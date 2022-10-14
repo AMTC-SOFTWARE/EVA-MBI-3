@@ -1,0 +1,9 @@
+*.pyc
+app/.vs/
+app/dist/
+app/env/
+app/build/
+app/MercedesBenz/
+app/app.spec
+
+app/app.spec

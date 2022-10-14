@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="images">
+    <file>images/reset.jpg</file>
+    <file>images/gafet.png</file>
+    <file>images/icon.ico</file>
+    <file>images/blanco.png</file>
+    <file>images/usuario.jpg</file>
+    <file>images/usuario_x.jpg</file>
+    <file>images/desoutter.jpg</file>
+    <file>images/scanner.jpg</file>
+  </qresource>
+</RCC>

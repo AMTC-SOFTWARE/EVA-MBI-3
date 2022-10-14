@@ -1,0 +1,171 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>a102a14f-08dd-4501-8402-0c2593b1d946</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>app.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>app</Name>
+    <RootNamespace>app</RootNamespace>
+    <InterpreterId>Global|VisualStudio|mercedesBenz</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="app.py" />
+    <Compile Include="forms\admin.py" />
+    <Compile Include="gui\model\__init__.py" />
+    <Compile Include="gui\view\comm.py" />
+    <Compile Include="gui\view\img_popout.py" />
+    <Compile Include="gui\view\login.py" />
+    <Compile Include="gui\view\main.py" />
+    <Compile Include="gui\view\resources_rc.py" />
+    <Compile Include="gui\view\scanner.py" />
+    <Compile Include="gui\view\__init__.py" />
+    <Compile Include="gui\__init__.py" />
+    <Compile Include="manager\controller\height.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="manager\controller\vision.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="manager\controller\inspections.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="manager\controller\__init__.py" />
+    <Compile Include="manager\model\__init__.py" />
+    <Compile Include="manager\view\comm.py" />
+    <Compile Include="manager\view\__init__.py" />
+    <Compile Include="manager\__init__.py" />
+    <Compile Include="toolkit\admin\controller\__init__.py" />
+    <Compile Include="toolkit\admin\model\__init__.py" />
+    <Compile Include="toolkit\admin\view\admin.py" />
+    <Compile Include="toolkit\admin\view\torques.py" />
+    <Compile Include="toolkit\admin\view\__init__.py" />
+    <Compile Include="toolkit\admin\__init__.py" />
+    <Compile Include="toolkit\plugins\rework\form.py" />
+    <Compile Include="toolkit\plugins\rework\__init__.py" />
+    <Compile Include="toolkit\plugins\__init__.py" />
+    <Compile Include="data\BB\ptsManagement.py" />
+    <Compile Include="toolkit\propertiesTest.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="toolkit\simulations\cycleTest.py" />
+    <Compile Include="toolkit\simulations\mqttClientTest.py" />
+    <Compile Include="toolkit\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="data\" />
+    <Folder Include="data\BB\" />
+    <Folder Include="data\imgs\" />
+    <Folder Include="data\imgs\boxes\" />
+    <Folder Include="data\imgs\boxes\New folder\" />
+    <Folder Include="data\imgs\usuarios\" />
+    <Folder Include="forms\" />
+    <Folder Include="forms\images\" />
+    <Folder Include="gui\" />
+    <Folder Include="gui\model\" />
+    <Folder Include="gui\view\" />
+    <Folder Include="manager\" />
+    <Folder Include="manager\controller\" />
+    <Folder Include="manager\model\" />
+    <Folder Include="manager\view\" />
+    <Folder Include="toolkit\" />
+    <Folder Include="toolkit\admin\" />
+    <Folder Include="toolkit\admin\controller\" />
+    <Folder Include="toolkit\admin\model\" />
+    <Folder Include="toolkit\admin\model\__pycache__\" />
+    <Folder Include="toolkit\admin\view\" />
+    <Folder Include="toolkit\admin\view\__pycache__\" />
+    <Folder Include="toolkit\admin\__pycache__\" />
+    <Folder Include="toolkit\plugins\" />
+    <Folder Include="toolkit\plugins\rework\" />
+    <Folder Include="toolkit\plugins\__pycache__\" />
+    <Folder Include="toolkit\simulations\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="data\BB\BB" />
+    <Content Include="data\config" />
+    <Content Include="data\imgs\6mm Nut.jpg" />
+    <Content Include="data\imgs\8mm Nut.jpg" />
+    <Content Include="data\imgs\Battery Nut.jpg" />
+    <Content Include="data\imgs\blanco.jpg" />
+    <Content Include="data\imgs\boxes\BATTERY.JPG" />
+    <Content Include="data\imgs\boxes\BATTERY_2.JPG" />
+    <Content Include="data\imgs\boxes\MFB-P1.jpg" />
+    <Content Include="data\imgs\boxes\MFB-P2.jpg" />
+    <Content Include="data\imgs\boxes\MFB-S.jpg" />
+    <Content Include="data\imgs\boxes\New folder\BATTERY.JPG" />
+    <Content Include="data\imgs\boxes\New folder\MFB-P1.jpg" />
+    <Content Include="data\imgs\boxes\New folder\MFB-P2.jpg" />
+    <Content Include="data\imgs\boxes\New folder\MFB-S.jpg" />
+    <Content Include="data\imgs\boxes\New folder\PDC-D.jpg" />
+    <Content Include="data\imgs\boxes\New folder\PDC-P.jpg" />
+    <Content Include="data\imgs\boxes\New folder\PDC-R.jpg" />
+    <Content Include="data\imgs\boxes\PDC-D.jpg" />
+    <Content Include="data\imgs\boxes\PDC-P.JPG" />
+    <Content Include="data\imgs\boxes\PDC-R.jpg" />
+    <Content Include="data\imgs\centerImage_1.jpg" />
+    <Content Include="data\imgs\logo.jpg" />
+    <Content Include="data\imgs\scrap.jpg" />
+    <Content Include="data\imgs\tool1.jpg" />
+    <Content Include="data\imgs\tool2.jpg" />
+    <Content Include="data\imgs\tool3.jpg" />
+    <Content Include="data\imgs\tuerca_x.jpg" />
+    <Content Include="data\imgs\usuarios\Angel Villanueva.png" />
+    <Content Include="data\imgs\usuarios\Anibal Baez.jpg" />
+    <Content Include="data\imgs\usuarios\Christian Castro.jpg" />
+    <Content Include="data\imgs\usuarios\Ignacio Tolentino.jpg" />
+    <Content Include="data\imgs\usuarios\Marco Rutiaga.jpg" />
+    <Content Include="data\imgs\usuarios\Oscar Escarcega.jpg" />
+    <Content Include="data\imgs\usuarios\Rafael Trovamala.jpg" />
+    <Content Include="data\imgs\usuarios\usuario_x.jpg" />
+    <Content Include="data\pts_torque" />
+    <Content Include="forms\admin.ui" />
+    <Content Include="forms\images.ui" />
+    <Content Include="forms\images\blanco.png" />
+    <Content Include="forms\images\desoutter.jpg" />
+    <Content Include="forms\images\gafet.png" />
+    <Content Include="forms\images\icon.ico" />
+    <Content Include="forms\images\reset.jpg" />
+    <Content Include="forms\images\scanner.jpg" />
+    <Content Include="forms\images\usuario.jpg" />
+    <Content Include="forms\images\usuario_x.jpg" />
+    <Content Include="forms\img_popout.ui" />
+    <Content Include="forms\login.ui" />
+    <Content Include="forms\main.ui" />
+    <Content Include="forms\NOTAS.txt" />
+    <Content Include="forms\resources.qrc" />
+    <Content Include="forms\scanner.ui" />
+    <Content Include="requirements.txt" />
+    <Content Include="toolkit\admin\model\__pycache__\__init__.cpython-37.pyc" />
+    <Content Include="toolkit\admin\view\__pycache__\admin.cpython-37.pyc" />
+    <Content Include="toolkit\admin\view\__pycache__\torques.cpython-37.pyc" />
+    <Content Include="toolkit\admin\view\__pycache__\__init__.cpython-37.pyc" />
+    <Content Include="toolkit\admin\__pycache__\__init__.cpython-37.pyc" />
+    <Content Include="toolkit\plugins\__pycache__\__init__.cpython-37.pyc" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|VisualStudio|MercedesBenz" />
+    <InterpreterReference Include="Global|VisualStudio|mercedesBenz" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

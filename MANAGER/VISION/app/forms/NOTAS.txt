@@ -1,0 +1,25 @@
+
+			Sources:
+http://www.science.smith.edu/dftwiki/index.php/PyQt5_Tutorial:_A_Window_Application_with_File_IO
+https://pypi.org/project/pipreqs/#description
+
+	To conver .ui to .py
+pyuic5 -x main.ui -o main.py
+pyuic5 -x admin.ui -o admin.py
+pyuic5 -x login.ui -o login.py
+pyuic5 -x scanner.ui -o scanner.py
+pyuic5 -x torqueTest.ui -o torqueTest.py
+pyuic5 -x images.ui -o images.py
+pyuic5 -x img_popout.ui -o img_popout.py
+
+	To conver .qrc to .py
+pyrcc5 resources.qrc -o resources_rc.py 
+
+	To create a executable
+pyinstaller principal.py
+
+	To create a executable without comand console and ICON
+pyinstaller --noconsole --icon=data\\icon.ico --add-data data;data  view.py
+
+	To create requirements.txt 
+pipreqs /home/project/location
