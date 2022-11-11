@@ -26,6 +26,15 @@ class Model (object):
 
         self.id_HM = None
 
+        #variable para guardar el qr esperado de la caja PDCR
+        self.qr_esperado = ""
+        #variable para llevar conteo de intentos de escaneo de caja PDCR
+        self.contador_scan_pdcr = 1
+        #máximo número de intentos de escaneo de caja PDCR correcta
+        self.max_pdcr_try = 3
+        #variable para inhabilitar la llave
+        self.disable_key = False
+
         self.pdcrvariant = ""
         self.expected_fuses = ""
         #variable para hacer reintentos de trigger si no se recibe respuesta del sensor de altura

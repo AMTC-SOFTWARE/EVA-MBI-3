@@ -292,6 +292,8 @@ class Ui_main(object):
         self.img_center.setScaledContents(False)
         self.img_center.setAlignment(QtCore.Qt.AlignCenter)
         self.img_center.setObjectName("img_center")
+        self.img_center.setStyleSheet("margin-left: 220px")
+
         self.splitter_3 = QtWidgets.QSplitter(self.splitter_4)
         self.splitter_3.setOrientation(QtCore.Qt.Vertical)
         self.splitter_3.setObjectName("splitter_3")
@@ -421,6 +423,32 @@ class Ui_main(object):
         self.lineEdit.setObjectName("lineEdit")
         self.gridLayout.addWidget(self.splitter_4, 0, 0, 1, 1)
         main.setCentralWidget(self.centralwidget)
+        ############################# LCD ######################################
+        self.gridLayout_3 = QtWidgets.QGridLayout()
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.lbl_cant = QtWidgets.QLabel(self.centralwidget)
+        self.lbl_cant.setMinimumSize(QtCore.QSize(110, 15))
+        self.lbl_cant.setMaximumSize(QtCore.QSize(300, 50))
+        font = QtGui.QFont()
+        font.setFamily("Sitka Text")
+        font.setPointSize(28)
+        font.setBold(True)
+        font.setWeight(75)
+        
+        self.lbl_cant.setAlignment(QtCore.Qt.AlignCenter)
+        self.lbl_cant.setObjectName("lbl_cant")
+        #self.lbl_cant.setStyleSheet("font-size:20px; margin-bottom: 5px"  )
+        self.lbl_cant.setStyleSheet("color: #214562; font-size:20px; border-radius:20px; background-color: #a7c3d1; margin-bottom: 5px"  )
+        self.gridLayout_3.addWidget(self.lbl_cant, 0, 0, 1, 1)
+        self.lcdNumber = QtWidgets.QLCDNumber(self.centralwidget)
+        self.lcdNumber.setMinimumSize(QtCore.QSize(147, 0))
+        self.lcdNumber.setObjectName("lcdNumber")
+        self.lcdNumber.setStyleSheet("border-style: none")
+        self.gridLayout_3.addWidget(self.lcdNumber, 1, 0, 1, 1)
+        self.lcdNumber.setGeometry(1650,800, 200 , 100)
+        self.lbl_cant.setGeometry(1650,750, 200 , 100)
+        ########################################################################
+
         self.menubar = QtWidgets.QMenuBar(main)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1269, 21))
         self.menubar.setObjectName("menubar")
@@ -462,7 +490,7 @@ class Ui_main(object):
         ########################################################
         self.lbl_info4.setText(_translate("main", "INFO4"))
         self.menuMenu.setTitle(_translate("main", "Menu"))
-
+        self.lbl_cant.setText(_translate("main", "PIEZAS"))
 
 if __name__ == "__main__":
     import resources_rc

@@ -9,7 +9,8 @@ from math import ceil
 #librería para ordenar diccionarios
 from collections import OrderedDict
 import json
-
+import os
+from os.path import exists
 
 class Vision (QState):
     retry       = pyqtSignal()
@@ -217,11 +218,57 @@ class Triggers (QState):
                     error = True
                     img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
                     self.model.v_result[box][fuse] = temp
+        current_day = self.model.datetime.strftime("%d")
+        current_month = self.model.datetime.strftime("%m")
+        year = self.model.datetime.strftime("%Y")
+        current_time = self.model.datetime.strftime("_%H;%M;%S")
+        meses = {
+            "1":"Enero",
+            "2":"Febrero",
+            "3":"Marzo",
+            "4":"Abril",
+            "5":"Mayo",
+            "6":"Junio",
+            "7":"Julio",
+            "8":"Agosto",
+            "9":"Septiembre",
+            "10":"Octubre",
+            "11":"Noviembre",
+            "12":"Diciembre",
+            }
+        for elemento in meses:
+            if elemento == current_month:
+                current_month = meses[elemento]
+                print("mes actual: ",current_month)
+
 
         imwrite(self.model.imgs_path + self.module + ".jpg", img)
         name = self.model.qr_codes["HM"]#self.model.input_data["database"]["pedido"]["PEDIDO"]
-        name += "_" + self.model.datetime.strftime("%Y%m%d%H%M%S")
+        name += "_" + self.model.qr_codes["REF"]
+        name += "_" + current_day + current_month + year + current_time
         name += "_" + current_trig
+
+        nombre_carpeta = year + current_month+ current_day
+        print("nombre_carpeta: ",nombre_carpeta)
+
+        #tratar de crear carpeta por si no existe aún
+        try:
+            carpeta_nueva = "C:/images/DATABASE/" + nombre_carpeta
+
+            if not(exists(carpeta_nueva)):
+                os.mkdir(carpeta_nueva)
+            else:
+                print("ya existe carpeta: ",carpeta_nueva)
+            carpeta_nueva = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-2/" + nombre_carpeta
+            if not(exists(carpeta_nueva)):
+                os.mkdir(carpeta_nueva)
+            else:
+                print("ya existe carpeta: ",carpeta_nueva)
+
+        except OSError as exception:
+            print("ERROR AL CREAR CARPETA:::\n",exception)
+
+        name = nombre_carpeta + "/" + name
 
         print("\nINSPECTION:", self.model.v_result[box])
         print("MASTER    :", self.model.modularity_fuses[box], "\n")
@@ -259,7 +306,7 @@ class Triggers (QState):
             #se tiene que guardar como .webp para que haga la conversión
             outpath_webp_LOCAL = "C:/images/DATABASE/" + name  + "-PASS.webp" 
             imwrite(outpath_webp_LOCAL, img_last, [IMWRITE_WEBP_QUALITY, quality_percent])
-            outpath_webp_SERVIDOR = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR/" + name  + "-PASS.webp" 
+            outpath_webp_SERVIDOR = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-2/" + name  + "-PASS.webp" 
             imwrite(outpath_webp_SERVIDOR, img_last, [IMWRITE_WEBP_QUALITY, quality_percent])
 
             command = {
@@ -280,7 +327,7 @@ class Triggers (QState):
             #se tiene que guardar como .webp para que haga la conversión
             outpath_webp_LOCAL = "C:/images/DATABASE/" + name  + "-FAIL.webp" 
             imwrite(outpath_webp_LOCAL, img_last, [IMWRITE_WEBP_QUALITY, quality_percent])
-            outpath_webp_SERVIDOR = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR/" + name  + "-FAIL.webp" 
+            outpath_webp_SERVIDOR = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-2/" + name  + "-FAIL.webp" 
             imwrite(outpath_webp_SERVIDOR, img_last, [IMWRITE_WEBP_QUALITY, quality_percent])
 
             command = {

@@ -61,6 +61,9 @@ class MainWindow (QMainWindow):
         self.ui.lineEdit.setFocus()
         self.ui.lineEdit.setVisible(False)
 
+        self.ui.lbl_cant.setVisible(True)
+        self.ui.lcdNumber.setVisible(True)
+
         menu = self.ui.menuMenu
         actionLogin = QAction("Login",self)
         actionLogout = QAction("Logout",self)
@@ -236,7 +239,15 @@ class MainWindow (QMainWindow):
                 self.ui.lbl_nuts.setText(message["lbl_nuts"]["text"])
                 if "color" in message["lbl_nuts"]:
                     self.ui.lbl_nuts.setStyleSheet("color: " + message["lbl_nuts"]["color"])
+            if "lcdNumber" in message:
+                if "value" in message["lcdNumber"]:
 
+                    print("mememe mensaje: ",message["lcdNumber"])
+                    self.ui.lcdNumber.display(message["lcdNumber"]["value"])
+                if "visible" in message["lcdNumber"]:
+                    #### Visualizacion del LCD
+                    self.ui.lbl_cant.setVisible(message["lcdNumber"]["visible"])
+                    self.ui.lcdNumber.setVisible(message["lcdNumber"]["visible"])
             ###########################################################################
             if "lbl_box1" in message:
                 self.ui.lbl_box1.setText(message["lbl_box1"]["text"])

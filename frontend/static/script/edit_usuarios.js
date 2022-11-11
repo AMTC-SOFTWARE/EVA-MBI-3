@@ -19,6 +19,9 @@ function cargartabla(){
     case "SUPERUSUARIO":
     cargar_superusuario();
     break;
+    case "SUPCALIDAD":
+    cargar_supcalidad();
+    break;
     default:
     cargar_usuarios();
   }
@@ -170,6 +173,101 @@ function cargar_usuarios(){
     for (i = 0; i < filas; i++) {
       // console.log(data.TYPE[i])
       if (data.TYPE[i] == sessionStorage.getItem('tipo')) {
+        var tr = document.createElement('TR');
+        for (j = 0; j < colnames.length; j++) {
+          var td = document.createElement('TD')
+          td.appendChild(document.createTextNode(data[colnames[j]][i]));
+          tr.appendChild(td)
+        }
+        var td = document.createElement('TD');
+        var boton = document.createElement('button');
+        var eliminar = document.createElement('i');
+        eliminar.classList.add("fas");
+        eliminar.classList.add("fa-trash");
+        boton.title = "Eliminar";
+        boton.classList.add('btn');
+        boton.classList.add('btn-danger');
+        boton.classList.add('btn-delete');
+        var botondos = document.createElement('button');
+        var modificar = document.createElement('i');
+        modificar.classList.add("fas");
+        modificar.classList.add("fa-user-edit");
+        botondos.title = 'Modificar';
+        botondos.classList.add('btn');
+        botondos.classList.add('btn-primary');
+        botondos.classList.add('btn-edit');
+        boton.appendChild(eliminar);
+        botondos.appendChild(modificar);
+        td.appendChild(boton);
+        td.append(" ");
+        td.appendChild(botondos);
+        tr.appendChild(td)
+        tableBody.appendChild(tr);
+      }
+    }
+
+    myTableDiv.appendChild(table);
+    $(document).ready(function() {
+      $('#myTable').DataTable({
+        responsive:true
+      });
+    } );
+   //  $("#myTable tr").click(function(){
+   //   var value=$(this).find('td:first').next().next().html();
+   //   alert(value);    
+   // }); 
+ })
+}
+function cargar_supcalidad(){
+  cleardiv();
+  fetch(dominio+"/api/get/usuarios/ID/>/0/_/=/_")
+  .then(data=>data.json())
+  .then(data=>{
+    // console.log(data);
+    var colnames = Object.keys(data);
+    // console.log("Columnas: ", colnames);
+    colnames.splice(colnames.indexOf("GAFET"),1);
+    colnames.splice(colnames.indexOf("ID"),1);
+    colnames.splice(colnames.indexOf("ACTIVE"),1,"ID","ACTIVE");
+    // console.log("Colnames Final: ",colnames);
+    var filas = data[colnames[1]].length;
+    // console.log("Num de Registros:",filas);
+    // console.log(data.TYPE)
+
+    //CREACIÓN DE TABLA
+    var myTableDiv = document.getElementById("tabla");
+    var table = document.createElement('TABLE');
+    var tableBody = document.createElement('TBODY');
+    var Encabezados = document.createElement('THEAD');
+
+    table.id = "myTable";
+    table.classList.add('display');
+    table.classList.add('nowrap');
+    table.cellSpacing="0";
+    table.width="100%";
+    table.border = '2';
+    table.appendChild(Encabezados);
+    table.appendChild(tableBody);
+    tableBody.align="center";
+    //FIN DE CREACIÓN DE TABLA
+
+    //ENCABEZADOS DE LA TABLA
+    var tr = document.createElement('TR');
+    Encabezados.appendChild(tr);
+    for (i = 0; i < colnames.length; i++) {
+      var th = document.createElement('TH')
+      th.width = '100';
+      th.appendChild(document.createTextNode(colnames[i]));
+      tr.appendChild(th).style.backgroundColor="#0DBED6";
+    }
+    var th = document.createElement('TH')
+    th.width = '100';
+    th.appendChild(document.createTextNode('Operación'));
+    tr.appendChild(th).style.backgroundColor="#0DBED6";
+    //FILAS DE LA TABLA
+    for (i = 0; i < filas; i++) {
+      // console.log(data.TYPE[i])
+      if (data.TYPE[i] == "CALIDAD" || data.TYPE[i] == "OPERADOR" || data.TYPE[i] == "SUPCALIDAD") {
         var tr = document.createElement('TR');
         for (j = 0; j < colnames.length; j++) {
           var td = document.createElement('TD')
@@ -413,9 +511,17 @@ $(document).on('click','.btn-edit', function(){
         document.getElementById('tipo').disabled = true;
         document.getElementById('tipo').value = "CALIDAD";
         break;
+        case "SUPCALIDAD":
+        document.getElementById('tipo').value = "SUPCALIDAD";
+        document.getElementById('SUPERUSUARIO').style.display = 'none';
+        document.getElementById('MANTENIMIENTO').style.display = 'none';
+        document.getElementById('PRODUCCION').style.display = 'none';
+        document.getElementById('INGENIERIA').style.display = 'none';
+        break;
         case "MANTENIMIENTO":
         document.getElementById('tipo').disabled = true;
         document.getElementById('tipo').value = "MANTENIMIENTO";
+        document.getElementById('SUPCALIDAD').style.display = 'none';
         break;
         case "PRODUCCION":
         document.getElementById('tipo').value = "PRODUCCION";
@@ -462,6 +568,7 @@ $(document).on('click','.btn-edit', function(){
         case "MANTENIMIENTO":
         document.getElementById('tipo').disabled = true;
         document.getElementById('tipo').value = "MANTENIMIENTO";
+        document.getElementById('SUPCALIDAD').style.display = 'none';
         break;
         case "PRODUCCION":
         document.getElementById('tipo').value = "PRODUCCION";
@@ -469,6 +576,13 @@ $(document).on('click','.btn-edit', function(){
         document.getElementById('MANTENIMIENTO').disabled = true;
         document.getElementById('SUPERUSUARIO').disabled = true;
         break;
+        case "SUPCALIDAD":
+          document.getElementById('tipo').value = "SUPCALIDAD";
+          document.getElementById('SUPERUSUARIO').style.display = 'none';
+          document.getElementById('MANTENIMIENTO').style.display = 'none';
+          document.getElementById('PRODUCCION').style.display = 'none';
+          document.getElementById('INGENIERIA').style.display = 'none';
+          break;
         case "INGENIERIA":
         document.getElementById('tipo').value = "INGENIERIA";
         document.getElementById('CALIDAD').disabled = true;

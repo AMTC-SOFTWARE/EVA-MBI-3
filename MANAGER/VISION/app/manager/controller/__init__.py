@@ -1,14 +1,16 @@
-from PyQt5.QtCore import QObject, QStateMachine, QState, pyqtSlot, pyqtSignal, QTimer
+from PyQt5.QtCore import QObject, QStateMachine, QState, pyqtSlot, pyqtSignal, QTimer, QThread
 from manager.view.comm import MqttClient
 from manager.model import Model
 from paho.mqtt import publish
-from datetime import datetime
+from datetime import datetime, timedelta
 from threading import Timer
 from time import strftime, sleep
 from copy import copy
 from os import system
 import requests
 import json
+import os
+from os.path import exists
 
 from manager.controller import inspections
 from toolkit.admin import Admin       
@@ -37,7 +39,13 @@ class Controller (QObject):
         self.inspections    = inspections.Inspections(model = self.model, ID = "1", parent = self.process)
         self.finish         = Finish(model = self.model, parent = self.process)
         
-        
+        self.check_pdcr             = CheckPDCR(model = self.model, parent = self.process)
+        self.enable_clamps          = EnableClamps(model = self.model, parent = self.process)
+        self.scan_pdcr              = ScanPDCR(model = self.model, parent = self.process)
+        self.scan_quality           = ScanQr(model = self.model, parent = self.process)
+        self.quality_validation     = QualityValidation(model = self.model, parent = self.process)
+
+
         self.startup.addTransition(self.startup.ok, self.show_login)
         self.show_login.addTransition(self.client.ID, self.check_login)
         self.show_login.addTransition(self.client.login, self.show_login)
@@ -51,7 +59,18 @@ class Controller (QObject):
         self.check_qr.addTransition(self.check_qr.nok, self.scan_qr)
         self.check_qr.addTransition(self.check_qr.rework, self.qr_rework)
         self.qr_rework.addTransition(self.qr_rework.ok, self.check_qr)
-        self.check_qr.addTransition(self.check_qr.ok, self.standby)
+        
+        self.check_qr.addTransition(self.check_qr.ok, self.scan_pdcr)
+        self.scan_pdcr.addTransition(self.client.code, self.check_pdcr)
+        #self.scan_pdcr.addTransition(self.scan_pdcr.emptypdcr, self.enable_clamps)
+        self.check_pdcr.addTransition(self.check_pdcr.nok, self.scan_pdcr)
+        self.check_pdcr.addTransition(self.check_pdcr.max_tries, self.scan_quality)
+        self.check_pdcr.addTransition(self.check_pdcr.ok, self.enable_clamps)
+        self.scan_quality.addTransition(self.client.code, self.quality_validation)
+        self.quality_validation.addTransition(self.quality_validation.nok, self.scan_quality)
+        self.quality_validation.addTransition(self.quality_validation.ok, self.scan_pdcr)
+        self.enable_clamps.addTransition(self.enable_clamps.continuar, self.standby)
+
         #################################################################
         self.standby.addTransition(self.client.clamp, self.inspections)
         self.inspections.addTransition(self.inspections.finished, self.finish)
@@ -160,6 +179,25 @@ class Startup(QState):
             "img_center" : "logo.jpg"
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+        
+        #tratar de crear carpetas principales por si no existen
+        try:
+            carpeta_nueva = "C:/images/"
+            if not(exists(carpeta_nueva)):
+                os.mkdir(carpeta_nueva)
+            else:
+                print("ya existe carpeta: ",carpeta_nueva)
+
+            carpeta_nueva = "C:/images/DATABASE/"
+            if not(exists(carpeta_nueva)):
+                os.mkdir(carpeta_nueva)
+            else:
+                print("ya existe carpeta: ",carpeta_nueva)
+
+        except OSError as error:
+            print("ERROR AL CREAR CARPETA:::\n",error)
+        
+
         #QTimer.singleShot(15000, self.kioskMode)
         self.model.robot.stop()
         self.ok.emit()
@@ -264,7 +302,6 @@ class StartCycle (QState):
     def __init__(self, model = None, parent = None):
         super().__init__(parent)
         self.model = model
-        self.clamps = True
 
     def onEntry(self, event):
 
@@ -298,7 +335,6 @@ class StartCycle (QState):
             command["lbl_result"] = {"text": "Apagando equipo...", "color": "green"}
             command["lbl_steps"] = {"text": ""}
             command["shutdown"] = True
-            self.clamps = False
             QTimer.singleShot(3000, self.fuseBoxesClamps)
         if self.model.config_data["trazabilidad"]:
             command["lbl_info3"] = {"text": "Trazabilidad\n\nActivada", "color": "green"}
@@ -312,7 +348,7 @@ class StartCycle (QState):
     def fuseBoxesClamps (self):
         command = {}
         for i in self.model.fuses_BB:
-             command[i] = self.clamps
+             command[i] = False
         print(command)
         publish.single(self.model.pub_topics["plc"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
@@ -693,12 +729,14 @@ class CheckQr (QState):
                 evento = event.replace('_',' ')
                 command = {
                     "lbl_result" : {"text": "Datamatrix validado", "color": "green"},
-                    "lbl_steps" : {"text": "Coloca las cajas en los nidos", "color": "black"},
+                    "lbl_steps" : {"text": "Obteniendo Contenido de Arnés", "color": "black"},
                     "statusBar" : pedido["PEDIDO"]+" "+self.model.qr_codes["HM"]+" "+evento,
                     "cycle_started": True
                     }
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-                Timer(0.1, self.fuseBoxesClamps).start()
+                
+                self.model.contador_scan_pdcr = 1
+                ################################################################################################################################# OK EMIT
                 self.ok.emit()
             else:
                 #se va a el estado rework
@@ -716,12 +754,6 @@ class CheckQr (QState):
             self.model.input_data["database"]["modularity"].clear()
             self.nok.emit()
 
-    def fuseBoxesClamps (self):
-        command = {}
-        for i in self.model.input_data["database"]["modularity"]:
-            command[i] = True
-        print(command)
-        publish.single(self.model.pub_topics["plc"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     #Función para buscar el HM obtenido de la etiqueta (Consulta para saber si tiene historial de torque, y jalar sus resultados)
     def ETIQUETA(self, ID):
@@ -911,6 +943,199 @@ class CheckQr (QState):
         except Exception as ex:
             print("Etiqueta Trazabilidad: ", ex)
             return False
+
+class ScanPDCR (QState):
+
+    emptypdcr = pyqtSignal()
+
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+
+    def onEntry(self, event):
+        print("############################## ESTADO: ScanPDCR ############################")
+
+        #self.model.pdcrvariant puede valer: 
+        #"PDC-R"     para esta caja corresponde el QR: A2239061602
+        #"PDC-RMID"  para esta caja corresponde el QR: A2239061502
+        #"PDC-RS"    para esta caja corresponde el QR: A2239061402
+
+        if self.model.pdcrvariant == "PDC-R":
+            self.model.qr_esperado = "2239061602"
+        elif self.model.pdcrvariant == "PDC-RMID":
+            self.model.qr_esperado = "2239061502"
+        elif self.model.pdcrvariant == "PDC-RS":
+            self.model.qr_esperado = "2239061402"
+
+        command = {
+            "lbl_result" : {"text": "Escanear caja " + self.model.pdcrvariant, "color": "green"},
+            "lbl_steps" : {"text": "QR: A" + self.model.qr_esperado, "color": "black"},
+            "show":{"scanner": True}
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+    def onExit(self, QEvent):
+        print("Saliendo de ScanPDCR")
+        command = {
+            "show":{"scanner": False}
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+class CheckPDCR (QState):
+
+    ok = pyqtSignal()
+    nok = pyqtSignal()
+    max_tries = pyqtSignal()
+
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+
+    def onEntry(self, QEvent):
+        print("############################## ESTADO: CheckPDCR ############################")
+
+        #se guarda el qr leído de la caja PDCR
+        qr_leido = copy(self.model.input_data["gui"]["code"])
+
+        if self.model.contador_scan_pdcr >= self.model.max_pdcr_try:
+            command = {
+                "lbl_result" : {"text": "Demasiados Intentos, para reiniciar los intentos", "color": "red", "font": "35pt"},
+                "lbl_steps" : {"text": "Llamar a un SUPERVISOR de CALIDAD. Llave deshabilitada.", "color": "red", "font": "35pt"},
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            self.model.disable_key = True
+
+            self.max_tries.emit()
+
+        else:
+
+            if self.model.qr_esperado in qr_leido:
+                print("Qr Correcto")
+                command = {
+                    "lbl_result" : {"text": "Qr de Caja Correcto", "color": "green"},
+                    "lbl_steps" : {"text": "Iniciando Ciclo", "color": "black"},
+                    }
+                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                Timer(1.2,self.ok.emit).start()
+
+            else:
+                #se agrega uno al contador de intentos
+                self.model.contador_scan_pdcr += 1
+                command = {
+                    "lbl_result" : {"text": "Qr Incorrecto, Esperado: A" + self.model.qr_esperado, "color": "red"},
+                    "lbl_steps" : {"text": "Intento " + str(self.model.contador_scan_pdcr) + " de " + str(self.model.max_pdcr_try), "color": "orange"},
+                    }
+                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                print("Qr Incorrecto, se espera: ",self.model.qr_esperado)
+                Timer(2.4,self.nok.emit).start()
+
+
+    def onExit(self, QEvent):
+        print("Saliendo de CheckPDCR")
+
+class EnableClamps (QState):
+
+    continuar = pyqtSignal()
+
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+
+    def onEntry(self, QEvent):
+        print("############################## ESTADO: EnableClamps ############################")
+
+        self.model.disable_key = False
+
+        command = {}
+        for i in self.model.input_data["database"]["modularity"]:
+            command[i] = True
+        print(command)
+        publish.single(self.model.pub_topics["plc"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+        command = {
+            "lbl_result" : {"text": "Información de Arnés Validada", "color": "green"},
+            "lbl_steps" : {"text": "Coloca las cajas en los nidos para continuar", "color": "navy"},
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+        Timer(1,self.continuar.emit).start()
+
+    def onExit(self, QEvent):
+        print("Saliendo de EnableClamps")
+
+class QualityValidation (QState):
+
+    ok = pyqtSignal()
+    nok = pyqtSignal()
+
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+
+    def onEntry(self, QEvent):
+        print("############################## ESTADO: QualityValidation ############################")
+
+        command = {
+            "lbl_result" : {"text": "Validando Usuario", "color": "orange"},
+            "lbl_steps" : {"text": "Revisando Permisos", "color": "black"},
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+        Timer(0.05,self.consulta_usuarios).start()
+
+
+    def consulta_usuarios (self):
+        try:
+            #se guarda el usuario ingresado
+            usuario_ingresado = copy(self.model.input_data["gui"]["code"])
+
+            endpoint = ("http://{}/api/get/usuarios/GAFET/=/{}/ACTIVE/=/1".format(self.model.server, usuario_ingresado))
+            response = requests.get(endpoint).json()
+
+            if "TYPE" in response:
+                tipo_usuario = response["TYPE"]
+                nombre_usuario = copy(response["NAME"])
+
+                if tipo_usuario == "SUPCALIDAD":
+
+                    command = {
+                        "lbl_result" : {"text": nombre_usuario + " Autorizó", "color": "green"},
+                        "lbl_steps" : {"text": "Vuelva a Intentar, o Llave para Finalizar", "color": "green", "font": "35pt"},
+                        }
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                    
+                    self.model.disable_key = False
+                    self.model.contador_scan_pdcr = 1
+                    Timer(2.4,self.ok.emit).start()
+
+                else:
+                    command = {
+                        "lbl_result" : {"text": "Usuario Sin Permiso", "color": "red"},
+                        "lbl_steps" : {"text": "Llamar a un SUPERVISOR de CALIDAD. Llave deshabilitada.", "color": "black", "font": "35pt"},
+                        }
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                    Timer(1.2,self.nok.emit).start()
+
+            else:
+                 command = {
+                    "lbl_result" : {"text": "Código Incorrecto", "color": "red"},
+                    "lbl_steps" : {"text": "Llamar a un SUPERVISOR de CALIDAD. Llave deshabilitada.", "color": "black", "font": "35pt"},
+                    }
+                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                 Timer(1.2,self.nok.emit).start()
+
+        except Exception as ex:
+            print("Login request exception: ", ex)
+            command = {
+                "lbl_result" : {"text": "Código Incorrecto", "color": "red"},
+                "lbl_steps" : {"text": "Llamar a un SUPERVISOR de CALIDAD. Llave deshabilitada.", "color": "black", "font": "35pt"},
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            Timer(1.2,self.nok.emit).start()
+
+
+    def onExit(self, QEvent):
+        print("Saliendo de QualityValidation")
 
 class QrRework (QState):
     ok = pyqtSignal()
@@ -1126,3 +1351,135 @@ class Reset (QState):
                         }
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         QTimer.singleShot(500,self.ok.emit)
+
+
+#EJECUCIÓN EN PARALELO
+class MyThread(QThread):
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model  = model
+        
+        print("se crea un objeto de la clase MyThread con padre QThread")
+        print("con entrada del objeto model de la clase model que está en model.py")
+        print("y el objeto client de la clase MqttClient que está en comm.py")
+        
+    def run(self):
+
+        while 1:
+
+            sleep(5)
+            command = {"lcdNumber": {"visible": False}}
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            command = {"lcdNumber": {"visible": True}}
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+            try:
+                print("Corriendo en Paralelo")
+
+                ############################################ CONTADOR DE PIEZAS #####################################
+                #fecha actual
+                fechaActual = datetime.today()
+                #delta time de un día
+                td = timedelta(1)
+                #afterfechaActual es la fecha actual mas un día (mañana)
+                afterfechaActual = fechaActual + td
+                #beforefechaActual es la fecha actual menos un día (ayer)
+                beforefechaActual = fechaActual - td
+
+                #se obtiene la hora actual (int)
+                horaActual = datetime.today().hour
+                print("hora Actual: ",horaActual)
+                dia_inicial =''
+                dia_final =''
+
+                #si la hora actual es mayor de las 7am   
+                if horaActual >= 19 or horaActual < 7:
+                    print("Segundo turno")
+
+                    if horaActual < 7:
+                       dia_inicial = beforefechaActual.strftime('%Y-%m-%d')
+                       #print('BEFORE: ',dia_inicial)
+                       dia_final = fechaActual.strftime('%Y-%m-%d')
+                       #print('AFTER: ',dia_final)
+                       dia_inicial = str(dia_inicial) + "-19"
+                       ##Estamos hablando que ayer ya paso y estamos en el dia que sigue el turno de la tarde
+                       dia_final = str(dia_final) + "-07"
+                       endpoint = "http://{}//json2/historial/fin/>/{}/</{}".format(self.model.server,dia_inicial,dia_final)
+                    else: 
+                       dia_inicial = fechaActual.strftime('%Y-%m-%d')
+
+                       dia_final = fechaActual.strftime('%Y-%m-%d')
+                       #print('AFTER: ',dia_final)
+                       dia_inicial = str(dia_inicial) + "-19"
+                       ##Estamos hablando que ayer ya paso y estamos en el dia que sigue el turno de la tarde
+                       dia_final = str(dia_final) + "-07"
+                       endpoint = "http://{}//json2/historial/fin/>=/{}/_/_".format(self.model.server,dia_inicial)
+
+                    
+                    print("dia_inicial",dia_inicial)
+                    print("dia_final", dia_final)
+                    ########################################## Consulta Local ##################################
+                    #endpoint = "http://{}/api/get/et_mbi_2/historial/fin/>/{}/</{}_/_".format(self.model.server,dia_inicial,dia_final)
+                    #contresponse = requests.get(endpoint).json()
+                elif horaActual < 19 or horaActual >= 7:
+                    print("Primer turno")
+                    dia_inicial = fechaActual.strftime('%Y-%m-%d')
+                    dia_final = fechaActual.strftime('%Y-%m-%d')
+
+                    dia_inicial = str(dia_inicial) + "-7"
+                    dia_final = str(dia_final) + "-7"
+                    print("dia_inicial",dia_inicial)
+                    print("dia_final", dia_final)
+                    endpoint = "http://{}//json2/historial/fin/>/{}/</{}".format(self.model.server,dia_inicial,dia_final)
+
+                    ########################################## Consulta Local ##################################
+                #endpoint = "http://{}/api/get/historial/fin/>/{}/</{}_/_".format(self.model.server,dia_inicial,dia_final)
+                #endpoint = "http://{}//json2/historial/fin/>/{}/</{}".format(self.model.server,dia_inicial,dia_final)
+                print(endpoint)
+                contresponse = requests.get(endpoint).json()
+
+                #print("dia_inicial: ",dia_inicial)
+                #print("dia_final: ",dia_final)
+                
+                
+
+                #No existen coincidencias
+                if "items" in contresponse: ## LOCAL
+                    print("No se han liberado arneses el día de hoy")
+                    command = {
+                            "lcdNumber" : {"value": 0}
+                            }
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+                #si la respuesta es un entero, quiere decir que solo hay un arnés
+                elif isinstance(contresponse["ID"],int):
+                    command = {
+                            "lcdNumber" : {"value": 1}
+                            }   
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+                #Si existe más de un registro (contresponse["ID"] es una lista)
+                else:
+                    #se eliminan los que se repiten en la búsqueda, para solo contar los arneses diferentes que hayan pasado
+                    result = 0
+                    for item in contresponse["RESULTADO"]:
+                        print (item)
+                        #si el arnés no está en la lista anteriormente, no suma
+
+                        if item > 0:
+                            result += 1
+                    #si el contador revasa los 999, se seguirá mostrando este número, ya que si no se reinicia a 0
+                    if result > 999:
+                        command = {
+                                "lcdNumber" : {"value": 999}
+                                }
+                    else:
+                        command = {
+                                "lcdNumber" : {"value": result} ## cantidad de arneses sin repetirse que han liberado el día de hoy
+                                }
+                        
+                        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                ############################################################################################################
+              
+            except Exception as ex:
+                print("Excepción al consultar los tableros en DB LOCAL Paralelo: ", ex)

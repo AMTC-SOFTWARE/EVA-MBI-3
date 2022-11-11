@@ -30,6 +30,7 @@ class MqttClient (QObject):
     vision      =   pyqtSignal()
     height      =   pyqtSignal()
     start       =   pyqtSignal()
+    #error_cortina   =   pyqtSignal()
 
     nido_PDCD = ""
     nido_PDCP = ""
@@ -159,7 +160,10 @@ class MqttClient (QObject):
 
                 if "key" in payload:
                     if payload["key"] == True:
-                        self.key.emit()
+                        if self.model.disable_key == False:
+                            self.key.emit()
+                        else:
+                            print("llave deshabilitada, llame a un supervisor de calidad o un AMTC")
                         
                 if "encoder" in payload and "name" in payload and "value" in payload:
                     encoder = "encoder_" + str(payload["encoder"])
@@ -499,6 +503,9 @@ class MqttClient (QObject):
                         self.rbt_init.emit()
                     if "position_reached" in payload["response"]:
                         self.rbt_pose.emit()
+                    #if "Error, is Safety OK?" in payload["response"]:
+                    #    print("cortina interrumpida signal")
+                    #    self.error_cortina.emit()
             #variable para guardar los resultados obtenidos al hacer una inspección con visycam desde la GDI
             if message.topic == self.model.sub_topics["vision"]:
                 self.model.input_data["vision"] = payload
