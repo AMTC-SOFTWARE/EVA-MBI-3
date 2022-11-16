@@ -490,7 +490,7 @@ class CheckQr (QState):
                                 entTrazabilidad = {
                                     "ENTVISION": self.model.datetime.strftime("%Y/%m/%d %H:%M:%S"),
                                     "UBICACION": "ENTRADA_A_VISION",
-                                    "NAMEVISION": "EVA-MBI-2"
+                                    "NAMEVISION": "EVA-MBI-3"
                                     }
                                 endpointUpdate = "http://{}/server_famx2/update/seghm/{}".format(self.model.server,self.model.id_HM)
                                 
@@ -1267,7 +1267,7 @@ class Finish (QState):
                 trazabilidad = {
                     "SALVISION": historial["FIN"],
                     "UBICACION": "SALIDA_DE_VISION",
-                    "NAMEVISION": "EVA-MBI-2"
+                    "NAMEVISION": "EVA-MBI-3"
                     }
                 endpoint = "http://{}/server_famx2/update/seghm/{}".format(self.model.server,self.model.id_HM)
                 
