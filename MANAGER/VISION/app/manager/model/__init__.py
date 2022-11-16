@@ -382,43 +382,43 @@ class Model (object):
         #nombre de programas a llamar para inspección de zonas(por bloque) en visycam (visión) en cada punto del robot
         self.v_triggers = {
             "PDC-P": ["P1"],
-            "PDC-D": ["D1"],
+            "PDC-D": ["D1","D2"],
             "PDC-S": ["S1"], 
-            "TBLU": ["TB1"],
-            "PDC-R": ["R1","R2","R3"],
-            "PDC-RMID": ["R1","R2"],
-            "PDC-RS": ["R1","R2"]
+            "TBLU": ["TB1","TB2"],
+            "PDC-R": ["R1","R2","R3","R4","R5","R6","R7","R8"],
+            "PDC-RMID": ["R1","R2","R3","R4","R5","R6"],
+            "PDC-RS": ["R1","R2","R3","R4","R5","R6"]
             }
         #puntos guardados en robot a los que irá para sus inspecciones de visión
         self.rv_triggers = {
             "PDC-P": ["PDCP_vision_1"],
-            "PDC-D": ["PDCD_vision_1"],
+            "PDC-D": ["PDCD_vision_1","PDCD_vision_2"],
             "PDC-S": ["PDCS_vision_1"], 
-            "TBLU": ["TBLU_vision_1"],
-            "PDC-R": ["PDCR_vision_1","PDCR_vision_2","PDCR_vision_3"],
-            "PDC-RMID": ["PDCRMID_vision_1","PDCRMID_vision_2"],
-            "PDC-RS": ["PDCRMID_vision_1","PDCRMID_vision_2"]
+            "TBLU": ["TBLU_vision_1","TBLU_vision_2"],
+            "PDC-R": ["PDCR_vision_1","PDCR_vision_2","PDCR_vision_3","PDCR_vision_4","PDCR_vision_5","PDCR_vision_6","PDCR_vision_7","PDCR_vision_8"],
+            "PDC-RMID": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
+            "PDC-RS": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"]
             }
         #nombre de programas a llamar para inspección de zonas(por bloque) en sensor (altura) en cada punto del robot
         self.h_triggers = {
             "PDC-P": ["P1","P2","P3"],
-            "PDC-D": ["D1","D2","D3"],
+            "PDC-D": ["D1","D2","D3","D4"],
             "PDC-S": ["S1"], 
-            "TBLU": ["TB1","TB2"],
-            "PDC-R": ["R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11"],
-            "PDC-RMID": ["R1","R2","R3","R4","R5","R6","R7","R8"],
-            "PDC-RS": ["R1","R2","R3","R4","R5","R6","R7","R8"]
+            "TBLU": ["TB1","TB2","TB3"],
+            "PDC-R": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9","R11","12","13","14"],
+            "PDC-RMID": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
+            "PDC-RS": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"]
             }
         
         #puntos guardados en robot a los que irá para sus inspecciones de alturas
         self.rh_triggers = {
             "PDC-P": ["PDCP_pa1","PDCP_pa2","PDCP_pa3"],
-            "PDC-D": ["PDCD_pa1","PDCD_pa2","PDCD_pa3"],
+            "PDC-D": ["PDCD_pa1","PDCD_pa2","PDCD_pa3","PDCD_pa4"],
             "PDC-S": ["PDCS_pa1"], 
-            "TBLU": ["TBLU_pa1","TBLU_pa2"],
-            "PDC-R": ["PDCR_pa1","PDCR_pa2","PDCR_pa3","PDCR_pa4","PDCR_pa5","PDCR_pa6","PDCR_pa7","PDCR_pa8","PDCR_pa9","PDCR_pa10","PDCR_pa11"],
-            "PDC-RMID": ["PDCR_pa1","PDCR_pa2","PDCR_pa3","PDCR_pa4","PDCR_pa5","PDCR_pa6","PDCR_pa7","PDCR_pa8"],
-            "PDC-RS": ["PDCR_pa1","PDCR_pa2","PDCR_pa3","PDCR_pa4","PDCR_pa5","PDCR_pa6","PDCR_pa7","PDCR_pa8"]
+            "TBLU": ["TBLU_pa1","TBLU_pa2","TBLU_pa3"],
+            "PDC-R": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9","PDCR_pa11","PDCR_pa12","PDCR_pa13","PDCR_pa14"],
+            "PDC-RMID": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
+            "PDC-RS": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"]
             }
 
         print("v_triggers:\n",self.v_triggers)
