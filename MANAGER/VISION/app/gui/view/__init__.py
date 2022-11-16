@@ -61,8 +61,8 @@ class MainWindow (QMainWindow):
         self.ui.lineEdit.setFocus()
         self.ui.lineEdit.setVisible(False)
 
-        self.ui.lbl_cant.setVisible(True)
-        self.ui.lcdNumber.setVisible(True)
+        self.ui.lbl_cant.setVisible(False)
+        self.ui.lcdNumber.setVisible(False)
 
         menu = self.ui.menuMenu
         actionLogin = QAction("Login",self)

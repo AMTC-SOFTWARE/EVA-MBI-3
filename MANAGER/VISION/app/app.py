@@ -24,7 +24,7 @@ if __name__ == "__main__":
     import sys
 
     app     = QApplication(sys.argv)
-    gui     = MainWindow(name = "EVA-MBI-2", topic = "gui")
+    gui     = MainWindow(name = "EVA-MBI-3", topic = "gui")
     manager = Controller(gui)
     gui.ready.connect(gui.showMaximized)
     gui.ready.connect(manager.start)
