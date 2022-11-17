@@ -133,9 +133,8 @@ class Triggers (QState):
         #se hace trigger de sensor de altura
         publish.single(self.pub_topic, json.dumps(command), hostname='127.0.0.1', qos = 2)
         
-        #codigo que se usaba para hacer una segunda petición de trigger, pero si se hace enseguida crashea la GDI
-        #if self.model.height_data[self.module]["current_trig"] == "R2":
-        #    Timer(3,self.second_attempt).start()
+        #codigo para hacer una segunda petición de trigger para comenzar medición
+        Timer(2.5,self.second_attempt).start()
 
         self.model.height_data["rqst"] = True #CREEMOS QUE SE HACE TRUE PARA EL BYPASSEADO
         self.model.fuses_parser["box"] = self.model.height_data[self.module]["box"]
