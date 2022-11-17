@@ -198,14 +198,14 @@ class Startup(QState):
             print("ERROR AL CREAR CARPETA:::\n",error)
         
 
-        #QTimer.singleShot(15000, self.kioskMode)
+        QTimer.singleShot(15, self.kioskMode)
         self.model.robot.stop()
         self.ok.emit()
 
     def kioskMode(self):
-        #system("taskkill /f /im explorer.exe")
-        publish.single("modules/set",json.dumps({"window" : False}),hostname='127.0.0.1', qos = 2)
-        publish.single("visycam/set",json.dumps({"window" : False}),hostname='127.0.0.1', qos = 2)
+        system("taskkill /f /im explorer.exe")
+        #publish.single("modules/set",json.dumps({"window" : False}),hostname='127.0.0.1', qos = 2)
+        #publish.single("visycam/set",json.dumps({"window" : False}),hostname='127.0.0.1', qos = 2)
 
     def logout(self, user):
         try:
