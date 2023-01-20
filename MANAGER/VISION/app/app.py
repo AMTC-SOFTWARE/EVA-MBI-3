@@ -1,8 +1,8 @@
 """
 @authors: MS. Marco Rutiaga Quezada
-         MS. Aarón Castillo Tobías
-         MS. César Velázqiez Zaldo
-         Ing. Rogelio García
+          MS. Aarón Castillo Tobías
+          MS. César Velázqiez Zaldo
+          Ing. Rogelio García
 
 ###############################################################################
 commands to exe generation:

@@ -222,20 +222,22 @@ class Triggers (QState):
         current_month = self.model.datetime.strftime("%m")
         year = self.model.datetime.strftime("%Y")
         current_time = self.model.datetime.strftime("_%H;%M;%S")
+
         meses = {
-            "1":"Enero",
-            "2":"Febrero",
-            "3":"Marzo",
-            "4":"Abril",
-            "5":"Mayo",
-            "6":"Junio",
-            "7":"Julio",
-            "8":"Agosto",
-            "9":"Septiembre",
+            "01":"Enero",
+            "02":"Febrero",
+            "03":"Marzo",
+            "04":"Abril",
+            "05":"Mayo",
+            "06":"Junio",
+            "07":"Julio",
+            "08":"Agosto",
+            "09":"Septiembre",
             "10":"Octubre",
             "11":"Noviembre",
             "12":"Diciembre",
             }
+
         for elemento in meses:
             if elemento == current_month:
                 current_month = meses[elemento]
