@@ -261,7 +261,7 @@ class Triggers (QState):
                 os.mkdir(carpeta_nueva)
             else:
                 print("ya existe carpeta: ",carpeta_nueva)
-            carpeta_nueva = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-2/" + nombre_carpeta
+            carpeta_nueva = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-3/" + nombre_carpeta
             if not(exists(carpeta_nueva)):
                 os.mkdir(carpeta_nueva)
             else:
@@ -308,7 +308,7 @@ class Triggers (QState):
             #se tiene que guardar como .webp para que haga la conversión
             outpath_webp_LOCAL = "C:/images/DATABASE/" + name  + "-PASS.webp" 
             imwrite(outpath_webp_LOCAL, img_last, [IMWRITE_WEBP_QUALITY, quality_percent])
-            outpath_webp_SERVIDOR = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-2/" + name  + "-PASS.webp" 
+            outpath_webp_SERVIDOR = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-3/" + name  + "-PASS.webp" 
             imwrite(outpath_webp_SERVIDOR, img_last, [IMWRITE_WEBP_QUALITY, quality_percent])
 
             command = {
@@ -329,7 +329,7 @@ class Triggers (QState):
             #se tiene que guardar como .webp para que haga la conversión
             outpath_webp_LOCAL = "C:/images/DATABASE/" + name  + "-FAIL.webp" 
             imwrite(outpath_webp_LOCAL, img_last, [IMWRITE_WEBP_QUALITY, quality_percent])
-            outpath_webp_SERVIDOR = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-2/" + name  + "-FAIL.webp" 
+            outpath_webp_SERVIDOR = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-3/" + name  + "-FAIL.webp" 
             imwrite(outpath_webp_SERVIDOR, img_last, [IMWRITE_WEBP_QUALITY, quality_percent])
 
             command = {
