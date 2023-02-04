@@ -95,16 +95,39 @@ def uploadRef():
     allowed_file = False
     file = None
     try:
+        data = request.form['DBEVENT']
+        print(request.form['DBEVENT'])
+
+        if 'izquierda' in data:
+            print('IZQUIERDO')
+            if 'z296' in data:
+                flujo = 'ILZ'
+                numero = '296'
+            if 'x296' in data:
+                flujo = 'ILX'
+                numero = '296'
+            if 'x294' in data: 
+                flujo = 'ILX'
+                numero = '294'
+
+        if 'derecha' in data:
+            print('DERECHO')
+            flujo = 'IRX'
+            if 'x294' in data:
+                numero = '294'
+            else : 
+                numero = '296'
+
         if 'file' in request.files:
             file = request.files['file']
-            if file.filename != '':
+            if file.filename != '' and flujo in file.filename and numero in file.filename:
                 filename = file.filename
                 allowed_file = '.' in filename and \
                     filename.rsplit('.', 1)[1].lower() == "dat"
         if file and allowed_file:
             filename = secure_filename(file.filename)
             path = os.path.join(app.config['UPLOAD_FOLDER'], 'ILX')
-            print(path, 'ACAAAAAAAA esta la ubicacion que se necesita subir')
+            #print(path, 'ACAAAAAAAA esta la ubicacion que se necesita subir')
 
             isExist = os.path.exists(path)
             if not isExist:
