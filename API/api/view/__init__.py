@@ -80,7 +80,7 @@ def etiqueta():
     #print("_RESULT_: Fusibles y torques OK")
     try:
         #192.168.1.103 IP Maquina Vision
-        publish.single("Printer/5", json.dumps(label), hostname='192.168.1.103', qos = 2)
+        publish.single("Printer/5", json.dumps(label), hostname='127.0.0.1', qos = 2)
         response["items"] = 1
     except Exception as ex:
         print("ETIQUETA MANUAL Exception: ",ex)
