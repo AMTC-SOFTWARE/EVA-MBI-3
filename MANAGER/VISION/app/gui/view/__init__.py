@@ -4,7 +4,7 @@
 """
 
 from PyQt5.QtWidgets import QDialog, QMainWindow, QLineEdit, QMessageBox, QAction
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QTimer
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QTimer, QSize
 from PyQt5.QtGui import QPixmap
 from threading import Timer
 from os.path import exists
@@ -235,6 +235,15 @@ class MainWindow (QMainWindow):
                 self.ui.lbl_info4.setText(message["lbl_info4"]["text"])
                 if "color" in message["lbl_info4"]:
                     self.ui.lbl_info4.setStyleSheet("color: " + message["lbl_info4"]["color"])
+                if "ancho" in message["lbl_info4"]:
+                    if "alto" in message["lbl_info4"]:
+
+                        ancho = int(message["lbl_info4"]["ancho"])
+                        alto = int(message["lbl_info4"]["alto"])
+
+                        self.lbl_info4.setMinimumSize(QSize(ancho, alto))
+                        self.lbl_info4.setMaximumSize(QSize(ancho, alto))
+
             if "lbl_nuts" in message:
                 self.ui.lbl_nuts.setText(message["lbl_nuts"]["text"])
                 if "color" in message["lbl_nuts"]:
