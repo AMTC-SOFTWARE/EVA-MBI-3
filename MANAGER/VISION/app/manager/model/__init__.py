@@ -267,6 +267,7 @@ class Model (object):
 
     #################### Vision-Altura #####################
         self.fuses_base = {}
+        #Se usan como coordenadas para dibujar el cuadro de inspeccion en la imagen de las cajas
         self.fuses_BB = {
             'PDC-D': {
                 'F200': [(271, 572), (300, 583)], 'F201': [(270, 555), (301, 567)], 'F202': [(274, 540), (304, 548)], 'F203': [(272, 523), (301, 533)], 

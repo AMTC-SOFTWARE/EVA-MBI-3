@@ -531,9 +531,9 @@
    'C:\\Program Files (x86)\\Microsoft Visual '
    'Studio\\Shared\\Python37_64\\lib\\multiprocessing\\__init__.py',
    'PYMODULE'),
-  ('tracemalloc',
+  ('typing',
    'C:\\Program Files (x86)\\Microsoft Visual '
-   'Studio\\Shared\\Python37_64\\lib\\tracemalloc.py',
+   'Studio\\Shared\\Python37_64\\lib\\typing.py',
    'PYMODULE'),
   ('stringprep',
    'C:\\Program Files (x86)\\Microsoft Visual '
@@ -543,9 +543,9 @@
    'C:\\Program Files (x86)\\Microsoft Visual '
    'Studio\\Shared\\Python37_64\\lib\\_py_abc.py',
    'PYMODULE'),
-  ('typing',
+  ('tracemalloc',
    'C:\\Program Files (x86)\\Microsoft Visual '
-   'Studio\\Shared\\Python37_64\\lib\\typing.py',
+   'Studio\\Shared\\Python37_64\\lib\\tracemalloc.py',
    'PYMODULE'),
   ('view',
    'C:\\Users\\castrru\\Documents\\GitHub\\EVA-MBI-3\\API\\api\\view\\__init__.py',
