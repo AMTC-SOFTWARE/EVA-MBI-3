@@ -1,4 +1,5 @@
-from model import host, user, password, database, serverp2, dbp2, userp2, passwordp2
+#from model import host, user, password, database, serverp2, dbp2, userp2, passwordp2
+from model import model
 from werkzeug.utils import secure_filename
 from flask import Flask, request
 from datetime import datetime
@@ -17,9 +18,14 @@ app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), '..\\')
 
+datos_conexion=model()
+host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
 #####################################  Servicio para Etiquetas desde WEB ####################################
 @app.route("/printer/etiqueta",methods=["POST"])
 def etiqueta():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     response = {"items": 0}
     print("Dentro de Servicio para Etiqueta MANUAL")
     date = request.form['DATE']
@@ -91,6 +97,8 @@ def etiqueta():
 #####################################  Upload Files Services ####################################
 @app.route('/upload/modularities', methods=['POST'])
 def uploadRef():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     response = {"items": 0}
     allowed_file = False
     file = None
@@ -144,6 +152,8 @@ def uploadRef():
 
 @app.route('/update/modularities', methods=['POST'])
 def updateRef():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     data = request.form['DBEVENT']
     print("DB a la que se cargan los DAT: ",data)
     ilxfaltantes = auto_modularities.makeModularities(data)
@@ -151,6 +161,8 @@ def updateRef():
 
 @app.route('/update/modules', methods=['POST'])
 def updateModules():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     response = {"items": 0}
     allowed_file = False
     file = None
@@ -195,6 +207,8 @@ def updateModules():
 
 @app.route('/update/determinantes', methods=['POST'])
 def updateDeterminantes():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     response = {"items": 0}
     allowed_file = False
     file = None
@@ -231,6 +245,8 @@ def updateDeterminantes():
 #########################################  CRUD Services ########################################
 @app.route("/api/get/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def generalGET(table, column_1, operation_1, value_1, column_2, operation_2, value_2):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -268,6 +284,8 @@ def generalGET(table, column_1, operation_1, value_1, column_2, operation_2, val
 
 @app.route("/api/post/<table>",methods=["POST"])
 def generalPOST(table):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -313,6 +331,8 @@ def generalPOST(table):
 
 @app.route("/api/delete/<table>/<int:ID>",methods=["POST"])
 def delete(table, ID):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     try:
         connection = pymysql.connect(host = host, user = user, passwd = password, database = database)
     except Exception as ex:
@@ -332,6 +352,8 @@ def delete(table, ID):
 
 @app.route("/api/update/<table>/<int:ID>",methods=["POST"])
 def update(table, ID):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -374,6 +396,8 @@ def update(table, ID):
 
 @app.route("/api/get/pdcr/variantes",methods=["GET"])
 def variantes():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     pdcrVariantes = {
     "small": [],
     "medium": [],
@@ -403,6 +427,8 @@ def variantes():
 
 @app.route("/api/get/preview/modularity/<ILX>",methods=["GET"])
 def preview(ILX):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     endpoint = "http://127.0.0.1:5000/api/get/pdcr/variantes"
     pdcrVariantes = requests.get(endpoint).json()
     print("Lista Final de Variantes PDC-R: \n",pdcrVariantes)
@@ -537,6 +563,8 @@ def preview(ILX):
 ################################################## Respaldos de Base de Datos Endpoint  ####################################################
 @app.route("/api/get/bkup",methods=["GET"])
 def bkup():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     items = {
         "status": False,
         "dir": "",
@@ -569,6 +597,8 @@ def bkup():
 ################################################## Crear Base de Datos (Evento)  ####################################################
 @app.route("/api/post/newEvent",methods=["POST"])
 def newEvent():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     host_fase = "127.0.0.1"
     user_fase = "amtc"
     password_fase = "4dm1n_001"
@@ -693,6 +723,8 @@ def newEvent():
 ################################################## Eliminar Base de Datos (Evento)  ####################################################
 @app.route("/api/delete/event",methods=["POST"])
 def delEvent():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     host_fase = "127.0.0.1"
     user_fase = "amtc"
     password_fase = "4dm1n_001"
@@ -721,6 +753,8 @@ def delEvent():
 ################################################## Consultar Bases de Datos (Eventos)  ####################################################
 @app.route("/api/get/eventos",methods=["GET"])
 def eventos():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     host_fase = "127.0.0.1"
     user_fase = "amtc"
     password_fase = "4dm1n_001"
@@ -769,6 +803,8 @@ def eventos():
 
 @app.route("/api/get/<db>/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def eventGET(table, db, column_1, operation_1, value_1, column_2, operation_2, value_2):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -806,6 +842,8 @@ def eventGET(table, db, column_1, operation_1, value_1, column_2, operation_2, v
 
 @app.route("/api/get/<db>/preview/modularity/<ILX>",methods=["GET"])
 def previewEvent(ILX,db):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     endpoint = f"http://127.0.0.1:5000/api/get/{db}/pdcr/variantes"
     pdcrVariantes = requests.get(endpoint).json()
     print("Lista Final de Variantes PDC-R: \n",pdcrVariantes)
@@ -939,6 +977,8 @@ def previewEvent(ILX,db):
 
 @app.route("/api/get/<db>/pdcr/variantes",methods=["GET"])
 def variantesEvent(db):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     pdcrVariantes = {
     "small": [],
     "medium": [],
@@ -972,6 +1012,8 @@ def variantesEvent(db):
 
 @app.route("/api/delete/<db>/<table>/<int:ID>",methods=["POST"])
 def deleteEvent(table, ID,db):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     try:
         connection = pymysql.connect(host = host, user = user, passwd = password, database = db)
     except Exception as ex:
@@ -991,6 +1033,8 @@ def deleteEvent(table, ID,db):
 
 @app.route('/database/<db>/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>',methods=['GET'])
 def value_of_a_tableEvent(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2,db):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1029,6 +1073,8 @@ def value_of_a_tableEvent(table,column_of_table_1,operation_1,val_1,column_of_ta
 ################################################## Update Fijikura Server  ####################################################
 @app.route("/server_famx2/get/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def famx2GET(table, column_1, operation_1, value_1, column_2, operation_2, value_2):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1078,6 +1124,8 @@ def famx2GET(table, column_1, operation_1, value_1, column_2, operation_2, value
 
 @app.route("/server_famx2/update/<table>/<int:ID>",methods=["POST"])
 def famx2update(table, ID):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -1124,6 +1172,8 @@ def famx2update(table, ID):
 
 @app.route("/server_famx2/post/<table>",methods=["POST"])
 def famx2POST(table):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     def escape_name(s):
         name = '{}'.format(s.replace('`', '``'))
         return name
@@ -1170,6 +1220,8 @@ def famx2POST(table):
 ################################################## Webpages endpoints #########################################################
 @app.route('/database/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>',methods=['GET'])
 def value_of_a_table(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1208,6 +1260,8 @@ def value_of_a_table(table,column_of_table_1,operation_1,val_1,column_of_table_2
 
 @app.route('/json2/<table>/<column_of_table>/<operation_1>/<val_1>/<operation_2>/<val_2>',methods=['GET'])
 def json2Return(table,column_of_table,operation_1,val_1,operation_2,val_2):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
 
     items = 0
 
@@ -1278,6 +1332,8 @@ def json2Return(table,column_of_table,operation_1,val_1,operation_2,val_2):
 
 @app.route('/database/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>/multi',methods=['GET'])
 def value_of_a_table_2(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1324,6 +1380,8 @@ def value_of_a_table_2(table,column_of_table_1,operation_1,val_1,column_of_table
 
 @app.route('/info/<arnes>/<type_pts>/<caja>',methods=['GET'])
 def info_cajas(arnes,type_pts,caja):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     path = "data/points/"
     file_name= path + caja+"_puntos_"+type_pts
     print(file_name)
