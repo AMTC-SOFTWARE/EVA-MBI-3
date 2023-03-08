@@ -535,13 +535,13 @@
    'C:\\Program Files (x86)\\Microsoft Visual '
    'Studio\\Shared\\Python37_64\\lib\\typing.py',
    'PYMODULE'),
-  ('stringprep',
-   'C:\\Program Files (x86)\\Microsoft Visual '
-   'Studio\\Shared\\Python37_64\\lib\\stringprep.py',
-   'PYMODULE'),
   ('_py_abc',
    'C:\\Program Files (x86)\\Microsoft Visual '
    'Studio\\Shared\\Python37_64\\lib\\_py_abc.py',
+   'PYMODULE'),
+  ('stringprep',
+   'C:\\Program Files (x86)\\Microsoft Visual '
+   'Studio\\Shared\\Python37_64\\lib\\stringprep.py',
    'PYMODULE'),
   ('tracemalloc',
    'C:\\Program Files (x86)\\Microsoft Visual '

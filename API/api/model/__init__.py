@@ -10,23 +10,13 @@ passwordp2 = "pJ0rge2021"
 #userp2 = "pnx-atmc"
 #passwordp2 = "fujikuraamtc" #Antiguas credenciales Limitadas (No funcionan para Trazabilidad)
 from datetime import datetime, timedelta, date, time
-#host = "127.0.0.1"
-#user = "admin"
-#password = "4dm1n_001"
-#database = "interior"
 
-#serverp2 = "naapnx-famx2s"
-#dbp2 = "agrucomb_prod"
-#userp2 = "pnx_agrucomb_prod"
-#passwordp2 = "pJ0rge2021"
-#userp2 = "pnx-atmc"
-#passwordp2 = "fujikuraamtc" #Antiguas credenciales Limitadas (No funcionan para Trazabilidad)
 class model(object):
     def __init__(self, parent=None):
         self.host = "127.0.0.1"
         self.user = "admin"
         self.password = "4dm1n_001"
-        self.database = "interior"
+        self.database = "eva_mbi_3"
 
         
         self.serverp2 = ""
