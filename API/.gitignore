@@ -1,0 +1,7 @@
+*.pyc
+*.spec
+*.pyproj
+api/.vs/
+api/dist/
+api/env/
+api/build/
