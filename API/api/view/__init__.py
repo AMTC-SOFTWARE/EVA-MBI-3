@@ -1,3 +1,5 @@
+#EVA-MBI-3
+
 from model import model
 from werkzeug.utils import secure_filename
 from flask import Flask, request
@@ -8,6 +10,10 @@ from pickle import load
 import pymysql
 import json
 import os
+from os.path import exists  #para saber si existe una carpeta o archivo
+from shutil import rmtree   #para eliminar carpeta con archivos dentro: rmtree("carpeta_con_archivos")
+from os import remove       #para eliminar archivo único: remove("archivo.txt")
+from os import rmdir        #para eliminar carpeta vacía: rmdir("carpeta_vacia")
 import requests
 from paho.mqtt import publish
 import pyodbc
@@ -95,48 +101,39 @@ def uploadRef():
     response = {"items": 0}
     allowed_file = False
     file = None
+
+    #se asigna el path de la carpeta que se quiere limpiar y crear
+    path_carpeta = os.path.join(app.config['UPLOAD_FOLDER'], 'ILX') #"..\\ILX"
+    #se obtiene true si existe la carpeta
+    existe_carpeta = os.path.isdir(path_carpeta)
+    if existe_carpeta == True:
+        try:
+            #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
+            rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+            print("se elimina la carpeta")
+        except OSError as error:
+            print("ERROR AL ELIMINAR CARPETA:::\n",error)
+    #mientras la carpeta no esté creada, se estará tratando de crear
+    while(not(os.path.isdir(path_carpeta))):
+        try:
+            os.mkdir(path_carpeta)
+        except OSError as error:
+            print("ERROR AL CREAR CARPETA:::\n",error)
+
     try:
-        data = request.form['DBEVENT']
-        print(request.form['DBEVENT'])
-
-        if 'izquierda' in data:
-            print('IZQUIERDO')
-            if 'z296' in data:
-                flujo = 'ILZ'
-                numero = '296'
-            if 'x296' in data:
-                flujo = 'ILX'
-                numero = '296'
-            if 'x294' in data: 
-                flujo = 'ILX'
-                numero = '294'
-
-        if 'derecha' in data:
-            print('DERECHO')
-            flujo = 'IRX'
-            if 'x294' in data:
-                numero = '294'
-            else : 
-                numero = '296'
 
         if 'file' in request.files:
             file = request.files['file']
-            if file.filename != '' and flujo in file.filename and numero in file.filename:
+            if file.filename != '':
                 filename = file.filename
                 allowed_file = '.' in filename and \
                     filename.rsplit('.', 1)[1].lower() == "dat"
         if file and allowed_file:
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], 'ILX')
-            #print(path, 'ACAAAAAAAA esta la ubicacion que se necesita subir')
-
-            isExist = os.path.exists(path)
-            if not isExist:
-                # Create a new directory because it does not exist 
-                os.makedirs(path)
-                print("The new directory is created!", path)
+            print("se guardan los archivos en el folder temporal")
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "ILX", filename))
             response["items"] = 1
+
     except Exception as ex:
         print("uploadRef Exception: ", ex)
         response = {"exception" : ex.args}
@@ -147,6 +144,7 @@ def uploadRef():
 def updateRef():
     data = request.form['DBEVENT']
     print("DB a la que se cargan los DAT: ",data)
+    print("se actualizarán los DATS en la base de datos, ingresando a función auto_modularities.makeModularities")
     ilxfaltantes = auto_modularities.makeModularities(data)
     return ilxfaltantes
 
@@ -155,6 +153,25 @@ def updateModules():
     response = {"items": 0}
     allowed_file = False
     file = None
+
+    #se asigna el path de la carpeta que se quiere limpiar y crear
+    path_carpeta = os.path.join(app.config['UPLOAD_FOLDER'], "modules") #"..\\modules"
+    #se obtiene true si existe la carpeta
+    existe_carpeta = os.path.isdir(path_carpeta)
+    if existe_carpeta == True:
+        try:
+            #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
+            rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+            print("se elimina la carpeta")
+        except OSError as error:
+            print("ERROR AL ELIMINAR CARPETA:::\n",error)
+    #mientras la carpeta no esté creada, se estará tratando de crear
+    while(not(os.path.isdir(path_carpeta))):
+        try:
+            os.mkdir(path_carpeta)
+        except OSError as error:
+            print("ERROR AL CREAR CARPETA:::\n",error)
+
     try:
         data = request.form['DBEVENT']
         print("DB a la que se carga la Info: ",data)
@@ -168,14 +185,6 @@ def updateModules():
                     filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']
         if file and allowed_file:
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], "modules")
-            #print(path, 'ACAAAAAAAA esta la ubicacion que se necesita subir')
-            isExist = os.path.exists(path)
-            if not isExist:
-                # Create a new directory because it does not exist 
-                os.makedirs(path)
-                print("The new directory is created!", path)
-
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "modules", filename))
             auto_modularities.refreshModules(data)
             excelnew = {
@@ -188,9 +197,11 @@ def updateModules():
             endpoint = f"http://127.0.0.1:5000/api/post/historial"
             responseHistorial = requests.post(endpoint, data = json.dumps(excelnew))
             response["items"] = 1
+
     except Exception as ex:
         print("updateModules Exception: ", ex)
         response = {"exception" : ex.args}
+
     finally:
         return response
 
@@ -199,6 +210,25 @@ def updateDeterminantes():
     response = {"items": 0}
     allowed_file = False
     file = None
+
+    #se asigna el path de la carpeta que se quiere limpiar y crear
+    path_carpeta = os.path.join(app.config['UPLOAD_FOLDER'], "determinantes") #"..\\determinantes"
+    #se obtiene true si existe la carpeta
+    existe_carpeta = os.path.isdir(path_carpeta)
+    if existe_carpeta == True:
+        try:
+            #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
+            rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+            print("se elimina la carpeta")
+        except OSError as error:
+            print("ERROR AL ELIMINAR CARPETA:::\n",error)
+    #mientras la carpeta no esté creada, se estará tratando de crear
+    while(not(os.path.isdir(path_carpeta))):
+        try:
+            os.mkdir(path_carpeta)
+        except OSError as error:
+            print("ERROR AL CREAR CARPETA:::\n",error)
+
     try:
         data = request.form['DBEVENT']
         print("DB a la que se carga la Info: ",data)
@@ -212,14 +242,6 @@ def updateDeterminantes():
                     filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']
         if file and allowed_file:
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], "determinantes")
-            #print(path, 'ACAAAAAAAA esta la ubicacion que se necesita subir')
-            isExist = os.path.exists(path)
-            if not isExist:
-                # Create a new directory because it does not exist 
-                os.makedirs(path)
-                print("The new directory is created!", path)
-
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "determinantes", filename))
             auto_modularities.refreshDeterminantes(data,usuario)
             response["items"] = 1
@@ -232,8 +254,7 @@ def updateDeterminantes():
 #########################################  CRUD Services ########################################
 @app.route("/api/get/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def generalGET(table, column_1, operation_1, value_1, column_2, operation_2, value_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -271,8 +292,7 @@ def generalGET(table, column_1, operation_1, value_1, column_2, operation_2, val
 
 @app.route("/api/post/<table>",methods=["POST"])
 def generalPOST(table):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -318,8 +338,7 @@ def generalPOST(table):
 
 @app.route("/api/delete/<table>/<int:ID>",methods=["POST"])
 def delete(table, ID):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     try:
         connection = pymysql.connect(host = host, user = user, passwd = password, database = database)
     except Exception as ex:
@@ -339,8 +358,7 @@ def delete(table, ID):
 
 @app.route("/api/update/<table>/<int:ID>",methods=["POST"])
 def update(table, ID):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -546,8 +564,7 @@ def preview(ILX):
 ################################################## Respaldos de Base de Datos Endpoint  ####################################################
 @app.route("/api/get/bkup",methods=["GET"])
 def bkup():
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     items = {
         "status": False,
         "dir": "",
@@ -780,8 +797,7 @@ def eventos():
 
 @app.route("/api/get/<db>/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def eventGET(table, db, column_1, operation_1, value_1, column_2, operation_2, value_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -985,8 +1001,7 @@ def variantesEvent(db):
 
 @app.route("/api/delete/<db>/<table>/<int:ID>",methods=["POST"])
 def deleteEvent(table, ID,db):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     try:
         connection = pymysql.connect(host = host, user = user, passwd = password, database = db)
     except Exception as ex:
@@ -1006,8 +1021,7 @@ def deleteEvent(table, ID,db):
 
 @app.route('/database/<db>/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>',methods=['GET'])
 def value_of_a_tableEvent(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2,db):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1046,8 +1060,8 @@ def value_of_a_tableEvent(table,column_of_table_1,operation_1,val_1,column_of_ta
 ################################################## Update Fijikura Server  ####################################################
 @app.route("/server_famx2/get/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def famx2GET(table, column_1, operation_1, value_1, column_2, operation_2, value_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+    #datos_conexion=model()
+    #host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1097,8 +1111,8 @@ def famx2GET(table, column_1, operation_1, value_1, column_2, operation_2, value
 
 @app.route("/server_famx2/update/<table>/<int:ID>",methods=["POST"])
 def famx2update(table, ID):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+    #datos_conexion=model()
+    #host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -1145,8 +1159,8 @@ def famx2update(table, ID):
 
 @app.route("/server_famx2/post/<table>",methods=["POST"])
 def famx2POST(table):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+    #datos_conexion=model()
+    #host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     def escape_name(s):
         name = '{}'.format(s.replace('`', '``'))
         return name
@@ -1193,8 +1207,7 @@ def famx2POST(table):
 ################################################## Webpages endpoints #########################################################
 @app.route('/database/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>',methods=['GET'])
 def value_of_a_table(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1233,8 +1246,7 @@ def value_of_a_table(table,column_of_table_1,operation_1,val_1,column_of_table_2
 
 @app.route('/json2/<table>/<column_of_table>/<operation_1>/<val_1>/<operation_2>/<val_2>',methods=['GET'])
 def json2Return(table,column_of_table,operation_1,val_1,operation_2,val_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     items = 0
 
     if table == "availability":
@@ -1304,8 +1316,7 @@ def json2Return(table,column_of_table,operation_1,val_1,operation_2,val_2):
 
 @app.route('/database/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>/multi',methods=['GET'])
 def value_of_a_table_2(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
