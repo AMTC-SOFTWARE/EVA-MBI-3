@@ -1885,3 +1885,86 @@ thead tr:first-child Th{
 .none{
     display: none;
 }
+
+ /*********************************************Busqueda de referencias  *******************************************/
+ .perdido{
+    transition: all ease-in-out 0.7s;
+    margin: 0rem 1rem;
+    padding-left: 1rem;
+    width: 40rem;
+    animation: myMove 1s forwards;
+  }
+  @keyframes myMove{
+      from { background-color: gray;}
+      to{ background-color: rgb(110, 0, 0);
+        color: wheat;
+        margin-bottom: 1rem;
+    }
+  }
+.encontrado{
+    background-color: rgb(106, 250, 116);
+    border-radius: 1em;
+    transition: all ease-in-out 0.7s;
+    margin: 1rem;
+    padding-left: 1rem;
+    width: 40rem;
+  }
+.encontradoXn {
+    transition: all ease-in-out 0.7s;
+    background-color: rgb(106, 250, 243);
+    width: 40rem;
+    border-radius: 1em;
+    padding-left: 1rem;
+    
+    animation: newOne 1s forwards;
+}
+@keyframes newOne {
+    from{ opacity: 0;
+        margin: -1rem 1rem;
+    }
+    to{opacity: 1;
+        margin: 1rem;
+        
+    
+    }
+}
+.resultados{
+    margin-top: 3rem;
+    overflow-y: scroll;
+    max-height: 39rem;
+    min-width: 40rem;
+    max-width: 100%;
+  }
+  .abrir{
+    opacity: 1;
+    height: 50rem;
+    transition: all 0.4s ease-in-out;
+  }
+  .cerrar{
+    opacity: 0;
+    height: 0rem;
+    transition: all 0.4s ease-in-out;
+  }
+  #busqueda{
+    cursor: pointer;
+  }
+/*Boton Trash*/
+  .btn-trash{
+    visibility: hidden;
+    opacity: 0;
+    position: fixed;
+    right: 9rem;
+    background: #ff4040;
+    bottom: 10rem;
+    width: 4rem;
+    height: 4rem;
+    padding: .5rem 1.3rem;
+    transition: all ease 500ms;
+  }
+  .btn-trash.active{
+    visibility: visible;
+    opacity: 1;
+  }
+  .btn-trash:hover{
+    background-color: #333;
+  }

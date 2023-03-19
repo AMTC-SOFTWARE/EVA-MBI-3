@@ -288,6 +288,25 @@
     background-color: gray;
     transition:  all 0.2s;
   }
+  .green-circle{
+    background-color: rgb(106, 250, 116);
+    border-radius: 100%; 
+    width: 2rem;
+    height: 2rem;
+  }
+  .red-circle{
+   background-color: rgb(110, 0, 0);  
+   border-radius: 100%; 
+   width: 2rem;
+    height: 2rem;
+  }
+  .blue-circle{
+    background-color: rgb(106, 250, 243);
+    border-radius: 100%; 
+    width: 2rem;
+    height: 2rem;
+
+  }
   .green-light > .eventos > figure > .arrow {
   background-color: greenyellow;
   transition:  all 0.2s;
@@ -300,6 +319,13 @@
   background-color: gray;
   transition:  all 0.2s;
   }
+  .botonazo{
+            color: aliceblue;
+            background: cadetblue;
+            max-width: 15rem;
+            margin: 1rem auto;
+            min-width: 9rem;
+        }
   </style>
   <div class="modal fade" id="login_modal" name="login_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -360,6 +386,37 @@
     <div>
       <br>
       <h3>EVENTOS</h3>
+      <hr>
+      <h4><a id="busqueda">Seleccione Aqui para buscar Referencias </a></h4>
+      <!-- Buscador por block de Nota -->
+    <div id="conjunto" class="section flex-box cerrar">
+      <span class="column" style="min-width: 50%;">
+          <br>
+          <div class="grid" style="margin-left: 2rem;">
+              <h4 style="margin-bottom: 1rem;">Inserte Aqui las Referencias que desea buscar</h4>
+              <nav class="grid auto-flow-column">
+                <span>Verde<p class="green-circle">  </p> - Encontrado    </span>
+                <span>Rojo <p class="red-circle">    </p> - No Encontrado </span>
+                <span>Azul <p class="blue-circle">   </p> - Duplicado     </span>
+              </nav>
+              <textarea name="contenedor" id="areatext" cols="30" rows="10"></textarea>
+              <button id="obtener" class="botonazo" onclick="busqueda_eventos()">Buscar</button>
+          </div>
+
+      </span>
+
+      <span class="column" id="resultado" style="min-width: 50%; margin: 3rem auto;">
+          <div class="grid" style="margin-left: 2rem;">
+          <h4>Aqui se mostrará los valores que fueron consultados</h4>
+              <div class="resultados" id="resultados">
+                  <span>.</span>
+              </div>
+          </div>  
+
+
+      </span>
+  </div>
+      <!-- href="busqueda.html" -->
       <hr>
       <label>Agregue módulos y modularidades al evento que pertenezcan, o cree uno nuevo.
     </div>
@@ -572,8 +629,8 @@
           <button type="button" class="btn btn-info btn-lg" id="ver_modulos" style="margin: 10px" onclick="location.href='edit_modulos.html'">Módulos</button>
           <!-- SECCIÓN PARA VER VISUALES -->
           <button type="button" class="btn btn-relx btn-lg" id="boton_visuales" style="margin: 10px" onclick="location.href='visuales.html'">Visuales</button>
-           <!-- SECCIÓN PARA VER Módulos Determinantes -->
-           <button type="button" class="btn btn-primary btn-lg" id="boton_definiciones" style="margin: 10px" onclick="location.href='definiciones.html'">Módulos Determinantes</button>
+          <!-- SECCIÓN PARA VER Modulos Determinantes -->
+          <button type="button" class="btn btn-primary btn-lg" id="boton_definiciones" style="margin: 10px" onclick="location.href='definiciones.html'">Módulos Determinantes</button>
         </div>
         <div class="modal-footer">
         </div>
@@ -655,5 +712,6 @@
 <script  type="text/javascript" src="static/script/jquery.dataTables.min.js"></script>
 <script  type="text/javascript" src="static/script/datatables/dataTables.responsive.min.js"></script>
 <script  type="text/javascript" src="static/script/automatico.js"></script>
+<script  type="text/javascript" src="static/script/busqueda.js"></script>
 </body>
 </html>

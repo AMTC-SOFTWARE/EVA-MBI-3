@@ -7,6 +7,7 @@ document.getElementById('tituloEvento').innerText = eventoFinal;
 var mv=[];
 var mt=[];
 var pedido;
+var refArray; //Guardado de Valores de Pedido para dara la tarea de borrarlos en el evento
 var id;
 var pedidoeditar;
 var pedido_editar_final;
@@ -28,7 +29,7 @@ function cargartabla(){
   fetch(dominio+"/api/get/"+DBEVENT+"/pedidos/ID/>/0/_/=/_")
   .then(data=>data.json())
   .then(data=>{
-    // console.log(data);
+    console.log(data);
     if (data.items == 0) {
       console.log("Sin registro alguno");
       document.getElementById("tabla").innerHTML = "<label>Tabla sin registros.</label>";
@@ -37,7 +38,7 @@ function cargartabla(){
       colnames.splice(colnames.indexOf("ID"),1);
       colnames.splice(colnames.indexOf("PEDIDO"),1);
       colnames.splice(colnames.indexOf("ACTIVE"),1,"ID","PEDIDO","ACTIVE");
-      // console.log("Columnas: ", colnames);
+      console.log("Columnas: ", colnames);
       var filas = data[colnames[1]].length;
       // console.log("Num de Registros:",filas);
       // console.log(data[colnames[7]]);
@@ -76,7 +77,7 @@ function cargartabla(){
       //FILAS DE LA TABLA
       for (i = 0; i < filas; i++) {
         //// Instrucciones para saber si el registro pertenece a Interior o Motor ////
-        var filasQR = JSON.parse(data[colnames[7]][i]);
+        var filasQR = JSON.parse(data["QR_BOXES"][i]);
         // console.log(filasQR);
         var nombresQR = Object.keys(filasQR);
         // console.log("Cajas", nombresQR);
@@ -86,6 +87,18 @@ function cargartabla(){
           for (j = 0; j < colnames.length; j++) {
             var td = document.createElement('TD')
             switch (colnames[j]){
+              case "PEDIDO":
+              var selector  = document.createElement('input');
+              const ref = data[colnames[j]][i];
+              const pedidoId = data['PEDIDO'][i]; 
+              selector.setAttribute('type', 'checkbox');
+              selector.id = `${pedidoId}`  
+              selector.style.marginLeft = '0.5rem'
+              selector.value = `{"PEDIDO":"${ref}", "VALOR": 1}`;
+              selector.setAttribute('onclick', 'desicion(this)')       
+              td.appendChild(selector);
+              td.appendChild(document.createTextNode(' ' + ref));
+              break
               case "MODULOS_ALTURA":
               var boton = document.createElement('button');
               var icono = document.createElement('i');
@@ -183,7 +196,8 @@ function cargartabla(){
       myTableDiv.appendChild(table);
       $(document).ready(function() {
         $('#myTable').DataTable({
-          responsive:true
+          responsive:true,
+          order: [[0, 'desc']]
         });
       });
     }
@@ -815,7 +829,6 @@ function comprobarmfbe(obj){
 function mostrar_modulos_vision(){
   document.getElementById("modulos_vision").innerHTML = "<option value='"+"'>Seleccione un modulo de vision..."+"</option>";
   //modulos de vision
-  var miSelectT = document.getElementById("modulos_vision")[0];
   fetch(dominio+"/api/get/"+DBEVENT+"/modulos_fusibles/all/-/-/-/-/-")
   .then(data=>data.json())
   .then(data=>{
@@ -832,7 +845,6 @@ function mostrar_modulos_vision(){
 function mostrar_modulos_torque(){
   document.getElementById("modulos_torque").innerHTML = "<option value='"+"'>Seleccione un modulo de torque..."+"</option>";
   //modulos de torque
-  var miSelectT = document.getElementById("modulos_torque")[0];
   fetch(dominio+"/api/get/"+DBEVENT+"/modulos_torques/all/-/-/-/-/-")
   .then(data=>data.json())
   .then(data=>{
@@ -1186,4 +1198,172 @@ function comprobaractivo(obj){
     activo = 0;
   }
   // console.log("Valor de activo: ",activo);
+}
+
+
+refArray = []
+function desicion(ref){
+  if (ref.checked){
+    addPedido(ref)
+  }else{
+    delPedido(ref)
+  }
+}
+
+
+
+function addPedido(ref){
+  console.log('addPEDIDO',ref);
+  var delCant
+  const seleccion =  ref.value? ref.value: `{"PEDIDO":"${ref}"}`;
+  console.log(seleccion);
+  var Jvalue = JSON.parse(seleccion);
+  if (!refArray.includes(Jvalue['PEDIDO'] )) {
+    refArray.push(Jvalue['PEDIDO'])
+  }
+    
+
+   console.log(refArray);
+
+  delCant = refArray.length
+
+   var delRef = document.getElementById("btn-delRef")
+
+   delRef.classList.add('borrar')
+   delRef.classList.add('btn-danger');
+
+
+ if (delCant) {
+   delRef.classList.add('active')
+  
+ }else{
+   delRef.classList.remove('active')
+
+ }
+  
+}
+
+
+
+function delPedido(ref){
+  console.log('DELPEDIDO', ref);
+  var delCant
+  const seleccion =  ref.value? ref.value: `{"PEDIDO":"${ref}"}`;
+  console.log(seleccion);
+  
+  
+  var Jvalue = JSON.parse(seleccion)  
+     refArray.splice(refArray.indexOf(Jvalue['PEDIDO']),1)
+     Jvalue['VALOR'] = 0;
+   console.log(refArray);
+
+   delCant = refArray.length
+
+   var delRef = document.getElementById("btn-delRef")
+
+   delRef.classList.add('borrar')
+   delRef.classList.add('btn-danger');
+
+
+ if (delCant) {
+   delRef.classList.add('active')
+  
+ }else{
+   delRef.classList.remove('active')
+
+ }
+  
+}
+
+function borraPedidos(){
+  // console.log(refArray, 'Aqui yace el BorraPedidos 3000');
+  if (confirm(`¿Estas seguro de eliminar ${refArray.length} elementos?`)){
+          refArray.forEach(alx => {
+            console.log(alx);
+            
+            fetch(dominio+'/api/delete/'+DBEVENT+'/pedidos/PEDIDO/'+alx,{
+              method: 'POST'
+            }).then(res=>res.json())
+            .then(function (data){
+              console.log(data);
+              console.log(`Haz eliminado el registro ${alx}`)
+            })
+            .catch(function(err) {
+              console.log(err);
+            });
+          });
+         setTimeout(function(){
+        cargartabla()
+           }, 2000);
+        
+    } else{
+    console.log('Eliminacion Anulada');
+  }
+}
+function lastDay() {
+  if (document.getElementById("lastDay").checked === true) {
+    
+    fetch(dominio+"/api/get/"+DBEVENT+"/pedidos/ID/>/0/_/=/_")
+    .then(data=>data.json())
+    .then(data=>{
+    console.log(data["ID"]);
+   
+
+    const pum = data["DATETIME"]
+    var lastDate = new Date (pum[pum.length - 1])
+    console.log(pum[pum.length - 1]);
+    // var fechaInicial = moment.utc(lastDate).add(-1,'days').format('YYYY-MM-DD'); //Insertar una fecha del dia de hoy menos 1 dia
+    var fechaFinal = moment.utc(lastDate).format('YYYY-MM-DD'); //Insertar una fecha del dia de hoy mas 1 dia
+    // console.log('Fecha Inicial'+fechaInicial + 'Fecha final'+fechaFinal);
+    fetch(dominio+`/api/get/${DBEVENT}/pedidos/datetime/>/${fechaFinal}/_/_/_`)
+    .then(mem=>mem.json())
+    .then(mem=> {
+      console.log(mem);
+      const lastlx = mem["PEDIDO"]
+      for (let c = lastlx.length-1; c >= 0; c--) {
+        const lx = lastlx[c] // El nombre del pedido
+        let ref = document.getElementById(`${lx}`)
+        if (ref) {
+          ref.checked = true
+          addPedido(lx)
+        }else{
+          addPedido(lx)
+        }
+       }
+    })
+
+  })
+}else{
+  fetch(dominio+"/api/get/"+DBEVENT+"/pedidos/ID/>/0/_/=/_")
+  .then(data=>data.json())
+  .then(data=>{
+  console.log(data["ID"]);
+ 
+
+  const pum = data["DATETIME"]
+  var lastDate = new Date (pum[pum.length - 1])
+  console.log(pum[pum.length - 1]);
+  // var fechaInicial = moment.utc(lastDate).add(-1,'days').format('YYYY-MM-DD'); //Insertar una fecha del dia de hoy menos 1 dia
+  var fechaFinal = moment.utc(lastDate).format('YYYY-MM-DD'); //Insertar una fecha del dia de hoy mas 1 dia
+  // console.log('Fecha Inicial'+fechaInicial + 'Fecha final'+fechaFinal);
+  fetch(dominio+`/api/get/${DBEVENT}/pedidos/datetime/>/${fechaFinal}/_/_/_`)
+  .then(mem=>mem.json())
+  .then(mem=> {
+    console.log(mem);
+    const lastlx = mem["PEDIDO"]
+    for (let c = lastlx.length-1; c >= 0; c--) {
+      const lx = lastlx[c] // El nombre del pedido
+      let ref = document.getElementById(`${lx}`)
+      if (ref) {
+        ref.checked = false;
+        delPedido(lx)
+      }else{
+        delPedido(lx)
+      }
+     }
+  })
+
+})
+
+}
 }
