@@ -96,6 +96,28 @@ def etiqueta():
         return response
 
 #####################################  Upload Files Services ####################################
+@app.route('/delete/filesmodularities', methods=['POST'])
+def delRef():
+    response = {"items": 0}
+    try:
+        path_carpeta = "..\\ILX";
+        #se obtiene true si existe la carpeta
+        existe_carpeta = os.path.isdir(path_carpeta)
+        if existe_carpeta == True:
+            try:
+                #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
+                rmtree(path_carpeta)#para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+                print("se elimina la carpeta")
+                response = {"path" : 'Eliminado desde la API, mi Pana'}
+            except OSError as error:
+                print("ERROR AL ELIMINAR CARPETA:::\n",error)
+                response = {"exception" : ex.args}
+        return response
+    except Exception as ex:
+        print("DeleteRef Exception: ", ex)
+        response = {"exception" : ex.args}
+        return response
+
 @app.route('/upload/modularities', methods=['POST'])
 def uploadRef():
     response = {"items": 0}
@@ -109,7 +131,7 @@ def uploadRef():
     if existe_carpeta == True:
         try:
             #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
-            rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+            #rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
             print("se elimina la carpeta")
         except OSError as error:
             print("ERROR AL ELIMINAR CARPETA:::\n",error)

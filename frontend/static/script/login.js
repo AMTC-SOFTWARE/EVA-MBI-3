@@ -1,5 +1,5 @@
-﻿var dominio = 'http://127.0.0.1:5000'; // IP Máquina(Router): 192.168.1.10 IP Pruebas: localhost
-console.log("Hola, Soy la actualización del 27 ♥ de Octubre de 2022");
+﻿var dominio = 'http://127.0.0.1:5000'; // IP Estacion: 10.71.82.52 IP Pruebas: localhost
+console.log("Hola, Soy la actualización del 19 ♥ de Marzo de 2023");
 console.log(dominio);
 var alerta = document.getElementById('alerta');
 var alertasesion = document.getElementById('alertasesion');
