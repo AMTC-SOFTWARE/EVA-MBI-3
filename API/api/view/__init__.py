@@ -125,7 +125,7 @@ def uploadRef():
     file = None
 
     #se asigna el path de la carpeta que se quiere limpiar y crear
-    path_carpeta = os.path.join(app.config['UPLOAD_FOLDER'], 'ILX') #"..\\ILX"
+    path_carpeta = "..\\ILX"
     #se obtiene true si existe la carpeta
     existe_carpeta = os.path.isdir(path_carpeta)
     if existe_carpeta == True:
@@ -177,7 +177,7 @@ def updateModules():
     file = None
 
     #se asigna el path de la carpeta que se quiere limpiar y crear
-    path_carpeta = os.path.join(app.config['UPLOAD_FOLDER'], "modules") #"..\\modules"
+    path_carpeta = "..\\modules"
     #se obtiene true si existe la carpeta
     existe_carpeta = os.path.isdir(path_carpeta)
     if existe_carpeta == True:
@@ -234,7 +234,7 @@ def updateDeterminantes():
     file = None
 
     #se asigna el path de la carpeta que se quiere limpiar y crear
-    path_carpeta = os.path.join(app.config['UPLOAD_FOLDER'], "determinantes") #"..\\determinantes"
+    path_carpeta = "..\\determinantes"
     #se obtiene true si existe la carpeta
     existe_carpeta = os.path.isdir(path_carpeta)
     if existe_carpeta == True:
