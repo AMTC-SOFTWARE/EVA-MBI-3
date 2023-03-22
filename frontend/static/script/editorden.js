@@ -90,11 +90,11 @@ function cargartabla(){
               case "PEDIDO":
               var selector  = document.createElement('input');
               const ref = data[colnames[j]][i];
-              const pedidoId = data['PEDIDO'][i]; 
+              const pedidoId = data['ID'][i]; 
               selector.setAttribute('type', 'checkbox');
               selector.id = `${pedidoId}`  
               selector.style.marginLeft = '0.5rem'
-              selector.value = `{"PEDIDO":"${ref}", "VALOR": 1}`;
+              selector.value = `{"ID":"${pedidoId}", "VALOR": 1}`;
               selector.setAttribute('onclick', 'desicion(this)')       
               td.appendChild(selector);
               td.appendChild(document.createTextNode(' ' + ref));
@@ -1215,11 +1215,11 @@ function desicion(ref){
 function addPedido(ref){
   console.log('addPEDIDO',ref);
   var delCant
-  const seleccion =  ref.value? ref.value: `{"PEDIDO":"${ref}"}`;
+  const seleccion =  ref.value? ref.value: `{"ID":"${ref}"}`;
   console.log(seleccion);
   var Jvalue = JSON.parse(seleccion);
-  if (!refArray.includes(Jvalue['PEDIDO'] )) {
-    refArray.push(Jvalue['PEDIDO'])
+  if (!refArray.includes(Jvalue['ID'] )) {
+    refArray.push(Jvalue['ID'])
   }
     
 
@@ -1248,12 +1248,12 @@ function addPedido(ref){
 function delPedido(ref){
   console.log('DELPEDIDO', ref);
   var delCant
-  const seleccion =  ref.value? ref.value: `{"PEDIDO":"${ref}"}`;
+  const seleccion =  ref.value? ref.value: `{"ID":"${ref}"}`;
   console.log(seleccion);
   
   
   var Jvalue = JSON.parse(seleccion)  
-     refArray.splice(refArray.indexOf(Jvalue['PEDIDO']),1)
+     refArray.splice(refArray.indexOf(Jvalue['ID']),1)
      Jvalue['VALOR'] = 0;
    console.log(refArray);
 
@@ -1281,7 +1281,7 @@ function borraPedidos(){
           refArray.forEach(alx => {
             console.log(alx);
             
-            fetch(dominio+'/api/delete/'+DBEVENT+'/pedidos/PEDIDO/'+alx,{
+            fetch(dominio+'/api/delete/'+DBEVENT+'/pedidos/'+alx,{
               method: 'POST'
             }).then(res=>res.json())
             .then(function (data){
@@ -1319,7 +1319,7 @@ function lastDay() {
     .then(mem=>mem.json())
     .then(mem=> {
       console.log(mem);
-      const lastlx = mem["PEDIDO"]
+      const lastlx = mem["ID"]
       for (let c = lastlx.length-1; c >= 0; c--) {
         const lx = lastlx[c] // El nombre del pedido
         let ref = document.getElementById(`${lx}`)
@@ -1350,7 +1350,7 @@ function lastDay() {
   .then(mem=>mem.json())
   .then(mem=> {
     console.log(mem);
-    const lastlx = mem["PEDIDO"]
+    const lastlx = mem["ID"]
     for (let c = lastlx.length-1; c >= 0; c--) {
       const lx = lastlx[c] // El nombre del pedido
       let ref = document.getElementById(`${lx}`)
