@@ -39,6 +39,11 @@ class Model (object):
         self.expected_fuses = ""
         #variable para hacer reintentos de trigger si no se recibe respuesta del sensor de altura
         self.height_trigger = False
+        
+        #lista para guardar las cajas que han terminado su inspección para poderlas desclampear
+        self.cajas_a_desclampear = []
+        #bandera para avisar que ya se terminaron las cajas actuales que se colocaron y es hora de desclampear (luego de que el robot vaya a home)
+        self.desclampear_ready = False
 
         self.tiempo = ""
 

@@ -27,9 +27,11 @@ class MqttClient (QObject):
     rbt_init    =   pyqtSignal()
     rbt_pose    =   pyqtSignal()
     rbt_stop    =   pyqtSignal()
+    rbt_home    =   pyqtSignal()
     vision      =   pyqtSignal()
     height      =   pyqtSignal()
     start       =   pyqtSignal()
+    
     #error_cortina   =   pyqtSignal()
 
     nido_PDCD = ""
@@ -503,6 +505,10 @@ class MqttClient (QObject):
                         self.rbt_init.emit()
                     if "position_reached" in payload["response"]:
                         self.rbt_pose.emit()
+
+                    if "home_reached" in payload["response"]:
+                        self.rbt_home.emit()
+
                     #if "Error, is Safety OK?" in payload["response"]:
                     #    print("cortina interrumpida signal")
                     #    self.error_cortina.emit()
