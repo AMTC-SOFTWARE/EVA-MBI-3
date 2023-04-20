@@ -636,7 +636,7 @@ def newEvent():
 
     data = request.get_json(force=True)
     print("Data: ",data)
-    event_name = 'evento_'+data["EVENTO"]+"_X"+data["NUMERO"]+"_"+data["CONDUCCION"]
+    event_name = 'evento_'+data["EVENTO"]+"_"+data["NUMERO"]+"_"+data["CONDUCCION"]
     historial["USUARIO"] = data["USUARIO"]
     historial["DATETIME"] = data["DATETIME"]
     historial["DBEVENT"] = event_name
