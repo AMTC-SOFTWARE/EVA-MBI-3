@@ -687,10 +687,11 @@ $(document).on('click','.btn-ver', function(){
 
   var edit_id = header.parent().prev().find("td:first").text();
   var edit= header.parent().prev().find("td:first").next().text();
+  var edit_space = edit.trim()
   id = edit_id;
   console.log("Nombre de la Modularidad: ", edit);
   console.log("Id de Modularidad: ",edit_id);
-  sessionStorage.setItem("modularidad", edit);
+  sessionStorage.setItem("modularidad", edit_space);
   location.href = "preview.html";
 });
 

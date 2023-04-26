@@ -959,8 +959,6 @@ function descargarHistorial(data) {
     let vision = [];
     let altura = [];
     let intentos_va = [];
-    let intentos_v = [];
-    let intentos_a = [];
     let angulo = [];
 
     //ENCABEZADOS DE LA TABLA PARA DESCARGAR
@@ -1191,63 +1189,31 @@ function descargarHistorial(data) {
             break;
           case "INTENTOS_VA":
             let columns_VA = {};
-            columns_V = {};
-            columns_A = {};
-            
-            //console.log(secciones[j]);
             colTitle = secciones[j];
             //console.log(colID);
             dataParse = data[colTitle];
+            //console.log(dataParse);
             var cajas = dataParse[i] == false ? "" : JSON.parse(dataParse[i]);
-            //console.log(cajas);
-            //console.log(cajas.VISION);
-            //console.log(cajas.ALTURA);
-            if (cajas.VISION !== undefined) {
-              var cajaKeys_intV = Object.keys(cajas.VISION)
-              var arraySection_V = [];
-              var ObjectID_V = [cajaKeys_intV];
-            for (let index = 0; index < cajaKeys_intV.length; index++) {
-              let titleArray = cajaKeys_intV[index];
-              columns_V = {
-                ...cajas.VISION[cajaKeys_intV[index]]
+            var cajaKeys = Object.keys(cajas)
+            var arraySection = [];
+            for (let index = 0; index < cajaKeys.length; index++) {
+              let titleArray = cajaKeys[index];
+              let jsonString = JSON.stringify(cajas[cajaKeys[index]])
+              jsonString = jsonString.replace("{", "")
+              jsonString = jsonString.split('"').join(' ');
+              jsonString = jsonString.replace("}", " ")
+              jsonString = jsonString.split("null").join('N/A ');
+              jsonString = jsonString.split("vacio").join('N/A ');
+              arraySection[titleArray] = jsonString;
+              columns_VA = {
+                ...arraySection
               }
-              ObjectID_V[titleArray] = cajas.VISION[cajaKeys_intV[index]];
             };
-            
-           }else{
-            columns_V = {
-              ...[]
-            }
-           }
-          
-           if (cajas.ALTURA !== undefined) {
-            var cajaKeys_A = Object.keys(cajas.ALTURA)
-            var arraySection_A = [];
-            var ObjectID_A = [cajaKeysA]
-
-            for (let index = 0; index < cajaKeys_A.length; index++) {
-              let titleArray = cajaKeys_A[index];
-              columns_A = {
-                ...cajas.ALTURA[cajaKeys_A[index]]
-              }
-              ObjectID_A[titleArray] = cajas.ALTURA[cajaKeys_A[index]];
+            let ObjectID_VA = {
+              ID: colID[i],
+              ...columns_VA
             };
-          }else{
-            columns_A = {
-              ...[]
-            }
-          }
-            //console.log(columns_VA);
-                     
-            intentos_v.push({
-              ID: colID[i],
-              ...ObjectID_V})
-
-            intentos_a.push({
-              ID: colID[i],
-              ...ObjectID_V})
-            //console.log(intentos_v);
-            //console.log(intentos_a);
+            intentos_va.push(ObjectID_VA)
             break;
           case "INTENTOS_T":
             let columns_INTT = {};
@@ -1463,60 +1429,6 @@ function descargarHistorial(data) {
       newVis[boxV] = [...arrayV];
     };
     console.log(newVis)
-            /*----------------------------↓Intentos V↓--------------------------------------------*/
-            var newIntv = {}
-            cajaKeys_intV.unshift("ID")
-            //cajaKeys_intV.push("NULO")
-            lastArray = cajaKeys_intV.length-1
-            for (let inVisJ = 0; inVisJ < cajaKeys_intV.length; inVisJ++) {
-              const boxV = cajaKeys_intV[inVisJ];
-              arrayV = [];
-              for (var i = 0; i < intentos_v.length; i++) {
-                if (intentos_v[i][boxV] !== undefined) {
-                  if (boxV === "ID") {
-                    arrayV.push({
-                      'ID': intentos_v[i][boxV]
-                    })
-                  }
-                  if (boxV !== 'ID') {
-                    arrayV.push(intentos_v[i][boxV])
-                  }
-                }else{
-                  //console.log(cajaKeys_V[lastArray])
-                  intentos_v[i][cajaKeys_intV[lastArray]] = 0;
-                  arrayV.push(intentos_v[i][cajaKeys_intV[lastArray]])
-                }
-              }
-              newIntv[boxV] = [...arrayV];
-            };
-            //console.log(newIntv)
-    /*----------------------------↓Intentos A↓--------------------------------------------*/
-              var newInta = {}
-              cajaKeys_A.unshift("ID")
-              //cajaKeys_A.push("NULO")
-              lastArray = cajaKeys_A.length-1
-              for (let inAltJ = 0; inAltJ < cajaKeys_A.length; inAltJ++) {
-                const boxA = cajaKeys_A[inAltJ];
-                arrayA = [];
-                for (var i = 0; i < intentos_a.length; i++) {
-                  if (intentos_a[i][boxA] !== undefined) {
-                    if (boxA === "ID") {
-                      arrayA.push({
-                        'ID': intentos_a[i][boxA]
-                      })
-                    }
-                    if (boxA !== 'ID') {
-                      arrayA.push(intentos_a[i][boxA])
-                    }
-                  }else{
-                    //console.log(cajaKeys_A[lastArray])
-                    intentos_a[i][cajaKeys_A[lastArray]] = 0;
-                    arrayA.push(intentos_a[i][cajaKeys_A[lastArray]])
-                  }
-                }
-                newInta[boxA] = [...arrayA];
-              };
-              //console.log(newInta)
     /*----------------------------↓altura↓--------------------------------------------*/
     //console.log(altura)
     var newAlt = {}
@@ -1570,8 +1482,7 @@ function descargarHistorial(data) {
         var table4 = newIntt;
         var table5 = newVis;
         var table6 = newAlt;
-        var table7 = newIntv;
-        var table8 = newInta;
+        var table7 = intentos_va;
         let wideValue;
         // convert table to excel sheet
         var wb = XLSX.utils.table_to_book(table, {
@@ -1592,7 +1503,7 @@ function descargarHistorial(data) {
           bgColor: {rgb: "FFFF6550"}
         }
       };
-      
+   
     }*/
         /************TORQUE *******/
         wb.SheetNames.push("Torque");
@@ -1624,7 +1535,7 @@ function descargarHistorial(data) {
             endMerge += 1;
           }
 
-          
+
           //console.log(`S: ${startMerge} X: ${x} S: ${endMerge}`) 
           merge.push({
             s: {
@@ -1641,7 +1552,10 @@ function descargarHistorial(data) {
             startMerge += ((Object.keys(eachbox[1])).length);
           } else {
             startMerge += 1;
-          } 
+          }
+
+
+
         }
         ws2['!merges'] = merge;
         wb.Sheets["Torque"] = ws2;
@@ -1913,141 +1827,12 @@ function descargarHistorial(data) {
         ws6['!merges'] = merge;
         wb.Sheets["Altura"] = ws6;
 
-
-            /************INTENTOS V *******/
-    wb.SheetNames.push("Intentos-v");
-    var ws7;
-    var cadaCaja = Object.keys(table7) // 11 cajas actualmente
-    var coordenada = 0
-    wideValue = 0;
-    merge = [];
-    endMerge = -1
-    startMerge = 0
-    for (let x = 0; x < cadaCaja.length; x++) {
-      let eachbox = table7[cadaCaja[x]];
-      
-      for (let u = 0; u < eachbox.length; u++) {
-        if (!eachbox[u].hasOwnProperty('NULO')){
-          //console.log(eachbox[u])
-          wideValue = Object.keys(eachbox[u]).length
-          if (wideValue !== 1){
-           wideValue += 1;
-          }
-        }
-      }
-
-      encontrar(coordenada)
-
-      ws7 = XLSX.utils.sheet_add_json(ws7, eachbox, {
-        sheet: "Intentos-v",
-        origin: abc
-      });
-      //console.log(eachbox, abc, cadaCaja[x])
-      ws7[abcT] = {
-        t: 's',
-        v: `${cadaCaja[x]}`
-      }
-      let boxkeys = wideValue
-      coordenada += wideValue;
-      //console.log(abcT)
-
-      if (boxkeys > 1) {
-        ///console.log(boxkeys);
-        endMerge += (boxkeys);
-      } else {
-        endMerge += 1;
-      }
-      //console.log(`S: ${startMerge} X: ${x} S: ${endMerge}`) 
-      merge.push({
-        s: {
-          r: 0,
-          c: startMerge
-        },
-        e: {
-          r: 0,
-          c: endMerge
-        }
-      })
-      if (wideValue > 1) {
-        ///console.log(wideValue);
-        startMerge += (wideValue);
-      } else {
-        startMerge += 1;
-      }
-    }
-    ws7['!merges'] = merge;
-    wb.Sheets["Intentos-v"] = ws7;
-
-
-        /************INTENTOS A *******/
-        wb.SheetNames.push("Intentos-a");
-        var ws8;
-        var cadaCaja = Object.keys(table8) //11 cajas actualmente
-        var coordenada = 0
-        wideValue = 0;
-        merge = [];
-        endMerge = -1
-        startMerge = 0
-        for (let x = 0; x < cadaCaja.length; x++) {
-          let eachbox = table8[cadaCaja[x]];
-
-          for (let u = 0; u < eachbox.length; u++) {
-            if (!eachbox[u].hasOwnProperty('NULO')){
-              //console.log(eachbox[u])
-              wideValue = Object.keys(eachbox[u]).length
-              if (wideValue !== 1){
-               wideValue += 1;
-              }
-            }
-          }
-
-          encontrar(coordenada)
-          ws8 = XLSX.utils.sheet_add_json(ws8, eachbox, {
-            sheet: "Intentos-a",
-            origin: abc
-          });
-          //console.log(eachbox, abc, cadaCaja[x])
-          ws8[abcT] = {
-            t: 's',
-            v: `${cadaCaja[x]}`
-          }
-          let boxkeys = wideValue
-          coordenada += wideValue
-          //console.log(abcT)
-    
-          if (boxkeys > 1) {
-            ///console.log(boxkeys);
-            endMerge += (boxkeys);
-          } else {
-            endMerge += 1;
-          }
-          //console.log(`S: ${startMerge} X: ${x} S: ${endMerge}`) 
-          merge.push({
-            s: {
-              r: 0,
-              c: startMerge
-            },
-            e: {
-              r: 0,
-              c: endMerge
-            }
-          })
-          if (wideValue > 1) {
-            ///console.log(wideValue);
-            startMerge += (wideValue);
-          } else {
-            startMerge += 1;
-          }
-        }
-        ws8['!merges'] = merge;
-        wb.Sheets["Intentos-a"] = ws8;
-
-        // /************INTENTOS VA *******/
-        // wb.SheetNames.push("Intentos-va");
-        // var ws7 = XLSX.utils.json_to_sheet(table7, {
-        //   sheet: "Intentos-va"
-        // });
-        // wb.Sheets["Intentos-va"] = ws7;
+        /************INTENTOS VA *******/
+        wb.SheetNames.push("Intentos-va");
+        var ws7 = XLSX.utils.json_to_sheet(table7, {
+          sheet: "Intentos-va"
+        });
+        wb.Sheets["Intentos-va"] = ws7;
 
         // wb.SheetNames.push("EJEMPLO")
         // const workers = [{

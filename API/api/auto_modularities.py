@@ -53,7 +53,7 @@ def makeModules(data):
     dir_path = os.path.join(os.getcwd(), '..\\modules\\')
     file_name = None
     for root, dirs, files in os.walk(dir_path):
-        for file_name in files:
+        for file_name in files: 
             print("file_name: ",file_name)
             if file_name.endswith('.xls') or file_name.endswith('.xlsx'):
                 file = openpyxl.load_workbook(filename = dir_path + file_name, data_only=True)
@@ -133,6 +133,7 @@ def makeModules(data):
                                         fuse = fuse.replace("A", "")
                                     if box == "PDC-S":
                                         fuse = str(fuse)
+                                        #print("Tipo del Fuse Ya convertido: ",type(fuse))
                                     if box == "F96":
                                         print("Caja F96 AQUI",module)
                                         box = "PDC-RMID"
@@ -352,7 +353,31 @@ def refreshModules(data):
 
 ################################### Modularities management ##############################
 def makeModularities(data):
+    global modules
+    print("Dentro de MakeModularities DATA: ",data)
+    # Se manda llamar a la función encargada de consultar los módulos determinantes desde la base de datos, para posteriormente meterlos en un json llamado "pdcrVariantes".
+    endpoint = f"http://127.0.0.1:5000/api/get/{data}/pdcr/variantes"
+    pdcrVariantes = requests.get(endpoint).json()
+    print("Lista Final de Variantes PDC-R:\n",pdcrVariantes)
+    print("#################### Modularities ####################")
+    endpoint = f"http://127.0.0.1:5000/api/get/{data}/modulos_fusibles/all/-/-/-/-/-"
+    modulesExisting = requests.get(endpoint).json()
+    #print("Modulos existentes en la base de datos VISION: ",modulesExisting["MODULO"])
+    print("LEN VISION: ",len(modulesExisting["MODULO"]))
 
+    endpoint = f"http://127.0.0.1:5000/api/get/{data}/modulos_torques/all/-/-/-/-/-"
+    modulesExisting_t = requests.get(endpoint).json()
+    #print("Modulos existentes en la base de datos TORQUES: ",modulesExisting_t["MODULO"])
+    print("LEN TORQUES: ",len(modulesExisting_t["MODULO"]))
+
+    dir_path = os.path.join(os.getcwd(), '..\\ILX\\')
+    file_name = None
+    modularities = []
+    modulosFaltantes = []
+    ilxfaltantes = {
+        "ILX": {},
+        "Modulos": {}
+        }
     flujo = ""
     numero = ""
     if 'izquierda' in data:
@@ -376,9 +401,9 @@ def makeModularities(data):
             numero = '296'
         if 'x294' in data or 'X294' in data: 
             flujo = 'IRX'
-            numero = '294'
+            numero = '294'        
     flujo_numero = flujo + numero
-
+    
     global modules
     print("Dentro de MakeModularities DATA: ",data)
     # Se manda llamar a la función encargada de consultar los módulos determinantes desde la base de datos, para posteriormente meterlos en un json llamado "pdcrVariantes".
@@ -391,7 +416,7 @@ def makeModularities(data):
     modulesExisting = requests.get(endpoint).json()
     #print("Modulos existentes en la base de datos VISION: ",modulesExisting["MODULO"])
     print("LEN VISION: ",len(modulesExisting["MODULO"]))
-    print("se obtienen los módulos existentes de torques cargados para este evento (obtenidos de la matriz)")
+
     endpoint = f"http://127.0.0.1:5000/api/get/{data}/modulos_torques/all/-/-/-/-/-"
     modulesExisting_t = requests.get(endpoint).json()
     #print("Modulos existentes en la base de datos TORQUES: ",modulesExisting_t["MODULO"])
@@ -436,7 +461,16 @@ def makeModularities(data):
                     csv = csv[:-1]
                     fic.close()
                     #print("MODULOS DEL ILX: ",csv.split(sep = ","))
+                    if "ILX294" in ILX:
+                        print("Evento 294 IZQUIERDA")
+                    if "IRX294" in ILX:
+                        print("Evento 294 DERECHA")
+                    if "ILX296" in ILX:
+                        print("Evento 296 IZQUIERDA")
+                    if "IRX296" in ILX:
+                        print("Evento 296 DERECHA")
                     if "296" in ILX or "294" in ILX:
+                        #print("Evento 296")
                         if "IRX" in ILX or "IRZ" in ILX:
                             print("Lleva la MFB-P2 DERECHA con terminación : 7216")
                             flag_mfbp2_der = True
