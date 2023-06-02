@@ -298,6 +298,10 @@ class Model (object):
                 'F334': [(380, 309), (422, 319)], 'F335': [(380, 294), (422, 307)], 'E21': [(287, 423), (295, 441)], 'E22': [(295, 442), (302, 460)],
                 'conector': [(275, 422), (304, 462)]
                 }, 
+            'PDC-P2': {
+                'CONECTOR1': [(395, 1060), (910, 1390)], 'CONECTOR2': [(1180, 780), (1585, 1110)], 'CONECTOR3': [(282, 395), (326, 408)], 'CONECTOR4': [(289, 380), (315, 390)], 
+                'CONECTOR5': [(295, 442), (302, 460)]
+                }, 
             'PDC-R': {
                 'F400': [(510, 214), (519, 246)], 'F401': [(499, 214), (508, 246)], 'F402': [(487, 214), (497, 246)], 'F403': [(477, 214), (485, 246)], 
                 'F404': [(467, 214), (475, 246)], 'F405': [(455, 214), (464, 246)], 'F411': [(385, 220), (392, 241)], 'F410': [(395, 220), (402, 241)], 
@@ -388,6 +392,7 @@ class Model (object):
                 
         #nombre de programas a llamar para inspección de zonas(por bloque) en visycam (visión) en cada punto del robot
         self.v_triggers = {
+            "PDC-P2": ["P2"],
             "PDC-P": ["P1"],
             "PDC-D": ["D1","D2"],
             "PDC-S": ["S1"], 
@@ -398,6 +403,7 @@ class Model (object):
             }
         #puntos guardados en robot a los que irá para sus inspecciones de visión
         self.rv_triggers = {
+            "PDC-P2": ["PDCP2_vision_1"],
             "PDC-P": ["PDCP_vision_1"],
             "PDC-D": ["PDCD_vision_1","PDCD_vision_2"],
             "PDC-S": ["PDCS_vision_1"], 
@@ -476,7 +482,13 @@ class Model (object):
             "1008695": ' 60 A',#Rosa
             "1010733": ' 70 A',#Gris
             "vacio": '',
-            "conector":" PDCP"
+            "conector":" PDCP",
+            "conector1":" PDCP2",
+            "conector2":" PDCP2",
+            "conector3":" PDCP2",
+            "conector4":" PDCP2",
+            "conector5":" PDCP2"
+
             }
 
         self.robot = Robot(self.pub_topics["robot"], self.robot_data)
@@ -581,7 +593,10 @@ class Model (object):
                 'F319': 'vacio', 'F320': 'vacio', 'F321': 'vacio', 'F322': 'vacio', 'F323': 'vacio', 'F324': 'vacio', 'F325': 'vacio', 'F326': 'vacio', 'F327': 'vacio',
                 'F328': 'vacio', 'F329': 'vacio', 'F330': 'vacio', 'F331': 'vacio', 'F332': 'vacio', 'F333': 'vacio', 'F334': 'vacio', 'F335': 'vacio', 'E21': 'vacio',
                 'E22': 'vacio','conector': 'conector'
-                }, 
+                },
+            'PDC-P2': {
+                'CONECTOR1': 'conector1', 'CONECTOR2': 'conector2', 'CONECTOR3': 'conector3', 'CONECTOR4': 'conector4', 'CONECTOR5': 'conector5'
+                },
             'PDC-R': {
                 'F405': 'vacio', 'F404': 'vacio', 'F403': 'vacio', 'F402': 'vacio', 'F401': 'vacio', 'F400': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio',
                 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'vacio', 'F414': 'vacio', 'F415': 'vacio', 'F416': 'vacio', 'F417': 'vacio',
@@ -634,9 +649,13 @@ class Model (object):
                 for i in BB:
                     pts = self.fuses_BB[i[0]][i[1]]
                     rectangle(img, pts[0], pts[1], color, 2)
+                    if BB[0]=="PDC-P2":
+                        rectangle(img, pts[0], pts[1], color, 20)
             else:
                 pts = self.fuses_BB[BB[0]][BB[1]]
                 rectangle(img, pts[0], pts[1], color, 2)
+                if BB[0]=="PDC-P2":
+                    rectangle(img, pts[0], pts[1], color, 20)
         except Exception as ex:
             print("Model.drawBB exception: ", ex)
         return img
