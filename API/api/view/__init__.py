@@ -1,4 +1,6 @@
-#from model import host, user, password, database, serverp2, dbp2, userp2, passwordp2
+#EVA-MBI-3
+
+#from model import model
 from model import model
 from werkzeug.utils import secure_filename
 from flask import Flask, request
@@ -9,6 +11,10 @@ from pickle import load
 import pymysql
 import json
 import os
+from os.path import exists  #para saber si existe una carpeta o archivo
+from shutil import rmtree   #para eliminar carpeta con archivos dentro: rmtree("carpeta_con_archivos")
+from os import remove       #para eliminar archivo único: remove("archivo.txt")
+from os import rmdir        #para eliminar carpeta vacía: rmdir("carpeta_vacia")
 import requests
 from paho.mqtt import publish
 import pyodbc
@@ -17,10 +23,8 @@ import auto_modularities
 app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), '..\\')
-
 datos_conexion=model()
-host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
-
+host,user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
 #####################################  Servicio para Etiquetas desde WEB ####################################
 @app.route("/printer/etiqueta",methods=["POST"])
 def etiqueta():
@@ -95,6 +99,28 @@ def etiqueta():
         return response
 
 #####################################  Upload Files Services ####################################
+@app.route('/delete/filesmodularities', methods=['POST'])
+def delRef():
+    response = {"items": 0}
+    try:
+        path_carpeta = "..\\ILX";
+        #se obtiene true si existe la carpeta
+        existe_carpeta = os.path.isdir(path_carpeta)
+        if existe_carpeta == True:
+            try:
+                #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
+                rmtree(path_carpeta)#para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+                print("se elimina la carpeta")
+                response = {"path" : 'Eliminado desde la API, mi Pana'}
+            except OSError as error:
+                print("ERROR AL ELIMINAR CARPETA:::\n",error)
+                response = {"exception" : ex.args}
+        return response
+    except Exception as ex:
+        print("DeleteRef Exception: ", ex)
+        response = {"exception" : ex.args}
+        return response
+
 @app.route('/upload/modularities', methods=['POST'])
 def uploadRef():
     datos_conexion=model()
@@ -102,48 +128,39 @@ def uploadRef():
     response = {"items": 0}
     allowed_file = False
     file = None
+
+    #se asigna el path de la carpeta que se quiere limpiar y crear
+    path_carpeta = "..\\ILX"
+    #se obtiene true si existe la carpeta
+    existe_carpeta = os.path.isdir(path_carpeta)
+    if existe_carpeta == True:
+        try:
+            #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
+            #rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+            print("se elimina la carpeta")
+        except OSError as error:
+            print("ERROR AL ELIMINAR CARPETA:::\n",error)
+    #mientras la carpeta no esté creada, se estará tratando de crear
+    while(not(os.path.isdir(path_carpeta))):
+        try:
+            os.mkdir(path_carpeta)
+        except OSError as error:
+            print("ERROR AL CREAR CARPETA:::\n",error)
+
     try:
-        data = request.form['DBEVENT']
-        print(request.form['DBEVENT'])
-
-        if 'izquierda' in data:
-            print('IZQUIERDO')
-            if 'z296' in data:
-                flujo = 'ILZ'
-                numero = '296'
-            if 'x296' in data:
-                flujo = 'ILX'
-                numero = '296'
-            if 'x294' in data: 
-                flujo = 'ILX'
-                numero = '294'
-
-        if 'derecha' in data:
-            print('DERECHO')
-            flujo = 'IRX'
-            if 'x294' in data:
-                numero = '294'
-            else : 
-                numero = '296'
 
         if 'file' in request.files:
             file = request.files['file']
-            if file.filename != '' and flujo in file.filename and numero in file.filename:
+            if file.filename != '':
                 filename = file.filename
                 allowed_file = '.' in filename and \
                     filename.rsplit('.', 1)[1].lower() == "dat"
         if file and allowed_file:
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], 'ILX')
-            #print(path, 'ACAAAAAAAA esta la ubicacion que se necesita subir')
-
-            isExist = os.path.exists(path)
-            if not isExist:
-                # Create a new directory because it does not exist 
-                os.makedirs(path)
-                print("The new directory is created!", path)
+            print("se guardan los archivos en el folder temporal")
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "ILX", filename))
             response["items"] = 1
+
     except Exception as ex:
         print("uploadRef Exception: ", ex)
         response = {"exception" : ex.args}
@@ -156,6 +173,7 @@ def updateRef():
     host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     data = request.form['DBEVENT']
     print("DB a la que se cargan los DAT: ",data)
+    print("se actualizarán los DATS en la base de datos, ingresando a función auto_modularities.makeModularities")
     ilxfaltantes = auto_modularities.makeModularities(data)
     return ilxfaltantes
 
@@ -166,6 +184,25 @@ def updateModules():
     response = {"items": 0}
     allowed_file = False
     file = None
+
+    #se asigna el path de la carpeta que se quiere limpiar y crear
+    path_carpeta = "..\\modules"
+    #se obtiene true si existe la carpeta
+    existe_carpeta = os.path.isdir(path_carpeta)
+    if existe_carpeta == True:
+        try:
+            #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
+            rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+            print("se elimina la carpeta")
+        except OSError as error:
+            print("ERROR AL ELIMINAR CARPETA:::\n",error)
+    #mientras la carpeta no esté creada, se estará tratando de crear
+    while(not(os.path.isdir(path_carpeta))):
+        try:
+            os.mkdir(path_carpeta)
+        except OSError as error:
+            print("ERROR AL CREAR CARPETA:::\n",error)
+
     try:
         data = request.form['DBEVENT']
         print("DB a la que se carga la Info: ",data)
@@ -179,14 +216,6 @@ def updateModules():
                     filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']
         if file and allowed_file:
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], "modules")
-            #print(path, 'ACAAAAAAAA esta la ubicacion que se necesita subir')
-            isExist = os.path.exists(path)
-            if not isExist:
-                # Create a new directory because it does not exist 
-                os.makedirs(path)
-                print("The new directory is created!", path)
-
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "modules", filename))
             auto_modularities.refreshModules(data)
             excelnew = {
@@ -196,12 +225,14 @@ def updateModules():
                 'DATETIME': 'AUTO'
                 }
             #print("Información que se manda al POST DE EVENTOS HISTORIAL: ",excelnew)
-            endpoint = f"http://127.0.0.1:5000/api/post/historial"
+            endpoint = f"http://{host}:5000/api/post/historial"
             responseHistorial = requests.post(endpoint, data = json.dumps(excelnew))
             response["items"] = 1
+
     except Exception as ex:
         print("updateModules Exception: ", ex)
         response = {"exception" : ex.args}
+
     finally:
         return response
 
@@ -212,6 +243,25 @@ def updateDeterminantes():
     response = {"items": 0}
     allowed_file = False
     file = None
+
+    #se asigna el path de la carpeta que se quiere limpiar y crear
+    path_carpeta = "..\\determinantes"
+    #se obtiene true si existe la carpeta
+    existe_carpeta = os.path.isdir(path_carpeta)
+    if existe_carpeta == True:
+        try:
+            #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
+            rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
+            print("se elimina la carpeta")
+        except OSError as error:
+            print("ERROR AL ELIMINAR CARPETA:::\n",error)
+    #mientras la carpeta no esté creada, se estará tratando de crear
+    while(not(os.path.isdir(path_carpeta))):
+        try:
+            os.mkdir(path_carpeta)
+        except OSError as error:
+            print("ERROR AL CREAR CARPETA:::\n",error)
+
     try:
         data = request.form['DBEVENT']
         print("DB a la que se carga la Info: ",data)
@@ -225,14 +275,6 @@ def updateDeterminantes():
                     filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']
         if file and allowed_file:
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], "determinantes")
-            #print(path, 'ACAAAAAAAA esta la ubicacion que se necesita subir')
-            isExist = os.path.exists(path)
-            if not isExist:
-                # Create a new directory because it does not exist 
-                os.makedirs(path)
-                print("The new directory is created!", path)
-
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "determinantes", filename))
             auto_modularities.refreshDeterminantes(data,usuario)
             response["items"] = 1
@@ -245,8 +287,7 @@ def updateDeterminantes():
 #########################################  CRUD Services ########################################
 @app.route("/api/get/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def generalGET(table, column_1, operation_1, value_1, column_2, operation_2, value_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -284,8 +325,7 @@ def generalGET(table, column_1, operation_1, value_1, column_2, operation_2, val
 
 @app.route("/api/post/<table>",methods=["POST"])
 def generalPOST(table):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -331,8 +371,7 @@ def generalPOST(table):
 
 @app.route("/api/delete/<table>/<int:ID>",methods=["POST"])
 def delete(table, ID):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     try:
         connection = pymysql.connect(host = host, user = user, passwd = password, database = database)
     except Exception as ex:
@@ -352,8 +391,7 @@ def delete(table, ID):
 
 @app.route("/api/update/<table>/<int:ID>",methods=["POST"])
 def update(table, ID):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -403,7 +441,7 @@ def variantes():
     "medium": [],
     "large": [],
     }
-    endpoint = "http://127.0.0.1:5000/api/get/definiciones/ACTIVE/=/1/_/_/_"
+    endpoint = f"http://{host}:5000/api/get/definiciones/ACTIVE/=/1/_/_/_"
     pdcrVariantesDB = requests.get(endpoint).json()
     #print("pdcrVariantesDB-------",pdcrVariantesDB)
     if len(pdcrVariantesDB["MODULO"]) > 0:
@@ -427,15 +465,13 @@ def variantes():
 
 @app.route("/api/get/preview/modularity/<ILX>",methods=["GET"])
 def preview(ILX):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
-    endpoint = "http://127.0.0.1:5000/api/get/pdcr/variantes"
+    endpoint = f"http://{host}:5000/api/get/pdcr/variantes"
     pdcrVariantes = requests.get(endpoint).json()
     print("Lista Final de Variantes PDC-R: \n",pdcrVariantes)
     flag_l = False
     flag_m = False
     flag_s = False
-    endpoint = f"http://127.0.0.1:5000/api/get/pedidos/PEDIDO/=/{ILX}/ACTIVE/=/1"
+    endpoint = f"http://{host}:5000/api/get/pedidos/PEDIDO/=/{ILX}/ACTIVE/=/1"
     response = requests.get(endpoint).json()
     #print("RESPONSE ",response)
     #print("RESPONSE ",response["MODULOS_VISION"])
@@ -482,7 +518,7 @@ def preview(ILX):
         if module in pdcrVariantes["small"]:
             flag_s = True
         #print("Module i de la Lista: "+module)
-        endpoint_Module= f"http://127.0.0.1:5000/api/get/modulos_fusibles/MODULO/=/{module}/_/=/_"
+        endpoint_Module= f"http://{host}:5000/api/get/modulos_fusibles/MODULO/=/{module}/_/=/_"
         #print("Endpoint del módulo"+endpoint_Module)
         resultado = requests.get(endpoint_Module).json()
         #print("Modulo Informacion",resultado)
@@ -530,7 +566,7 @@ def preview(ILX):
     print(f"\n\t\tMODULOS_TORQUE:\n{modules_torque}")
     for modulet in modules_torque:
         #print("Module i de la Lista: "+module)
-        endpoint_Modulet= f"http://127.0.0.1:5000/api/get/modulos_torques/MODULO/=/{modulet}/_/=/_"
+        endpoint_Modulet= f"http://{host}:5000/api/get/modulos_torques/MODULO/=/{modulet}/_/=/_"
         #print("Endpoint del módulo"+endpoint_Module)
         resultadot = requests.get(endpoint_Modulet).json()
         #print("Modulo Informacion",resultadot)
@@ -563,8 +599,7 @@ def preview(ILX):
 ################################################## Respaldos de Base de Datos Endpoint  ####################################################
 @app.route("/api/get/bkup",methods=["GET"])
 def bkup():
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     items = {
         "status": False,
         "dir": "",
@@ -597,11 +632,6 @@ def bkup():
 ################################################## Crear Base de Datos (Evento)  ####################################################
 @app.route("/api/post/newEvent",methods=["POST"])
 def newEvent():
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
-    host_fase = "127.0.0.1"
-    user_fase = "amtc"
-    password_fase = "4dm1n_001"
     charSet = "utf8mb4_bin"
     historial = {
         "DBEVENT": "",
@@ -616,7 +646,7 @@ def newEvent():
 
     data = request.get_json(force=True)
     print("Data: ",data)
-    event_name = 'evento_'+data["EVENTO"]+"_X"+data["NUMERO"]+"_"+data["CONDUCCION"]
+    event_name = 'evento_'+data["EVENTO"]+"_"+data["NUMERO"]+"_"+data["CONDUCCION"]
     historial["USUARIO"] = data["USUARIO"]
     historial["DATETIME"] = data["DATETIME"]
     historial["DBEVENT"] = event_name
@@ -624,7 +654,7 @@ def newEvent():
     activo["ACTIVE"] = data["ACTIVE"]
     activo["DBEVENT"] = event_name
     try:
-        connection = pymysql.connect(host = host_fase, user = user_fase, passwd = password_fase)
+        connection = pymysql.connect(host = host, user = user, passwd = password)
     except Exception as ex:
         print("generalPOST connection Exception: ", ex)
         return {"exception": ex.args}
@@ -712,10 +742,10 @@ def newEvent():
         response = {"exception": ex.args}
     finally:
         #print("Información que se manda al POST DE EVENTOS HISTORIAL: ",historial)
-        endpoint = f"http://127.0.0.1:5000/api/post/historial"
+        endpoint = f"http://{host}:5000/api/post/historial"
         responseHistorial = requests.post(endpoint, data = json.dumps(historial))
         #print("Información que se manda al POST DE EVENTOS ACTIVO: ",activo)
-        endpoint = f"http://127.0.0.1:5000/api/post/activo"
+        endpoint = f"http://{host}:5000/api/post/activo"
         responseActivo = requests.post(endpoint, data = json.dumps(activo))
         connection.close()
         return response
@@ -723,11 +753,6 @@ def newEvent():
 ################################################## Eliminar Base de Datos (Evento)  ####################################################
 @app.route("/api/delete/event",methods=["POST"])
 def delEvent():
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
-    host_fase = "127.0.0.1"
-    user_fase = "amtc"
-    password_fase = "4dm1n_001"
     charSet = "utf8mb4_bin"
     response = {"delete": 0}
 
@@ -735,7 +760,7 @@ def delEvent():
     print("Data: ",data)
     #EVENTDELETE = data["DBEVENT"]
     try:
-        connection = pymysql.connect(host = host_fase, user = user_fase, passwd = password_fase, database = data["DBEVENT"])
+        connection = pymysql.connect(host = host, user = user, passwd = password, database = data["DBEVENT"])
     except Exception as ex:
         print("Delete Event connection Exception: ", ex)
         return {"exception": ex.args}
@@ -753,16 +778,11 @@ def delEvent():
 ################################################## Consultar Bases de Datos (Eventos)  ####################################################
 @app.route("/api/get/eventos",methods=["GET"])
 def eventos():
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
-    host_fase = "127.0.0.1"
-    user_fase = "amtc"
-    password_fase = "4dm1n_001"
     lista = {
         "eventos": {}
         }
     try:
-        connection = pymysql.connect(host = host_fase, user = user_fase, passwd = password_fase)
+        connection = pymysql.connect(host = host, user = user, passwd = password)
     except Exception as ex:
         print("GET EVENTOS connection Exception: ", ex)
         return {"exception": ex.args}
@@ -778,9 +798,9 @@ def eventos():
                     #print("Este contiene evento: ",i[0])
                     x.extend(i)
                     
-                    endpoint = f"http://127.0.0.1:5000/api/get/{i[0]}/historial/all/-/-/-/-/-"
+                    endpoint = f"http://{host}:5000/api/get/{i[0]}/historial/all/-/-/-/-/-"
                     respHistorial = requests.get(endpoint).json()
-                    endpoint = f"http://127.0.0.1:5000/api/get/{i[0]}/activo/all/-/-/-/-/-"
+                    endpoint = f"http://{host}:5000/api/get/{i[0]}/activo/all/-/-/-/-/-"
                     respActivo = requests.get(endpoint).json()
                     #print("Respuesta de Historial: ",respHistorial)
                     #print("Respuesta de Historial Archivo: ",respHistorial["ARCHIVO"])
@@ -803,8 +823,7 @@ def eventos():
 
 @app.route("/api/get/<db>/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def eventGET(table, db, column_1, operation_1, value_1, column_2, operation_2, value_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -842,15 +861,13 @@ def eventGET(table, db, column_1, operation_1, value_1, column_2, operation_2, v
 
 @app.route("/api/get/<db>/preview/modularity/<ILX>",methods=["GET"])
 def previewEvent(ILX,db):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
-    endpoint = f"http://127.0.0.1:5000/api/get/{db}/pdcr/variantes"
+    endpoint = f"http://{host}:5000/api/get/{db}/pdcr/variantes"
     pdcrVariantes = requests.get(endpoint).json()
     print("Lista Final de Variantes PDC-R: \n",pdcrVariantes)
     flag_l = False
     flag_m = False
     flag_s = False
-    endpoint = f"http://127.0.0.1:5000/api/get/{db}/pedidos/PEDIDO/=/{ILX}/ACTIVE/=/1"
+    endpoint = f"http://{host}:5000/api/get/{db}/pedidos/PEDIDO/=/{ILX}/ACTIVE/=/1"
     response = requests.get(endpoint).json()
     #print("RESPONSE ",response)
     #print("RESPONSE ",response["MODULOS_VISION"])
@@ -897,7 +914,7 @@ def previewEvent(ILX,db):
         if module in pdcrVariantes["small"]:
             flag_s = True
         #print("Module i de la Lista: "+module)
-        endpoint_Module= f"http://127.0.0.1:5000/api/get/{db}/modulos_fusibles/MODULO/=/{module}/_/=/_"
+        endpoint_Module= f"http://{host}:5000/api/get/{db}/modulos_fusibles/MODULO/=/{module}/_/=/_"
         #print("Endpoint del módulo"+endpoint_Module)
         resultado = requests.get(endpoint_Module).json()
         #print("Modulo Informacion",resultado)
@@ -945,7 +962,7 @@ def previewEvent(ILX,db):
     print(f"\n\t\tMODULOS_TORQUE:\n{modules_torque}")
     for modulet in modules_torque:
         #print("Module i de la Lista: "+module)
-        endpoint_Modulet= f"http://127.0.0.1:5000/api/get/{db}/modulos_torques/MODULO/=/{modulet}/_/=/_"
+        endpoint_Modulet= f"http://{host}:5000/api/get/{db}/modulos_torques/MODULO/=/{modulet}/_/=/_"
         #print("Endpoint del módulo"+endpoint_Module)
         resultadot = requests.get(endpoint_Modulet).json()
         #print("Modulo Informacion",resultadot)
@@ -984,7 +1001,7 @@ def variantesEvent(db):
     "medium": [],
     "large": [],
     }
-    endpoint = f"http://127.0.0.1:5000/api/get/{db}/definiciones/ACTIVE/=/1/_/_/_"
+    endpoint = f"http://{host}:5000/api/get/{db}/definiciones/ACTIVE/=/1/_/_/_"
     pdcrVariantesDB = requests.get(endpoint).json()
     #print("pdcrVariantesDB-------",pdcrVariantesDB)
     try:
@@ -1012,8 +1029,7 @@ def variantesEvent(db):
 
 @app.route("/api/delete/<db>/<table>/<int:ID>",methods=["POST"])
 def deleteEvent(table, ID,db):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     try:
         connection = pymysql.connect(host = host, user = user, passwd = password, database = db)
     except Exception as ex:
@@ -1033,8 +1049,7 @@ def deleteEvent(table, ID,db):
 
 @app.route('/database/<db>/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>',methods=['GET'])
 def value_of_a_tableEvent(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2,db):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1073,8 +1088,8 @@ def value_of_a_tableEvent(table,column_of_table_1,operation_1,val_1,column_of_ta
 ################################################## Update Fijikura Server  ####################################################
 @app.route("/server_famx2/get/<table>/<column_1>/<operation_1>/<value_1>/<column_2>/<operation_2>/<value_2>",methods=["GET"])
 def famx2GET(table, column_1, operation_1, value_1, column_2, operation_2, value_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+    #datos_conexion=model()
+    #host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     if column_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1124,8 +1139,8 @@ def famx2GET(table, column_1, operation_1, value_1, column_2, operation_2, value
 
 @app.route("/server_famx2/update/<table>/<int:ID>",methods=["POST"])
 def famx2update(table, ID):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+    #datos_conexion=model()
+    #host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     def escape_name(s):
         name = '`{}`'.format(s.replace('`', '``'))
         return name
@@ -1172,8 +1187,8 @@ def famx2update(table, ID):
 
 @app.route("/server_famx2/post/<table>",methods=["POST"])
 def famx2POST(table):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+    #datos_conexion=model()
+    #host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     def escape_name(s):
         name = '{}'.format(s.replace('`', '``'))
         return name
@@ -1220,8 +1235,7 @@ def famx2POST(table):
 ################################################## Webpages endpoints #########################################################
 @app.route('/database/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>',methods=['GET'])
 def value_of_a_table(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:
@@ -1332,8 +1346,7 @@ def json2Return(table,column_of_table,operation_1,val_1,operation_2,val_2):
 
 @app.route('/database/<table>/<column_of_table_1>/<operation_1>/<val_1>/<column_of_table_2>/<operation_2>/<val_2>/multi',methods=['GET'])
 def value_of_a_table_2(table,column_of_table_1,operation_1,val_1,column_of_table_2,operation_2,val_2):
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+
     if column_of_table_1=='all':
         query='SELECT * FROM ' +table+';'
     else:

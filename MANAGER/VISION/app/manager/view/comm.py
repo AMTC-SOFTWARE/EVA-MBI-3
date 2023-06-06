@@ -27,9 +27,11 @@ class MqttClient (QObject):
     rbt_init    =   pyqtSignal()
     rbt_pose    =   pyqtSignal()
     rbt_stop    =   pyqtSignal()
+    rbt_home    =   pyqtSignal()
     vision      =   pyqtSignal()
     height      =   pyqtSignal()
     start       =   pyqtSignal()
+    
     #error_cortina   =   pyqtSignal()
 
     nido_PDCD = ""
@@ -37,12 +39,14 @@ class MqttClient (QObject):
     nido_PDCR = ""
     nido_PDCS = ""
     nido_TBLU = ""
+    nido_PDCP2= ""
 
     color_PDCD = "blue"
     color_PDCP = "blue"
     color_PDCR = "blue"
     color_PDCS = "blue"
     color_TBLU = "blue"
+    color_PDCP2 = "blue"
 
     puertaA = ""
     puertaB = ""
@@ -377,6 +381,30 @@ class MqttClient (QObject):
                                 "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}"}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                if "PDC-P2" in payload_str:
+                    if "PDC-P2" in payload:
+                        if payload["PDC-P2"] == True:
+                            self.nido_PDCP2 = "PDC-P2:\n Habilitada"
+                            self.color_PDCP2 = "blue"
+
+                        if payload["PDC-P2"] == False:
+                            self.nido_PDCP2 = ""
+                            self.color_PDCP2 = "blue"
+
+                    if "PDC-P2_ERROR" in payload:
+                        if payload["PDC-P2_ERROR"] == True:
+                            self.nido_PDCP2 = "TBLU:\n clampeo incorrecto"
+                            self.color_PDCP2 = "red"
+                    if "clamp_PDC-P2" in payload:
+                        if payload["clamp_PDC-P2"] == True:
+                            self.nido_PDCP2 = "PDC-P2:\n clampeo correcto"
+                            self.color_PDCP2 = "green"
+
+
+                    command = {
+                                "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}"}
+                              }
+                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
                 if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
                         if payload["ERROR_cortina"] == True:
@@ -503,6 +531,10 @@ class MqttClient (QObject):
                         self.rbt_init.emit()
                     if "position_reached" in payload["response"]:
                         self.rbt_pose.emit()
+
+                    if "home_reached" in payload["response"]:
+                        self.rbt_home.emit()
+
                     #if "Error, is Safety OK?" in payload["response"]:
                     #    print("cortina interrumpida signal")
                     #    self.error_cortina.emit()

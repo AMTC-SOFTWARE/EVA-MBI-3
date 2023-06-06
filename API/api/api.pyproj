@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>api</Name>
     <RootNamespace>api</RootNamespace>
-    <InterpreterId>Global|VisualStudio|ENVIRONMENT (Python 3.7 (32-bit))</InterpreterId>
+    <InterpreterId>MSBuild|inteto2|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,6 +53,15 @@
     <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Interpreter Include="..\..\..\..\..\..\Users\garza\OneDrive\Documentos\inteto2\">
+      <Id>inteto2</Id>
+      <Version>3.10</Version>
+      <Description>inteto2 (Python 3.10)</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
     <Interpreter Include="..\..\..\ET-MBI-1\MANAGER\TORQUE\app\env\">
       <Id>env</Id>
       <Version>3.7</Version>

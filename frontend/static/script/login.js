@@ -1,5 +1,6 @@
-﻿var dominio = 'http://127.0.0.1:5000'; // IP Máquina(Router): 192.168.1.10 IP Pruebas: localhost
-console.log("Hola, Soy la actualización del 27 ♥ de Octubre de 2022");
+﻿var dominio = 'http://127.0.0.1:5000'; // IP Máquina(Router): 10.71.83.57 IP Pruebas: localhost
+//EVA-MBI-3
+console.log("Hola, Soy la actualización del 25 ♥ de Abril de 2023");
 console.log(dominio);
 var alerta = document.getElementById('alerta');
 var alertasesion = document.getElementById('alertasesion');
@@ -134,12 +135,8 @@ function sesion_1(){
 		document.getElementById('botonparte').classList.remove('disabled');
 		document.getElementById('boton_manual').classList.remove('disabled');
 		document.getElementById('boton_auto').classList.remove('disabled');
-		document.getElementById('tipo').disabled = false;
+		document.getElementById('tipo').disabled = true;
 		document.getElementById('tipo').value = "SUPCALIDAD";
-		document.getElementById('SUPERUSUARIO').style.display = 'none';
-        document.getElementById('MANTENIMIENTO').style.display = 'none';
-        document.getElementById('PRODUCCION').style.display = 'none';
-        document.getElementById('INGENIERIA').style.display = 'none';
 		// document.getElementById('comentariosHeader').style.display = "inline-block";
 		break;
 		case "MANTENIMIENTO":

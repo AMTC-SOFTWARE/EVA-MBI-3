@@ -19,6 +19,8 @@ class Inspections(QState):
 
         self.setup_robot        = SetRobot(model = self.model, parent = self)
         self.update_triggers    = UpdateTriggers(model = self.model, parent = self)
+        self.waiting_home       = WaitingHome(model = self.model, parent = self)
+        self.liberar_cajas      = LiberarCajas(model = self.model, parent = self)
         self.vision             = vision.Vision(module = self.v_module, model = self.model, parent = self)
         self.height             = height.Height(module = self.h_module, model = self.model, parent = self)
         self.wait_start         = WaitStart(model = self.model, parent = self)
@@ -45,6 +47,10 @@ class Inspections(QState):
         self.vision.addTransition(self.vision.finished, self.height)
         self.height.addTransition(self.height.retry, self.setup_robot)
         self.height.addTransition(self.height.finished, self.update_triggers)
+
+        self.update_triggers.addTransition(self.update_triggers.esperar_robot_home,self.waiting_home)
+        self.waiting_home.addTransition(self.model.transitions.rbt_home,self.liberar_cajas)
+        self.liberar_cajas.addTransition(self.liberar_cajas.ok,self.update_triggers)
 
         self.update_triggers.finished.connect(self.finished.emit)
         self.setInitialState(self.wait_start)  
@@ -100,12 +106,44 @@ class SetRobot(QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         Timer(0.05, self.model.robot.home).start()
 
+class WaitingHome(QState):
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+
+    def onEntry(self, QEvent):
+
+        print("############################## ESTADO: WaitingHome INSPECTIONS ############################")
+        command = {
+            "lbl_result" : {"text": "Enviando Robot a Home para liberar cajas", "color": "green"},
+            "lbl_steps" : {"text": "Por favor espere", "color": "black"}
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+
+class LiberarCajas(QState):
+    ok     =   pyqtSignal()
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+
+    def onEntry(self, QEvent):
+        print("############################## ESTADO: LiberarCajas INSPECTIONS ############################")
+
+        for box in self.model.cajas_a_desclampear:
+            publish.single(self.model.pub_topics["plc"],json.dumps({box : False}),hostname='127.0.0.1', qos = 2)
+
+        #se limpia la variable
+        self.model.cajas_a_desclampear = []
+        self.model.desclampear_ready = False
+        self.ok.emit()
+
 
 class UpdateTriggers(QState):
     ok          = pyqtSignal()
     finished    = pyqtSignal()
     nok         = pyqtSignal()
-
+    esperar_robot_home = pyqtSignal()
     def __init__(self, model = None, parent = None):
         super().__init__(parent)
         self.model = model
@@ -113,7 +151,11 @@ class UpdateTriggers(QState):
     def onEntry(self, QEvent):
 
         print("############################## ESTADO: UpdateTriggers INSPECTIONS ############################")
-
+        if self.model.desclampear_ready == True:
+            command = {"trigger": "HOME"}
+            publish.single(self.model.pub_topics["robot"], json.dumps(command), hostname='127.0.0.1', qos = 2)
+            self.esperar_robot_home.emit()
+            return
         modularity = self.model.input_data["database"]["modularity"]
         clamps = self.model.input_data["plc"]["clamps"]
         if not(len (modularity)):
@@ -167,7 +209,11 @@ class UpdateTriggers(QState):
 
                     #aquí se modifica robot_data usando de base lo de rv_triggers y rh_triggers del modelo
                     self.model.robot_data["v_queue"][i] = copy(self.model.rv_triggers[i])
-                    self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
+                    print(i)
+                    if i=='PDC-P2':
+                        self.model.robot_data["h_queue"][i]=[]
+                    else:
+                       self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
 
                     print("self.model.robot_data[v_queue]-------",self.model.robot_data["v_queue"])
                     print("self.model.robot_data[v_queue][i]",self.model.robot_data["v_queue"][i])

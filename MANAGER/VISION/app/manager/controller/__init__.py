@@ -699,9 +699,12 @@ class CheckQr (QState):
                                             #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
                                             if not(cavity in self.model.input_data["database"]["modularity"][box]):
                                                 self.model.input_data["database"]["modularity"][box].append(cavity)
+                                                print("quiero este formato",cavity)
+                                                print("el tipo,")
                                             #si la caja no tiene esa cavidad entonces se agrega al diccionario
                                             if not(cavity in arnes_data[box]):
                                                 arnes_data[box][cavity] =  current_module[box][cavity]
+                            
                         else:
                             command = {
                                     "lbl_result" : {"text": "Módulos de visión redundantes", "color": "red"},
@@ -723,8 +726,11 @@ class CheckQr (QState):
 
 
                 ################################
+                
                 #se llena la variable modularity_fuses con todas las cavidades con fusibles vacíos
+                
                 self.model.modularity_fuses.update(copy(self.model.fuses_base))
+                
                 try:
                     for caja in arnes_data:
                         for cavidad in arnes_data[caja]:
@@ -734,8 +740,11 @@ class CheckQr (QState):
                     print (ex)
 
                 ################################
-
-
+                #Se agrega nueva inspeccion obligatoria para todos los arneses la caja PDC-P2
+                self.model.input_data["database"]["modularity"]["PDC-P2"] = ['CONECTOR1', 'CONECTOR2']
+                
+                
+                
                 print("\t\tCOLECCIÓN:\n", self.model.input_data["database"]["modularity"])
                 print("\t\tmodularity_fuses:\n", self.model.modularity_fuses) #Temporal solo para ver los fusibles cuando sea un vehículo Z296 (MAXI 30A VERDE Nuevo)
                 

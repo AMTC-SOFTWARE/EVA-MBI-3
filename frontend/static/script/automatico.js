@@ -386,8 +386,19 @@ function unhighlight(e) {
 dropArea.addEventListener('drop', handleDrop, false)
 
 $("#cargar").on("click", function () {
+    deleteModularities();
     ([...files]).forEach(cargar_archivo)
 })
+
+function deleteModularities(){
+    fetch(dominio + '/delete/filesmodularities', {
+         method: 'POST'
+     })
+     .then(res => res.json())
+     .then(function (data) {
+        //console.log(data);
+     })
+}
 
 function handleDrop(e) {
     let dt = e.dataTransfer

@@ -373,10 +373,20 @@ class Pose(QState):
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             clamps = self.model.input_data["plc"]["clamps"]
+             #se elimina de las cajas clampeadas actualmente
             clamps.pop(clamps.index(box))
+            
+            #se guardan las cajas terminadas actuales en una variable para posteriormente desclampearlas cuando el robot esté en home
+            self.model.cajas_a_desclampear.append(box)
+
+            #si ya no le quedan cajas por inspeccionar de las que se clampearon
+            if len(clamps) == 0:
+                self.model.desclampear_ready = True
+
+            #se elimina de todas las tareas
             self.model.input_data["database"]["modularity"].pop(box)
             self.model.height_data[self.module]["box"] = ""
-            publish.single(self.model.pub_topics["plc"],json.dumps({box : False}),hostname='127.0.0.1', qos = 2)
+            
             self.queue.clear()
             self.finished.emit()
             return
