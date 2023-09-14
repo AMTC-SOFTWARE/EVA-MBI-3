@@ -1426,8 +1426,8 @@ def info_cajas(arnes,type_pts,caja):
 def data_count(table, column):
     turnos = request.get_json(force=True)
     turnos = {
-            "1":["07-00","18-59"],
-            "2":["19-00","06-59"],
+            "1":["07-00","16-59"],
+            "2":["17-00","06-59"],
             }
 
     print("turnos:",turnos)
