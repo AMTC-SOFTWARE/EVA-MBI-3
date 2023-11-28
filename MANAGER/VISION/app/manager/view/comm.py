@@ -160,6 +160,19 @@ class MqttClient (QObject):
                             if box in self.model.input_data["plc"]["clamps"]:
                                 self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
 
+                if "Candado_PDCS" in payload:
+                    if payload["Candado_PDCS"] == True:
+                        command = {
+                                "lbl_result" : {"text": "Conector de PDC-S NOK", "color": "red"},
+                                "lbl_steps" : {"text": "Coloca el Conector de la caja PDC-S", "color": "red"}
+                              }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        command = {
+                                "lbl_result" : {"text": "", "color": "red"},
+                                "lbl_steps" : {"text": "", "color": "red"}
+                              }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 if "key" in payload:
                     if payload["key"] == True:
                         if self.model.disable_key == False:
