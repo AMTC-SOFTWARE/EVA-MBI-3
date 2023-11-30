@@ -1,15 +1,24 @@
 #EVA-MBI-3
 
+#from model import model
 from model import model
 from werkzeug.utils import secure_filename
-from flask import Flask, request
-from datetime import datetime
+from flask import Flask, request,send_file, make_response
+from datetime import datetime, timedelta, date, time
 from flask_cors import CORS
 from time import strftime
 from pickle import load
 import pymysql
 import json
 import os
+import io
+from openpyxl import Workbook
+from openpyxl.chart.label import DataLabel, DataLabelList
+from openpyxl.chart.series import SeriesLabel
+from openpyxl.styles import Alignment, Font, PatternFill, NamedStyle
+from openpyxl.chart import BarChart, Reference
+from openpyxl.worksheet.table import Table, TableStyleInfo
+from openpyxl.utils import get_column_letter
 from os.path import exists  #para saber si existe una carpeta o archivo
 from shutil import rmtree   #para eliminar carpeta con archivos dentro: rmtree("carpeta_con_archivos")
 from os import remove       #para eliminar archivo único: remove("archivo.txt")
@@ -1403,4 +1412,380 @@ def info_cajas(arnes,type_pts,caja):
         dic={"puntos":pts}
     return dic
 
+@app.route('/contar/<table>/<column>', methods=['GET'])
+def data_count(table, column):
+    turnos = request.get_json(force=True)
+    turnos = {
+            "1":["07-00","16-59"],
+            "2":["17-00","06-59"],
+            }
+
+    print("turnos:",turnos)
+    ####### REVISAR EN QUÉ TURNO ESTÁ LA HORA ACTUAL
+    for elemento in turnos:
+
+        hora_iniciostr = turnos[elemento][0]
+        hora_finstr = turnos[elemento][1]
+
+        inicio_split = hora_iniciostr.split("-")
+        hora_inicio = int(inicio_split[0])
+        minuto_inicio = int(inicio_split[1])
+            
+        fin_split = hora_finstr.split("-")
+        hora_fin = int(fin_split[0])
+        minuto_fin = int(fin_split[1])
+
+            
+        #Se obtiene la Hora actual (int)
+        horaActual = datetime.now().hour
+        #Minutos Actuales
+        minActual = datetime.now().minute
+            
+
+        #se detecta el tipo de jornada ....
+        caso1 = False #inicio menor que fin (jornada normal)
+        caso2 = False #fin menor que inicio (jornada con cambio de día)
+            
+        if hora_inicio < hora_fin:
+            #print("hora inicio menor que hora fin")
+            caso1 = True
+        else:
+            if hora_inicio == hora_fin:
+                #print("hora inicio = a hora fin")
+                if minuto_inicio < minuto_fin:
+                    #print("minuto inicio menor que minuto fin")
+                    caso1 = True
+                else:
+                    #print("minuto inicio mayor que minuto fin")
+                    caso2 = True
+            else:
+                #print("hora inciio menor que hora fin")
+                caso2 = True
+
+
+        #Fecha Actual
+        fechaActual = datetime.today()
+        ##Segundos Actuales
+        ##secActual = datetime.now().second
+        #delta time de un día
+        td = timedelta(days = 1)
+        ayerfechaActual = fechaActual - td
+        mañanafechaActual = fechaActual + td
+
+        hoy_year =  datetime.now().year
+        hoy_month = datetime.now().month
+        hoy_day =   datetime.now().day
+
+        ayer_year =  ayerfechaActual.year
+        ayer_month = ayerfechaActual.month
+        ayer_day =   ayerfechaActual.day
+
+        mañana_year =  mañanafechaActual.year
+        mañana_month = mañanafechaActual.month
+        mañana_day =   mañanafechaActual.day
+
+        inicio_query = ""
+        fin_query = ""
+
+        #AQUÍ YA SE SABE EL TIPO DE HORARIO QUE SE ESTÁ REVISANDO, 
+        #HAY QUE VER SI LA HORA ACTUAL ESTÁ DENTRO DE ESTE HORARIO
+
+        if caso1 == True:
+
+            init_date = datetime(hoy_year, hoy_month, hoy_day, hora_inicio, minuto_inicio )
+            end_date  = datetime(hoy_year, hoy_month, hoy_day, hora_fin,    minuto_fin )
+
+            if init_date <= fechaActual <= end_date:
+                inicio_query = str(init_date.strftime('%Y-%m-%d-%H-%M'))
+                fin_query =     str(end_date.strftime('%Y-%m-%d-%H-%M'))
+                break
+
+        if caso2 == True:
+
+            init_date1 = datetime(    hoy_year,     hoy_month,     hoy_day,  hora_inicio,  minuto_inicio )
+            end_date1 =  datetime( mañana_year,  mañana_month,  mañana_day,  hora_fin,     minuto_fin )
+                
+            init_date2 = datetime(ayer_year, ayer_month, ayer_day, hora_inicio, minuto_inicio )
+            end_date2 =  datetime( hoy_year,  hoy_month,  hoy_day,    hora_fin,    minuto_fin )
+
+            if init_date1 <= fechaActual <= end_date1:
+                inicio_query = str(init_date1.strftime('%Y-%m-%d-%H-%M'))
+                fin_query =     str(end_date1.strftime('%Y-%m-%d-%H-%M'))
+                break
+
+            if init_date2 <= fechaActual <= end_date2:
+                inicio_query = str(init_date2.strftime('%Y-%m-%d-%H-%M'))
+                fin_query =     str(end_date2.strftime('%Y-%m-%d-%H-%M'))
+                break
+
+    ####### CONTAR LOS ARNESES QUE HAY o HA HABIDO ENTRE TAL FECHA Y TAL FECHA DEPENDIENDO DEL CASO
+
+    print("--------------------inicio_query: ",inicio_query)
+    print("--------------------   fin_query: ",fin_query)
+
+    query= "SELECT * FROM " +table+" WHERE "+ column + ">=" + "'" + inicio_query + "' AND " + column + "<=" + "'" + fin_query + "';"
+    print("query: ",query)
+
+    try:
+        connection = pymysql.connect(host = host, user = user, passwd = password, database = database, cursorclass=pymysql.cursors.DictCursor)
+    
+    except Exception as ex:
+        print("data_count connection Exception: ", ex)
+        response = {"conteo" : 0}
+        return response
+
+
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall() 
+        
+        pedidos = []
+
+        for i in result: ##Buscando diferentes Valores en el rango de fecha
+            indice = result.index(i)
+            if result[indice]["RESULTADO"] > 0: ##Revisando si existen resets
+                pedidos.append(result[indice]["RESULTADO"])
+                #print(pedidos)
+        mylist = list(dict.fromkeys(pedidos)) ## Eliminando valores duplicados
+        #print(len(pedidos), 'The Big ONE')
+        ###CONTAR LOS ITEMS LEÍDOS
+
+        #if inicio_query == "":
+        #    conteo = 0
+        #else:
+        #    if len(result):
+        #        if isinstance(result, str):
+        #            conteo = 1
+        #        if isinstance(result, list):
+        #            conteo = len(result)
+        #            #print(result)
+        #    else:
+        #        conteo = 0
+
+        response = {"conteo" : len(pedidos)}
+
+    except Exception as ex:
+        print("data_count cursor Exception: ", ex)
+        response = {"conteo" :0}
+        return response
+
+    finally:
+        connection.close()
+        return response
+
+### Area de consulta de datos
+@app.route('/descargar/<db>/<table>/<task>')
+def descargar(db, table, task):
+    query = 'SELECT * FROM ' +table+' WHERE '+task+';'
+    print(query)
+    try:
+        connection = pymysql.connect(host = host, user = user, passwd = password, database = database, cursorclass=pymysql.cursors.DictCursor)
+    except Exception as ex:
+        print("myJsonResponse connection Exception: ", ex)
+        return {"exception": ex.args}
+    try:
+        with connection.cursor() as cursor:
+            items = cursor.execute(query)
+            result = cursor.fetchall()
+            #print("result: ",result)
+            #print(result[0].keys())
+            arreglo = []
+            hourEnd = []
+            h =  result[0]
+            valores_fila = ','.join( str(valor) for valor in h)
+            #print(valores_fila)
+            li = list(valores_fila.split(","))
+            #print(li)
+            li.remove('VISION')
+            li.remove('TORQUE')
+            li.remove('ALTURA')
+            li.remove('INTENTOS_VA')
+            li.remove('INTENTOS_T')
+            li.remove('SCRAP')
+            li.remove('SERIALES')
+            #li.remove('NOTAS')
+            li.remove('ANGULO')
+            #Capitalizando Titulos,   TITULO -> Titulo
+            capt = []
+            for l in li: 
+                c = l.capitalize()
+                capt.append(c)
+                
+            arreglo.append(capt)
+            #arreglo.append(valores_fila)
+            if len(result) > 0:
+                # Procesar los resultados por fila
+                for fila in result:
+                    del fila['VISION']
+                    del fila['TORQUE']
+                    del fila['ALTURA']
+                    del fila['INTENTOS_VA']
+                    del fila['INTENTOS_T']
+                    del fila['SCRAP']
+                    del fila['SERIALES']
+                    #del fila['NOTAS']
+                    del fila['ANGULO']
+                    
+                    dato = []
+                    if fila["HM"] != 'HM000000000003':
+                        arreglo.append(dato)
+                        #print(fila)
+                        for i in fila:
+                            if 'NOTAS' in i:
+                                Notepad = json.loads(fila[i])
+                                #print(Notepad['VISION'][0])
+                                dato.append(Notepad['VISION'][0])
+                            
+                            else: 
+                                #print(fila["FIN"])
+                                # Define las dos fechas como cadenas de texto
+                                hourEnd.append(fila['FIN'])
+                                # Convierte las cadenas de texto en objetos datetime
+                                #fecha1 = datetime.strptime(fecha1_str, "%d-%m-%Y %H:%M:%S")
+                                #fecha2 = datetime.strptime(fecha2_str, "%d-%m-%Y %H:%M:%S")
+                                #print(fila[i])
+                                dato.append(fila[i])
+                        
+                    
+                #print(arreglo)
+
+            else:
+                response = {"items": items}
+                #print(response)
+
+    except Exception as ex:
+        print("myJsonResponse cursor Exception: ", ex)
+        response = {"exception" : ex.args}
+
+
+    #######################  REALIZANDO FORMATO EXCEL ################
+    #######################                           ################
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = 'Historial'
+
+    # Crea una nueva hoja en el libro
+    #sheet2 = workbook.create_sheet("Graficar") # insert at first position
+    #sheet2 = workbook["Graficar"]
+
+    sheet['A1'] = '_____'
+
+    for j in arreglo:
+        sheet.append(j)
+    alineacion_izquierda = Alignment(horizontal='left')
+    
+    sheet.insert_cols(idx=6,amount=1)
+    sheet['F2'] = 'Duracion (dias, horas, minutos, segundos)'
+    sheet['H2'] = 'Resultado-Vision'
+    
+    sheet['I2'] = 'Tiempo Ciclo'
+    sheet['J2'] = 'Tiempo Ciclo Horas'
+    
+    sheet.title = 'Historial'
+        # Agrega valores a la nueva columna (no necesitas calcular la diferencia en Python)
+    for i in range(3, sheet.max_row + 1):
+        formula = f'= IFERROR(ABS(D{i}-E{i}), 0)'  # Suponiendo que "Inicio" está en la columna D y "Fin" en la columna E
+        
+        # Suponiendo que "Inicio" está en la columna D y "Fin" en la columna E
+        formulaB = f'= CONCATENATE( (PRODUCT( DAY(F{i}),24) + HOUR(F{i}) ), ":", MINUTE(F{i}), ":", SECOND(F{i}))'  
+        
+        formulaC = f'=IFERROR(ABS($D{i}-$E{i}), 0)'  #Tiempo Muerto en Decimal de Horas
+        formulaD = f'=IFERROR(ABS($D{i}-$E{i}) * 24, 0)'  #Tiempo Muerto en Decimal de Horas
+
+        sheet.cell(row=i, column=6, value=formula)
+
+
+        sheet.cell(row=i, column=9, value=formulaC)
+        sheet.cell(row=i, column=10, value=formulaD)
+
+    lastfila = get_column_letter(sheet.max_column)+str(sheet.max_row) 
+
+
+# ####FORMATOS
+    formato_hora = NamedStyle(name = 'formato_hora')
+    formato_hora.number_format = 'hh:mm:ss'
+
+    # Supongamos que deseas aplicar el formato a la columna A (por ejemplo, de la fila 2 a la fila 100)
+    columna = sheet['F']
+    for celda in columna[2:sheet.max_row]:  # Excluye la primera fila si tiene encabezados
+             celda.number_format = 'dd hh:mm:ss'
+
+    # Supongamos que deseas aplicar el formato a la columna A (por ejemplo, de la fila 2 a la fila 100)
+    columna = sheet['J']
+    for celda in columna[2:sheet.max_row]:  # Excluye la primera fila si tiene encabezados
+            celda.number_format = 'dd hh:mm:ss'
+
+# Iterar sobre todas las columnas y ajustar sus anchos
+    for column in sheet.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                cell.alignment = alineacion_izquierda
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2) * 1.1
+        sheet.column_dimensions[column_letter].width = adjusted_width
+    # sheet.column_dimensions['C'].width = 40
+    sheet.column_dimensions['D'].width = 20
+    sheet.column_dimensions['F'].width = 20
+    # sheet.column_dimensions['G'].width = 20
+    sheet.column_dimensions['K'].width = 20
+    sheet.column_dimensions['E'].width = 19
+    sheet.column_dimensions['J'].width = 15
+    sheet.column_dimensions['N'].width = 13
+    sheet.column_dimensions['O'].width = 15
+    sheet.column_dimensions['P'].width = 15
+    # Agregar título de la tabla de clientes
+    sheet['A1'] = f'Fujikura Automotive México Piedras Negras "Vision"'
+    sheet.merge_cells('A1:D1')
+
+
+    tab = Table(displayName="Table1", ref="A2:" + lastfila)
+
+    # Agregando Estilos de tabla
+    style = TableStyleInfo(name="TableStyleMedium6", showFirstColumn=False,
+                    showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+    tab.tableStyleInfo = style
+
+    sheet.add_table(tab)
+
+    # Formulario para calcular por columnas diferentes tareas
+    sheet['N2'] = 'Promedio'
+    sheet['N3'] = "= TEXT(AVERAGE(F3:F"+str(sheet.max_row)+'), "hh:mm:ss")'
+    sheet['O2'] = "No terminados"
+    sheet['O3'] = '= COUNTIF(H3:H'+str(sheet.max_row)+',"="&"RESET")'
+
+
+    tab2 = Table(displayName="Table2", ref="N2:O3")
+
+    # Agregando Formato a la tabla
+    formulas = TableStyleInfo(name="TableStyleMedium2", showFirstColumn=False,
+                    showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+    tab2.tableStyleInfo = formulas
+
+    sheet.add_table(tab2)
+
+    # Establecer estilos de fuente y color
+    first_table_font = Font(color="124B43")  # Azul Marino
+    second_table_font = Font(color="0043BB")  # Un tono más claro de rojo
+
+    
+
+    # Guardar el libro de Excel en un objeto en memoria
+    output = io.BytesIO()
+    workbook.save(output)
+    output.seek(0)
+
+    # Enviar el archivo como respuesta para descarga
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name='Fujikura Automotive México Piedras Negras.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 ########################################################################################################################################
