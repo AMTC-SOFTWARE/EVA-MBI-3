@@ -179,7 +179,8 @@ class Triggers (QState):
                         print("Modelo Final: ",self.model.tries)
                         #para guardar fusible actual vs esperado para mostrar en pantalla
                         #self.model.expected_fuses.append(fuse+":\t["+i+"]\t["+self.model.modularity_fuses[box][fuse]+"]\n")
-
+                        print("self.model.modularity_fuses[box][fuse]",self.model.modularity_fuses[box][fuse])
+                        print("amp_keys",amp_keys)
                         if self.model.modularity_fuses[box][fuse] in amp_keys:
                             if self.model.modularity_fuses[box][fuse] == "rojo":
                                 if fuse in self.model.amperaje["rojo"]:
@@ -189,7 +190,12 @@ class Triggers (QState):
                                     print("Fusible MINI Rojo de 10 A")
                                     amperaje = ' 10 A'
                             else:
-                                amperaje = self.model.amperaje[self.model.modularity_fuses[box][fuse]]
+                                if exists(self.model.amperaje[self.model.modularity_fuses[box][fuse]]):
+                                    amperaje = self.model.amperaje[self.model.modularity_fuses[box][fuse]]
+                                else:
+                                    amperaje =""
+
+
                             #print("****DB-Este color se encuentra en el modelo de Amperaje****: ",self.model.modularity_fuses[box][fuse],amperaje)
 
                         #Este fragmento de código es para mostrar el amperaje del fusible detectado por la cámara del Robot,

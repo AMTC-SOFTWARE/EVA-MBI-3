@@ -209,7 +209,11 @@ class UpdateTriggers(QState):
 
                     #aquí se modifica robot_data usando de base lo de rv_triggers y rh_triggers del modelo
                     self.model.robot_data["v_queue"][i] = copy(self.model.rv_triggers[i])
-                    self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
+                    print(i)
+                    if i=='PDC-P2':
+                        self.model.robot_data["h_queue"][i]=[]
+                    else:
+                       self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
 
                     print("self.model.robot_data[v_queue]-------",self.model.robot_data["v_queue"])
                     print("self.model.robot_data[v_queue][i]",self.model.robot_data["v_queue"][i])
