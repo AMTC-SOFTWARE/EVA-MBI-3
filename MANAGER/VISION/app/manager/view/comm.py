@@ -419,83 +419,83 @@ class MqttClient (QObject):
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
-                if "ERROR" in payload_str:
-                    if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
+                if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
                         if payload["ERROR_cortina"] == True:
-                            self.cortina = "CORTINA \n INTERRUMPIDA"
+                            command = {"lbl_info4" : {"text": "Cortina\nIterrumpida", "color": "red", "ancho":400,"alto":400}}  
                         if payload["ERROR_cortina"] == False:
-                            self.cortina = ""
-                    if "ERROR_modbusIO" in payload:
-                        if payload["ERROR_modbusIO"] == True:
-                            self.modbusIO = "\n Remote IO"
-                        if payload["ERROR_modbusIO"] == False:
-                            self.modbusIO = ""
-                    if "ERROR_modbusRA" in payload:
-                        if payload["ERROR_modbusRA"] == True:
-                            self.modbusRA = "\n Robot A"
-                        if payload["ERROR_modbusRA"] == False:
-                            self.modbusRA = ""
-                    if "ERROR_modbusRB" in payload:
-                        if payload["ERROR_modbusRB"] == True:
-                            self.modbusRB = "\n Robot B"
-                        if payload["ERROR_modbusRB"] == False:
-                            self.modbusRB = ""
+                            command = {"lbl_info4" : {"text": "", "color": "red", "ancho":10,"alto":10}}  
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
-                    if self.modbusIO == "\n Remote IO" and self.modbusRA == "\n Robot A":
-                        self.plural2 = "ES"
-                    elif self.modbusIO == "\n Remote IO" and self.modbusRB == "\n Robot B":
-                        self.plural2 = "ES"
-                    elif self.modbusRA == "\n Robot A" and self.modbusRB == "\n Robot B":
-                        self.plural2 = "ES"
-                    else:
-                        self.plural2 = ""
+                #if "ERROR" in payload_str:
+                #    if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
+                #        if payload["ERROR_cortina"] == True:
+                #            self.cortina = "CORTINA \n INTERRUMPIDA"
+                #        if payload["ERROR_cortina"] == False:
+                #            self.cortina = ""
+                #    if "ERROR_modbusIO" in payload:
+                #        if payload["ERROR_modbusIO"] == True:
+                #            self.modbusIO = "\n Remote IO"
+                #        if payload["ERROR_modbusIO"] == False:
+                #            self.modbusIO = ""
+                #    if "ERROR_modbusRA" in payload:
+                #        if payload["ERROR_modbusRA"] == True:
+                #            self.modbusRA = "\n Robot A"
+                #        if payload["ERROR_modbusRA"] == False:
+                #            self.modbusRA = ""
+                #    if "ERROR_modbusRB" in payload:
+                #        if payload["ERROR_modbusRB"] == True:
+                #            self.modbusRB = "\n Robot B"
+                #        if payload["ERROR_modbusRB"] == False:
+                #            self.modbusRB = ""
 
-                if "INTERLOCK" in payload_str:              
-                    if "INTERLOCK_A" in payload:
-                        if payload["INTERLOCK_A"] == True:
-                            self.puertaA = "\nA"
-                        if payload["INTERLOCK_A"] == False:
-                            self.puertaA = ""
-                    if "INTERLOCK_B" in payload:
-                        if payload["INTERLOCK_B"] == True:
-                            self.puertaB = "\nB"
-                        if payload["INTERLOCK_B"] == False:
-                            self.puertaB = ""
-                    if "INTERLOCK_C" in payload:
-                        if payload["INTERLOCK_C"] == True:
-                            self.puertaC = "\nC"
-                        if payload["INTERLOCK_C"] == False:
-                            self.puertaC = ""
+                #    if self.modbusIO == "\n Remote IO" and self.modbusRA == "\n Robot A":
+                #        self.plural2 = "ES"
+                #    elif self.modbusIO == "\n Remote IO" and self.modbusRB == "\n Robot B":
+                #        self.plural2 = "ES"
+                #    elif self.modbusRA == "\n Robot A" and self.modbusRB == "\n Robot B":
+                #        self.plural2 = "ES"
+                #    else:
+                #        self.plural2 = ""
+
+                #if "INTERLOCK" in payload_str:              
+                #    if "INTERLOCK_A" in payload:
+                #        if payload["INTERLOCK_A"] == True:
+                #            self.puertaA = "\nA"
+                #        if payload["INTERLOCK_A"] == False:
+                #            self.puertaA = ""
+                #    if "INTERLOCK_B" in payload:
+                #        if payload["INTERLOCK_B"] == True:
+                #            self.puertaB = "\nB"
+                #        if payload["INTERLOCK_B"] == False:
+                #            self.puertaB = ""
+                #    if "INTERLOCK_C" in payload:
+                #        if payload["INTERLOCK_C"] == True:
+                #            self.puertaC = "\nC"
+                #        if payload["INTERLOCK_C"] == False:
+                #            self.puertaC = ""
                     
-                    if self.puertaA == "\nA" and self.puertaB == "\nB":
-                        self.plural = "S"
-                    elif self.puertaA == "\nA" and self.puertaC == "\nC":
-                        self.plural = "S"
-                    elif self.puertaB == "\nB" and self.puertaC == "\nC":
-                        self.plural = "S"
-                    else:
-                        self.plural = ""
+                #    if self.puertaA == "\nA" and self.puertaB == "\nB":
+                #        self.plural = "S"
+                #    elif self.puertaA == "\nA" and self.puertaC == "\nC":
+                #        self.plural = "S"
+                #    elif self.puertaB == "\nB" and self.puertaC == "\nC":
+                #        self.plural = "S"
+                #    else:
+                #        self.plural = ""
 
-                if self.puertaA == "" and self.puertaB == "" and self.puertaC == "":
-                    if self.modbusIO == "" and self.modbusRA == "" and self.modbusRB == "":
-                        command = {"lbl_info4" : {"text": f"{self.cortina}", "color": "red"}}
-                    else:
-                        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n ERROR{self.plural2} MODBUS: {self.modbusIO} {self.modbusRA} {self.modbusRB}", "color": "red"}}
-                else:
-                    if self.modbusIO == "" and self.modbusRA == "" and self.modbusRB == "":
-                        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n PUERTA{self.plural} \n ABIERTA{self.plural}: {self.puertaA} {self.puertaB} {self.puertaC}", "color": "red"}}
-                    else:
-                        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n ERROR MODBUS: {self.modbusIO} {self.modbusRA} {self.modbusRB} \n \n PUERTA{self.plural} \n ABIERTA{self.plural}: {self.puertaA} {self.puertaB} {self.puertaC}", "color": "red"}}
-                self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                #if self.puertaA == "" and self.puertaB == "" and self.puertaC == "":
+                #    if self.modbusIO == "" and self.modbusRA == "" and self.modbusRB == "":
+                #        command = {"lbl_info4" : {"text": f"{self.cortina}", "color": "red"}}
+                #    else:
+                #        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n ERROR{self.plural2} MODBUS: {self.modbusIO} {self.modbusRA} {self.modbusRB}", "color": "red"}}
+                #else:
+                #    if self.modbusIO == "" and self.modbusRA == "" and self.modbusRB == "":
+                #        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n PUERTA{self.plural} \n ABIERTA{self.plural}: {self.puertaA} {self.puertaB} {self.puertaC}", "color": "red"}}
+                #    else:
+                #        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n ERROR MODBUS: {self.modbusIO} {self.modbusRA} {self.modbusRB} \n \n PUERTA{self.plural} \n ABIERTA{self.plural}: {self.puertaA} {self.puertaB} {self.puertaC}", "color": "red"}}
+                #self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
-                
-
-
-                ##############################################################################################
-
-
-
-
+            ##############################################################################################
 
             if "torque/" in message.topic and "/status" in message.topic:
                 if "result" in payload: 

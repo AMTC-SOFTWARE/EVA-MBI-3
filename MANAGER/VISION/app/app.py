@@ -8,6 +8,10 @@
 commands to exe generation:
         pyinstaller --noconsole --icon=icon.ico --add-data data;data app.py
         pyinstaller --icon=icon.ico --add-data data;data app.py
+        
+        special case pyinstaller not recognized
+        Python -m PyInstaller --icon=icon.ico --add-data data;data app.py
+
 commands for User Experience:
         Reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System /v DisableTaskMgr /t REG_DWORD /d 1 /f
         taskkill /f /im explorer.exe

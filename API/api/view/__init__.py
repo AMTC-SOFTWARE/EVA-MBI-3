@@ -36,6 +36,8 @@ host,user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos
 #####################################  Servicio para Etiquetas desde WEB ####################################
 @app.route("/printer/etiqueta",methods=["POST"])
 def etiqueta():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     response = {"items": 0}
     print("Dentro de Servicio para Etiqueta MANUAL")
     date = request.form['DATE']
@@ -129,6 +131,8 @@ def delRef():
 
 @app.route('/upload/modularities', methods=['POST'])
 def uploadRef():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     response = {"items": 0}
     allowed_file = False
     file = None
@@ -173,6 +177,8 @@ def uploadRef():
 
 @app.route('/update/modularities', methods=['POST'])
 def updateRef():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     data = request.form['DBEVENT']
     print("DB a la que se cargan los DAT: ",data)
     print("se actualizarán los DATS en la base de datos, ingresando a función auto_modularities.makeModularities")
@@ -181,6 +187,8 @@ def updateRef():
 
 @app.route('/update/modules', methods=['POST'])
 def updateModules():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     response = {"items": 0}
     allowed_file = False
     file = None
@@ -238,6 +246,8 @@ def updateModules():
 
 @app.route('/update/determinantes', methods=['POST'])
 def updateDeterminantes():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     response = {"items": 0}
     allowed_file = False
     file = None
@@ -432,6 +442,8 @@ def update(table, ID):
 
 @app.route("/api/get/pdcr/variantes",methods=["GET"])
 def variantes():
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     pdcrVariantes = {
     "small": [],
     "medium": [],
@@ -990,6 +1002,8 @@ def previewEvent(ILX,db):
 
 @app.route("/api/get/<db>/pdcr/variantes",methods=["GET"])
 def variantesEvent(db):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     pdcrVariantes = {
     "small": [],
     "medium": [],
@@ -1268,6 +1282,8 @@ def value_of_a_table(table,column_of_table_1,operation_1,val_1,column_of_table_2
 
 @app.route('/json2/<table>/<column_of_table>/<operation_1>/<val_1>/<operation_2>/<val_2>',methods=['GET'])
 def json2Return(table,column_of_table,operation_1,val_1,operation_2,val_2):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
 
     items = 0
 
@@ -1385,6 +1401,8 @@ def value_of_a_table_2(table,column_of_table_1,operation_1,val_1,column_of_table
 
 @app.route('/info/<arnes>/<type_pts>/<caja>',methods=['GET'])
 def info_cajas(arnes,type_pts,caja):
+    datos_conexion=model()
+    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
     path = "data/points/"
     file_name= path + caja+"_puntos_"+type_pts
     print(file_name)
@@ -1573,6 +1591,7 @@ def data_count(table, column):
     finally:
         connection.close()
         return response
+
 
 ### Area de consulta de datos
 @app.route('/descargar/<db>/<table>/<task>')

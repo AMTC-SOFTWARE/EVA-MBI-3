@@ -126,7 +126,7 @@ def makeModules(data):
                                     if isinstance(box,str):
                                         box = box.replace(" ","")#se eliminan posibles espacios existentes, si hay datos de lo contrario es None
 
-                                    if box =="Fuse Box F55":
+                                    if box =="Fuse Box F55" or box =="FuseBoxF55":
                                         box = "TBLU"
                                     fuse = currentSheet.cell(row = row, column = 2).value #ejemplo: F210
                                     if isinstance(fuse,str):

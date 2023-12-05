@@ -324,6 +324,7 @@ class StartCycle (QState):
             #############################################
             "lbl_result" : {"text": "Nuevo ciclo iniciado", "color": "green"},
             "lbl_steps" : {"text": "Escanea el numero HM", "color": "black"},
+            "lcdNumber": {"value": 0, "visible": False},
             "img_nuts" : "blanco.jpg",
             "img_center" : "logo.jpg",
             "allow_close": False,
@@ -341,7 +342,26 @@ class StartCycle (QState):
         else:
             command["lbl_info3"] = {"text": "Trazabilidad\nDesactivada", "color": "red"}
 
+        command["lcdNumber"] = {"value": 0, "visible": True}
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+        try:
+            turnos = {
+            "1":["07-00","18-59"],
+            "2":["19-00","06-59"],
+            }
+
+            endpoint = "http://{}/contar/historial/FIN".format(self.model.server)
+            response = requests.get(endpoint, data=json.dumps(turnos))
+            response = response.json()
+            print("response: ",response)
+            print("Startup para mostrar conteo de arneses")
+            command["lcdNumber"] = {"value": response["conteo"]}
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+        except Exception as ex:
+            print("Error en el conteo ", ex)
+
         if not(self.model.shutdown):
             self.ok.emit()
 
@@ -1376,12 +1396,7 @@ class MyThread(QThread):
 
         while 1:
 
-            sleep(5)
-            command = {"lcdNumber": {"visible": False}}
-            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-            command = {"lcdNumber": {"visible": True}}
-            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-
+            
             try:
                 print("Corriendo en Paralelo")
 
@@ -1450,44 +1465,7 @@ class MyThread(QThread):
                 #print("dia_inicial: ",dia_inicial)
                 #print("dia_final: ",dia_final)
                 
-                
-
-                #No existen coincidencias
-                if "items" in contresponse: ## LOCAL
-                    print("No se han liberado arneses el día de hoy")
-                    command = {
-                            "lcdNumber" : {"value": 0}
-                            }
-                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-
-                #si la respuesta es un entero, quiere decir que solo hay un arnés
-                elif isinstance(contresponse["ID"],int):
-                    command = {
-                            "lcdNumber" : {"value": 1}
-                            }   
-                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-
-                #Si existe más de un registro (contresponse["ID"] es una lista)
-                else:
-                    #se eliminan los que se repiten en la búsqueda, para solo contar los arneses diferentes que hayan pasado
-                    result = 0
-                    for item in contresponse["RESULTADO"]:
-                        print (item)
-                        #si el arnés no está en la lista anteriormente, no suma
-
-                        if item > 0:
-                            result += 1
-                    #si el contador revasa los 999, se seguirá mostrando este número, ya que si no se reinicia a 0
-                    if result > 999:
-                        command = {
-                                "lcdNumber" : {"value": 999}
-                                }
-                    else:
-                        command = {
-                                "lcdNumber" : {"value": result} ## cantidad de arneses sin repetirse que han liberado el día de hoy
-                                }
-                        
-                        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+       
                 ############################################################################################################
               
             except Exception as ex:

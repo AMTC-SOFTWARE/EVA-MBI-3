@@ -412,10 +412,14 @@ class Ui_main(object):
         self.lbl_box7.setObjectName("lbl_box7") ######### Modificación para F96 #########
         ######################################################################
         self.lbl_info4 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_info4.setMinimumSize(QtCore.QSize(110, 0))
-        self.lbl_info4.setMaximumSize(QtCore.QSize(110, 16777215))
+        self.lbl_info4.setMinimumSize(QtCore.QSize(450, 0))
+        self.lbl_info4.setMaximumSize(QtCore.QSize(450, 16777215))
         self.lbl_info4.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.lbl_info4.setObjectName("lbl_info4")
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        font.setBold(True)
+        self.lbl_info4.setFont(font)
         self.lineEdit = QtWidgets.QLineEdit(self.splitter_3)
         self.lineEdit.setMinimumSize(QtCore.QSize(110, 0))
         self.lineEdit.setMaximumSize(QtCore.QSize(110, 15))
