@@ -421,7 +421,7 @@ class MqttClient (QObject):
                 
                 if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
                         if payload["ERROR_cortina"] == True:
-                            command = {"lbl_info4" : {"text": "Cortina\nIterrumpida", "color": "red", "ancho":400,"alto":400}}  
+                            command = {"lbl_info4" : {"text": "Cortina\nInterrumpida", "color": "red", "ancho":400,"alto":400}}  
                         if payload["ERROR_cortina"] == False:
                             command = {"lbl_info4" : {"text": "", "color": "red", "ancho":10,"alto":10}}  
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
