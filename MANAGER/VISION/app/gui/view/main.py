@@ -452,6 +452,13 @@ class Ui_main(object):
         self.lcdNumber.setGeometry(1650,800, 200 , 100)
         self.lbl_cant.setGeometry(1650,750, 200 , 100)
         ########################################################################
+        #se crean después del menuMenu para que aparezcan sobre este y no debajo
+        self.btn_hxh = QtWidgets.QPushButton(main)
+        self.btn_hxh.setGeometry(QtCore.QRect(250, 50, 140, 35)) #posx, posy, ancho, alto
+        self.btn_hxh.setObjectName("btn_eimf")
+        #self.btn_eimf.setStyleSheet('background-color: silver; color: white; font-weight:bold; font-size:15pt; font: Century Schoolbook')
+
+        self.btn_hxh.setStyleSheet('background-color: cyan; color: black; font-weight:bold; font-size:12pt; font: Segoe UI Black')
 
         self.menubar = QtWidgets.QMenuBar(main)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1269, 21))
@@ -476,6 +483,8 @@ class Ui_main(object):
     def retranslateUi(self, main):
         _translate = QtCore.QCoreApplication.translate
         main.setWindowTitle(_translate("main", "MainWindow"))
+        ########################################################
+        self.btn_hxh.setText(_translate("main", "Hora por Hora"))
         self.lbl_info1.setText(_translate("main", "INFO1"))
         self.lbl_result.setText(_translate("main", "RESULTADOS"))
         self.lbl_steps.setText(_translate("main", "PASOS"))

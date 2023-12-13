@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>app</Name>
     <RootNamespace>app</RootNamespace>
-    <InterpreterId>Global|VisualStudio|ENVIRONMENT (Python 3.7 (32-bit))</InterpreterId>
+    <InterpreterId>Global|VisualStudio|env (Python 3.7 (64-bit))</InterpreterId>
     <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
     <IsWindowsApplication>True</IsWindowsApplication>
   </PropertyGroup>
@@ -33,6 +33,7 @@
     <Compile Include="gui\view\main.py" />
     <Compile Include="gui\view\resources_rc.py" />
     <Compile Include="gui\view\scanner.py" />
+    <Compile Include="gui\view\Tabla_horas.py" />
     <Compile Include="gui\view\__init__.py" />
     <Compile Include="gui\__init__.py" />
     <Compile Include="manager\controller\height.py">
@@ -158,8 +159,7 @@
     <Content Include="toolkit\plugins\__pycache__\__init__.cpython-37.pyc" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|VisualStudio|ENVIRONMENT (Python 3.7 (32-bit))" />
-    <InterpreterReference Include="Global|VisualStudio|mercedesBenz" />
+    <InterpreterReference Include="Global|VisualStudio|env (Python 3.7 (64-bit))" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

@@ -1592,7 +1592,163 @@ def data_count(table, column):
         connection.close()
         return response
 
+@app.route('/horaxhora/<table>/<column>', methods=['GET'])
+def horaxhora(table, column):
+    turnos = request.get_json(force=True)
+    turnos = {
+            "1":["07-00","16-59"],
+            "2":["17-00","06-59"],
+            }
 
+    print("turnos:",turnos)
+    ####### REVISAR EN QUÉ TURNO ESTÁ LA HORA ACTUAL
+    for elemento in turnos:
+
+        hora_iniciostr = turnos[elemento][0]
+        hora_finstr = turnos[elemento][1]
+
+        inicio_split = hora_iniciostr.split("-")
+        hora_inicio = int(inicio_split[0])
+        minuto_inicio = int(inicio_split[1])
+            
+        fin_split = hora_finstr.split("-")
+        hora_fin = int(fin_split[0])
+        minuto_fin = int(fin_split[1])
+
+            
+        #Se obtiene la Hora actual (int)
+        horaActual = datetime.now().hour
+        #Minutos Actuales
+        minActual = datetime.now().minute
+            
+
+        #se detecta el tipo de jornada ....
+        caso1 = False #inicio menor que fin (jornada normal)
+        caso2 = False #fin menor que inicio (jornada con cambio de día)
+            
+        if hora_inicio < hora_fin:
+            #print("hora inicio menor que hora fin")
+            caso1 = True
+        else:
+            if hora_inicio == hora_fin:
+                #print("hora inicio = a hora fin")
+                if minuto_inicio < minuto_fin:
+                    #print("minuto inicio menor que minuto fin")
+                    caso1 = True
+                else:
+                    #print("minuto inicio mayor que minuto fin")
+                    caso2 = True
+            else:
+                #print("hora inciio menor que hora fin")
+                caso2 = True
+
+
+        #Fecha Actual
+        fechaActual = datetime.today()
+        ##Segundos Actuales
+        ##secActual = datetime.now().second
+        #delta time de un día
+        td = timedelta(days = 1)
+        ayerfechaActual = fechaActual - td
+        mañanafechaActual = fechaActual + td
+
+        hoy_year =  datetime.now().year
+        hoy_month = datetime.now().month
+        hoy_day =   datetime.now().day
+
+        ayer_year =  ayerfechaActual.year
+        ayer_month = ayerfechaActual.month
+        ayer_day =   ayerfechaActual.day
+
+        mañana_year =  mañanafechaActual.year
+        mañana_month = mañanafechaActual.month
+        mañana_day =   mañanafechaActual.day
+
+        inicio_query = ""
+        fin_query = ""
+
+        #AQUÍ YA SE SABE EL TIPO DE HORARIO QUE SE ESTÁ REVISANDO, 
+        #HAY QUE VER SI LA HORA ACTUAL ESTÁ DENTRO DE ESTE HORARIO
+
+        if caso1 == True:
+
+            init_date = datetime(hoy_year, hoy_month, hoy_day, hora_inicio, minuto_inicio )
+            end_date  = datetime(hoy_year, hoy_month, hoy_day, hora_fin,    minuto_fin )
+
+            if init_date <= fechaActual <= end_date:
+                inicio_query = str(init_date.strftime('%Y-%m-%d-%H-%M'))
+                fin_query =     str(end_date.strftime('%Y-%m-%d-%H-%M'))
+                break
+
+        if caso2 == True:
+
+            init_date1 = datetime(    hoy_year,     hoy_month,     hoy_day,  hora_inicio,  minuto_inicio )
+            end_date1 =  datetime( mañana_year,  mañana_month,  mañana_day,  hora_fin,     minuto_fin )
+                
+            init_date2 = datetime(ayer_year, ayer_month, ayer_day, hora_inicio, minuto_inicio )
+            end_date2 =  datetime( hoy_year,  hoy_month,  hoy_day,    hora_fin,    minuto_fin )
+
+            if init_date1 <= fechaActual <= end_date1:
+                inicio_query = str(init_date1.strftime('%Y-%m-%d-%H-%M'))
+                fin_query =     str(end_date1.strftime('%Y-%m-%d-%H-%M'))
+                break
+
+            if init_date2 <= fechaActual <= end_date2:
+                inicio_query = str(init_date2.strftime('%Y-%m-%d-%H-%M'))
+                fin_query =     str(end_date2.strftime('%Y-%m-%d-%H-%M'))
+                break
+
+    ####### CONTAR LOS ARNESES QUE HAY o HA HABIDO ENTRE TAL FECHA Y TAL FECHA DEPENDIENDO DEL CASO
+
+    print("--------------------inicio_query: ",inicio_query)
+    print("--------------------   fin_query: ",fin_query)
+
+    query= "SELECT HM,RESULTADO,INICIO,FIN, USUARIO FROM " +table+" WHERE "+ column + ">=" + "'" + inicio_query + "' AND " + column + "<=" + "'" + fin_query + "';"
+    print("query: ",query)
+
+    try:
+        connection = pymysql.connect(host = host, user = user, passwd = password, database = database, cursorclass=pymysql.cursors.DictCursor)
+    
+    except Exception as ex:
+        print("data_count connection Exception: ", ex)
+        response = {'HM': 0,
+                   'INICIO': 0,
+                   'FIN': 0,
+                   'RESULTADO': 0}
+        return response
+
+
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall() 
+        #print("result",result)
+        if len(result) > 0:
+            response = {}
+            keys = list(result[0])
+            for key in keys:
+                response[key] = []
+                for item in result:
+                    response[key].append(item.pop(key))   
+            response["columns"] = keys
+        else:
+            response ={'HM': 0,
+                   'INICIO': 0,
+                   'FIN': 0,
+                   'RESULTADO': 0}
+        
+
+    except Exception as ex:
+        print("data_count cursor Exception: ", ex)
+        response = {'HM': 0,
+                   'INICIO': 0,
+                   'FIN': 0,
+                   'RESULTADO': 0}
+        return response
+
+    finally:
+        connection.close()
+        return response
 ### Area de consulta de datos
 @app.route('/descargar/<db>/<table>/<task>')
 def descargar(db, table, task):

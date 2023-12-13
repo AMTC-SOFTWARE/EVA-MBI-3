@@ -3,23 +3,32 @@
 @author: MSc. Marco Rutiaga Quezada
 """
 
-from PyQt5.QtWidgets import QDialog, QMainWindow, QLineEdit, QMessageBox, QAction
+from PyQt5.QtWidgets import QDialog, QMainWindow, QPushButton, QMessageBox, QLineEdit, QAction, QTableWidgetItem
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QTimer, QSize
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QColor
 from threading import Timer
 from os.path import exists
 from os import system 
 import json 
-
-from gui.view import resources_rc, main, login, scanner, img_popout
+from datetime import datetime, timedelta
+from threading import Timer
+from time import strftime, sleep
+from copy import copy
+import requests
+import pandas as pd
+from gui.view import resources_rc, main, login, scanner, img_popout, Tabla_horas
 from gui.view.comm import MqttClient
 from gui.model import Model
-
+import math
+import re
 class MainWindow (QMainWindow):
 
     output = pyqtSignal(dict)
     ready =  pyqtSignal()
-
+    def quitar_numeros_enteros(self,cadena):
+        # Utilizar una expresión regular para encontrar y reemplazar números enteros
+        resultado = re.sub(r'\d+', '', cadena)
+        return resultado
     def __init__(self, name = "GUI", topic = "gui", parent = None):
         super().__init__(parent)
 
@@ -29,7 +38,8 @@ class MainWindow (QMainWindow):
         self.qw_scanner = Scanner(parent = self)
         self.qw_img_popout = Img_popout(parent = self)
         self.pop_out = PopOut(self)
-        
+        self.qw_Tabla_horas = Tabla_hora_w(parent = self)
+
         self.client = MqttClient(self.model, self)
         self.client.subscribe.connect(self.input)
         self.output.connect(self.client.publish)
@@ -82,7 +92,7 @@ class MainWindow (QMainWindow):
         self.qw_scanner.ui.btn_ok.clicked.connect(self.scanner)
         self.qw_scanner.ui.lineEdit.returnPressed.connect(self.scanner)
         self.qw_scanner.ui.btn_cancel.clicked.connect(self.qw_scanner.ui.lineEdit.clear)
-        
+        self.ui.btn_hxh.clicked.connect(self.horaxhora)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.status)
         #self.timer.start(200)
@@ -90,6 +100,221 @@ class MainWindow (QMainWindow):
         self.allow_close        = True
         self.cycle_started      = False
         self.shutdown           = False
+    def horaxhora(self):
+        #self.qw_Tabla_horas.show()
+        print("vamos a calcular los hora por hora")
+        horario_turno1={"7":0,
+                        "8":0,
+                        "9":0,
+                        "10":0,
+                        "11":0,
+                        "12":0,
+                        "13":0,
+                        "14":0,
+                        "15":0,
+                        "16":0,
+                        "17":0,
+                        "18":0,
+                        "19":0,
+                        "20":0,
+                        "21":0,
+                        "22":0,
+                        "23":0,
+                        "00":0,
+                        "01":0,
+                        "02":0,
+                        "03":0,
+                        "04":0,
+                        "05":0,
+                        "06":0,
+                        }
+
+
+        
+        try:
+            turnos = {
+            "1":["07-00","18-59"],
+            "2":["19-00","06-59"],
+            }
+
+            endpoint = "http://{}/horaxhora/historial/FIN".format(self.model.server)
+            response = requests.get(endpoint, data=json.dumps(turnos))
+            response = response.json()
+            
+            arneses_turno=pd.DataFrame({'HM': response['HM'],
+                   'INICIO': response['INICIO'],
+                   'FIN': response['FIN'],
+                   'RESULTADO': response['RESULTADO'],
+                   'USUARIO': response['USUARIO']})
+            
+            
+            arneses_turno['INICIO']=pd.to_datetime(arneses_turno['INICIO'])
+            arneses_turno['FIN']=pd.to_datetime(arneses_turno['FIN'])
+            arneses_turno['RESULTADO']=arneses_turno['RESULTADO'].astype("string")
+
+            #Calcula Duración de ciclo de los arneses
+            arneses_turno["INTERVALO"]=arneses_turno['FIN']-arneses_turno['INICIO']
+            total_minutos_perdidos={}
+            Arneses_cada_hora={}
+            promedio_ciclo={}
+            mejor_tiempo_hora={}
+            mejor_tiempo_hora_usuario={}
+            mejor_tiempo = pd.to_timedelta('1 hours')
+            peor_tiempo = pd.to_timedelta('0 hours')
+            usuario=""
+            for hora in horario_turno1:
+                hora_inicio = pd.to_datetime(f'{hora}:00:00').time()
+                
+                if hora=="23":
+                    hora_fin = pd.to_datetime('23:59:59').time()
+                else:
+                    hora_siguiente=str(int(hora)+1)
+                    hora_fin = pd.to_datetime(f'{hora_siguiente}:00:00').time()
+                
+                # Aplicamos el filtro para seleccionar las filas dentro del intervalo de horas.
+                #horario_turno1[hora] = arneses_turno[(arneses_turno['FIN'].dt.time >= hora_inicio) & (arneses_turno['FIN'].dt.time <= hora_fin) & (arneses_turno['RESULTADO']=="2")]
+                
+                base_temporal = arneses_turno[(arneses_turno['FIN'].dt.time >= hora_inicio) & (arneses_turno['FIN'].dt.time <= hora_fin) & (arneses_turno['RESULTADO']=="2")]
+                
+                promedio_ciclo[hora]=base_temporal['INTERVALO'].mean().total_seconds() / 60
+                
+                mejor_tiempo_hora_usuario[hora]=base_temporal['INTERVALO'].min(skipna=True)
+                mejor_tiempo_hora[hora]=base_temporal['INTERVALO'].min(skipna=True).total_seconds() / 60
+
+                nuevo_usuario=base_temporal.loc[base_temporal['INTERVALO'] == mejor_tiempo_hora_usuario[hora], 'USUARIO']
+                
+
+                nuevo_mejor_tiempo=base_temporal['INTERVALO'].min(skipna=True)
+                nuevo_peor_tiempo=base_temporal['INTERVALO'].max(skipna=True)
+                
+
+                # Verificamos si el resultado no es None o NaN antes de imprimir o usar el valor.
+
+                if pd.notna(nuevo_mejor_tiempo):
+                    if nuevo_mejor_tiempo<=mejor_tiempo:
+                        mejor_tiempo=nuevo_mejor_tiempo
+                        usuario=nuevo_usuario
+                else:
+                    print("No hay valores válidos en la columna 'intervalo'.")
+                if pd.notna(nuevo_peor_tiempo):
+                    if nuevo_peor_tiempo>=peor_tiempo:
+                        peor_tiempo=nuevo_peor_tiempo
+
+                else:
+                    print("No hay valores válidos en la columna 'intervalo'.")
+                #Se suman los tiemos de cada hora para saber cuanto tiempo estuvo la maquina sin trabajar
+                # Convertimos la columna 'tiempos' a tipo timedelta.
+                base_temporal['INTERVALO'] = pd.to_timedelta(base_temporal['INTERVALO'])
+                # Sumamos los tiempos y lo convertimos a minutos.
+                total_minutos_perdidos[hora] =60 - base_temporal['INTERVALO'].sum().total_seconds() / 60
+                
+                Arneses_cada_hora[hora] = base_temporal.shape[0]
+                #horario_turno1[hora]["Arneses_cada_hora"] =base_temporal.shape[0]
+
+            print("total_minutos_perdidos",total_minutos_perdidos)
+            print("Arneses_cada_hora",Arneses_cada_hora)
+            print("promedio_ciclo",promedio_ciclo)
+            print("mejor_tiempo",mejor_tiempo.total_seconds() / 60)
+            print("peor_tiempo",peor_tiempo.total_seconds() / 60)
+            
+            #self.qw_scanner.setVisible(show["scanner"])
+            #item = self.tableWidget.horizontalHeaderItem(1)
+            #item.setText(_translate("Ui_Tabla_h", "Mejor Tiempo"))
+            fila=0
+            for hora in Arneses_cada_hora:
+                
+                # Rellena la cantidad de arneses en la tabla
+                celda_cantidad_arneses = QTableWidgetItem("                 "+str(Arneses_cada_hora[hora]))
+                if Arneses_cada_hora[hora]> 0:
+
+                   celda_cantidad_arneses.setBackground(QColor("cyan"))
+                
+                self.qw_Tabla_horas.ui.tableWidget.setItem(fila,0,celda_cantidad_arneses)
+                
+                #Rellena el mejor tiempo en la tabla
+                if isinstance(mejor_tiempo_hora[hora], float) and not (math.isnan(mejor_tiempo_hora[hora]) or math.isinf(mejor_tiempo_hora[hora])):
+                    # Obtener la parte entera y decimal
+                    parte_entera = int(mejor_tiempo_hora[hora])
+                    parte_decimal = mejor_tiempo_hora[hora] - parte_entera
+                    
+                    # Convertir la parte decimal a segundos
+                    segundos = round(parte_decimal * 60)
+                    
+
+                    celda_mejor_tiempo=QTableWidgetItem(f"   {parte_entera} minutos, {segundos} s." )
+                else:
+                    celda_mejor_tiempo=QTableWidgetItem("0")
+                
+                self.qw_Tabla_horas.ui.tableWidget.setItem(fila,1,celda_mejor_tiempo)
+                
+                #Rellena elpromedio de tiempo ciclo en la tabla
+                if isinstance(promedio_ciclo[hora], float) and not (math.isnan(promedio_ciclo[hora]) or math.isinf(promedio_ciclo[hora])):
+                    # Obtener la parte entera y decimal
+                    parte_entera = int(promedio_ciclo[hora])
+                    parte_decimal = promedio_ciclo[hora] - parte_entera
+                    
+                    # Convertir la parte decimal a segundos
+                    segundos = round(parte_decimal * 60)
+                    
+
+                    celda_promedio_ciclo=QTableWidgetItem(f"   {parte_entera} minutos, {segundos} s." )
+                else:
+                    celda_promedio_ciclo=QTableWidgetItem("0")
+                self.qw_Tabla_horas.ui.tableWidget.setItem(fila,2,celda_promedio_ciclo)
+
+
+                #Rellena los minutos perdidos cada hora en la tabla
+                if isinstance(total_minutos_perdidos[hora], float) and not (math.isnan(total_minutos_perdidos[hora]) or math.isinf(total_minutos_perdidos[hora])):
+                    # Obtener la parte entera y decimal
+                    parte_entera = int(total_minutos_perdidos[hora])
+                    parte_decimal = total_minutos_perdidos[hora] - parte_entera
+                    
+                    # Convertir la parte decimal a segundos
+                    segundos = round(parte_decimal * 60)
+                    
+
+                    celda_minutos_perdidos=QTableWidgetItem(f"   {parte_entera} minutos, {segundos} s." )
+                else:
+                    celda_minutos_perdidos=QTableWidgetItem("0")
+                
+                self.qw_Tabla_horas.ui.tableWidget.setItem(fila,3,celda_minutos_perdidos)
+
+
+                fila+=1
+            if mejor_tiempo.total_seconds() < self.model.mejor_tiempo:
+                self.model.mejor_tiempo=float(mejor_tiempo.total_seconds())
+            # Obtener la parte entera y decimal
+            parte_entera = int(self.model.mejor_tiempo / 60)
+            parte_decimal = (self.model.mejor_tiempo / 60) - parte_entera
+            
+            # Convertir la parte decimal a segundos
+            segundos = round(parte_decimal * 60)
+            
+            self.qw_Tabla_horas.ui.label_3.setText(f"Tiempo record: {parte_entera} minutos, {segundos} s.")
+
+            
+            mejor_tiempo_str=str(mejor_tiempo.total_seconds() / 60)
+            usuario=str(usuario)
+            usuario=usuario.replace("Name: USUARIO, dtype: object","")
+
+            usuario_sin_numeros = self.quitar_numeros_enteros(usuario)
+            
+            
+            self.qw_Tabla_horas.ui.label_2.setText(f"{usuario_sin_numeros}     con el mejor Tiempo")
+
+            
+            
+            
+            self.qw_Tabla_horas.show()
+            
+
+        except Exception as ex:
+            print("Error en el conteo ", ex)
+        
+    
+
+    
+
 
     def menuProcess(self, q):
         try:
@@ -248,6 +473,7 @@ class MainWindow (QMainWindow):
                 self.ui.lbl_nuts.setText(message["lbl_nuts"]["text"])
                 if "color" in message["lbl_nuts"]:
                     self.ui.lbl_nuts.setStyleSheet("color: " + message["lbl_nuts"]["color"])
+
             if "lcdNumber" in message:
                 if "value" in message["lcdNumber"]:
 
@@ -446,6 +672,19 @@ class Scanner (QDialog):
         if event.key() == Qt.Key_Escape:
             print("Escape key was pressed")
 
+class Tabla_hora_w (QDialog):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.ui = Tabla_horas.Ui_Ui_Tabla_h()
+        self.ui.setupUi(self) 
+        
+
+    def closeEvent(self, event):
+        #event.ignore() 
+        print("close event")
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            print("Escape key was pressed")
 
 class Img_popout (QDialog):
     def __init__(self, parent = None):

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Ui_Tabla_h</class>
+ <widget class="QMainWindow" name="Ui_Tabla_h">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1237</width>
+    <height>639</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Hora por Hora</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="1" column="1">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMaximumSize</enum>
+        </property>
+        <item row="0" column="1">
+         <widget class="QTextEdit" name="textEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QTableWidget" name="tableWidget">
+          <attribute name="horizontalHeaderVisible">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>200</number>
+          </attribute>
+          <row>
+           <property name="text">
+            <string>07-08</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>08-09</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>09-10</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>10-11</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>11-12</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>12-13</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>13-14</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>14-15</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>16-17</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>17-18</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>18-19</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>19-20</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>20-21</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>21-22</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>23-00</string>
+           </property>
+          </row>
+          <column>
+           <property name="text">
+            <string>Cantidad de Arneses</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Mejor Tiempo</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Peor Tiempo</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Tiempo sin usar la máquina</string>
+           </property>
+           <property name="textAlignment">
+            <set>AlignJustify|AlignVCenter</set>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="1">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="1" column="2">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>                                                                            NOTAS</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="font">
+           <font>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>HORA POR HORA</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1237</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menumenu">
+    <property name="title">
+     <string>menu</string>
+    </property>
+   </widget>
+   <addaction name="menumenu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

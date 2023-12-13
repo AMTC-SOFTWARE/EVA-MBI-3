@@ -12,6 +12,8 @@ class Model (object):
         self.setTopic = "gui/set"
         self.statusTopic = "gui/status"
         self.inBuffer = {}
+        self.server = "127.0.0.1:5000" #para correr localmente
+        self.mejor_tiempo=1000
         self.status = {
             "visible": {
                 "gui": False, 
@@ -20,3 +22,4 @@ class Model (object):
                 "pop_out": False
                 }
             }
+
