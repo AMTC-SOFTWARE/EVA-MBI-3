@@ -454,7 +454,7 @@ class Ui_main(object):
         ########################################################################
         #se crean después del menuMenu para que aparezcan sobre este y no debajo
         self.btn_hxh = QtWidgets.QPushButton(main)
-        self.btn_hxh.setGeometry(QtCore.QRect(250, 50, 140, 35)) #posx, posy, ancho, alto
+        self.btn_hxh.setGeometry(QtCore.QRect(230, 50, 140, 35)) #posx, posy, ancho, alto
         self.btn_hxh.setObjectName("btn_eimf")
         #self.btn_eimf.setStyleSheet('background-color: silver; color: white; font-weight:bold; font-size:15pt; font: Century Schoolbook')
 

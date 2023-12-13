@@ -1703,7 +1703,7 @@ def horaxhora(table, column):
     print("--------------------inicio_query: ",inicio_query)
     print("--------------------   fin_query: ",fin_query)
 
-    query= "SELECT HM,RESULTADO,INICIO,FIN, USUARIO FROM " +table+" WHERE "+ column + ">=" + "'" + inicio_query + "' AND " + column + "<=" + "'" + fin_query + "';"
+    query= "SELECT HM,RESULTADO,INICIO,FIN,USUARIO FROM " +table+" WHERE "+ column + ">=" + "'" + inicio_query + "' AND " + column + "<=" + "'" + fin_query + "';"
     print("query: ",query)
 
     try:

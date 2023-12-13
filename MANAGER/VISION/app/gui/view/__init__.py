@@ -21,6 +21,7 @@ from gui.view.comm import MqttClient
 from gui.model import Model
 import math
 import re
+import sys
 class MainWindow (QMainWindow):
 
     output = pyqtSignal(dict)
@@ -29,6 +30,7 @@ class MainWindow (QMainWindow):
         # Utilizar una expresión regular para encontrar y reemplazar números enteros
         resultado = re.sub(r'\d+', '', cadena)
         return resultado
+    
     def __init__(self, name = "GUI", topic = "gui", parent = None):
         super().__init__(parent)
 
@@ -84,7 +86,7 @@ class MainWindow (QMainWindow):
         menu.addAction(actionConfig)
         menu.addAction(actionWEB)
         menu.triggered[QAction].connect(self.menuProcess)
-
+        self.ui.btn_hxh.setFocusPolicy(Qt.NoFocus)
 
         #self.ui.lineEdit.returnPressed.connect(self.qrBoxes)
         self.qw_login.ui.lineEdit.returnPressed.connect( self.login)
@@ -681,6 +683,7 @@ class Tabla_hora_w (QDialog):
 
     def closeEvent(self, event):
         #event.ignore() 
+        #self.uimain.lineEdit.setFocus()
         print("close event")
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
