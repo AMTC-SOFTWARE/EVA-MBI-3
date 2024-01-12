@@ -476,6 +476,11 @@ class Ui_main(object):
         self.statusbar.setObjectName("statusbar")
         main.setStatusBar(self.statusbar)
         self.menubar.addAction(self.menuMenu.menuAction())
+        #se crean después del menuMenu para que aparezcan sobre este y no debajo
+        self.lbl_clock = QtWidgets.QLabel(main)
+        self.lbl_clock.setGeometry(QtCore.QRect(1550, 20, 300, 100)) #posx, posy, ancho, alto
+        self.lbl_clock.setObjectName("lbl_clock")
+        self.lbl_clock.setStyleSheet('background-color: navy; color: white; font-weight:bold; font-size:15pt; font: Century Schoolbook')
 
         self.retranslateUi(main)
         QtCore.QMetaObject.connectSlotsByName(main)

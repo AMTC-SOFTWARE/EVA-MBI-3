@@ -563,6 +563,78 @@ class MainWindow (QMainWindow):
                         self.ui.statusbar.clearMessage()
                     else:
                         self.ui.statusbar.showMessage(message["statusBar"])
+            if "lbl_clock" in message:
+
+                if "text" in message["lbl_clock"]:
+                    self.ui.lbl_clock.setText(message["lbl_clock"]["text"])
+                elif "fecha" in message["lbl_clock"]:
+
+                    #<p style="background-color: #000033;">
+
+                    texto = """
+                    <head/>
+                    <body>
+                        <p>
+                            <br>  <!-- Salto de línea -->    
+                            <span style="font-size:11pt; font-style:Monospace; color:lightblue;">&nbsp;&nbsp;&nbsp;Fecha Fujikura:&nbsp; <!-- &nbsp; es un espacio vacío -->
+                            </span>
+                            <span style="font-size:11pt; font-style:Helvetica; color:#ffffff;">daay&nbsp;&nbsp;&nbsp;
+                            </span>
+                            <br>  <!-- Salto de línea -->
+                            <span style="font-size:26pt; font-style:Helvetica; font-weight:bold; color:#ffffff;">&nbsp;&nbsp;&nbsp;&nbsp;daate&nbsp;&nbsp;&nbsp;</span>
+                            <br>  <!-- Salto de línea -->
+                        </p>
+                    </body>
+                    """
+
+                    fecha = message["lbl_clock"]["fecha"]
+                    fecha = fecha.split(" ")
+                    fecha[1] = fecha[1][0:8]
+                    fecha_mes = fecha[0].split("-")
+                    if fecha_mes[1] == "1" or fecha_mes[1] == "01":
+                        fecha_mes[1] = "Enero"
+                    elif fecha_mes[1] == "2" or fecha_mes[1] == "02":
+                        fecha_mes[1] = "Febrero"
+                    elif fecha_mes[1] == "3" or fecha_mes[1] == "0":
+                        fecha_mes[1] = "Marzo"
+                    elif fecha_mes[1] == "4" or fecha_mes[1] == "0":
+                        fecha_mes[1] = "Abril"
+                    elif fecha_mes[1] == "5" or fecha_mes[1] == "0":
+                        fecha_mes[1] = "Mayo"
+                    elif fecha_mes[1] == "6" or fecha_mes[1] == "0":
+                        fecha_mes[1] = "Junio"
+                    elif fecha_mes[1] == "7" or fecha_mes[1] == "0":
+                        fecha_mes[1] = "Julio"
+                    elif fecha_mes[1] == "8" or fecha_mes[1] == "0":
+                        fecha_mes[1] = "Agosto"
+                    elif fecha_mes[1] == "9" or fecha_mes[1] == "0":
+                        fecha_mes[1] = "Septiembre"
+                    elif fecha_mes[1] == "10":
+                        fecha_mes[1] = "Octubre"
+                    elif fecha_mes[1] == "11":
+                        fecha_mes[1] = "Noviembre"
+                    elif fecha_mes[1] == "12":
+                        fecha_mes[1] = "Diciembre"
+                    fecha[0] = fecha_mes[2] + "-" + fecha_mes[1] + "-" + fecha_mes[0]
+                    texto = texto.replace("daay",fecha[0])
+
+                    formato_hora = ""
+                    nueva_hora = "12"
+                    string_hora = str(fecha[1]).split(":")
+                    if int(string_hora[0]) < 12:
+                        if int(string_hora[0]) != 12:
+                            nueva_hora = str(int(string_hora[0]))
+                        formato_hora = " am"
+                    else:
+                        if int(string_hora[0]) != 12:
+                            nueva_hora = str(int(string_hora[0])-12)
+                        formato_hora = " pm"
+
+                    string_hora = nueva_hora + ":" + string_hora[1] + ":" + string_hora[2] + formato_hora
+
+                    texto = texto.replace("daate",string_hora)
+                    self.ui.lbl_clock.setStyleSheet("background-color: #000033; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;")
+                    self.ui.lbl_clock.setText(texto)
         except Exception as ex:
             print("\ninput() exception : \nMessage: ", message, "\nException: ", ex)
             self.output.emit({"Exception":"Input error"})

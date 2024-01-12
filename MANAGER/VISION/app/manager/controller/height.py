@@ -386,7 +386,9 @@ class Pose(QState):
             #se elimina de todas las tareas
             self.model.input_data["database"]["modularity"].pop(box)
             self.model.height_data[self.module]["box"] = ""
-            
+            self.model.F96_pendiente=False
+            if len(self.model.input_data["database"]["modularity"])<=1 and "F96" in self.model.input_data["database"]["modularity"]:
+                self.model.F96_pendiente=True
             self.queue.clear()
             self.finished.emit()
             return

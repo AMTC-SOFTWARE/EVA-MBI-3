@@ -44,7 +44,8 @@ class Controller (QObject):
         self.scan_pdcr              = ScanPDCR(model = self.model, parent = self.process)
         self.scan_quality           = ScanQr(model = self.model, parent = self.process)
         self.quality_validation     = QualityValidation(model = self.model, parent = self.process)
-
+        self.reloj_mythread         = MyThreadReloj(self.model, self.process)
+        self.reloj_mythread.start()
 
         self.startup.addTransition(self.startup.ok, self.show_login)
         self.show_login.addTransition(self.client.ID, self.check_login)
@@ -688,22 +689,42 @@ class CheckQr (QState):
                                 else:
                                     #recorremos las cavidades de los datos del modulo que tienen esa misma caja
                                     for cavity in current_module[box]:
-                                        #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-                                        if current_module[box][cavity] != "vacio":
-                                            #si no esta la caja en arnes_data, agregar llave
-                                            if not(box in arnes_data):
-                                                arnes_data[box] = {}
-                                            #si la caja no está, encender bandera de que es una nueva caja
-                                            if not(box in self.model.input_data["database"]["modularity"]):
-                                                self.model.input_data["database"]["modularity"][box] = []
-                                            #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-                                            if not(cavity in self.model.input_data["database"]["modularity"][box]):
-                                                self.model.input_data["database"]["modularity"][box].append(cavity)
-                                                print("quiero este formato",cavity)
-                                                print("el tipo,")
-                                            #si la caja no tiene esa cavidad entonces se agrega al diccionario
-                                            if not(cavity in arnes_data[box]):
-                                                arnes_data[box][cavity] =  current_module[box][cavity]
+                                       print("cavity",cavity)
+                                       if cavity == "F96":
+                                           #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
+                                           if current_module[box][cavity] != "vacio":
+                                               #si no esta la caja en arnes_data, agregar llave
+                                               if not("F96" in arnes_data):
+                                                   arnes_data["F96"] = {}
+                                                   print("si va a llevar F96")
+                                               #si la caja no está, encender bandera de que es una nueva caja
+                                               if not("F96" in self.model.input_data["database"]["modularity"]):
+                                                   self.model.input_data["database"]["modularity"]["F96"] = []
+                                                   print("f96 inputdata",self.model.input_data)
+                                               #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
+                                               if not(cavity in self.model.input_data["database"]["modularity"]["F96"]):
+                                                   self.model.input_data["database"]["modularity"]["F96"].append(cavity)
+                                                   print("f96 inputdata appnd",self.model.input_data)
+                                               #si la caja no tiene esa cavidad entonces se agrega al diccionario
+                                               if not(cavity in arnes_data["F96"]):
+                                                   print("arnes_data[F96][cavity]",arnes_data)
+                                                   arnes_data["F96"][cavity] =  current_module[box][cavity]
+                                       else:
+                                           #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
+                                           if current_module[box][cavity] != "vacio":
+                                               
+                                               #si no esta la caja en arnes_data, agregar llave
+                                               if not(self.model.pdcrvariant in arnes_data):
+                                                   arnes_data[self.model.pdcrvariant] = {}
+                                               #si la caja no está, agregar lista vacía para dicha caja
+                                               if not(self.model.pdcrvariant in self.model.input_data["database"]["modularity"]):
+                                                   self.model.input_data["database"]["modularity"][self.model.pdcrvariant] = []
+                                               #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
+                                               if not(cavity in self.model.input_data["database"]["modularity"][self.model.pdcrvariant]):
+                                                   self.model.input_data["database"]["modularity"][self.model.pdcrvariant].append(cavity)
+                                               #si la caja no tiene esa cavidad entonces se agrega al diccionario
+                                               if not(cavity in arnes_data[self.model.pdcrvariant]):
+                                                   arnes_data[self.model.pdcrvariant][cavity] =  current_module[box][cavity]
                             
                         else:
                             command = {
@@ -1381,6 +1402,42 @@ class Reset (QState):
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         QTimer.singleShot(500,self.ok.emit)
 
+class MyThreadReloj(QThread):
+
+    #check_material = pyqtSignal()
+
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model  = model
+
+        print("MyThreadReloj")
+        print("se crea un objeto de la clase MyThread con padre QThread")
+        print("con entrada del objeto model de la clase model que está en model.py")
+        print("y el objeto client de la clase MqttClient que está en comm.py")
+        
+    def run(self):
+
+        fechaActual = self.model.get_currentTime() #se obtiene la fecha desde el servidor por primera vez
+        print("update pedido desde MyThreadReloj inicial")
+        while 1:
+
+            #tiempo de espera para no alentar las ejecuciones de otros procesos
+            sleep(1)
+            fechaLocalActual = datetime.now() #se actualiza la fecha local Actual
+            fechaActual = self.model.update_fecha_actual(fechaLocalActual,fechaActual)
+
+            #td = timedelta(1)
+            #beforefechaActual = fechaActual - td
+            #afterfechaActual = fechaActual + td
+            #hoy = fechaActual.strftime('%Y-%m-%d')
+            #mañana = afterfechaActual.strftime('%Y-%m-%d')
+            #hora_actual = fechaActual.time()
+
+            command = {
+                    "lbl_clock":{"fecha":str(fechaActual)},
+                    }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)      
+            
 
 #EJECUCIÓN EN PARALELO
 class MyThread(QThread):

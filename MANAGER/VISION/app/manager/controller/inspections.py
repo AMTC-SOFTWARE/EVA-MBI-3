@@ -42,7 +42,9 @@ class Inspections(QState):
 
         self.standby.addTransition(self.model.transitions.clamp, self.wait_start)
         self.standby.addTransition(self.model.transitions.start, self.update_triggers)     
-
+        ##con f96 sin instrumentar
+        self.update_triggers.addTransition(self.update_triggers.F96_espera,self.wait_start)
+        ##
         self.vision.addTransition(self.vision.retry, self.setup_robot)
         self.vision.addTransition(self.vision.finished, self.height)
         self.height.addTransition(self.height.retry, self.setup_robot)
@@ -144,6 +146,7 @@ class UpdateTriggers(QState):
     finished    = pyqtSignal()
     nok         = pyqtSignal()
     esperar_robot_home = pyqtSignal()
+    F96_espera  = pyqtSignal()
     def __init__(self, model = None, parent = None):
         super().__init__(parent)
         self.model = model
@@ -155,6 +158,11 @@ class UpdateTriggers(QState):
             command = {"trigger": "HOME"}
             publish.single(self.model.pub_topics["robot"], json.dumps(command), hostname='127.0.0.1', qos = 2)
             self.esperar_robot_home.emit()
+            return
+        if self.model.F96_pendiente and self.model.F96_clampeado==False:
+            self.model.input_data["plc"]["clamps"].append("F96")
+            self.model.F96_clampeado=True
+            self.F96_espera.emit()
             return
         modularity = self.model.input_data["database"]["modularity"]
         clamps = self.model.input_data["plc"]["clamps"]
@@ -183,28 +191,28 @@ class UpdateTriggers(QState):
                     ################################################################################################################
                     #al leer un arnés, se llena modularity con los fusibles asignados y se rellena con los demás fusibles vacios
                     #entonces siempre habrá una cavidad F96 pero no siempre llevará el fusible. Entonces cuando sea diferente de vacio...
-                    if self.model.modularity_fuses[self.model.pdcrvariant]["F96"] != "vacio":
-                        print("F96 es diferente de vacio \n")
-                        #si ya trae el trigger (porque un arnés anterior lo traía y se modificó el vector)
-                        if "F96" in self.model.v_triggers[self.model.pdcrvariant]:
-                            print("pass porque ya trae el trigger \n")
-                            #no se agrega para evitar duplicados
-                            pass
-                        #si no trae el trigger, pero si hay un valor para F96, lo agregas al vector
-                        else:
-                            print("no trae trigger pero si hay F96, se agrega a la lista (append): \n")
-                            
-                            self.model.rv_triggers[self.model.pdcrvariant].append(self.model.rv_F96_trigger)
-                            self.model.v_triggers[self.model.pdcrvariant].append(self.model.v_F96_trigger)
-                    #si no lleva el F96, asegurarse de que el vector no lleve este trigger por arneses anteriores
-                    else:
-                        print("F96 es vacio \n")
-                        if "F96" in self.model.v_triggers[self.model.pdcrvariant]:
-                            print("F96 es vacio pero si está agegado el punto, se hace un pop: \n")
-                            #self.model.rv_triggers[self.model.pdcrvariant].pop(self.model.rv_triggers[self.model.pdcrvariant].index("F96_pv1"))
-                            self.model.rv_triggers[self.model.pdcrvariant].pop(-1)
-                            #self.model.v_triggers[self.model.pdcrvariant].pop(self.model.v_triggers[self.model.pdcrvariant].index("F96"))
-                            self.model.v_triggers[self.model.pdcrvariant].pop(-1)
+                    #if self.model.modularity_fuses[self.model.pdcrvariant]["F96"] != "vacio":
+                    #    print("F96 es diferente de vacio \n")
+                    #    #si ya trae el trigger (porque un arnés anterior lo traía y se modificó el vector)
+                    #    if "F96" in self.model.v_triggers[self.model.pdcrvariant]:
+                    #        print("pass porque ya trae el trigger \n")
+                    #        #no se agrega para evitar duplicados
+                    #        pass
+                    #    #si no trae el trigger, pero si hay un valor para F96, lo agregas al vector
+                    #    else:
+                    #        print("no trae trigger pero si hay F96, se agrega a la lista (append): \n")
+                    #        
+                    #        self.model.rv_triggers[self.model.pdcrvariant].append(self.model.rv_F96_trigger)
+                    #        self.model.v_triggers[self.model.pdcrvariant].append(self.model.v_F96_trigger)
+                    ##si no lleva el F96, asegurarse de que el vector no lleve este trigger por arneses anteriores
+                    #else:
+                    #    print("F96 es vacio \n")
+                    #    if "F96" in self.model.v_triggers[self.model.pdcrvariant]:
+                    #        print("F96 es vacio pero si está agegado el punto, se hace un pop: \n")
+                    #        #self.model.rv_triggers[self.model.pdcrvariant].pop(self.model.rv_triggers[self.model.pdcrvariant].index("F96_pv1"))
+                    #        self.model.rv_triggers[self.model.pdcrvariant].pop(-1)
+                    #        #self.model.v_triggers[self.model.pdcrvariant].pop(self.model.v_triggers[self.model.pdcrvariant].index("F96"))
+                    #        self.model.v_triggers[self.model.pdcrvariant].pop(-1)
                     ################################################################################################################
 
                     #aquí se modifica robot_data usando de base lo de rv_triggers y rh_triggers del modelo

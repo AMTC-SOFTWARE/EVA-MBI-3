@@ -3,7 +3,7 @@ from time import strftime
 from pickle import load
 import requests
 import json
-
+from datetime import datetime, timedelta, date, time
 from time import sleep
 import pprint
 
@@ -25,7 +25,8 @@ class Model (object):
         #self.server = "192.168.1.10:5000" #IP de estación
 
         self.id_HM = None
-
+        self.fechaAnterior = self.get_currentTime() #se inicializa con la fecha del servidor
+        self.fechaLocalAnterior = datetime.now() #se inicializa con la fecha local actual
         #variable para guardar el qr esperado de la caja PDCR
         self.qr_esperado = ""
         #variable para llevar conteo de intentos de escaneo de caja PDCR
@@ -44,7 +45,7 @@ class Model (object):
         self.cajas_a_desclampear = []
         #bandera para avisar que ya se terminaron las cajas actuales que se colocaron y es hora de desclampear (luego de que el robot vaya a home)
         self.desclampear_ready = False
-
+        self.F96_pendiente=False
         self.tiempo = ""
 
         self.BB = {
@@ -399,7 +400,8 @@ class Model (object):
             "TBLU": ["TB1","TB2"],
             "PDC-R": ["R1","R2","R3","R4","R5","R6","R7","R8"],
             "PDC-RMID": ["R1","R2","R3","R4","R5","R6"],
-            "PDC-RS": ["R1","R2","R3","R4","R5","R6"]
+            "PDC-RS": ["R1","R2","R3","R4","R5","R6"],
+            "F96": ["F96"]
             }
         #puntos guardados en robot a los que irá para sus inspecciones de visión
         self.rv_triggers = {
@@ -410,7 +412,8 @@ class Model (object):
             "TBLU": ["TBLU_vision_1","TBLU_vision_2"],
             "PDC-R": ["PDCR_vision_1","PDCR_vision_2","PDCR_vision_3","PDCR_vision_4","PDCR_vision_5","PDCR_vision_6","PDCR_vision_7","PDCR_vision_8"],
             "PDC-RMID": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
-            "PDC-RS": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"]
+            "PDC-RS": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
+            "F96": ["F96_vision_1"]
             }
         #nombre de programas a llamar para inspección de zonas(por bloque) en sensor (altura) en cada punto del robot
         self.h_triggers = {
@@ -420,7 +423,8 @@ class Model (object):
             "TBLU": ["TB1","TB2","TB3"],
             "PDC-R": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9","R11","R12","R13","R14"],
             "PDC-RMID": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
-            "PDC-RS": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"]
+            "PDC-RS": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
+            "F96": ["F96"]
             }
         
         #puntos guardados en robot a los que irá para sus inspecciones de alturas
@@ -431,7 +435,8 @@ class Model (object):
             "TBLU": ["TBLU_pa1","TBLU_pa2","TBLU_pa3"],
             "PDC-R": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9","PDCR_pa11","PDCR_pa12","PDCR_pa13","PDCR_pa14"],
             "PDC-RMID": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
-            "PDC-RS": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"]
+            "PDC-RS": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
+            "F96": ["F96_pa1"]
             }
 
         print("v_triggers:\n",self.v_triggers)
@@ -502,7 +507,8 @@ class Model (object):
     ###########################################################
 
     def reset (self):
-        
+        self.model.F96_clampeado=False
+        self.model.cajas_a_desclampear = []
         self.datetime = None
         #for i in self.result:
         #    for j in self.result[i]:
@@ -562,6 +568,7 @@ class Model (object):
         self.height_data["height1"]["current_trig"] = None
         self.height_data["height1"]["rqst"] = None
         self.height_data["height1"]["img"] = None
+        self.F96_clampeado=False
 
         self.master_fuses.clear()
         self.modularity_fuses .clear()
@@ -607,7 +614,7 @@ class Model (object):
                 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'F462': 'vacio',
                 'F463': 'vacio', 'F464': 'vacio', 'F465': 'vacio', 'F466': 'vacio', 'F467': 'vacio', 'F468': 'vacio', 'F469': 'vacio', 'F470': 'vacio', 'F471': 'vacio',
                 'F472': 'vacio', 'F473': 'vacio', 'F474': 'vacio', 'F475': 'vacio', 'F476': 'vacio', 'F477': 'vacio', 'F478': 'vacio', 'F479': 'vacio', 'F480': 'vacio',
-                'F481': 'vacio', 'F482': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'RELX': 'vacio','F96': 'vacio'
+                'F481': 'vacio', 'F482': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'RELX': 'vacio'
                 }, 
             'PDC-RMID': {
                 'F400': 'vacio', 'F401': 'vacio', 'F402': 'vacio', 'F403': 'vacio', 'F404': 'vacio', 'F405': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio',
@@ -617,7 +624,7 @@ class Model (object):
                 'F441': 'vacio', 'F432': 'vacio', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'vacio', 'F444': 'vacio',
                 'F445': 'vacio', 'F446': 'vacio', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio',
                 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'F449': 'vacio',
-                'F448': 'vacio', 'F447': 'vacio', 'RELX': 'vacio','F96': 'vacio'
+                'F448': 'vacio', 'F447': 'vacio', 'RELX': 'vacio'
                 },
             'PDC-RS': {
                 'F400': 'vacio', 'F401': 'vacio', 'F402': 'vacio', 'F403': 'vacio', 'F404': 'vacio', 'F405': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio',
@@ -627,13 +634,16 @@ class Model (object):
                 'F441': 'vacio', 'F432': 'vacio', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'vacio', 'F444': 'vacio',
                 'F445': 'vacio', 'F446': 'vacio', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio',
                 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'F449': 'vacio',
-                'F448': 'vacio', 'F447': 'vacio', 'RELX': 'vacio','F96': 'vacio'
+                'F448': 'vacio', 'F447': 'vacio', 'RELX': 'vacio'
                 }, 
             'PDC-S': {
                 '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'
                 }, 
             'TBLU': {
                 '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio', '7': 'vacio', '8': 'vacio', '9': 'vacio'
+                },
+            'F96': {
+                'F96': 'vacio'
                 }
             }
 
@@ -668,12 +678,53 @@ class Model (object):
             data = {
                 "PEDIDO":pedido,
                 "ESTADO": state,
-                "DATETIME": strftime("%Y/%m/%d %H:%M:%S"),
+                "DATETIME": self.get_currentTime().strftime("%Y/%m/%d %H:%M:%S"),
                 }
             resp = requests.post("http://localhost:5000/api/post/log",data=json.dumps(data))
         except Exception as ex:
             print("Log request Exception: ", ex)
 
+    def get_currentTime(self):
+
+        fecha_actuaal = None
+        try:
+            endpoint = "http://{}/server_famx/hora_servidor".format(self.server) #self.model.server
+            respuesta_hora = requests.get(endpoint).json()
+            if "exception" in respuesta_hora:
+                fecha_actuaal = datetime.now() #se toma la hora local de la PC
+                print("////////// fecha_local")
+            else:
+                fecha_actuaal = datetime.strptime(respuesta_hora["HORA_ACTUAL"], "%Y-%m-%d %H:%M:%S") #se toma la hora del servidor en el formato deseado
+                print("////////// fecha_servidor")
+        except Exception as ex:
+            print("exception hora_servidor: ",ex)
+            fecha_actuaal = datetime.now()
+            print("////////// fecha_local")
+        print("//////// Actualizando Fecha: ",fecha_actuaal)
+        return fecha_actuaal
+
+    def update_fecha_actual(self,fechaLocalActual,fechaActual):
+
+        #print("fechaActual: ",fechaActual)
+        segundos_transcurridos = fechaLocalActual - self.fechaLocalAnterior #se obtiene la diferencia del tiempo transcurrido en cada iteración de la ejecución paralela
+
+        self.fechaLocalAnterior = fechaLocalActual
+        #print("segundos_transcurridos por iteración: ",segundos_transcurridos)
+        
+        diferencia = fechaActual - self.fechaAnterior #se obtiene el tiempo total que ha transcurrido desde la última actualización de la hora desde el servidor (donde se han ido acumulando los segundos transcurridos de cada iteración y la fecha original obtenida del servidor)
+        # Compara si han pasado más de 3 minutos (180 segundos)
+        #print("diferenciaLocalAcumulada: ",diferencia)
+
+        if diferencia > timedelta(minutes=3) or diferencia < timedelta(minutes=0):
+            #print("Han pasado más de 3 minutos. Actualizando hora desde servidor...")
+            fechaActual = self.get_currentTime() #se actualiza del servidor la fecha
+            print("update pedido desde update_fecha_actual")
+            self.fechaAnterior = fechaActual #se guarda la última fecha obtenida de la actualización del servidor
+        else:
+            fechaActual = fechaActual + segundos_transcurridos
+            #print("tiempo transcurrido: ",diferencia)
+
+        return fechaActual
 
 class Robot (object):
 

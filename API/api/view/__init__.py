@@ -106,6 +106,49 @@ def etiqueta():
     finally:
         return response
 
+###################################  Update Get Hora de Servidor ####################################
+@app.route("/server_famx/hora_servidor",methods=["GET"])
+def servidorHora():
+    try:
+        connection = pyodbc.connect('DRIVER={SQL server}; SERVER='+serverp2+';DATABASE='+dbp2+';UID='+userp2+';PWD='+passwordp2)
+        print("Conexión Éxitosa")
+    except Exception as ex:
+        print("Conexión a P2 Exception: ", ex)
+        return {"exception": ex.args}
+    query = "SELECT CURRENT_TIMESTAMP AS HORA_ACTUAL;"
+    print("query: ",query)
+    try:
+        with connection.cursor() as cursor:
+            items = cursor.execute(query)
+            #result = cursor.fetchall()
+            records = cursor.fetchall()
+            insertObject = []
+            columnNames = [column[0]
+               for column in cursor.description
+            ]
+            for record in records:
+               insertObject.append(dict(zip(columnNames, record)))
+               #print("insertObject FINAL: ",insertObject)
+            if len(insertObject) == 1:
+                response = insertObject[0]
+            elif len(insertObject) > 1:
+                response = {}
+                keys = list(insertObject[0])
+                for key in keys:
+                    response[key] = []
+                    for item in insertObject:
+                        response[key].append(item.pop(key))         
+            else:
+                response = {"items": 0}
+            if "HORA_ACTUAL" in response:
+                response["HORA_ACTUAL"] = response["HORA_ACTUAL"].strftime('%Y-%m-%d %H:%M:%S')
+                print("response[HORA_ACTUAL]: ",response["HORA_ACTUAL"])
+    except Exception as ex:
+        print("myJsonResponse cursor Exception: ", ex)
+        response = {"exception" : ex.args}
+    finally:
+        connection.close()
+        return response
 #####################################  Upload Files Services ####################################
 @app.route('/delete/filesmodularities', methods=['POST'])
 def delRef():

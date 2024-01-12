@@ -40,6 +40,7 @@ class MqttClient (QObject):
     nido_PDCS = ""
     nido_TBLU = ""
     nido_PDCP2= ""
+    nido_F96= ""
 
     color_PDCD = "blue"
     color_PDCP = "blue"
@@ -47,6 +48,7 @@ class MqttClient (QObject):
     color_PDCS = "blue"
     color_TBLU = "blue"
     color_PDCP2 = "blue"
+    color_F96 = "blue"
 
     puertaA = ""
     puertaB = ""
@@ -319,21 +321,21 @@ class MqttClient (QObject):
                             "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"}
                             }
 
-                    #recorrer las cajas de la colección buscando que exista una cavidad F96 en el arnés
-                    for caja in self.model.input_data["database"]["modularity"]:
-                        if "F96" in caja:
-                            command = {
-                                "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"},
-                                "lbl_box7" : {"text": "F96: Si Aplica", "color": "purple"}
-                                }
+                    ##recorrer las cajas de la colección buscando que exista una cavidad F96 en el arnés
+                    #for caja in self.model.input_data["database"]["modularity"]:
+                    #    if "F96" in caja:
+                    #        command = {
+                    #            "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"},
+                    #            "lbl_box7" : {"text": "F96: Si Aplica", "color": "purple"}
+                    #            }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                     #si no hay caja PDCR, limpiar mensaje de F96
-                    if self.nido_PDCR == "":
-                        command = {
-                            "lbl_box7" : {"text": "", "color": "blue"}
-                            }
-                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    #if self.nido_PDCR == "":
+                    #    command = {
+                    #        "lbl_box7" : {"text": "", "color": "blue"}
+                    #        }
+                    #    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
 
                 if "PDC-S" in self.model.input_data["database"]["modularity"]:
@@ -418,7 +420,30 @@ class MqttClient (QObject):
                                 "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}"}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                
+                if "F96" in payload_str:
+                    if "F96" in payload:
+                        if payload["F96"] == True:
+                            self.nido_F96 = "F96:\n Habilitada"
+                            self.color_F96 = "blue"
+
+                        if payload["F96"] == False:
+                            self.nido_F96 = ""
+                            self.color_F96 = "blue"
+
+                    if "F96_ERROR" in payload:
+                        if payload["F96_ERROR"] == True:
+                            self.nido_F96 = "F96:\n clampeo incorrecto"
+                            self.color_F96 = "red"
+                    if "clamp_F96" in payload:
+                        if payload["clamp_F96"] == True:
+                            self.nido_F96 = "F96:\n clampeo correcto"
+                            self.color_F96 = "green"
+
+
+                    command = {
+                                "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}"}
+                              }
+                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
                         if payload["ERROR_cortina"] == True:
                             command = {"lbl_info4" : {"text": "Cortina\nInterrumpida", "color": "red", "ancho":400,"alto":400}}  
