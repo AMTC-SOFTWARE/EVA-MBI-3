@@ -507,8 +507,8 @@ class Model (object):
     ###########################################################
 
     def reset (self):
-        self.model.F96_clampeado=False
-        self.model.cajas_a_desclampear = []
+        self.F96_clampeado=False
+        self.cajas_a_desclampear = []
         self.datetime = None
         #for i in self.result:
         #    for j in self.result[i]:

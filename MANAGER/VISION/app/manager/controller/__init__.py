@@ -671,60 +671,59 @@ class CheckQr (QState):
                                 if "PDC-R" in box:
                                     #recorremos las cavidades de los datos del modulo que tienen esa misma caja
                                     for cavity in current_module[box]:
-                                        #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-                                        if current_module[box][cavity] != "vacio":
-                                            #si no esta la caja en arnes_data, agregar llave
-                                            if not(self.model.pdcrvariant in arnes_data):
-                                                arnes_data[self.model.pdcrvariant] = {}
-                                            #si la caja no está, agregar lista vacía para dicha caja
-                                            if not(self.model.pdcrvariant in self.model.input_data["database"]["modularity"]):
-                                                self.model.input_data["database"]["modularity"][self.model.pdcrvariant] = []
-                                            #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-                                            if not(cavity in self.model.input_data["database"]["modularity"][self.model.pdcrvariant]):
-                                                self.model.input_data["database"]["modularity"][self.model.pdcrvariant].append(cavity)
-                                            #si la caja no tiene esa cavidad entonces se agrega al diccionario
-                                            if not(cavity in arnes_data[self.model.pdcrvariant]):
-                                                arnes_data[self.model.pdcrvariant][cavity] =  current_module[box][cavity]
+                                        print("cavity",cavity)
+                                        if cavity == "F96":
+                                            #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
+                                            if current_module[box][cavity] != "vacio":
+                                                #si no esta la caja en arnes_data, agregar llave
+                                                if not("F96" in arnes_data):
+                                                    arnes_data["F96"] = {}
+                                                    print("si va a llevar F96")
+                                                #si la caja no está, encender bandera de que es una nueva caja
+                                                if not("F96" in self.model.input_data["database"]["modularity"]):
+                                                    self.model.input_data["database"]["modularity"]["F96"] = []
+                                                    print("f96 inputdata",self.model.input_data)
+                                                #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
+                                                if not(cavity in self.model.input_data["database"]["modularity"]["F96"]):
+                                                    self.model.input_data["database"]["modularity"]["F96"].append(cavity)
+                                                    print("f96 inputdata appnd",self.model.input_data)
+                                                #si la caja no tiene esa cavidad entonces se agrega al diccionario
+                                                if not(cavity in arnes_data["F96"]):
+                                                    print("arnes_data[F96][cavity]",arnes_data)
+                                                    arnes_data["F96"][cavity] =  current_module[box][cavity]
+                                        else:
+                                            #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
+                                            if current_module[box][cavity] != "vacio":
+                                                #si no esta la caja en arnes_data, agregar llave
+                                                if not(self.model.pdcrvariant in arnes_data):
+                                                    arnes_data[self.model.pdcrvariant] = {}
+                                                #si la caja no está, agregar lista vacía para dicha caja
+                                                if not(self.model.pdcrvariant in self.model.input_data["database"]["modularity"]):
+                                                    self.model.input_data["database"]["modularity"][self.model.pdcrvariant] = []
+                                                #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
+                                                if not(cavity in self.model.input_data["database"]["modularity"][self.model.pdcrvariant]):
+                                                    self.model.input_data["database"]["modularity"][self.model.pdcrvariant].append(cavity)
+                                                #si la caja no tiene esa cavidad entonces se agrega al diccionario
+                                                if not(cavity in arnes_data[self.model.pdcrvariant]):
+                                                    arnes_data[self.model.pdcrvariant][cavity] =  current_module[box][cavity]
                                 ##########
                                 else:
                                     #recorremos las cavidades de los datos del modulo que tienen esa misma caja
                                     for cavity in current_module[box]:
-                                       print("cavity",cavity)
-                                       if cavity == "F96":
-                                           #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-                                           if current_module[box][cavity] != "vacio":
-                                               #si no esta la caja en arnes_data, agregar llave
-                                               if not("F96" in arnes_data):
-                                                   arnes_data["F96"] = {}
-                                                   print("si va a llevar F96")
-                                               #si la caja no está, encender bandera de que es una nueva caja
-                                               if not("F96" in self.model.input_data["database"]["modularity"]):
-                                                   self.model.input_data["database"]["modularity"]["F96"] = []
-                                                   print("f96 inputdata",self.model.input_data)
-                                               #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-                                               if not(cavity in self.model.input_data["database"]["modularity"]["F96"]):
-                                                   self.model.input_data["database"]["modularity"]["F96"].append(cavity)
-                                                   print("f96 inputdata appnd",self.model.input_data)
-                                               #si la caja no tiene esa cavidad entonces se agrega al diccionario
-                                               if not(cavity in arnes_data["F96"]):
-                                                   print("arnes_data[F96][cavity]",arnes_data)
-                                                   arnes_data["F96"][cavity] =  current_module[box][cavity]
-                                       else:
-                                           #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-                                           if current_module[box][cavity] != "vacio":
-                                               
-                                               #si no esta la caja en arnes_data, agregar llave
-                                               if not(self.model.pdcrvariant in arnes_data):
-                                                   arnes_data[self.model.pdcrvariant] = {}
-                                               #si la caja no está, agregar lista vacía para dicha caja
-                                               if not(self.model.pdcrvariant in self.model.input_data["database"]["modularity"]):
-                                                   self.model.input_data["database"]["modularity"][self.model.pdcrvariant] = []
-                                               #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-                                               if not(cavity in self.model.input_data["database"]["modularity"][self.model.pdcrvariant]):
-                                                   self.model.input_data["database"]["modularity"][self.model.pdcrvariant].append(cavity)
-                                               #si la caja no tiene esa cavidad entonces se agrega al diccionario
-                                               if not(cavity in arnes_data[self.model.pdcrvariant]):
-                                                   arnes_data[self.model.pdcrvariant][cavity] =  current_module[box][cavity]
+                                        #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
+                                        if current_module[box][cavity] != "vacio":
+                                            #si no esta la caja en arnes_data, agregar llave
+                                            if not(box in arnes_data):
+                                                arnes_data[box] = {}
+                                            #si la caja no está, encender bandera de que es una nueva caja
+                                            if not(box in self.model.input_data["database"]["modularity"]):
+                                                self.model.input_data["database"]["modularity"][box] = []
+                                            #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
+                                            if not(cavity in self.model.input_data["database"]["modularity"][box]):
+                                                self.model.input_data["database"]["modularity"][box].append(cavity)
+                                            #si la caja no tiene esa cavidad entonces se agrega al diccionario
+                                            if not(cavity in arnes_data[box]):
+                                                arnes_data[box][cavity] =  current_module[box][cavity]
                             
                         else:
                             command = {
