@@ -177,7 +177,8 @@ class Startup(QState):
             "lbl_user" : {"type":"", "user": "", "color": "black"},
             "img_user" : "blanco.jpg",
             "img_nuts" : "blanco.jpg",
-            "img_center" : "logo.jpg"
+            "img_center" : "logo.jpg",
+            #"lcdNumtiempo": {"label_name": "Ciclo"},
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         
@@ -416,7 +417,15 @@ class StartCycle (QState):
             if segundos<10:
                 segundos="0"+str(segundos)
             tiempo_ciclo_promedio=str(parte_entera)+":"+str(segundos)
-            command["lcdNumtiempo"] = {"value": tiempo_ciclo_promedio}
+
+
+            command = {
+            "lcdNumtiempo": {"label_name": "Tiempo Ciclo\n Promedio", "color":"#68FD94", "value": tiempo_ciclo_promedio}
+            }
+
+
+            #command["lcdNumtiempo"] = {"value": tiempo_ciclo_promedio}
+
             
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
@@ -500,9 +509,11 @@ class CheckQr (QState):
 
         command = {
             "lbl_result" : {"text": "Datamatrix escaneado", "color": "green"},
-            "lbl_steps" : {"text": "Validando", "color": "black"}
+            "lbl_steps" : {"text": "Validando", "color": "black"},
+            "lcdNumtiempo": {"label_name": "Cronómetro", "color":"#ACFF5F"},   #FE1E48
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+        self.model.cronometro_ciclo=True
         Timer(0.05, self.API_requests).start()
 
     def API_requests (self):
@@ -1125,7 +1136,7 @@ class CheckPDCR (QState):
                 command = {
                     "lbl_result" : {"text": "Qr de Caja Correcto", "color": "green"},
                     "lbl_steps" : {"text": "Iniciando Ciclo", "color": "black"},
-                    "lcdNumtiempo": {"label_name": "Ciclo"},
+                    
                     }
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                 Timer(1.2,self.ok.emit).start()
@@ -1167,7 +1178,8 @@ class EnableClamps (QState):
         command = {
             "lbl_result" : {"text": "Información de Arnés Validada", "color": "green"},
             "lbl_steps" : {"text": "Coloca las cajas en los nidos para continuar", "color": "navy"},
-             
+            
+
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
@@ -1488,18 +1500,24 @@ class MyThreadReloj(QThread):
 
             #tiempo de espera para no alentar las ejecuciones de otros procesos
             sleep(1)
-            #if self.model.cronometro_ciclo==True:
-            #    #segundos+=1
-            #    #tiempo_transcurrido=str(minutos)+":"+segundos
-            #    print("se envia nombre del label del cronometro")
-            #    command = {
-            #        #"lcdNumbertiempo" : {"value": "tiempo_transcurrido"},
-            #        "lcdNumbertiempo" : {"label_name": "cronometro"}
-            #        }
-            #    #command["lcdNumbertiempo"] = {"value": tiempo_transcurrido}
-            #    #command["label_name"] = {"cronómetro": tiempo_transcurrido}
-            #
-            #    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            if self.model.cronometro_ciclo==True:
+                 segundos+=1
+                 if segundos >= 60:
+                     segundos=0
+                     minutos+=1 
+                 if segundos<10:
+                     segundos_str="0"+str(segundos)
+                 else:
+                     segundos_str=str(segundos)
+                 tiempo_transcurrido=str(minutos)+":"+str(segundos_str)
+                 
+                 command = {
+                     "lcdNumtiempo" : {"value": str(tiempo_transcurrido)},
+                           }
+            #    ##command["lcdNumbertiempo"] = {"value": tiempo_transcurrido}
+            #    ##command["label_name"] = {"cronómetro": tiempo_transcurrido}
+            #    #
+                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             ##else:
             #    segundos=0
             #    minutos=0

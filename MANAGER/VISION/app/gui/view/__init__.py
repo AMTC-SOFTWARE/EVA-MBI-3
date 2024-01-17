@@ -485,21 +485,18 @@ class MainWindow (QMainWindow):
                     self.ui.lcdNumber.setVisible(message["lcdNumber"]["visible"])
 
             if "lcdNumtiempo" in message:
-                if "label_name" in message:
-                    print(message["lcdNumtiempo"]["label_name"])
+                
+                if "label_name" in message["lcdNumtiempo"]:
                     self.ui.lbl_cant2.setText(message["lcdNumtiempo"]["label_name"])
-
                 if "value" in message["lcdNumtiempo"]:
                     self.ui.lcdNumtiempo.display(message["lcdNumtiempo"]["value"])
                 if "visible" in message["lcdNumtiempo"]:
                     #### Visualizacion del LCD
                     self.ui.lbl_cant2.setVisible(message["lcdNumtiempo"]["visible"])
                     self.ui.lcdNumtiempo.setVisible(message["lcdNumtiempo"]["visible"])
-                #if "color" in message["lcdNumtiempo"]:
-                #    #color_back=message["lcdNumtiempo"]["color"]
-                #    #print("color_back=message",color_back)
-                #    self.ui.lbl_box1.setStyleSheet("background-color: " + message["lcdNumtiempo"]["color"])
-                #    #self.ui.lbl_cant2.setStyleSheet("color: #214562; font-size:20px; border-radius:20px; background-color: {color_back}; margin-bottom: 5px")
+                if "color" in message["lcdNumtiempo"]:
+                     color_back=message["lcdNumtiempo"]["color"]
+                     self.ui.lbl_cant2.setStyleSheet("color: #214562; font-size:20px;background-color:" + message["lcdNumtiempo"]["color"]+ "; border-radius:20px; margin-bottom: 5px")
             ###########################################################################
             if "lbl_box1" in message:
                 self.ui.lbl_box1.setText(message["lbl_box1"]["text"])

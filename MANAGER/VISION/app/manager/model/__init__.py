@@ -41,7 +41,7 @@ class Model (object):
         #variable para hacer reintentos de trigger si no se recibe respuesta del sensor de altura
         self.height_trigger = False
         
-        self.cronometro_ciclo=True
+        self.cronometro_ciclo=False
         #lista para guardar las cajas que han terminado su inspección para poderlas desclampear
         self.cajas_a_desclampear = []
         #bandera para avisar que ya se terminaron las cajas actuales que se colocaron y es hora de desclampear (luego de que el robot vaya a home)
@@ -511,6 +511,7 @@ class Model (object):
         self.F96_clampeado=False
         self.cajas_a_desclampear = []
         self.datetime = None
+        self.cronometro_ciclo==False
         #for i in self.result:
         #    for j in self.result[i]:
         #        self.result[i][j] = None
