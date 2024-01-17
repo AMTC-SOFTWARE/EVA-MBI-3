@@ -470,12 +470,12 @@ class Ui_main(object):
         #self.lbl_cant.setStyleSheet("font-size:20px; margin-bottom: 5px"  )
         self.lbl_cant2.setStyleSheet("color: #214562; font-size:20px; border-radius:20px; background-color: #68FD94; margin-bottom: 5px"  ) # #214562 #a7c3d1
         self.gridLayout_3.addWidget(self.lbl_cant2, 0, 0, 1, 1)
-        self.lcdNumbertiempo = QtWidgets.QLCDNumber(self.centralwidget)
-        self.lcdNumbertiempo.setMinimumSize(QtCore.QSize(147, 0))
-        self.lcdNumbertiempo.setObjectName("lcdNumbertiempo")
-        self.lcdNumbertiempo.setStyleSheet("border-style: none")
-        self.gridLayout_3.addWidget(self.lcdNumbertiempo, 1, 0, 1, 1)
-        self.lcdNumbertiempo.setGeometry(1450,800, 200 , 100)
+        self.lcdNumtiempo = QtWidgets.QLCDNumber(self.centralwidget)
+        self.lcdNumtiempo.setMinimumSize(QtCore.QSize(147, 0))
+        self.lcdNumtiempo.setObjectName("lcdNumtiempo")
+        self.lcdNumtiempo.setStyleSheet("border-style: none")
+        self.gridLayout_3.addWidget(self.lcdNumtiempo, 1, 0, 1, 1)
+        self.lcdNumtiempo.setGeometry(1450,800, 200 , 100)
         self.lbl_cant2.setGeometry(1450,750, 200 , 100)
 
         

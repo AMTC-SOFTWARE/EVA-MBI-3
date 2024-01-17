@@ -326,7 +326,7 @@ class StartCycle (QState):
             "lbl_result" : {"text": "Nuevo ciclo iniciado", "color": "green"},
             "lbl_steps" : {"text": "Escanea el numero HM", "color": "black"},
             "lcdNumber": {"value": 0, "visible": False},
-            "lcdNumbertiempo": {"value": 0, "visible": False},
+            "lcdNumtiempo": {"value": 0, "visible": False},
             "img_nuts" : "blanco.jpg",
             "img_center" : "logo.jpg",
             "allow_close": False,
@@ -345,7 +345,7 @@ class StartCycle (QState):
             command["lbl_info3"] = {"text": "Trazabilidad\nDesactivada", "color": "red"}
 
         command["lcdNumber"] = {"value": 0, "visible": True}
-        command["lcdNumbertiempo"] = {"value": 0, "visible": True}
+        command["lcdNumtiempo"] = {"value": 0, "visible": True}
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
         try:
@@ -416,7 +416,7 @@ class StartCycle (QState):
             if segundos<10:
                 segundos="0"+str(segundos)
             tiempo_ciclo_promedio=str(parte_entera)+":"+str(segundos)
-            command["lcdNumbertiempo"] = {"value": tiempo_ciclo_promedio}
+            command["lcdNumtiempo"] = {"value": tiempo_ciclo_promedio}
             
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
@@ -1125,7 +1125,7 @@ class CheckPDCR (QState):
                 command = {
                     "lbl_result" : {"text": "Qr de Caja Correcto", "color": "green"},
                     "lbl_steps" : {"text": "Iniciando Ciclo", "color": "black"},
-                    #"lcdNumbertiempo": {"label_name": "ICiclo"},
+                    "lcdNumtiempo": {"label_name": "Ciclo"},
                     }
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                 Timer(1.2,self.ok.emit).start()
@@ -1167,6 +1167,7 @@ class EnableClamps (QState):
         command = {
             "lbl_result" : {"text": "Información de Arnés Validada", "color": "green"},
             "lbl_steps" : {"text": "Coloca las cajas en los nidos para continuar", "color": "navy"},
+             
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
