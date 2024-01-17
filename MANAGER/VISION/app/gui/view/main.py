@@ -451,6 +451,34 @@ class Ui_main(object):
         self.gridLayout_3.addWidget(self.lcdNumber, 1, 0, 1, 1)
         self.lcdNumber.setGeometry(1650,800, 200 , 100)
         self.lbl_cant.setGeometry(1650,750, 200 , 100)
+
+
+        ############################# LCD ######################################
+        self.gridLayout_3 = QtWidgets.QGridLayout()
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.lbl_cant2 = QtWidgets.QLabel(self.centralwidget)
+        self.lbl_cant2.setMinimumSize(QtCore.QSize(110, 15))
+        self.lbl_cant2.setMaximumSize(QtCore.QSize(300, 50))
+        font = QtGui.QFont()
+        font.setFamily("Sitka Text")
+        font.setPointSize(28)
+        font.setBold(True)
+        font.setWeight(75)
+
+        self.lbl_cant2.setAlignment(QtCore.Qt.AlignCenter)
+        self.lbl_cant2.setObjectName("lbl_cant2")
+        #self.lbl_cant.setStyleSheet("font-size:20px; margin-bottom: 5px"  )
+        self.lbl_cant2.setStyleSheet("color: #214562; font-size:20px; border-radius:20px; background-color: #68FD94; margin-bottom: 5px"  ) # #214562 #a7c3d1
+        self.gridLayout_3.addWidget(self.lbl_cant2, 0, 0, 1, 1)
+        self.lcdNumbertiempo = QtWidgets.QLCDNumber(self.centralwidget)
+        self.lcdNumbertiempo.setMinimumSize(QtCore.QSize(147, 0))
+        self.lcdNumbertiempo.setObjectName("lcdNumbertiempo")
+        self.lcdNumbertiempo.setStyleSheet("border-style: none")
+        self.gridLayout_3.addWidget(self.lcdNumbertiempo, 1, 0, 1, 1)
+        self.lcdNumbertiempo.setGeometry(1450,800, 200 , 100)
+        self.lbl_cant2.setGeometry(1450,750, 200 , 100)
+
+        
         ########################################################################
         #se crean después del menuMenu para que aparezcan sobre este y no debajo
         self.btn_hxh = QtWidgets.QPushButton(main)
@@ -509,7 +537,8 @@ class Ui_main(object):
         self.lbl_info4.setText(_translate("main", "INFO4"))
         self.menuMenu.setTitle(_translate("main", "Menu"))
         self.lbl_cant.setText(_translate("main", "PIEZAS"))
-
+        self.lbl_cant2.setText(_translate("main", "Tiempo Ciclo\n Promedio"))
+        
 if __name__ == "__main__":
     import resources_rc
     import sys

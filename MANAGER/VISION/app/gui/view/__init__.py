@@ -213,11 +213,7 @@ class MainWindow (QMainWindow):
                 Arneses_cada_hora[hora] = base_temporal.shape[0]
                 #horario_turno1[hora]["Arneses_cada_hora"] =base_temporal.shape[0]
 
-            print("total_minutos_perdidos",total_minutos_perdidos)
-            print("Arneses_cada_hora",Arneses_cada_hora)
-            print("promedio_ciclo",promedio_ciclo)
-            print("mejor_tiempo",mejor_tiempo.total_seconds() / 60)
-            print("peor_tiempo",peor_tiempo.total_seconds() / 60)
+            
             
             #self.qw_scanner.setVisible(show["scanner"])
             #item = self.tableWidget.horizontalHeaderItem(1)
@@ -485,6 +481,23 @@ class MainWindow (QMainWindow):
                     #### Visualizacion del LCD
                     self.ui.lbl_cant.setVisible(message["lcdNumber"]["visible"])
                     self.ui.lcdNumber.setVisible(message["lcdNumber"]["visible"])
+
+            if "lcdNumbertiempo" in message:
+                #if "label_name" in message:
+                #    print(message["lcdNumbertiempo"]["label_name"])
+                #    self.ui.lbl_cant2.setText(message["lcdNumbertiempo"]["label_name"])
+
+                if "value" in message["lcdNumbertiempo"]:
+                    self.ui.lcdNumbertiempo.display(message["lcdNumbertiempo"]["value"])
+                if "visible" in message["lcdNumbertiempo"]:
+                    #### Visualizacion del LCD
+                    self.ui.lbl_cant2.setVisible(message["lcdNumbertiempo"]["visible"])
+                    self.ui.lcdNumbertiempo.setVisible(message["lcdNumbertiempo"]["visible"])
+                #if "color" in message["lcdNumbertiempo"]:
+                #    #color_back=message["lcdNumbertiempo"]["color"]
+                #    #print("color_back=message",color_back)
+                #    self.ui.lbl_box1.setStyleSheet("background-color: " + message["lcdNumbertiempo"]["color"])
+                #    #self.ui.lbl_cant2.setStyleSheet("color: #214562; font-size:20px; border-radius:20px; background-color: {color_back}; margin-bottom: 5px")
             ###########################################################################
             if "lbl_box1" in message:
                 self.ui.lbl_box1.setText(message["lbl_box1"]["text"])

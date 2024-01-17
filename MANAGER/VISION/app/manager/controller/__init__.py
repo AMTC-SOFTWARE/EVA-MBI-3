@@ -11,10 +11,10 @@ import requests
 import json
 import os
 from os.path import exists
-
+import pandas as pd
 from manager.controller import inspections
 from toolkit.admin import Admin       
-
+import math
 class Controller (QObject):
 
     def __init__(self, parent = None):
@@ -326,6 +326,7 @@ class StartCycle (QState):
             "lbl_result" : {"text": "Nuevo ciclo iniciado", "color": "green"},
             "lbl_steps" : {"text": "Escanea el numero HM", "color": "black"},
             "lcdNumber": {"value": 0, "visible": False},
+            "lcdNumbertiempo": {"value": 0, "visible": False},
             "img_nuts" : "blanco.jpg",
             "img_center" : "logo.jpg",
             "allow_close": False,
@@ -344,6 +345,7 @@ class StartCycle (QState):
             command["lbl_info3"] = {"text": "Trazabilidad\nDesactivada", "color": "red"}
 
         command["lcdNumber"] = {"value": 0, "visible": True}
+        command["lcdNumbertiempo"] = {"value": 0, "visible": True}
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
         try:
@@ -351,7 +353,31 @@ class StartCycle (QState):
             "1":["07-00","18-59"],
             "2":["19-00","06-59"],
             }
-
+            horario_turno1={"7":0,
+                        "8":0,
+                        "9":0,
+                        "10":0,
+                        "11":0,
+                        "12":0,
+                        "13":0,
+                        "14":0,
+                        "15":0,
+                        "16":0,
+                        "17":0,
+                        "18":0,
+                        "19":0,
+                        "20":0,
+                        "21":0,
+                        "22":0,
+                        "23":0,
+                        "00":0,
+                        "01":0,
+                        "02":0,
+                        "03":0,
+                        "04":0,
+                        "05":0,
+                        "06":0,
+                        }
             endpoint = "http://{}/contar/historial/FIN".format(self.model.server)
             response = requests.get(endpoint, data=json.dumps(turnos))
             response = response.json()
@@ -359,6 +385,41 @@ class StartCycle (QState):
             print("Startup para mostrar conteo de arneses")
             command["lcdNumber"] = {"value": response["conteo"]}
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+
+            endpoint = "http://{}/horaxhora/historial/FIN".format(self.model.server)
+            response = requests.get(endpoint, data=json.dumps(turnos))
+            response = response.json()
+            
+            arneses_turno=pd.DataFrame({'HM': response['HM'],
+                   'INICIO': response['INICIO'],
+                   'FIN': response['FIN'],
+                   'RESULTADO': response['RESULTADO'],
+                   'USUARIO': response['USUARIO']})
+            
+            
+            arneses_turno['INICIO']=pd.to_datetime(arneses_turno['INICIO'])
+            arneses_turno['FIN']=pd.to_datetime(arneses_turno['FIN'])
+            arneses_turno['RESULTADO']=arneses_turno['RESULTADO'].astype("string")
+
+            #Calcula Duración de ciclo de los arneses
+            arneses_turno["INTERVALO"]=arneses_turno['FIN']-arneses_turno['INICIO']
+            
+            promedio_ciclo_turno=arneses_turno["INTERVALO"].mean().total_seconds() / 60
+            
+            # Obtener la parte entera y decimal
+            parte_entera = int(promedio_ciclo_turno)
+            parte_decimal = promedio_ciclo_turno - parte_entera
+            
+            # Convertir la parte decimal a segundos
+            segundos = round(parte_decimal * 60)
+            if segundos<10:
+                segundos="0"+str(segundos)
+            tiempo_ciclo_promedio=str(parte_entera)+":"+str(segundos)
+            command["lcdNumbertiempo"] = {"value": tiempo_ciclo_promedio}
+            
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
 
         except Exception as ex:
             print("Error en el conteo ", ex)
@@ -1057,12 +1118,14 @@ class CheckPDCR (QState):
             self.max_tries.emit()
 
         else:
-
+            
+            
             if self.model.qr_esperado in qr_leido:
                 print("Qr Correcto")
                 command = {
                     "lbl_result" : {"text": "Qr de Caja Correcto", "color": "green"},
                     "lbl_steps" : {"text": "Iniciando Ciclo", "color": "black"},
+                    #"lcdNumbertiempo": {"label_name": "ICiclo"},
                     }
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                 Timer(1.2,self.ok.emit).start()
@@ -1418,10 +1481,27 @@ class MyThreadReloj(QThread):
 
         fechaActual = self.model.get_currentTime() #se obtiene la fecha desde el servidor por primera vez
         print("update pedido desde MyThreadReloj inicial")
+        segundos=0
+        minutos=0
         while 1:
 
             #tiempo de espera para no alentar las ejecuciones de otros procesos
             sleep(1)
+            #if self.model.cronometro_ciclo==True:
+            #    #segundos+=1
+            #    #tiempo_transcurrido=str(minutos)+":"+segundos
+            #    print("se envia nombre del label del cronometro")
+            #    command = {
+            #        #"lcdNumbertiempo" : {"value": "tiempo_transcurrido"},
+            #        "lcdNumbertiempo" : {"label_name": "cronometro"}
+            #        }
+            #    #command["lcdNumbertiempo"] = {"value": tiempo_transcurrido}
+            #    #command["label_name"] = {"cronómetro": tiempo_transcurrido}
+            #
+            #    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            ##else:
+            #    segundos=0
+            #    minutos=0
             fechaLocalActual = datetime.now() #se actualiza la fecha local Actual
             fechaActual = self.model.update_fecha_actual(fechaLocalActual,fechaActual)
 
