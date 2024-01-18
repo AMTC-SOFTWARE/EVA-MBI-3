@@ -511,7 +511,7 @@ class Model (object):
         self.F96_clampeado=False
         self.cajas_a_desclampear = []
         self.datetime = None
-        self.cronometro_ciclo==False
+        
         #for i in self.result:
         #    for j in self.result[i]:
         #        self.result[i][j] = None

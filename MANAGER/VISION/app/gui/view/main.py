@@ -563,7 +563,7 @@ class Ui_main(object):
         self.menuMenu.setTitle(_translate("main", "Menu"))
         self.lbl_cant.setText(_translate("main", "PIEZAS"))
         self.lbl_cant2.setText(_translate("main", "Tiempo Ciclo\n Promedio"))
-        self.lbl_cant3.setText(_translate("main", "Cronometro"))
+        self.lbl_cant3.setText(_translate("main", "Cronómetro"))
         
 if __name__ == "__main__":
     import resources_rc

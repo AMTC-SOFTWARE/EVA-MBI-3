@@ -327,7 +327,7 @@ class StartCycle (QState):
             "lbl_steps" : {"text": "Escanea el numero HM", "color": "black"},
             "lcdNumber": {"value": 0, "visible": False},
             "lcdNumtiempo": {"value": 0, "visible": False},
-            "lcdcronometro": {"value": 0, "visible": False},
+            "lcdcronometro": {"visible": False},
             "img_nuts" : "blanco.jpg",
             "img_center" : "logo.jpg",
             "allow_close": False,
@@ -348,7 +348,7 @@ class StartCycle (QState):
 
         command["lcdNumber"] = {"value": 0, "visible": True}
         command["lcdNumtiempo"] = {"value": 0, "visible": True}
-        command["lcdcronometro"] = {"value": 0, "visible": True}
+        command["lcdcronometro"] = {"visible": True}
         
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
@@ -1319,7 +1319,7 @@ class Finish (QState):
         print("USUARIO: ",self.model.local_data["user"]["type"] + ": " + self.model.local_data["user"]["name"])
         #print("NOTAS: TORQUE OK, VISION OK, ALTURA OK, ETIQUETA OK",)
         #print("SCRAP: ",self.model.t_scrap)
-
+        self.model.cronometro_ciclo=False
         historial = {
             "HM": self.model.qr_codes["HM"],
             "RESULTADO": "2",
@@ -1381,7 +1381,7 @@ class Finish (QState):
                 "lbl_steps" : {"text": "Gire la llave de reset", "color": "black"}
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-
+        
         #### Trazabilidad FAMX2 Update de Información
         if self.model.config_data["trazabilidad"]:
             try:
@@ -1516,9 +1516,9 @@ class MyThreadReloj(QThread):
             #    ##command["label_name"] = {"cronómetro": tiempo_transcurrido}
             #    #
                  publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-            ##else:
-            #    segundos=0
-            #    minutos=0
+            else:
+                segundos=0
+                minutos=0
             fechaLocalActual = datetime.now() #se actualiza la fecha local Actual
             fechaActual = self.model.update_fecha_actual(fechaLocalActual,fechaActual)
 
