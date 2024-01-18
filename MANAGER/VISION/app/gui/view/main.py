@@ -427,7 +427,7 @@ class Ui_main(object):
         self.lineEdit.setObjectName("lineEdit")
         self.gridLayout.addWidget(self.splitter_4, 0, 0, 1, 1)
         main.setCentralWidget(self.centralwidget)
-        ############################# LCD ######################################
+        ############################# LCD 1######################################
         self.gridLayout_3 = QtWidgets.QGridLayout()
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.lbl_cant = QtWidgets.QLabel(self.centralwidget)
@@ -449,11 +449,11 @@ class Ui_main(object):
         self.lcdNumber.setObjectName("lcdNumber")
         self.lcdNumber.setStyleSheet("border-style: none")
         self.gridLayout_3.addWidget(self.lcdNumber, 1, 0, 1, 1)
-        self.lcdNumber.setGeometry(1650,800, 200 , 100)
-        self.lbl_cant.setGeometry(1650,750, 200 , 100)
+        self.lcdNumber.setGeometry(1750,800, 150 , 80) #200 , 100
+        self.lbl_cant.setGeometry(1750,750, 150 , 80)
 
 
-        ############################# LCD ######################################
+        ############################# LCD 2######################################
         self.gridLayout_3 = QtWidgets.QGridLayout()
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.lbl_cant2 = QtWidgets.QLabel(self.centralwidget)
@@ -475,10 +475,35 @@ class Ui_main(object):
         self.lcdNumtiempo.setObjectName("lcdNumtiempo")
         self.lcdNumtiempo.setStyleSheet("border-style: none")
         self.gridLayout_3.addWidget(self.lcdNumtiempo, 1, 0, 1, 1)
-        self.lcdNumtiempo.setGeometry(1450,800, 200 , 100)
-        self.lbl_cant2.setGeometry(1450,750, 200 , 100)
+        self.lcdNumtiempo.setGeometry(1600,800, 150 , 80)
+        self.lbl_cant2.setGeometry(1600,750, 150 , 80)
 
         
+        ############################# LCD 3######################################
+        self.gridLayout_3 = QtWidgets.QGridLayout()
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.lbl_cant3 = QtWidgets.QLabel(self.centralwidget)
+        self.lbl_cant3.setMinimumSize(QtCore.QSize(110, 15))
+        self.lbl_cant3.setMaximumSize(QtCore.QSize(300, 50))
+        font = QtGui.QFont()
+        font.setFamily("Sitka Text")
+        font.setPointSize(28)
+        font.setBold(True)
+        font.setWeight(75)
+
+        self.lbl_cant3.setAlignment(QtCore.Qt.AlignCenter)
+        self.lbl_cant3.setObjectName("lbl_cant3")
+        #self.lbl_cant.setStyleSheet("font-size:20px; margin-bottom: 5px"  )
+        self.lbl_cant3.setStyleSheet("color: #214562; font-size:20px; border-radius:20px; background-color: #68FD94; margin-bottom: 5px"  ) # #214562 #a7c3d1
+        self.gridLayout_3.addWidget(self.lbl_cant3, 0, 0, 1, 1)
+        self.lcdcronometro = QtWidgets.QLCDNumber(self.centralwidget)
+        self.lcdcronometro.setMinimumSize(QtCore.QSize(147, 0))
+        self.lcdcronometro.setObjectName("lcdcronometro")
+        self.lcdcronometro.setStyleSheet("border-style: none")
+        self.gridLayout_3.addWidget(self.lcdcronometro, 1, 0, 1, 1)
+        self.lcdcronometro.setGeometry(1450,800, 150 , 80)
+        self.lbl_cant3.setGeometry(1450,750, 150 , 80)
+
         ########################################################################
         #se crean después del menuMenu para que aparezcan sobre este y no debajo
         self.btn_hxh = QtWidgets.QPushButton(main)
@@ -538,6 +563,7 @@ class Ui_main(object):
         self.menuMenu.setTitle(_translate("main", "Menu"))
         self.lbl_cant.setText(_translate("main", "PIEZAS"))
         self.lbl_cant2.setText(_translate("main", "Tiempo Ciclo\n Promedio"))
+        self.lbl_cant3.setText(_translate("main", "Cronometro"))
         
 if __name__ == "__main__":
     import resources_rc

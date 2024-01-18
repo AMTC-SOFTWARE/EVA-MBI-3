@@ -178,7 +178,6 @@ class Startup(QState):
             "img_user" : "blanco.jpg",
             "img_nuts" : "blanco.jpg",
             "img_center" : "logo.jpg",
-            #"lcdNumtiempo": {"label_name": "Ciclo"},
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         
@@ -328,11 +327,13 @@ class StartCycle (QState):
             "lbl_steps" : {"text": "Escanea el numero HM", "color": "black"},
             "lcdNumber": {"value": 0, "visible": False},
             "lcdNumtiempo": {"value": 0, "visible": False},
+            "lcdcronometro": {"value": 0, "visible": False},
             "img_nuts" : "blanco.jpg",
             "img_center" : "logo.jpg",
             "allow_close": False,
             "cycle_started": False,
             "statusBar": "clear"
+
             }
         if self.model.shutdown == True:
             Timer(0.05, self.logout, args = (copy(self.model.local_data["user"]),)).start()
@@ -347,6 +348,8 @@ class StartCycle (QState):
 
         command["lcdNumber"] = {"value": 0, "visible": True}
         command["lcdNumtiempo"] = {"value": 0, "visible": True}
+        command["lcdcronometro"] = {"value": 0, "visible": True}
+        
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
         try:
@@ -418,15 +421,11 @@ class StartCycle (QState):
                 segundos="0"+str(segundos)
             tiempo_ciclo_promedio=str(parte_entera)+":"+str(segundos)
 
-
             command = {
             "lcdNumtiempo": {"label_name": "Tiempo Ciclo\n Promedio", "color":"#68FD94", "value": tiempo_ciclo_promedio}
             }
 
 
-            #command["lcdNumtiempo"] = {"value": tiempo_ciclo_promedio}
-
-            
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 
@@ -510,7 +509,6 @@ class CheckQr (QState):
         command = {
             "lbl_result" : {"text": "Datamatrix escaneado", "color": "green"},
             "lbl_steps" : {"text": "Validando", "color": "black"},
-            "lcdNumtiempo": {"label_name": "Cronómetro", "color":"#ACFF5F"},   #FE1E48
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         self.model.cronometro_ciclo=True
@@ -1512,7 +1510,7 @@ class MyThreadReloj(QThread):
                  tiempo_transcurrido=str(minutos)+":"+str(segundos_str)
                  
                  command = {
-                     "lcdNumtiempo" : {"value": str(tiempo_transcurrido)},
+                     "lcdcronometro" : {"value": str(tiempo_transcurrido)},
                            }
             #    ##command["lcdNumbertiempo"] = {"value": tiempo_transcurrido}
             #    ##command["label_name"] = {"cronómetro": tiempo_transcurrido}

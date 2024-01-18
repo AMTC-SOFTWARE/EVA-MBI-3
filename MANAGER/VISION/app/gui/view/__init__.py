@@ -75,9 +75,12 @@ class MainWindow (QMainWindow):
 
         self.ui.lbl_cant.setVisible(False)
         self.ui.lbl_cant2.setVisible(False)
-
+        self.ui.lbl_cant3.setVisible(False)
+        
         self.ui.lcdNumber.setVisible(False)
         self.ui.lcdNumtiempo.setVisible(False)
+        self.ui.lcdcronometro.setVisible(False)
+
         menu = self.ui.menuMenu
         actionLogin = QAction("Login",self)
         actionLogout = QAction("Logout",self)
@@ -497,6 +500,20 @@ class MainWindow (QMainWindow):
                 if "color" in message["lcdNumtiempo"]:
                      color_back=message["lcdNumtiempo"]["color"]
                      self.ui.lbl_cant2.setStyleSheet("color: #214562; font-size:20px;background-color:" + message["lcdNumtiempo"]["color"]+ "; border-radius:20px; margin-bottom: 5px")
+
+            if "lcdcronometro" in message:
+                
+                if "label_name" in message["lcdcronometro"]:
+                    self.ui.lbl_cant3.setText(message["lcdcronometro"]["label_name"])
+                if "value" in message["lcdcronometro"]:
+                    self.ui.lcdcronometro.display(message["lcdcronometro"]["value"])
+                if "visible" in message["lcdcronometro"]:
+                    #### Visualizacion del LCD
+                    self.ui.lbl_cant3.setVisible(message["lcdcronometro"]["visible"])
+                    self.ui.lcdcronometro.setVisible(message["lcdcronometro"]["visible"])
+                if "color" in message["lcdcronometro"]:
+                     color_back=message["lcdcronometro"]["color"]
+                     self.ui.lbl_cant3.setStyleSheet("color: #214562; font-size:20px;background-color:" + message["lcdcronometro"]["color"]+ "; border-radius:20px; margin-bottom: 5px")
             ###########################################################################
             if "lbl_box1" in message:
                 self.ui.lbl_box1.setText(message["lbl_box1"]["text"])
