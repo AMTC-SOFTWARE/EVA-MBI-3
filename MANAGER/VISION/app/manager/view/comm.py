@@ -195,8 +195,8 @@ class MqttClient (QObject):
                 if "retry_btn" in payload:
                     self.model.input_data["plc"]["retry_btn"] = bool(payload["retry_btn"])
                     if payload["retry_btn"] == True:
-                        self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "stop"}), qos = 2)
-                        Timer(0.5, self.start_robot).start()
+                        #self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "stop"}), qos = 2)
+                        #Timer(0.5, self.start_robot).start()
                         
                         self.retry_btn.emit()
 

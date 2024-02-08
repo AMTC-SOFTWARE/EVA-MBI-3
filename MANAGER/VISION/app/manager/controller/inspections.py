@@ -4,7 +4,7 @@ from threading import Timer
 from cv2 import imread, imwrite
 from copy import copy
 import json
-
+from time import sleep #para poder usar sleep()
 from manager.controller import vision, height
 #self.QState.assignProperty(self.button, 'text', 'Off')
 
@@ -28,12 +28,14 @@ class Inspections(QState):
         self.stop               = Stop(model = self.model, parent = self)
 
         #Estado inicial para esperar boton de start en la inspección
-        self.wait_start.addTransition(self.model.transitions.start, self.update_triggers)
+        self.wait_start.addTransition(self.model.transitions.start, self.setup_robot)
+       
+        self.setup_robot.addTransition(self.model.transitions.rbt_home, self.update_triggers)
 
         # --- if "position_reached" in payload["response"]: ---- self.rbt_pose.emit() --- 
-        self.setup_robot.addTransition(self.model.transitions.rbt_pose, self.update_triggers)
+        self.setup_robot.addTransition(self.model.transitions.rbt_home, self.update_triggers)
 
-        self.update_triggers.addTransition(self.model.transitions.start, self.setup_robot)
+        #self.update_triggers.addTransition(self.model.transitions.start, self.setup_robot)
         self.setup_robot.addTransition(self.model.transitions.retry_btn, self.setup_robot)
 
         self.update_triggers.addTransition(self.model.transitions.clamp, self.update_triggers)
@@ -41,7 +43,7 @@ class Inspections(QState):
         self.update_triggers.addTransition(self.update_triggers.ok, self.vision)
 
         self.standby.addTransition(self.model.transitions.clamp, self.wait_start)
-        self.standby.addTransition(self.model.transitions.start, self.update_triggers)     
+        self.standby.addTransition(self.model.transitions.start, self.setup_robot)     
         ##con f96 sin instrumentar
         self.update_triggers.addTransition(self.update_triggers.F96_espera,self.wait_start)
         ##
@@ -106,7 +108,10 @@ class SetRobot(QState):
             "lbl_steps" : {"text": "Por favor espere", "color": "black"}
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-        Timer(0.05, self.model.robot.home).start()
+        publish.single(self.model.pub_topics["robot"],json.dumps({"command": "stop"}),hostname='127.0.0.1', qos = 2)
+        
+        sleep(1)
+        publish.single(self.model.pub_topics["robot"],json.dumps({"command": "start"}),hostname='127.0.0.1', qos = 2)
 
 class WaitingHome(QState):
     def __init__(self, model = None, parent = None):

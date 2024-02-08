@@ -11,7 +11,7 @@ from collections import OrderedDict
 import json
 import os
 from os.path import exists
-
+self.reintento  = Reintento(module = self.module, model = self.model, parent = self)
 class Vision (QState):
     retry       = pyqtSignal()
     finished    = pyqtSignal()
@@ -51,12 +51,17 @@ class Process (QState):
         
         # entra a triggers con el mensaje de posición alcanzada del robot, el estado pose manda el mensaje mqtt para que el robot vaya ahí
         self.pose.addTransition(self.model.transitions.rbt_pose, self.triggers)
-        self.pose.addTransition(self.model.transitions.retry_btn, self.pose)
+
+        self.pose.addTransition(self.model.transitions.rbt_home, self.pose)
+        self.pose.addTransition(self.model.transitions.retry_btn, self.reintento)
+
+        self.reintento.addTransition(self.model.transitions.rbt_home, self.pose)
+
         self.triggers.addTransition(self.triggers.finished, self.pose)
         self.triggers.addTransition(self.model.transitions.vision, self.receiver)
         self.receiver.addTransition(self.receiver.ok, self.triggers)
-        self.addTransition(self.model.transitions.rbt_stop, self.stop)
-        self.stop.addTransition(self.model.transitions.start, self.pose)
+        #self.addTransition(self.model.transitions.rbt_stop, self.stop)
+        #self.stop.addTransition(self.model.transitions.start, self.pose)
         
         self.triggers.nok.connect(self.nok)
         self.pose.nok.connect(self.nok)
@@ -536,3 +541,40 @@ class Pose(QState):
         # self.model.vision_data Sale listo y recién horneado de aquí (AQUI ES DONDE VAMOS-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**)
         # Ejemplo de current_trig : "PDC_R_pv1"
         self.model.robot.setPose(current_trig)
+
+class Reintento (QState):
+    ok      = pyqtSignal()
+    nok     = pyqtSignal()
+
+    def __init__(self, module = "vision1", model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+        self.module = module
+
+    def onEntry(self, event):
+
+        print("############################## ESTADO: reintento VISION ############################")
+
+        box = self.model.vision_data[self.module]["box"]
+
+        command = {
+            "lbl_result" : {"text": "ESPERE", "color": "green"},
+            "lbl_steps" : {"text": "Botón de reintento presionado", "color": "black"}
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+        self.model.vision_data[self.module]["box"] = ""
+        self.model.vision_data[self.module]["queue"].clear()
+        self.model.vision_data[self.module]["current_trig"] = None
+        self.model.vision_data[self.module]["results"].clear()
+        self.model.vision_data[self.module]["rqst"] = None
+        self.model.robot.home()
+        
+    def onExit(self, QEvent):
+
+        command = {
+            "lbl_info1" : {"text": "", "color": "black"},
+            "lbl_result" : {"text": "Reintentando inspección por visión", "color": "green"},
+            "lbl_steps" : {"text": "Espera el resultado", "color": "black"},
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)

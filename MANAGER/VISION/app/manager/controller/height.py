@@ -44,12 +44,16 @@ class Process (QState):
         self.triggers   = Triggers( module = self.module, model = self.model, parent = self)
         self.receiver   = Receiver( module = self.module, model = self.model, parent = self)
         self.stop       = Stop(module = self.module, model = self.model, parent = self)
-        
+        self.reintento  = Reintento(module = self.module, model = self.model, parent = self)
         
         self.pose.addTransition(self.model.transitions.rbt_pose, self.triggers)
         #triggers.finished se emite cuando ya se terminó toda la cola de secciones correctamente
         self.triggers.addTransition(self.triggers.finished, self.pose)
 
+        self.pose.addTransition(self.model.transitions.retry_btn, self.reintento)
+        self.triggers.addTransition(self.model.transitions.retry_btn, self.reintento)
+
+        self.reintento.addTransition(self.model.transitions.rbt_home, self.pose)
         #height.emit() se hace como respuesta cuando se reciven los resultados del sensor de altura
         self.triggers.addTransition(self.model.transitions.height, self.receiver)
 
@@ -171,7 +175,7 @@ class Triggers (QState):
         if box in self.model.modularity_fuses:
             for fuse in self.model.modularity_fuses[box]:
                 #height_d es una copia elemento a elemento de la base de datos que te indica si hay fusible o no
-                height_d = [True] if self.model.modularity_fuses[box][fuse] != "vacio" else [False]
+                height_d = True if self.model.modularity_fuses[box][fuse] != "vacio" else False
 
                 #revisando si el fusible está en los resultados del sensor de altura (si está en esta sección de inspección)
                 if fuse in results[box]:
@@ -182,23 +186,44 @@ class Triggers (QState):
                     #se guarda el nombre de la caja y el nombre del fusible para poderlo modificar en bounding box
                     temp = [box, fuse]
 
-                    #si el resultado de la inspección (true/false) == true/false (dependiendo de si debe llevar o no fusible)
-                    if results[box][fuse] == height_d:
-                        #si es lo que debe ser, se pinta verde
-                        img = self.model.drawBB(img = img, BB = temp, color = (0, 255, 0))
-                        self.model.h_result[box][fuse] = self.model.modularity_fuses[box][fuse]
-                    else:
-                        error = True
-                        img = self.model.drawBB(img = img, BB = temp, color = (0, 0, 255))
-                        self.model.h_result[box][fuse] = not(height_d)
-                        self.model.expected_fuses = self.model.expected_fuses + str(fuse) + ":\tALTURA NOK\n"
-                        print("||||||||||Cavidad en la que hubo error: ",fuse, " Caja: ",box)
-                        print("Modelo: ",self.model.tries)
-                        if fuse in self.model.tries["ALTURA"][box]:
-                            self.model.tries["ALTURA"][box][fuse] += 1
+                    if len(results[box][fuse])>=1:
+
+                        #si el resultado de la inspección (true/false) == true/false (dependiendo de si debe llevar o no fusible)
+                        if results[box][fuse][-1] == height_d:
+                            #si es lo que debe ser, se pinta verde
+                            img = self.model.drawBB(img = img, BB = temp, color = (0, 255, 0))
+                            self.model.h_result[box][fuse] = self.model.modularity_fuses[box][fuse]
                         else:
-                            self.model.tries["ALTURA"][box][fuse] = 1
-                        print("Modelo Final: ",self.model.tries)
+                            error = True
+                            img = self.model.drawBB(img = img, BB = temp, color = (0, 0, 255))
+                            self.model.h_result[box][fuse] = not(height_d)
+                            self.model.expected_fuses = self.model.expected_fuses + str(fuse) + ":\tALTURA NOK\n"
+                            print("||||||||||Cavidad en la que hubo error: ",fuse, " Caja: ",box)
+                            print("Modelo: ",self.model.tries)
+                            if fuse in self.model.tries["ALTURA"][box]:
+                                self.model.tries["ALTURA"][box][fuse] += 1
+                            else:
+                                self.model.tries["ALTURA"][box][fuse] = 1
+                            print("Modelo Final: ",self.model.tries)
+
+                    else:
+                        #si el resultado de la inspección (true/false) == true/false (dependiendo de si debe llevar o no fusible)
+                        if results[box][fuse] == height_d:
+                            #si es lo que debe ser, se pinta verde
+                            img = self.model.drawBB(img = img, BB = temp, color = (0, 255, 0))
+                            self.model.h_result[box][fuse] = self.model.modularity_fuses[box][fuse]
+                        else:
+                            error = True
+                            img = self.model.drawBB(img = img, BB = temp, color = (0, 0, 255))
+                            self.model.h_result[box][fuse] = not(height_d)
+                            self.model.expected_fuses = self.model.expected_fuses + str(fuse) + ":\tALTURA NOK\n"
+                            print("||||||||||Cavidad en la que hubo error: ",fuse, " Caja: ",box)
+                            print("Modelo: ",self.model.tries)
+                            if fuse in self.model.tries["ALTURA"][box]:
+                                self.model.tries["ALTURA"][box][fuse] += 1
+                            else:
+                                self.model.tries["ALTURA"][box][fuse] = 1
+                            print("Modelo Final: ",self.model.tries)
 
         imwrite(self.model.imgs_path + self.module + ".jpg", img)
 
@@ -222,6 +247,41 @@ class Triggers (QState):
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             self.nok.emit()
+
+class Reintento (QState):
+    ok      = pyqtSignal()
+    nok     = pyqtSignal()
+
+    def __init__(self, module = "height1", model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+        self.module = module
+
+    def onEntry(self, event):
+
+        print("############################## ESTADO: reintento HEIGHT ############################")
+
+        box = self.model.height_data[self.module]["box"]
+        command = {
+            "lbl_result" : {"text": "ESPERE", "color": "green"},
+            "lbl_steps" : {"text": "Boton de reintento presionado", "color": "black"}
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+        #Descomentar si se quiere pasar por vision de nuevo
+        #self.model.height_data[self.module]["box"] = ""
+        #self.model.height_data[self.module]["queue"].clear()
+        self.model.height_data[self.module]["current_trig"] = None
+        self.model.height_data[self.module]["results"].clear()
+        self.model.height_data[self.module]["rqst"] = None
+        self.model.input_data["height"].clear()
+        self.model.robot.home()
+
+    def onExit(self, QEvent):
+        command = {
+            "lbl_result" : {"text": "Reintentando inspección de alturas", "color": "green"},
+            "lbl_steps" : {"text": "Espera el resultado", "color": "black"},
+            }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 
 class Receiver (QState):
