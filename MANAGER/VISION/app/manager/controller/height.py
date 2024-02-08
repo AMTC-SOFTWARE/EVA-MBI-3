@@ -53,6 +53,8 @@ class Process (QState):
         self.pose.addTransition(self.model.transitions.retry_btn, self.reintento)
         self.triggers.addTransition(self.model.transitions.retry_btn, self.reintento)
 
+        self.reintento.addTransition(self.model.transitions.retry_btn, self.reintento)
+
         self.reintento.addTransition(self.model.transitions.rbt_home, self.pose)
         #height.emit() se hace como respuesta cuando se reciven los resultados del sensor de altura
         self.triggers.addTransition(self.model.transitions.height, self.receiver)

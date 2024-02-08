@@ -11,7 +11,7 @@ from collections import OrderedDict
 import json
 import os
 from os.path import exists
-self.reintento  = Reintento(module = self.module, model = self.model, parent = self)
+
 class Vision (QState):
     retry       = pyqtSignal()
     finished    = pyqtSignal()
@@ -47,13 +47,15 @@ class Process (QState):
         self.triggers   = Triggers( module = self.module, model = self.model, parent = self)
         self.receiver   = Receiver( module = self.module, model = self.model, parent = self)
         self.stop       = Stop(module = self.module, model = self.model, parent = self)
-        
+        self.reintento  = Reintento(module = self.module, model = self.model, parent = self)
         
         # entra a triggers con el mensaje de posición alcanzada del robot, el estado pose manda el mensaje mqtt para que el robot vaya ahí
         self.pose.addTransition(self.model.transitions.rbt_pose, self.triggers)
 
         self.pose.addTransition(self.model.transitions.rbt_home, self.pose)
         self.pose.addTransition(self.model.transitions.retry_btn, self.reintento)
+
+        self.reintento.addTransition(self.model.transitions.retry_btn, self.reintento)
 
         self.reintento.addTransition(self.model.transitions.rbt_home, self.pose)
 
