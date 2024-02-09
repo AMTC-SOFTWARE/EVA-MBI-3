@@ -49,6 +49,10 @@ class Model (object):
         self.F96_pendiente=False
         self.tiempo = ""
 
+        self.BRACKET_PDCD_clampeado=False
+        self.PDCD_bracket_pendiente=False
+        self.PDCD_bracket_terminado=False
+
         self.BB = {
             'BATTERY': {
                 'BT': ((169, 157), (231, 212))}, 
@@ -287,6 +291,9 @@ class Model (object):
                 'F228': [(376, 401), (388, 413)], 'F229': [(377, 386), (388, 392)], 'F230': [(378, 367), (390, 377)], 'F231': [(374, 350), (388, 362)], 
                 'F232': [(376, 333), (389, 344)]
                 },
+            'PDC-Dbracket':{
+                'bracket': [(273, 304), (420, 447)]
+                },
             'F96':{
                 'F96': [(253, 337), (483, 425)]
                 },
@@ -402,7 +409,8 @@ class Model (object):
             "PDC-R": ["R1","R2","R3","R4","R5","R6","R7","R8"],
             "PDC-RMID": ["R1","R2","R3","R4","R5","R6"],
             "PDC-RS": ["R1","R2","R3","R4","R5","R6"],
-            "F96": ["F96"]
+            "F96": ["F96"],
+            "PDC-Dbracket": ["Db1"]
             }
         #puntos guardados en robot a los que irá para sus inspecciones de visión
         self.rv_triggers = {
@@ -414,7 +422,8 @@ class Model (object):
             "PDC-R": ["PDCR_vision_1","PDCR_vision_2","PDCR_vision_3","PDCR_vision_4","PDCR_vision_5","PDCR_vision_6","PDCR_vision_7","PDCR_vision_8"],
             "PDC-RMID": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
             "PDC-RS": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
-            "F96": ["F96_vision_1"]
+            "F96": ["F96_vision_1"],
+            "PDC-Dbracket": ["PDCDbracket_vision_1"]
             }
         #nombre de programas a llamar para inspección de zonas(por bloque) en sensor (altura) en cada punto del robot
         self.h_triggers = {
@@ -425,7 +434,8 @@ class Model (object):
             "PDC-R": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9","R11","R12","R13","R14"],
             "PDC-RMID": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
             "PDC-RS": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
-            "F96": ["F96"]
+            "F96": ["F96"],
+            "PDC-Dbracket": ["Db1"]
             }
         
         #puntos guardados en robot a los que irá para sus inspecciones de alturas
@@ -437,7 +447,8 @@ class Model (object):
             "PDC-R": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9","PDCR_pa11","PDCR_pa12","PDCR_pa13","PDCR_pa14"],
             "PDC-RMID": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
             "PDC-RS": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
-            "F96": ["F96_pa1"]
+            "F96": ["F96_pa1"],
+            "PDC-Dbracket": ["PDCDbracket_pa1"]
             }
 
         print("v_triggers:\n",self.v_triggers)
@@ -493,7 +504,8 @@ class Model (object):
             "conector2":" PDCP2",
             "conector3":" PDCP2",
             "conector4":" PDCP2",
-            "conector5":" PDCP2"
+            "conector5":" PDCP2",
+            "bracket1":" PDCD"
 
             }
 
@@ -508,6 +520,10 @@ class Model (object):
     ###########################################################
 
     def reset (self):
+        self.BRACKET_PDCD_clampeado=False
+        self.PDCD_bracket_terminado=False
+        self.PDCD_bracket_pendiente=False
+        self.cajas_a_desclampear=[]
         self.F96_clampeado=False
         self.cajas_a_desclampear = []
         self.datetime = None
@@ -597,6 +613,9 @@ class Model (object):
                 'F218': 'vacio', 'F219': 'vacio', 'F220': 'vacio', 'F221': 'vacio', 'F222': 'vacio', 'F223': 'vacio', 'F224': 'vacio', 'F225': 'vacio', 'F226': 'vacio',
                 'F227': 'vacio', 'F228': 'vacio', 'F229': 'vacio', 'F230': 'vacio', 'F231': 'vacio', 'F232': 'vacio'
                 }, 
+            'PDC-Dbracket': {
+                'bracket': 'bracket1'
+                },
             'PDC-P': {
                 'MF1': 'vacio', 'MF2': 'vacio', 'F301': 'vacio', 'F302': 'vacio', 'F303': 'vacio', 'F304': 'vacio', 'F305': 'vacio', 'F300': 'vacio', 'F318': 'vacio',
                 'F319': 'vacio', 'F320': 'vacio', 'F321': 'vacio', 'F322': 'vacio', 'F323': 'vacio', 'F324': 'vacio', 'F325': 'vacio', 'F326': 'vacio', 'F327': 'vacio',
@@ -661,12 +680,12 @@ class Model (object):
                 for i in BB:
                     pts = self.fuses_BB[i[0]][i[1]]
                     rectangle(img, pts[0], pts[1], color, 2)
-                    if BB[0]=="PDC-P2":
+                    if BB[0]=="PDC-P2" or BB[0]=="PDC-Dbracket":
                         rectangle(img, pts[0], pts[1], color, 20)
             else:
                 pts = self.fuses_BB[BB[0]][BB[1]]
                 rectangle(img, pts[0], pts[1], color, 2)
-                if BB[0]=="PDC-P2":
+                if BB[0]=="PDC-P2" or BB[0]=="PDC-Dbracket":
                     rectangle(img, pts[0], pts[1], color, 20)
         except Exception as ex:
             print("Model.drawBB exception: ", ex)

@@ -150,7 +150,7 @@ class Startup(QState):
     def onEntry(self, event):
 
         print("############################## ESTADO: Startup ############################")
-
+        self.model.cajas_a_desclampear = []
         if self.model.local_data["user"]["type"] != "":
             Timer(0.05, self.logout, args = (copy(self.model.local_data["user"]),)).start()
 
@@ -833,7 +833,8 @@ class CheckQr (QState):
                 #Se agrega nueva inspeccion obligatoria para todos los arneses la caja PDC-P2
                 self.model.input_data["database"]["modularity"]["PDC-P2"] = ['CONECTOR1', 'CONECTOR2']
                 
-                
+                #Se agrega nueva inspeccion obligatoria para todos los arneses el bracket de la caja PDCD
+                self.model.input_data["database"]["modularity"]["PDC-Dbracket"] = ['bracket']
                 
                 print("\t\tCOLECCIÓN:\n", self.model.input_data["database"]["modularity"])
                 print("\t\tmodularity_fuses:\n", self.model.modularity_fuses) #Temporal solo para ver los fusibles cuando sea un vehículo Z296 (MAXI 30A VERDE Nuevo)
@@ -1433,7 +1434,11 @@ class Reset (QState):
     def onEntry(self, event):
 
         print("############################## ESTADO: Reset ############################")
-
+        self.model.cronometro_ciclo=False
+        self.model.cajas_a_desclampear=[]
+        self.model.PDCD_bracket_pendiente=False
+        self.model.PDCD_bracket_terminado=False
+        self.model.BRACKET_PDCD_clampeado=False
         command = {
             "lbl_result" : {"text": "Se giró la llave de reset", "color": "green"},
             "lbl_steps" : {"text": "Reiniciando", "color": "black"},

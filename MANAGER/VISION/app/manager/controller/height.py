@@ -441,6 +441,12 @@ class Pose(QState):
             #se guardan las cajas terminadas actuales en una variable para posteriormente desclampearlas cuando el robot esté en home
             self.model.cajas_a_desclampear.append(box)
 
+            if "PDC-D" in self.model.cajas_a_desclampear and len(clamps)<1:
+                self.model.PDCD_bracket_pendiente=True
+
+            if "PDC-Dbracket" in self.model.cajas_a_desclampear:
+                self.model.PDCD_bracket_terminado=True
+
             #si ya no le quedan cajas por inspeccionar de las que se clampearon
             if len(clamps) == 0:
                 self.model.desclampear_ready = True

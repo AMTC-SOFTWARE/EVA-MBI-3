@@ -47,6 +47,7 @@ class Inspections(QState):
         ##con f96 sin instrumentar
         self.update_triggers.addTransition(self.update_triggers.F96_espera,self.wait_start)
         ##
+        self.update_triggers.addTransition(self.update_triggers.BRACKET_PDCD,self.wait_start)
         self.vision.addTransition(self.vision.retry, self.setup_robot)
         self.vision.addTransition(self.vision.finished, self.height)
         self.height.addTransition(self.height.retry, self.setup_robot)
@@ -87,11 +88,20 @@ class WaitStart(QState):
 
         print("############################## ESTADO: WaitStart INSPECTIONS ############################")
 
-        command = {
-            "lbl_result" : {"text": ""},
-            "lbl_steps" : {"text": "Presiona START para comenzar", "color": "green"}
-            }
-        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+        if self.model.PDCD_bracket_pendiente and self.model.PDCD_bracket_terminado==False:
+
+            command = {
+                "lbl_result" : {"text": "Coloca el bracket de la caja PDC-D"},
+                "lbl_steps" : {"text": "Presiona START para comenzar", "color": "green"},
+                "img_center" : "boxes/PDC-Dbracket.jpg"
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+        else:
+            command = {
+                "lbl_result" : {"text": ""},
+                "lbl_steps" : {"text": "Presiona START para comenzar", "color": "green"}
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 
 class SetRobot(QState):
@@ -134,16 +144,19 @@ class LiberarCajas(QState):
         super().__init__(parent)
         self.model = model
 
-    def onEntry(self, QEvent):
-        print("############################## ESTADO: LiberarCajas INSPECTIONS ############################")
+        if self.model.PDCD_bracket_terminado or self.model.PDCD_bracket_pendiente==False:
+            print("pdcd y bracket terminado")
+            for box in self.model.cajas_a_desclampear:
+                publish.single(self.model.pub_topics["plc"],json.dumps({box : False}),hostname='127.0.0.1', qos = 2)
 
-        for box in self.model.cajas_a_desclampear:
-            publish.single(self.model.pub_topics["plc"],json.dumps({box : False}),hostname='127.0.0.1', qos = 2)
-
-        #se limpia la variable
-        self.model.cajas_a_desclampear = []
-        self.model.desclampear_ready = False
-        self.ok.emit()
+            #se limpia la variable
+            self.model.cajas_a_desclampear = []
+            self.model.desclampear_ready = False
+            self.ok.emit()
+        else:
+            print("bracket no terminado")
+            self.model.desclampear_ready = False
+            self.ok.emit()
 
 
 class UpdateTriggers(QState):
@@ -152,6 +165,7 @@ class UpdateTriggers(QState):
     nok         = pyqtSignal()
     esperar_robot_home = pyqtSignal()
     F96_espera  = pyqtSignal()
+    BRACKET_PDCD     = pyqtSignal()
     def __init__(self, model = None, parent = None):
         super().__init__(parent)
         self.model = model
@@ -163,6 +177,12 @@ class UpdateTriggers(QState):
             command = {"trigger": "HOME"}
             publish.single(self.model.pub_topics["robot"], json.dumps(command), hostname='127.0.0.1', qos = 2)
             self.esperar_robot_home.emit()
+            return
+        if self.model.PDCD_bracket_pendiente and self.model.BRACKET_PDCD_clampeado==False:
+            self.model.BRACKET_PDCD_clampeado=True
+            self.model.input_data["plc"]["clamps"].append("PDC-Dbracket")
+            self.BRACKET_PDCD.emit()
+            print("va a return de update triggers por pdc dbracket")
             return
         if self.model.F96_pendiente and self.model.F96_clampeado==False:
             self.model.input_data["plc"]["clamps"].append("F96")

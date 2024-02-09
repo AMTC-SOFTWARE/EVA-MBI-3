@@ -231,7 +231,30 @@ class MqttClient (QObject):
                 ##############################################################################################
                 payload_str = json.dumps(payload)       # convertir diccionario payload a string y guardarlo
                 print("payload_str: ",payload_str)
-                
+                if "PDC-Dbracket" in payload_str: #busca en el string PDC-D
+                    #if "PDC-Dbracket" in payload:
+                    #    if payload["PDC-Dbracket"] == True:
+                    #        self.nido_PDCD = "PDC-Dbracket:\n Habilitada"
+                    #        self.color_PDCD = "blue"
+                    #
+                    #    if payload["PDC-Dbracket"] == False:
+                    #        self.nido_PDCD = ""
+                    #        self.color_PDCD = "blue"
+                    #
+                    if "PDC-Dbracket_ERROR" in payload:
+                        if payload["PDC-D_ERROR"] == True:
+                            self.nido_PDCD = "PDC-Dbracket:\n clampeo incorrecto"
+                            self.color_PDCD = "red"
+
+                    if "clamp_PDC-Dbracket" in payload:
+                        if payload["clamp_PDC-Dbracket"] == True:
+                            self.nido_PDCD = "PDC-Dbracket:\n clampeo correcto"
+                            self.color_PDCD = "green"
+
+                    command = {
+                        "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}
+                        }
+                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 if "PDC-D" in payload_str: #busca en el string PDC-D
                     if "PDC-D" in payload:
                         if payload["PDC-D"] == True:
@@ -338,14 +361,14 @@ class MqttClient (QObject):
                     #    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
 
-                if "PDC-S" in self.model.input_data["database"]["modularity"]:
-                    self.nido_PDCS = "PDC-S:\n Habilitada"
-                    self.color_PDCS = "blue"
-                    command = {
-                                "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-
+                #if "PDC-S" in self.model.input_data["database"]["modularity"]:
+                #    self.nido_PDCS = "PDC-S:\n Habilitada"
+                #    self.color_PDCS = "blue"
+                #    command = {
+                #                "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}"}
+                #              }
+                #    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                #
                 if "PDC-S" in payload_str:
                     if "PDC-S" in payload:
                         if payload["PDC-S"] == True:
@@ -586,6 +609,7 @@ class MqttClient (QObject):
 
             #variable para guardar los resultados obtenidos al hacer una inspección con sensor de altura keyence desde la GDI
             if message.topic == self.model.sub_topics["height"]:
+                self.model.input_data["height"].clear()
                 self.model.input_data["height"] = payload
                 print("*******************************************************")
                 print("model.input_data[height] en comm.py: \n",payload)
