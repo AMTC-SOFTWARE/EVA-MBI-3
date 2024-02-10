@@ -144,6 +144,7 @@ class LiberarCajas(QState):
         super().__init__(parent)
         self.model = model
 
+    def onEntry(self, QEvent):
         if self.model.PDCD_bracket_terminado or self.model.PDCD_bracket_pendiente==False:
             print("pdcd y bracket terminado")
             for box in self.model.cajas_a_desclampear:
