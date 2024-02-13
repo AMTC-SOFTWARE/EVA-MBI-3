@@ -140,7 +140,7 @@ class Triggers (QState):
         publish.single(self.pub_topic, json.dumps(command), hostname='127.0.0.1', qos = 2)
         
         #codigo para hacer una segunda petición de trigger para comenzar medición
-        Timer(2.5,self.second_attempt).start()
+        #Timer(2.5,self.second_attempt).start()
 
         self.model.height_data["rqst"] = True #CREEMOS QUE SE HACE TRUE PARA EL BYPASSEADO
         self.model.fuses_parser["box"] = self.model.height_data[self.module]["box"]
