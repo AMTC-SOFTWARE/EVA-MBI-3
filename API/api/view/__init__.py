@@ -3,15 +3,18 @@
 #from model import model
 from model import model
 from werkzeug.utils import secure_filename
-from flask import Flask, request,send_file, make_response
+from flask import Flask, request,send_file, send_from_directory,abort,jsonify
 from datetime import datetime, timedelta, date, time
+from PIL import Image
 from flask_cors import CORS
 from time import strftime
 from pickle import load
 import pymysql
 import json
 import os
+import re
 import io
+from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.chart.label import DataLabel, DataLabelList
 from openpyxl.chart.series import SeriesLabel
@@ -1634,6 +1637,55 @@ def data_count(table, column):
     finally:
         connection.close()
         return response
+@app.route('/buscarRuta', methods=['GET'])
+def buscar_ruta():
+    listaCajas = [] #Lista para empujar 
+    hm_enlace = request.args.get('hm_enlace')
+    fecha_enlace = request.args.get('fecha_enlace')
+    # Directorio donde buscar el archivo
+    directorio = r'C:\\BIN\\VISYCAM\\DATABASE\\'+ fecha_enlace
+    
+    # Expresión regular para encontrar el archivo
+    patron = re.compile(rf'{hm_enlace}')
+    print(fecha_enlace)
+
+       # Iterar sobre todos los archivos en el directorio
+    #print( os.listdir(directorio))
+    for nombre_archivo in os.listdir(directorio):
+        
+
+        ruta_archivo = os.path.join(directorio, nombre_archivo)
+         # Verificar si es un archivo regular
+        if os.path.isfile(ruta_archivo):
+            # Verificar si el nombre del archivo coincide con el patrón
+            if patron.search(nombre_archivo):
+                print(f'Encontrado:{ruta_archivo}')
+                listaCajas.append(ruta_archivo)
+    items = {"rutas":listaCajas}
+    
+        # Retorna la imagen en la respuesta HTTP
+    return jsonify(items)
+
+
+@app.route('/verArnes', methods=['GET'])
+def verArnes():
+    # Recupera el nombre del enlace desde la consulta de la URL
+    ruta_archivo = request.args.get('ruta')
+
+    # Construye la ruta completa del archivo usando el nombre del enlace
+    # ruta_archivo = f"\\\\naapnx-tra04\\AMTC_Trazabilidad\\INTERIOR\\2023Diciembre06\\{nombre_enlace}"
+    #2024-01-27_08;11;45
+
+    # Abre la imagen usando Pillow
+    imagen = Image.open(ruta_archivo)
+
+    # Convierte la imagen a bytes
+    img_bytes = BytesIO()
+    imagen.save(img_bytes, format='WEBP')
+    img_bytes.seek(0)
+
+    # Retorna la imagen en la respuesta HTTP
+    return send_file(img_bytes, mimetype='image/webp')   
 
 @app.route('/horaxhora/<table>/<column>', methods=['GET'])
 def horaxhora(table, column):
