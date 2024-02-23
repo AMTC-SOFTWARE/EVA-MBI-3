@@ -148,7 +148,7 @@ class Triggers (QState):
         print("esperando respuesta de sensor de altura")
 
         #se manda señal de reintento en 18 segundos
-        self.model.tiempo = threading.Timer(18,self.retry.emit)
+        self.model.tiempo = threading.Timer(2.5,self.retry.emit)
         self.model.tiempo.start()
             
     def second_attempt (self):
