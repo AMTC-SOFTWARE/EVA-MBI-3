@@ -1643,7 +1643,7 @@ def buscar_ruta():
     hm_enlace = request.args.get('hm_enlace')
     fecha_enlace = request.args.get('fecha_enlace')
     # Directorio donde buscar el archivo
-    directorio = r'C:\\BIN\\VISYCAM\\DATABASE\\'+ fecha_enlace
+    directorio = r'\\naapnx-tra04\\AMTC_Trazabilidad\\INTERIOR-3\\'+ fecha_enlace
     
     # Expresión regular para encontrar el archivo
     patron = re.compile(rf'{hm_enlace}')
