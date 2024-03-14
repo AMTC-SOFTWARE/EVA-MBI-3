@@ -199,7 +199,7 @@ class Startup(QState):
             print("ERROR AL CREAR CARPETA:::\n",error)
         
 
-        QTimer.singleShot(15, self.kioskMode)
+        #QTimer.singleShot(15, self.kioskMode)
         self.model.robot.stop()
         self.ok.emit()
 
@@ -830,7 +830,8 @@ class CheckQr (QState):
                     print (ex)
 
                 ################################
-                #Se agrega nueva inspeccion obligatoria para todos los arneses la caja PDC-P2
+                #Se agrega nueva inspeccion obligatoria para todos los arneses la caja 
+
                 self.model.input_data["database"]["modularity"]["PDC-P2"] = ['CONECTOR1', 'CONECTOR2']
                 
                 #Se agrega nueva inspeccion obligatoria para todos los arneses el bracket de la caja PDCD
