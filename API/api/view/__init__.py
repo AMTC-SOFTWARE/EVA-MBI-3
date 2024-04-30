@@ -1643,8 +1643,7 @@ def buscar_ruta():
     hm_enlace = request.args.get('hm_enlace')
     fecha_enlace = request.args.get('fecha_enlace')
     # Directorio donde buscar el archivo
-    directorio = r'\\naapnx-tra04\\AMTC_Trazabilidad\\INTERIOR-3\\'+ fecha_enlace
-    
+    directorio = rf'\\naapnx-tra04\AMTC_Trazabilidad\INTERIOR-3\{fecha_enlace}'
     # Expresión regular para encontrar el archivo
     patron = re.compile(rf'{hm_enlace}')
     print(fecha_enlace)
@@ -1669,7 +1668,7 @@ def buscar_ruta():
 
 @app.route('/verArnes', methods=['GET'])
 def verArnes():
-    # Recupera el nombre del enlace desde la consulta de la URL
+    # Recupera la ruta del archivo desde la consulta de la URL
     ruta_archivo = request.args.get('ruta')
 
     # Construye la ruta completa del archivo usando el nombre del enlace
