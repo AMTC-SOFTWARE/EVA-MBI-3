@@ -181,6 +181,7 @@ class Triggers (QState):
 
                 #revisando si el fusible está en los resultados del sensor de altura (si está en esta sección de inspección)
                 if fuse in results[box]:
+                    self.model.history_fuses.append(fuse) #Variable que va guardando cada fusible que llega en "results"
                     print(f"Box: {box} Fuse: {fuse}")
                     print("results (Leído): ",results[box][fuse])
                     print("Height_d (Esperado): ",height_d)
@@ -226,6 +227,17 @@ class Triggers (QState):
                             else:
                                 self.model.tries["ALTURA"][box][fuse] = 1
                             print("Modelo Final: ",self.model.tries)
+
+                #Aseguramiento de inspecciones de alturas 
+                BB = [box, fuse]
+                if current_trig == self.model.h_triggers[box][-1]: #Cuando el trigger actual es igual al ultimo h_trigger de la caja actual[box]
+                    #Si el fuse no estra dentro de model.history_fuses, se emite un error = True y se muestra en pantalla las cavidades faltantes por inspeccionar
+                    if fuse not in self.model.history_fuses: 
+                        error = True
+                        img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
+                        print("||||||||||Alturas faltantes en: ",fuse, " Caja: ",box)
+
+                        self.model.missing_fuses += "Inspección de alturas faltante: " + str(fuse) + "\n"
 
         imwrite(self.model.imgs_path + self.module + ".jpg", img)
 
@@ -371,16 +383,27 @@ class Error (QState):
         print("############################## ESTADO: Error HEIGHT ############################")
 
         box = self.model.height_data[self.module]["box"]
-        command = {
-            "lbl_result" : {"text": f"{box} alturas NOK", "color": "red"},
-            "lbl_steps" : {"text": "Presiona el boton de reintento", "color": "black"}
+        if len(self.model.missing_fuses) > 0:
+            command = {
+                "lbl_info1" : {"text": f"{self.model.missing_fuses}", "color": "blue"},
+                "lbl_result" : {"text": f"{box} vision NOK, Faltan Fusibles por inspeccionar", "color": "red"},
+                "lbl_steps" : {"text": "Llame al centro técnico", "color": "black"}
             }
-        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+        else:
+            command = {
+                "lbl_info1" : {"text": f"{self.model.expected_fuses}", "color": "blue"},
+                 "lbl_result" : {"text": f"{box} vision NOK", "color": "red"},
+                 "lbl_steps" : {"text": "Presiona el boton de reintento", "color": "black"}
+                 }
+
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         self.model.height_data[self.module]["box"] = ""
         self.model.height_data[self.module]["queue"].clear()
         self.model.height_data[self.module]["current_trig"] = None
         self.model.height_data[self.module]["results"].clear()
         self.model.height_data[self.module]["rqst"] = None
+        self.model.missing_fuses=""
         self.model.robot.home()
 
     def onExit(self, QEvent):

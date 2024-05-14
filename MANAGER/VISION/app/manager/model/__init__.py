@@ -49,6 +49,9 @@ class Model (object):
         self.F96_pendiente=False
         self.tiempo = ""
 
+        self.history_fuses = []
+        self.missing_fuses = ""
+
         self.BRACKET_PDCD_clampeado=False
         self.PDCD_bracket_pendiente=False
         self.PDCD_bracket_terminado=False
@@ -619,11 +622,10 @@ class Model (object):
             'PDC-P': {
                 'MF1': 'vacio', 'MF2': 'vacio', 'F301': 'vacio', 'F302': 'vacio', 'F303': 'vacio', 'F304': 'vacio', 'F305': 'vacio', 'F300': 'vacio', 'F318': 'vacio',
                 'F319': 'vacio', 'F320': 'vacio', 'F321': 'vacio', 'F322': 'vacio', 'F323': 'vacio', 'F324': 'vacio', 'F325': 'vacio', 'F326': 'vacio', 'F327': 'vacio',
-                'F328': 'vacio', 'F329': 'vacio', 'F330': 'vacio', 'F331': 'vacio', 'F332': 'vacio', 'F333': 'vacio', 'F334': 'vacio', 'F335': 'vacio', 'E21': 'vacio',
-                'E22': 'vacio','conector': 'conector'
+                'F328': 'vacio', 'F329': 'vacio', 'F330': 'vacio', 'F331': 'vacio', 'F332': 'vacio', 'F333': 'vacio', 'F334': 'vacio', 'F335': 'vacio','conector': 'conector'
                 },
             'PDC-P2': {
-                'CONECTOR1': 'conector1', 'CONECTOR2': 'conector2', 'CONECTOR3': 'conector3', 'CONECTOR4': 'conector4', 'CONECTOR5': 'conector5'
+                'CONECTOR1': 'conector1', 'CONECTOR2': 'conector2'
                 },
             'PDC-R': {
                 'F405': 'vacio', 'F404': 'vacio', 'F403': 'vacio', 'F402': 'vacio', 'F401': 'vacio', 'F400': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio',
