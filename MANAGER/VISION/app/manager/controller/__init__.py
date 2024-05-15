@@ -199,7 +199,7 @@ class Startup(QState):
             print("ERROR AL CREAR CARPETA:::\n",error)
         
 
-        #QTimer.singleShot(15, self.kioskMode)
+        QTimer.singleShot(15, self.kioskMode)
         self.model.robot.stop()
         self.ok.emit()
 
