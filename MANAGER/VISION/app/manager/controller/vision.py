@@ -559,6 +559,7 @@ class Pose(QState):
         else:
             self.model.vision_data[self.module]["box"] = ""
             self.queue.clear()
+            self.model.history_fuses.clear()
             self.finished.emit()
             return
 
