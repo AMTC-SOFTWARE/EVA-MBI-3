@@ -118,18 +118,16 @@ class Triggers (QState):
 
     def triggers(self):
 
-        #reiniciar variable para monitorear respuesta de sensor de altura
-        self.model.height_trigger = False
-
         # si hay cola de secciones a revisar (esta cola de "secciones de inspección de fusibles" se genera desde las modularidades)
         if len(self.queue) > 0:
             #se iguala la variable model.height_data["height1"]["current_trig"] a la sección de la cola
             self.model.height_data[self.module]["current_trig"] = self.queue[0]
             print("model.height_data[height1][current_trig]: ",self.queue[0])
         else:
-            #si no hay más secciones se accede al método finish
+            #si ya se leyó el Trigger actual se accede al método finish
             self.finish()
             return
+
         command = {
                     "trigger": self.model.height_data[self.module]["current_trig"]
                     }
@@ -158,9 +156,11 @@ class Triggers (QState):
         publish.single(self.pub_topic, json.dumps(command), hostname='127.0.0.1', qos = 2)
 
 
-    #A ESTE MÉTODO SOLO SE ACCEDE SI YA SE REVISARON TODAS LAS SECCIONES DE INSPECCIÓN DE ALTURAS
-    #SOLO SE HABILITAN LAS SECCIONES QUE EXISTEN PARA LAS CAJAS QUE LLEVA EL ARNÉS CONSTRUIDO
+    #A ESTE MÉTODO SOLO SE ACCEDE SI YA SE RECIBIÓ EL TRIGGER ACTUAL DE INSPECCIÓN DE ALTURAS
+    #(EN Receiver SE HACE UN POP DEL TRIGGER ACTUAL QUE SE ESTÁ REVISANDO, si da NOK en trigger )
     def finish (self):
+
+        print("########## FUNCION: Finish de Triggers de Height ##########")
 
         #se reinicia la variable que guarda expected_fuses
         self.model.expected_fuses = "\tLectura\n"
@@ -246,6 +246,8 @@ class Triggers (QState):
         print("MASTER    :", self.model.modularity_fuses[box], "\n")
 
         if error == False:
+
+            self.model.revisando_resultado_height = True #para no salir de Triggers si llega otro resultado de alturas y aún no se manda el finished
             command = {
                 "img_center" : self.module + ".jpg"
                 }
@@ -253,7 +255,10 @@ class Triggers (QState):
             self.model.height_data[self.module]["results"].clear()
             self.model.robot_data["h_queue"][box].pop(self.model.robot_data["h_queue"][box].index(self.model.robot_data["current_trig"]))
             self.model.height_data[self.module]["current_trig"] = None
-            Timer(1,self.finished.emit).start()
+
+            print("self.finished.emit de Trigger actual para height.py")
+            self.finished.emit()
+            #Timer(1,self.finished.emit).start()
         else:
             command = {
                 "img_center" : self.module + ".jpg",
@@ -318,6 +323,7 @@ class Receiver (QState):
 
         print("############################## ESTADO: Receiver HEIGHT ############################")
 
+        print("self.model.tiempo.cancel()")
         self.model.tiempo.cancel()
 
         try:
@@ -428,6 +434,8 @@ class Pose(QState):
     def onEntry(self, QEvent):
 
         print("############################## ESTADO: Pose HEIGHT ############################")
+
+        self.model.revisando_resultado_height = False #para poder recibir resultados de trigger de altura
 
         #se borran los errores en pantalla de alturas
         command = {"lbl_info1" : {"text": "", "color": "blue"}}

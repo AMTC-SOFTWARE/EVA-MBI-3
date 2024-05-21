@@ -119,7 +119,6 @@ class Triggers (QState):
             publish.single(topic, json.dumps({"Flash": False}), hostname='127.0.0.1', qos = 2)
 
             print("se terminaron los triggers para esta caja")
-
             self.finish()
             return
 
@@ -242,10 +241,19 @@ class Triggers (QState):
                     error = True
                     img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
                     self.model.v_result[box][fuse] = temp
+
         current_day = self.model.datetime.strftime("%d")
         current_month = self.model.datetime.strftime("%m")
         year = self.model.datetime.strftime("%Y")
         current_time = self.model.datetime.strftime("_%H;%M;%S")
+
+        while(current_day == None or current_month == None or year == None or current_time == None):
+            print("dentro de: while(current_day == None or current_month == None or year == None or current_time == None):")
+            current_day = self.model.datetime.strftime("%d")
+            current_month = self.model.datetime.strftime("%m")
+            year = self.model.datetime.strftime("%Y")
+            current_time = self.model.datetime.strftime("_%H;%M;%S")
+
 
         meses = {
             "01":"Enero",
@@ -284,12 +292,19 @@ class Triggers (QState):
             if not(exists(carpeta_nueva)):
                 os.mkdir(carpeta_nueva)
             else:
-                print("ya existe carpeta: ",carpeta_nueva)
+                print("ya existe carpeta LOCAL: ",carpeta_nueva)
+
+            command = {
+                "lbl_result" : {"text": "Creando Carpeta en RED...", "color": "navy"},
+            }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
             carpeta_nueva = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-3/" + nombre_carpeta
+
             if not(exists(carpeta_nueva)):
                 os.mkdir(carpeta_nueva)
             else:
-                print("ya existe carpeta: ",carpeta_nueva)
+                print("ya existe carpeta EN RED: ",carpeta_nueva)
 
         except OSError as exception:
             print("ERROR AL CREAR CARPETA:::\n",exception)
@@ -327,6 +342,9 @@ class Triggers (QState):
         img_last = imread(imgpath_last)
 
         if error == False:
+
+            self.model.revisando_resultado = True #para no salir de Triggers si llega otro resultado de visión y aún no se manda el finished
+
             #copyfile("C:/images/LASTINSPECTION.jpg", "C:/images/DATABASE/" + name  + "-PASS.jpg")
 
             #se tiene que guardar como .webp para que haga la conversión
@@ -343,9 +361,9 @@ class Triggers (QState):
             self.model.robot_data["v_queue"][box].pop(self.model.robot_data["v_queue"][box].index(self.model.robot_data["current_trig"]))
             self.model.vision_data[self.module]["current_trig"] = None
 
-            print("1.5 seg antes de emitir el finished del trigger")
-
-            Timer(1.5,self.finished.emit).start()
+            print("self.finished.emit de Trigger actual para vision.py")
+            self.finished.emit()
+            #Timer(1.5,self.finished.emit).start()
 
         else:
             #copyfile("C:/images/LASTINSPECTION.jpg", "C:/images/DATABASE/" + name  + "-FAIL.jpg")
@@ -485,6 +503,8 @@ class Pose(QState):
     def onEntry(self, QEvent):
 
         print("############################## ESTADO: Pose VISION ############################")
+
+        self.model.revisando_resultado = False #para poder recibir resultados de trigger de visión
 
         #se borran los errores de pantalla de visión
         command = {"lbl_info1" : {"text": "", "color": "blue"}}

@@ -36,10 +36,13 @@ class Model (object):
         #variable para inhabilitar la llave
         self.disable_key = False
 
+        #variable para no volver a entrara a reciver, si estás en trigger visión (y ya quitaste el trigger de la lista con un pop)
+        # y ya te había llegado un resultado de la visión y te vuelve a llegar nuevamente (por volver a abrir la GDI o mandar un trigger manual)
+        self.revisando_resultado = False
+        self.revisando_resultado_height = False
+
         self.pdcrvariant = ""
         self.expected_fuses = ""
-        #variable para hacer reintentos de trigger si no se recibe respuesta del sensor de altura
-        self.height_trigger = False
         
         self.cronometro_ciclo=False
         #lista para guardar las cajas que han terminado su inspección para poderlas desclampear
@@ -112,46 +115,6 @@ class Model (object):
             "REF": "--"
             }
 
-        self.torque_cycles = {
-            "PDC-P": {
-                "E1": ["tool1",3,"6mm Nut"]},
-            "PDC-D": {
-                "E1": ["tool1",2,"6mm Nut"]},
-            "BATTERY": {
-                "BT": ["tool1",5,"Battery Nut"]},
-            "BATTERY_2": {
-                "BT": ["tool1",5,"Battery Nut"]},
-            "MFB-P1": {
-                "A47": ["tool1",4,"8mm Nut"],
-                "A46": ["tool1",4,"8mm Nut"],
-                "A45": ["tool1",4,"6mm Nut"],
-                "A44": ["tool1",4,"6mm Nut"],
-                "A43": ["tool1",4,"6mm Nut"],
-                "A41": ["tool1",4,"8mm Nut"], 
-                "A42": ["tool1",4,"6mm Nut"]},
-            "MFB-S": {
-                "A51": ["tool1",5,"8mm Nut"],
-                "A52": ["tool1",5,"8mm Nut"],
-                "A53": ["tool1",5,"6mm Nut"],
-                "A54": ["tool1",5,"6mm Nut"],
-                "A55": ["tool1",5,"6mm Nut"],
-                "A56": ["tool1",5,"6mm Nut"]},
-            "MFB-P2": {
-                "A20": ["tool1",2,"8mm Nut"],
-                "A21": ["tool1",2,"6mm Nut"],
-                "A22": ["tool1",2,"6mm Nut"],
-                "A23": ["tool1",2,"6mm Nut"],
-                "A24": ["tool1",2,"6mm Nut"],
-                "A25": ["tool1",2,"8mm Nut"], 
-                "A26": ["tool1",2,"6mm Nut"], 
-                "A27": ["tool1",2,"6mm Nut"], 
-                "A28": ["tool1",2,"6mm Nut"], 
-                "A29": ["tool1",2,"6mm Nut"], 
-                "A30": ["tool1",2,"8mm Nut"]},
-            "PDC-R": {
-                "E1": ["tool1",3,"8mm Nut"]}
-            }
-
         self.sub_topics = {
                         "plc": "PLC/1/status",  
                         "torque_1": "torque/1/status",
@@ -219,7 +182,7 @@ class Model (object):
                 "encoder_2": {"zone": "0"},
                 "encoder_3": {"zone": "0"},
                 "retry_btn": False,
-                "clamps": ["PDC-P", "PDC-D", "BATTERY", "MFB-P1", "MFB-S", "MFB-P2", "PEDC-R"]}, # Debe inicializarce vacío
+                "clamps": ["PDC-P", "PDC-D", "BATTERY", "MFB-P1", "MFB-S", "MFB-P2", "PDC-R"]}, # Debe inicializarce vacío
             "torque":{
                 "tool1": {},
                 "tool2": {},
@@ -232,45 +195,6 @@ class Model (object):
             "robot": {},
             "vision": {},
             "height": {}
-            }
-
-        self.torque_data = {
-            "tool1" : {
-                "stop_profile": 0,
-                "backward_profile": 1, 
-                "current_trq": None,
-                "queue": [], #[["PDC-P", "E1", 3, "tuerca_x"]]
-                "rqst": False,
-                "gui": self.pub_topics["gui_2"],
-                "past_trq": None,
-                "img": None,
-                "error": False,
-                "enable" : False,
-                },
-            "tool2" : {
-                "stop_profile": 0,
-                "backward_profile": 1, 
-                "current_trq": None,
-                "queue": [], #[["PDC-P", "E1", 3, "tuerca_x"]]
-                "rqst": False,
-                "gui": self.pub_topics["gui"],
-                "past_trq": None,
-                "img": None,
-                "error": False,
-                "enable" : False
-                },
-            "tool3" : {
-                "stop_profile": 0,
-                "backward_profile": 1, 
-                "current_trq": None,
-                "queue": [], #[["PDC-P", "E1", 3, "tuerca_x"]]
-                "rqst": False,
-                "gui": self.pub_topics["gui_2"],
-                "past_trq": None,
-                "img": None,
-                "error": False,
-                "enable" : False
-                }
             }
 
         self.t_result = {}
@@ -523,6 +447,8 @@ class Model (object):
     ###########################################################
 
     def reset (self):
+        self.revisando_resultado_height = False
+        self.revisando_resultado = False
         self.BRACKET_PDCD_clampeado=False
         self.PDCD_bracket_terminado=False
         self.PDCD_bracket_pendiente=False
@@ -564,16 +490,6 @@ class Model (object):
         self.input_data["gui"]["code"]              = ""
         self.input_data["plc"]["clamps"].clear()
         self.input_data["gui"]["visible"].clear()
-        for i in self.input_data["torque"]: self.input_data["torque"][i].clear()
-        
-        for i in self.torque_data:
-            self.torque_data[i]["current_trq"]  = None
-            self.torque_data[i]["rqst"]         = False
-            self.torque_data[i]["past_trq"]     = None
-            self.torque_data[i]["img"]          = None
-            self.torque_data[i]["error"]        = False
-            self.torque_data[i]["enable"]       = False
-            self.torque_data[i]["queue"].clear()
 
         self.vision_data["vision1"]["results"].clear()
         self.vision_data["vision1"]["queue"].clear()

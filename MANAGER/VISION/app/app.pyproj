@@ -11,9 +11,13 @@
     <OutputPath>.</OutputPath>
     <Name>app</Name>
     <RootNamespace>app</RootNamespace>
-    <InterpreterId>Global|VisualStudio|main environment (Python 3.9 (64-bit))</InterpreterId>
+    <InterpreterId>Global|VisualStudio|Main Environment</InterpreterId>
     <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
     <IsWindowsApplication>True</IsWindowsApplication>
+    <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
+    <TestFramework>pytest</TestFramework>
+    <UnitTestPattern>test*.py</UnitTestPattern>
+    <UnitTestRootDirectory>.</UnitTestRootDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -159,8 +163,7 @@
     <Content Include="toolkit\plugins\__pycache__\__init__.cpython-37.pyc" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|VisualStudio|env (Python 3.7 (64-bit))" />
-    <InterpreterReference Include="Global|VisualStudio|main environment (Python 3.9 (64-bit))" />
+    <InterpreterReference Include="Global|VisualStudio|Main Environment" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

@@ -93,46 +93,9 @@ class Controller (QObject):
 
         #self.client.qr_box.connect(self.chkQrBoxes)
 
-    @pyqtSlot(str)
+    #@pyqtSlot(str)
     #def chkQrBoxes(self, qr_box):
-    #    try:
-    #        if len(self.model.input_data["database"]["pedido"]):
-    #            master_qr_boxes = json.loads(self.model.input_data["database"]["pedido"]["QR_BOXES"])
-    #            ok = False
-    #            for i in master_qr_boxes:
-    #                if qr_box == master_qr_boxes[i][0] and master_qr_boxes[i][1]:
-    #                    if not(i in self.model.input_data["plc"]["clamps"]) and i in self.model.input_data["database"]["modularity"]:
-    #                        ok = True
-    #                        self.client.client.publish(self.model.pub_topics["plc"],json.dumps({i: True}), qos = 2)
-    #                        command = {
-    #                            "lbl_steps" : {"text": f"Coloca la caja {i} en su lugar", "color": "black"}
-    #                            }
-    #                        Timer(5, self.boxTimeout, args = (i, qr_box)).start()
-    #                    break
-    #            if not(ok):
-    #                command = {
-    #                    "lbl_steps" : {"text": "Vuelve a escanear la caja", "color": "black"}
-    #                    }
-    #            for item in self.model.torque_data:
-    #                if not(len(self.model.torque_data[item]["queue"])):
-    #                   #self.client.client.publish(self.model.torque_data[item]["gui"],json.dumps(command), qos = 2)
-    #                   pass
-    #    except Exception as ex:
-    #        print ("manager.controller.chkQrBoxes Exception: ", ex)
-
-    @pyqtSlot()
-    #def boxTimeout(self, i, qr_box):
-    #    if not(i in self.model.input_data["plc"]["clamps"]):
-    #        self.client.client.publish(self.model.pub_topics["plc"],json.dumps({i: False}), qos = 2)
-    #        command = {
-    #            "lbl_steps" : {"text": f"Vuelve a escanear la caja {i}", "color": "black"},
-    #            }
-    #        #for item in self.model.torque_data:
-    #            #if not(len(self.model.torque_data[item]["queue"])):
-    #                #self.client.client.publish(self.model.torque_data[item]["gui"],json.dumps(command), qos = 2)
-    #                #pass
-    #    else:
-    #        self.model.qr_codes[i] = qr_box
+    #    pass
 
     @pyqtSlot()
     def start(self):
@@ -150,6 +113,7 @@ class Startup(QState):
     def onEntry(self, event):
 
         print("############################## ESTADO: Startup ############################")
+
         self.model.cajas_a_desclampear = []
         if self.model.local_data["user"]["type"] != "":
             Timer(0.05, self.logout, args = (copy(self.model.local_data["user"]),)).start()
@@ -1435,11 +1399,9 @@ class Reset (QState):
     def onEntry(self, event):
 
         print("############################## ESTADO: Reset ############################")
+        self.model.reset()
         self.model.cronometro_ciclo=False
-        self.model.cajas_a_desclampear=[]
-        self.model.PDCD_bracket_pendiente=False
-        self.model.PDCD_bracket_terminado=False
-        self.model.BRACKET_PDCD_clampeado=False
+
         command = {
             "lbl_result" : {"text": "Se giró la llave de reset", "color": "green"},
             "lbl_steps" : {"text": "Reiniciando", "color": "black"},
@@ -1540,7 +1502,6 @@ class MyThreadReloj(QThread):
                     }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)      
             
-
 #EJECUCIÓN EN PARALELO
 class MyThread(QThread):
     def __init__(self, model = None, parent = None):

@@ -142,6 +142,7 @@ class MqttClient (QObject):
                 return
 
             if message.topic == self.model.sub_topics["plc"]:
+                
                 for i in list(payload):
                     #Mensaje de respuesta de cajas clampeadas correctamente (enviado desde GDI)
                     if "clamp_" in i:
@@ -177,6 +178,7 @@ class MqttClient (QObject):
                                 "lbl_steps" : {"text": "", "color": "red"}
                               }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
                 if "key" in payload:
                     if payload["key"] == True:
                         if self.model.disable_key == False:
@@ -228,9 +230,9 @@ class MqttClient (QObject):
                         #####################################################################################
                         self.start.emit()
 
-                ##############################################################################################
                 payload_str = json.dumps(payload)       # convertir diccionario payload a string y guardarlo
                 print("payload_str: ",payload_str)
+                
                 if "PDC-Dbracket" in payload_str: #busca en el string PDC-D
                     #if "PDC-Dbracket" in payload:
                     #    if payload["PDC-Dbracket"] == True:
@@ -255,6 +257,7 @@ class MqttClient (QObject):
                         "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}
                         }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
                 if "PDC-D" in payload_str: #busca en el string PDC-D
                     if "PDC-D" in payload:
                         if payload["PDC-D"] == True:
@@ -352,23 +355,7 @@ class MqttClient (QObject):
                     #            "lbl_box7" : {"text": "F96: Si Aplica", "color": "purple"}
                     #            }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-
-                    #si no hay caja PDCR, limpiar mensaje de F96
-                    #if self.nido_PDCR == "":
-                    #    command = {
-                    #        "lbl_box7" : {"text": "", "color": "blue"}
-                    #        }
-                    #    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
-
-                #if "PDC-S" in self.model.input_data["database"]["modularity"]:
-                #    self.nido_PDCS = "PDC-S:\n Habilitada"
-                #    self.color_PDCS = "blue"
-                #    command = {
-                #                "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}"}
-                #              }
-                #    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                #
                 if "PDC-S" in payload_str:
                     if "PDC-S" in payload:
                         if payload["PDC-S"] == True:
@@ -419,6 +406,7 @@ class MqttClient (QObject):
                                 "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}"}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
                 if "PDC-P2" in payload_str:
                     if "PDC-P2" in payload:
                         if payload["PDC-P2"] == True:
@@ -443,6 +431,7 @@ class MqttClient (QObject):
                                 "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}"}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
                 if "F96" in payload_str:
                     if "F96" in payload:
                         if payload["F96"] == True:
@@ -467,6 +456,7 @@ class MqttClient (QObject):
                                 "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}"}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
                 if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
                         if payload["ERROR_cortina"] == True:
                             command = {"lbl_info4" : {"text": "Cortina\nInterrumpida", "color": "red", "ancho":400,"alto":400}}  
@@ -474,75 +464,18 @@ class MqttClient (QObject):
                             command = {"lbl_info4" : {"text": "", "color": "red", "ancho":10,"alto":10}}  
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
-                #if "ERROR" in payload_str:
-                #    if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
-                #        if payload["ERROR_cortina"] == True:
-                #            self.cortina = "CORTINA \n INTERRUMPIDA"
-                #        if payload["ERROR_cortina"] == False:
-                #            self.cortina = ""
-                #    if "ERROR_modbusIO" in payload:
-                #        if payload["ERROR_modbusIO"] == True:
-                #            self.modbusIO = "\n Remote IO"
-                #        if payload["ERROR_modbusIO"] == False:
-                #            self.modbusIO = ""
-                #    if "ERROR_modbusRA" in payload:
-                #        if payload["ERROR_modbusRA"] == True:
-                #            self.modbusRA = "\n Robot A"
-                #        if payload["ERROR_modbusRA"] == False:
-                #            self.modbusRA = ""
-                #    if "ERROR_modbusRB" in payload:
-                #        if payload["ERROR_modbusRB"] == True:
-                #            self.modbusRB = "\n Robot B"
-                #        if payload["ERROR_modbusRB"] == False:
-                #            self.modbusRB = ""
+                if "revisando_resultado" in payload:
+                    if payload["revisando_resultado"] == True:
+                        self.model.revisando_resultado = True
+                    else:
+                        self.model.revisando_resultado = False
 
-                #    if self.modbusIO == "\n Remote IO" and self.modbusRA == "\n Robot A":
-                #        self.plural2 = "ES"
-                #    elif self.modbusIO == "\n Remote IO" and self.modbusRB == "\n Robot B":
-                #        self.plural2 = "ES"
-                #    elif self.modbusRA == "\n Robot A" and self.modbusRB == "\n Robot B":
-                #        self.plural2 = "ES"
-                #    else:
-                #        self.plural2 = ""
-
-                #if "INTERLOCK" in payload_str:              
-                #    if "INTERLOCK_A" in payload:
-                #        if payload["INTERLOCK_A"] == True:
-                #            self.puertaA = "\nA"
-                #        if payload["INTERLOCK_A"] == False:
-                #            self.puertaA = ""
-                #    if "INTERLOCK_B" in payload:
-                #        if payload["INTERLOCK_B"] == True:
-                #            self.puertaB = "\nB"
-                #        if payload["INTERLOCK_B"] == False:
-                #            self.puertaB = ""
-                #    if "INTERLOCK_C" in payload:
-                #        if payload["INTERLOCK_C"] == True:
-                #            self.puertaC = "\nC"
-                #        if payload["INTERLOCK_C"] == False:
-                #            self.puertaC = ""
-                    
-                #    if self.puertaA == "\nA" and self.puertaB == "\nB":
-                #        self.plural = "S"
-                #    elif self.puertaA == "\nA" and self.puertaC == "\nC":
-                #        self.plural = "S"
-                #    elif self.puertaB == "\nB" and self.puertaC == "\nC":
-                #        self.plural = "S"
-                #    else:
-                #        self.plural = ""
-
-                #if self.puertaA == "" and self.puertaB == "" and self.puertaC == "":
-                #    if self.modbusIO == "" and self.modbusRA == "" and self.modbusRB == "":
-                #        command = {"lbl_info4" : {"text": f"{self.cortina}", "color": "red"}}
-                #    else:
-                #        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n ERROR{self.plural2} MODBUS: {self.modbusIO} {self.modbusRA} {self.modbusRB}", "color": "red"}}
-                #else:
-                #    if self.modbusIO == "" and self.modbusRA == "" and self.modbusRB == "":
-                #        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n PUERTA{self.plural} \n ABIERTA{self.plural}: {self.puertaA} {self.puertaB} {self.puertaC}", "color": "red"}}
-                #    else:
-                #        command = {"lbl_info4" : {"text": f"{self.cortina} \n \n ERROR MODBUS: {self.modbusIO} {self.modbusRA} {self.modbusRB} \n \n PUERTA{self.plural} \n ABIERTA{self.plural}: {self.puertaA} {self.puertaB} {self.puertaC}", "color": "red"}}
-                #self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-
+                if "revisando_resultado_height" in payload:
+                    if payload["revisando_resultado_height"] == True:
+                        self.model.revisando_resultado_height = True
+                    else:
+                        self.model.revisando_resultado_height = False
+            
             ##############################################################################################
 
             if "torque/" in message.topic and "/status" in message.topic:
@@ -601,21 +534,26 @@ class MqttClient (QObject):
                     #    self.error_cortina.emit()
             #variable para guardar los resultados obtenidos al hacer una inspección con visycam desde la GDI
             if message.topic == self.model.sub_topics["vision"]:
-                self.model.input_data["vision"] = payload
 
-
-
-                self.vision.emit()
+                if self.model.revisando_resultado == False: #para no leer resultados si ya se estaba revisando un resultado correcto
+                    print("Llegó resultado de visión guardado en self.model.input_data[vision], vision.emit()")
+                    self.model.input_data["vision"] = payload
+                    self.vision.emit()
+                else:
+                    print("resultado ignorado por self.model.revisando_resultado = True, para mandarlo a True hacer PLC/1/status {'revisando_resultado':true}")
 
             #variable para guardar los resultados obtenidos al hacer una inspección con sensor de altura keyence desde la GDI
             if message.topic == self.model.sub_topics["height"]:
-                self.model.input_data["height"].clear()
-                self.model.input_data["height"] = payload
-                print("*******************************************************")
-                print("model.input_data[height] en comm.py: \n",payload)
-                print("*******************************************************")
-                self.model.height_trigger = True
-                self.height.emit()
+
+                if self.model.revisando_resultado_height == False: #para no leer resultados si ya se estaba revisando un resultado correcto
+                    self.model.input_data["height"].clear()
+                    self.model.input_data["height"] = payload
+                    print("*******************************************************")
+                    print("model.input_data[height] en comm.py: \n",payload)
+                    print("*******************************************************")
+                    self.height.emit()
+                else:
+                    print("resultado ignorado por self.model.revisando_resultado_height = True, para mandarlo a True hacer PLC/1/status {'revisando_resultado_height':true}")
 
         except Exception as ex:
             print("input exception", ex)
