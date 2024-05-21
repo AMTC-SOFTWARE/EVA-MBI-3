@@ -13,11 +13,14 @@
     <RootNamespace>app</RootNamespace>
     <InterpreterId>Global|VisualStudio|Main Environment</InterpreterId>
     <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
-    <IsWindowsApplication>True</IsWindowsApplication>
+    <IsWindowsApplication>False</IsWindowsApplication>
     <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
     <TestFramework>pytest</TestFramework>
     <UnitTestPattern>test*.py</UnitTestPattern>
     <UnitTestRootDirectory>.</UnitTestRootDirectory>
+    <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,7 +60,6 @@
     <Compile Include="toolkit\admin\controller\__init__.py" />
     <Compile Include="toolkit\admin\model\__init__.py" />
     <Compile Include="toolkit\admin\view\admin.py" />
-    <Compile Include="toolkit\admin\view\torques.py" />
     <Compile Include="toolkit\admin\view\__init__.py" />
     <Compile Include="toolkit\admin\__init__.py" />
     <Compile Include="toolkit\plugins\rework\form.py" />

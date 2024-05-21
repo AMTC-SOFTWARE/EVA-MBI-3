@@ -9,7 +9,7 @@ from os import system
 from copy import copy
 import json
 
-from toolkit.admin.view import admin, torques
+from toolkit.admin.view import admin
 from toolkit.admin.model import Model
 
 from gui.view import PopOut
@@ -21,14 +21,17 @@ class Admin (QDialog):
     rcv     = pyqtSignal()
 
     def __init__(self, data):
+
+        print("creando objeto de config")
+
         self.data = data
         super().__init__(data.mainWindow)
         self.ui = admin.Ui_admin()
+
         self.ui.setupUi(self)
         self.model = Model()
         self.user_type = self.data.local_data["user"]["type"]
         self.client = Client()
-        self.qw_torques = Torques(model = self.model, client = self.client, parent = self)
         self.config = {}
         self.kiosk_mode = True
         self.pop_out = PopOut(self) 
@@ -47,7 +50,6 @@ class Admin (QDialog):
         #                self.ui.checkBox_2.setChecked(False)
         #else:
         #    self.config["untwist"] = False
-        self.ui.btn_off.setEnabled(False)
         if self.data.config_data["untwist"]:
             self.ui.checkBox_4.setChecked(True)
         else:
@@ -61,9 +63,7 @@ class Admin (QDialog):
         else:
             self.ui.checkBox_6.setChecked(False)
 
-        self.ui.btn_torque.clicked.connect(self.qw_torques.show)
         self.ui.btn_reset.clicked.connect(self.resetMachine)
-        self.ui.btn_off.clicked.connect(self.poweroff)
 
         self.ui.checkBox_1.stateChanged.connect(self.onClicked_1)
         self.ui.checkBox_2.stateChanged.connect(self.onClicked_2)
@@ -72,18 +72,13 @@ class Admin (QDialog):
         self.ui.checkBox_5.stateChanged.connect(self.onClicked_5)
         self.ui.checkBox_6.stateChanged.connect(self.onClicked_6)
         
-        self.rcv.connect(self.qw_torques.input)
         self.permissions()
 
 ######################################### Plugins #######################################
-        #self.qw_rework = None
-        #self.ui.btn_off.clicked.connect(self.show_rework)
 
     def permissions (self):
         if self.user_type == "SUPERUSUARIO":
-            self.ui.btn_off.setEnabled(True)
             self.ui.btn_reset.setEnabled(True)
-            self.ui.btn_torque.setEnabled(False)
             self.ui.checkBox_1.setEnabled(True)
             self.ui.checkBox_2.setEnabled(True)
             self.ui.checkBox_3.setEnabled(True)
@@ -91,39 +86,27 @@ class Admin (QDialog):
             self.ui.checkBox_5.setEnabled(False)
             self.ui.checkBox_6.setEnabled(True)
         elif self.user_type == "CALIDAD":
-            self.ui.btn_off.setEnabled(True)
             self.ui.btn_reset.setEnabled(True)
-            self.ui.btn_torque.setEnabled(False)
             self.ui.checkBox_1.setEnabled(True)
             self.ui.checkBox_2.setEnabled(False)
             self.ui.checkBox_3.setEnabled(False)
             self.ui.checkBox_4.setEnabled(False)
             self.ui.checkBox_5.setEnabled(False)
         elif self.user_type == "MANTENIMIENTO":
-            self.ui.btn_off.setEnabled(True)
             self.ui.btn_reset.setEnabled(True)
-            self.ui.btn_torque.setEnabled(False)
             self.ui.checkBox_1.setEnabled(True)
             self.ui.checkBox_2.setEnabled(False)
             self.ui.checkBox_3.setEnabled(True)
             self.ui.checkBox_4.setEnabled(False)
             self.ui.checkBox_5.setEnabled(False)
         elif self.user_type == "PRODUCCION":
-            self.ui.btn_off.setEnabled(False)
             self.ui.btn_reset.setEnabled(True)
-            self.ui.btn_torque.setEnabled(False)
             self.ui.checkBox_1.setEnabled(True)
             self.ui.checkBox_2.setEnabled(False)
             self.ui.checkBox_3.setEnabled(False)
             self.ui.checkBox_4.setEnabled(False)
             self.ui.checkBox_5.setEnabled(False)
         self.show()
-
-    #def show_rework (self):
-    #    if self.model.plugins["rework"] == False:
-    #        self.qw_rework = Rework(model = self.model, client = self.client, parent = self)
-    #        self.model.plugins["rework"] = True
-    #        self.rcv.connect(self.qw_rework.input)
 
 ##################################################################################################
 
@@ -157,15 +140,6 @@ class Admin (QDialog):
         choice = QMessageBox.question(self, 'Reiniciar', "Estas seguro de reiniciar la estación?",QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if choice == QMessageBox.Yes:
             system("shutdown /r")
-            self.client.publish("config/status", '{"shutdown": true}')
-            self.close()
-        else:
-            pass
-
-    def poweroff(self):
-        choice = QMessageBox.question(self, 'Apagar', "Estas seguro de apagar la estación?",QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if choice == QMessageBox.Yes:
-            system("shutdown /s")
             self.client.publish("config/status", '{"shutdown": true}')
             self.close()
         else:
@@ -206,14 +180,14 @@ class Admin (QDialog):
             print("Sistema de Trazabilidad Habilitado")
             self.pop_out.setText("El Sistema de Trazabilidad ha sido Habilitado")
             self.pop_out.setWindowTitle("Acción Realizada")
-            QTimer.singleShot(3000, self.pop_out.button(QMessageBox.Ok).click)
+            QTimer.singleShot(1000, self.pop_out.button(QMessageBox.Ok).click)
             self.pop_out.exec()
         else:
             self.data.config_data["trazabilidad"] = False
             print("Sistema de Trazabilidad Deshabilitado")
             self.pop_out.setText("El Sistema de Trazabilidad ha sido Deshabilitado")
             self.pop_out.setWindowTitle("Acción Realizada")
-            QTimer.singleShot(3000, self.pop_out.button(QMessageBox.Ok).click)
+            QTimer.singleShot(1000, self.pop_out.button(QMessageBox.Ok).click)
             self.pop_out.exec()
 
     def closeEvent(self, event):
@@ -222,7 +196,6 @@ class Admin (QDialog):
             dump(self.config, f, protocol=3)
         #self.client.publish("modules/set",json.dumps({"window" : False}), qos = 2)
         #self.client.publish("visycam/set",json.dumps({"window" : False}), qos = 2)
-        #self.client.publish("torque/1/set",json.dumps({"profile" : 0}), qos = 2)
         #system("taskkill /f /im explorer.exe")
         self.stopClient()
         event.accept()
