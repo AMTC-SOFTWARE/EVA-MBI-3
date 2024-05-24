@@ -480,9 +480,12 @@ class CheckQr (QState):
 
     def API_requests (self):
         try:
+
+            ##################################### Formato Etiqueta ##########################################################
+
             print("||||||Estado de Sistema de Trazabilidad: ",self.model.config_data["trazabilidad"])
-            pedido = None
-            dbEvent = None
+            self.model.pedido = None
+            self.model.dbEvent = None
             coincidencias = 0
             self.model.qr_codes["FET"] = self.model.input_data["gui"]["code"]
             temp = self.model.input_data["gui"]["code"].split (" ")
@@ -506,8 +509,9 @@ class CheckQr (QState):
                 self.nok.emit()
                 return
 
+            ##################################################################################################################
 
-            #### Trazabilidad FAMX2
+            ##################################### Trazabilidad FAMX2 #########################################################
             if self.model.config_data["trazabilidad"]:
                 try:
                     print("||||||||||||Consulta de HM a FAMX2...")
@@ -586,8 +590,23 @@ class CheckQr (QState):
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                     self.nok.emit()
                     return
-            ####
 
+            ##################################################################################################################
+
+            ################################## HISTORIAL PROCESADO ANTERIORMENTE #############################################
+            endpoint = "http://{}/api/get/historial/HM/=/{}/RESULTADO/=/2".format(self.model.server, self.model.qr_codes["HM"])
+            response = requests.get(endpoint).json()
+            #si response tiene items y esta es response["items"] = False (NO se encontró un arnés previamente en el historial),
+            #o si está qr_rework en True (ya fue aprobado), entonces NO se emite self.rework (esto te llevaría a esperar llave para confirmar).
+            #si no entra a rework.emit, quiere decir que no tiene historial y continúa normalmente...
+            if not(("items" in response and response["items"] == False) or (self.model.local_data["qr_rework"] == True)):
+                #se va a el estado rework
+                print("se trata de un retrabajo, yendo a estado rework para pedir llave")
+                self.rework.emit()
+                return
+            ##################################################################################################################
+
+            ######################################### BUSQUEDA DE EVENTOS ####################################################
             endpoint = "http://{}/api/get/eventos".format(self.model.server)
             eventos = requests.get(endpoint).json()
             #print("Lista eventos:\n",eventos)
@@ -601,13 +620,22 @@ class CheckQr (QState):
                     response = requests.get(endpoint).json()
                     #print("Response: ",response)
                     if "PEDIDO" in response:
-                        dbEvent = key
+                        self.model.dbEvent = key
                         coincidencias += 1
                         print("En este Evento se encuentra la modularidad \n")
-                        pedido = response
+                        self.model.pedido = response
+                        #self.model.pedido = {
+                        #"PEDIDO"             : "ILX294243B1016847",
+                        #"DATETIME"           : 2023-09-07 06:15:49,
+                        #"MODULOS_VISION"     : {"INTERIOR": ["A2239060302", "A2239060602", "A2239061002", "A2943202701", "A2945400211", "A2945400312", "A2945400609", "A2945400808", "A2945400811", "A2945400913", "A2945401011", "A2945401112", "A2945401211", "A2945401303", "A2945401312", "A2945401405", "A2945401413", "A2945401512", "A2945401606", "A2945401608", "A2945401609", "A2945401808", "A2945401810", "A2945402005", "A2945402010", "A2945402103", "A2945402109", "A2945402200", "A2945402205", "A2945402210", "A2945402309", "A2945402410", "A2945402502", "A2945402505", "A2945402611", "A2945402810", "A2945402902", "A2945402905", "A2945403000", "A2945403011", "A2945403100", "A2945403105", "A2945403106", "A2945403109", "A2945403211", "A2945403300", "A2945403402", "A2945403405", "A2945403510", "A2945403511", "A2945403601", "A2945403805", "A2945403811", "A2945403900", "A2945404001", "A2945404109", "A2945404111", "A2945404205", "A2945404300", "A2945404311", "A2945404402", "A2945404511", "A2945404802", "A2945404805", "A2945404909", "A2945405102", "A2945405212", "A2945405300", "A2945405312", "A2945405314", "A2945405400", "A2945405402", "A2945405615", "A2945405908", "A2945406008", "A2945406108", "A2945406209", "A2945406302", "A2945406312", "A2945406313", "A2945406315", "A2945406500", "A2945406508", "A2945406608", "A2945406702", "A2945406808", "A2945406813", "A2945406902", "A2945406905", "A2945406912", "A2945407000", "A2945407001", "A2945407102", "A2945407108", "A2945407112", "A2945407113", "A2945407200", "A2945407210", "A2945407300", "A2945407308", "A2945407408", "A2945407410", "A2945407800", "A2945407810", "A2945408208", "A2945408308", "A2945408406", "A2945408507", "A2945408818", "A2945408901", "A2945409007", "A2945409010", "A2945409210", "A2945409311", "A2945409410", "A2945409610", "A2945409708", "A2945409800", "A2945409808", "A2948210600", "A2948210700", "A2948210800", "A2948210900", "A2948211000", "A2948211100", "A2948605800", "A2955452900", "A2975402001", "A2975407930", "A2975848403"]},
+                        #"MODULOS_TORQUE"     : {"INTERIOR": ["A2239060302", "A2239060602", "A2239061002", "A2943202701", "A2945400211", "A2945400312", "A2945400609", "A2945400808", "A2945400811", "A2945400913", "A2945401011", "A2945401112", "A2945401211", "A2945401303", "A2945401312", "A2945401405", "A2945401413", "A2945401512", "A2945401606", "A2945401608", "A2945401609", "A2945401808", "A2945401810", "A2945402005", "A2945402010", "A2945402103", "A2945402109", "A2945402200", "A2945402205", "A2945402210", "A2945402309", "A2945402410", "A2945402502", "A2945402505", "A2945402611", "A2945402810", "A2945402902", "A2945402905", "A2945403000", "A2945403011", "A2945403100", "A2945403105", "A2945403106", "A2945403109", "A2945403211", "A2945403300", "A2945403402", "A2945403405", "A2945403510", "A2945403511", "A2945403601", "A2945403805", "A2945403811", "A2945403900", "A2945404001", "A2945404109", "A2945404111", "A2945404205", "A2945404300", "A2945404311", "A2945404402", "A2945404511", "A2945404802", "A2945404805", "A2945404909", "A2945405102", "A2945405212", "A2945405300", "A2945405312", "A2945405314", "A2945405400", "A2945405402", "A2945405615", "A2945405908", "A2945406008", "A2945406108", "A2945406209", "A2945406302", "A2945406312", "A2945406313", "A2945406315", "A2945406500", "A2945406508", "A2945406608", "A2945406702", "A2945406808", "A2945406813", "A2945406902", "A2945406905", "A2945406912", "A2945407000", "A2945407001", "A2945407102", "A2945407108", "A2945407112", "A2945407113", "A2945407200", "A2945407210", "A2945407300", "A2945407308", "A2945407408", "A2945407410", "A2945407800", "A2945407810", "A2945408208", "A2945408308", "A2945408406", "A2945408507", "A2945408818", "A2945408901", "A2945409007", "A2945409010", "A2945409210", "A2945409311", "A2945409410", "A2945409610", "A2945409708", "A2945409800", "A2945409808", "A2948210600", "A2948210700", "A2948210800", "A2948210900", "A2948211000", "A2948211100", "A2948605800", "A2955452900", "A2975402001", "A2975407930", "A2975848403"]},
+                        #"MODULOS_ALTURA"     : {"INTERIOR": ["A2239060302", "A2239060602", "A2239061002", "A2943202701", "A2945400211", "A2945400312", "A2945400609", "A2945400808", "A2945400811", "A2945400913", "A2945401011", "A2945401112", "A2945401211", "A2945401303", "A2945401312", "A2945401405", "A2945401413", "A2945401512", "A2945401606", "A2945401608", "A2945401609", "A2945401808", "A2945401810", "A2945402005", "A2945402010", "A2945402103", "A2945402109", "A2945402200", "A2945402205", "A2945402210", "A2945402309", "A2945402410", "A2945402502", "A2945402505", "A2945402611", "A2945402810", "A2945402902", "A2945402905", "A2945403000", "A2945403011", "A2945403100", "A2945403105", "A2945403106", "A2945403109", "A2945403211", "A2945403300", "A2945403402", "A2945403405", "A2945403510", "A2945403511", "A2945403601", "A2945403805", "A2945403811", "A2945403900", "A2945404001", "A2945404109", "A2945404111", "A2945404205", "A2945404300", "A2945404311", "A2945404402", "A2945404511", "A2945404802", "A2945404805", "A2945404909", "A2945405102", "A2945405212", "A2945405300", "A2945405312", "A2945405314", "A2945405400", "A2945405402", "A2945405615", "A2945405908", "A2945406008", "A2945406108", "A2945406209", "A2945406302", "A2945406312", "A2945406313", "A2945406315", "A2945406500", "A2945406508", "A2945406608", "A2945406702", "A2945406808", "A2945406813", "A2945406902", "A2945406905", "A2945406912", "A2945407000", "A2945407001", "A2945407102", "A2945407108", "A2945407112", "A2945407113", "A2945407200", "A2945407210", "A2945407300", "A2945407308", "A2945407408", "A2945407410", "A2945407800", "A2945407810", "A2945408208", "A2945408308", "A2945408406", "A2945408507", "A2945408818", "A2945408901", "A2945409007", "A2945409010", "A2945409210", "A2945409311", "A2945409410", "A2945409610", "A2945409708", "A2945409800", "A2945409808", "A2948210600", "A2948210700", "A2948210800", "A2948210900", "A2948211000", "A2948211100", "A2948605800", "A2955452900", "A2975402001", "A2975407930", "A2975848403"]},
+                        #"QR_BOXES"           : {"PDC-R": ["", false], "PDC-RMID": ["12239061502", true], "PDC-RS": ["", false], "PDC-D": ["12239060402", true], "PDC-P": ["12239060702", true], "MFB-P1": ["12975402001", true], "MFB-S": ["12235403215", true], "MFB-E": ["12975403015", true], "MFB-P2": ["12975407316", true]},
+                        #"ACTIVE"             : 1}
+
             print("Coincidencias = ",coincidencias)
-            if dbEvent != None:
-                print("La Modularidad pertenece al Evento: ",dbEvent)
+            if self.model.dbEvent != None:
+                print("La Modularidad pertenece al Evento: ",self.model.dbEvent)
                 if coincidencias != 1:
                     print("Datamatrix Redundante")
                     command = {
@@ -629,8 +657,11 @@ class CheckQr (QState):
                 self.nok.emit()
                 return
 
+            ##################################################################################################################
 
-            if not(self.ETIQUETA(self.model.qr_codes["HM"])):
+            ############################################ PREPARACIÓN DE INFORMACIÓN DE ETIQUETA ###############################
+
+            if not(self.ETIQUETA(self.model.qr_codes["HM"])): #de aquí se obtiene la información de la ETIQUETA y se llena la variable self.model.t_result
                 command = {
                         "lbl_result" : {"text": "Arnés sin historial de torque", "color": "red"},
                         "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
@@ -638,21 +669,68 @@ class CheckQr (QState):
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                 self.nok.emit()
                 return
+            
+            #aquí se revisa que se hayan leído datos de qué torques lleva, de lo contrario se deben consultar para armar las cajas de torque...
+            #(En ambos casos se debe terminar con el contenido necesario para las cajas de torque)
+
+            self.model.input_data["database"]["modularity_nuts"].clear() #se limpia la variable que guarda las tuercas a inspeccionar (sin cavidades de  tuercas vacías)
+            self.model.input_data["database"]["modularity"].clear() #variable para guardar la infromación de los fusibles en las cavidades que no están vacías para el arnés
+
+            if self.model.valores_torques_red == False: #se revisa esta variable en la función ETIQUETA para saber si el arnés tiene esta información o no
+                print("se generan los torques que llevará el arnés a partir de la base de datos cargada en la estación...")
+                self.build_contenido_torques()
+
+            else:
+                print("se acomodan los queue necesarios para las cajas de torque con la información de la tabla en red: valores")
+                print("self.model.t_result: ",self.model.t_result)
+                print("self.model.t_resultAngle: ",self.model.t_resultAngle)
+
+                #EJEMPLO DE CONTENIDO DE VARIABLES:
+                #self.model.t_result:  
+                #{'PDC-P': {'E1': 8.02}, 
+                #'PDC-D': {'E1': 8.0}, 
+                #'BATTERY': {'BT': 6.54}, 
+                #'BATTERY-2': {'BT': None}, 
+                #'MFB-P1': {'A47': None, 'A46': 16.04, 'A45': None, 'A44': None, 'A43': 8.02, 'A41': 16.1, 'A42': 7.99}, 
+                #'MFB-S': {'A51': None, 'A52': None, 'A53': None, 'A54': None, 'A55': None, 'A56': None}, 
+                #'MFB-E': {'E1': None, 'A1': None, 'A2': None}, 
+                #'MFB-P2': {'A20': 16.13, 'A21': 8.04, 'A22': 8.0, 'A23': None, 'A24': 8.02, 'A25': 16.07, 
+                #           'A26': 8.04, 'A27': None, 'A28': None, 'A29': 8.0, 'A30': 16.0}, 
+                #'PDC-R': {'E1': None}, 'PDC-RS': {'E1': None}, 'PDC-RMID': {'E1': 16.19}}
+
+                #self.model.t_resultAngle:  {'PDC-P': {'E1': 31.0}, 'PDC-D': {'E1': 37.7}, 'BATTERY': {'BT': 21.5}, 'BATTERY-2': {'BT': None}, 'MFB-P1': {'A47': None, 'A46': 46.1, 'A45': None, 'A44': None, 'A43': 24.0, 'A41': 46.6, 'A42': 34.5}, 'MFB-S': {'A51': None, 'A52': None, 'A53': None, 'A54': None, 'A55': None, 'A56': None}, 'MFB-E': {'E1': None, 'A1': None, 'A2': None}, 'MFB-P2': {'A20': 35.1, 'A21': 34.7, 'A22': 23.0, 'A23': None, 'A24': 26.9, 'A25': 31.4, 'A26': 22.5, 'A27': None, 'A28': None, 'A29': 22.3, 'A30': 43.3}, 'PDC-R': {'E1': None}, 'PDC-RS': {'E1': None}, 'PDC-RMID': {'E1': 31.3}}
+
+                #lista_cajas = ["MFB-P2","MFB-P1","MFB-S","MFB-E"]
+                lista_cajas = self.model.lista_cajas_torque
+                queue_tuercas = self.model.input_data["database"]["modularity_nuts"] #inicia vacío queue_tuercas = {}
+
+                for caja in lista_cajas:
+                    print("caja: ",caja)
+                    if caja in self.model.t_result:
+                        print("caja encontrada en self.model.t_result...")
+                        for tuerca in self.model.t_result[caja]:
+                            print("nombre tuerca: ",tuerca)
+                            if str(self.model.t_result[caja][tuerca]).upper() != "NONE":
+                                print("agregando tuerca diferente de None")
+                                if not(caja in queue_tuercas):
+                                    queue_tuercas[caja] = {}
+                                queue_tuercas[caja][tuerca] = str(self.model.t_result[caja][tuerca])
+
+                print("self.model.input_data[database][modularity_nuts]: ",self.model.input_data["database"]["modularity_nuts"])
+
+            ##################################################################################################################
 
             print("\nINICIO PROCESAMIENTO DE ARNÉS: ",strftime("%Y/%m/%d %H:%M:%S"))
 
+            ##################################################################################################################
+
             #Consulta a la API para ver cuales son los módulos Determinantes de cajas PDC-R y guardarlas en una variable que se utilizará más adelante.
-            endpoint = "http://{}/api/get/{}/pdcr/variantes".format(self.model.server, dbEvent)
+            endpoint = "http://{}/api/get/{}/pdcr/variantes".format(self.model.server, self.model.dbEvent)
             pdcrVariantes = requests.get(endpoint).json()
             print("Lista Final de Variantes PDC-R:\n",pdcrVariantes)
 
-            endpoint = "http://{}/api/get/historial/HM/=/{}/RESULTADO/=/2".format(self.model.server, self.model.qr_codes["HM"])
-            response = requests.get(endpoint).json()
-
-
-            #si response tiene items ... y esta es response["items"] = True  .... o si está qr_rework en  True...  se emite self.rework.emit (vas a qr_rework, a esperar llave para confirmar)
-            if ("items" in response and not(response["items"])) or self.model.local_data["qr_rework"]: # or True:
-                modules = json.loads(pedido["MODULOS_VISION"])
+            if 1:
+                modules = json.loads(self.model.pedido["MODULOS_VISION"])
                 modules = modules[list(modules)[0]]
                 flag_s = False
                 flag_m = False
@@ -680,14 +758,11 @@ class CheckQr (QState):
 
                 #variable para guardar toda la información de la configuración del arnés
                 arnes_data = {}
-                
-                #variable para guardar la infromación de las cavidades que no están vacías para el arnés
-                self.model.input_data["database"]["modularity"].clear()
 
                 #recorremos los modulos del arnés
                 for i in modules:
                     #petición a la base de datos local para ver que fusibles lleva cada modulo
-                    endpoint = "http://{}/api/get/{}/modulos_fusibles/MODULO/=/{}/_/=/_".format(self.model.server, dbEvent, i)
+                    endpoint = "http://{}/api/get/{}/modulos_fusibles/MODULO/=/{}/_/=/_".format(self.model.server, self.model.dbEvent, i)
                     response = requests.get(endpoint).json()
                     #si encuentra el módulo en la respuesta (que si existe en la base de datos local)...
                     if "MODULO" in response:
@@ -776,13 +851,12 @@ class CheckQr (QState):
                         self.nok.emit()
                         return 
 
-                self.model.input_data["database"]["pedido"] = pedido
+                self.model.input_data["database"]["pedido"] = self.model.pedido
 
 
-                ################################
+                ################################ SE AGREGAN CAVIDADES VACÍAS ################################
                 
                 #se llena la variable modularity_fuses con todas las cavidades con fusibles vacíos
-                
                 self.model.modularity_fuses.update(copy(self.model.fuses_base))
                 
                 try:
@@ -793,29 +867,39 @@ class CheckQr (QState):
                 except Exception as ex:
                     print (ex)
 
-                ################################
-                #Se agrega nueva inspeccion obligatoria para todos los arneses la caja 
+                ################################ CONECTORES PDC-P2 & PDC-Dbracket ################################
 
+                #Se agrega nueva inspeccion obligatoria para todos los arneses la caja 
                 self.model.input_data["database"]["modularity"]["PDC-P2"] = ['CONECTOR1', 'CONECTOR2']
-                
                 #Se agrega nueva inspeccion obligatoria para todos los arneses el bracket de la caja PDCD
                 self.model.input_data["database"]["modularity"]["PDC-Dbracket"] = ['bracket']
                 
+                ##################################################################################################
+
+                #self.model.input_data["database"]["modularity"]    # vairable que guarda un diccionario con las cajas de fusibles encontradas, pero cada clave contiene una lista de los fusibles 
+                #self.model.modularity_fuses                        # variable de diccionario con cada caja con el valor del color deseado para cada fusible y  contando ya las cavidades vacías
+
                 print("\t\tCOLECCIÓN:\n", self.model.input_data["database"]["modularity"])
                 print("\t\tmodularity_fuses:\n", self.model.modularity_fuses) #Temporal solo para ver los fusibles cuando sea un vehículo Z296 (MAXI 30A VERDE Nuevo)
                 
-                
+
+                # EJEMPLO::::::::::::::::::::
+                #COLECCIÓN:
+                #{'PDC-RMID': ['F419', 'F450', 'F451', 'F452', 'F453', 'F425', 'F458', 'F402', 'F441', 'F431', 'F439', 'F416', 'F417', 'F411', 'F443', 'F446', 'F418', 'F422', 'F420', 'F438', 'F457', 'RELX', 'F430', 'RELT', 'F432', 'F413', 'F415', 'F401', 'F421'], 'PDC-P': ['F305', 'F303', 'MF1', 'F321', 'F328', 'F329', 'F333', 'F323', 'F319', 'F327', 'F304', 'F318', 'F300', 'F320', 'F322', 'F326', 'F332', 'F335', 'MF2', 'F302'], 'PDC-D': ['F216', 'F200', 'F204', 'F209', 'F211', 'F213', 'F214', 'F215', 'F217', 'F218', 'F219', 'F220', 'F221', 'F222', 'F225', 'F226', 'F227', 'F229', 'F230', 'F231', 'F232', 'F223', 'F205'], 'PDC-P2': ['CONECTOR1', 'CONECTOR2'], 'PDC-Dbracket': ['bracket']}
+                #modularity_fuses:
+                #{'PDC-D': {'F200': 'beige', 'F201': 'vacio', 'F202': 'vacio', 'F203': 'vacio', 'F204': 'rojo', 'F205': 'beige', 'F206': 'vacio', 'F207': 'vacio', 'F208': 'vacio', 'F209': 'verde', 'F210': 'vacio', 'F211': 'verde', 'F212': 'vacio', 'F213': 'beige', 'F214': 'verde', 'F215': 'verde', 'F216': 'natural', 'F217': 'azul', 'F218': 'beige', 'F219': 'rojo', 'F220': 'beige', 'F221': 'azul', 'F222': 'rojo', 'F223': 'cafe', 'F224': 'vacio', 'F225': 'azul', 'F226': 'cafe', 'F227': 'beige', 'F228': 'vacio', 'F229': 'beige', 'F230': 'beige', 'F231': 'beige', 'F232': 'beige'}, 'PDC-Dbracket': {'bracket': 'bracket1'}, 'PDC-P': {'MF1': 'cafe', 'MF2': 'beige', 'F301': 'vacio', 'F302': 'beige', 'F303': 'beige', 'F304': 'beige', 'F305': 'beige', 'F300': 'rojo', 'F318': 'cafe', 'F319': 'cafe', 'F320': 'cafe', 'F321': 'cafe', 'F322': 'rojo', 'F323': 'cafe', 'F324': 'vacio', 'F325': 'vacio', 'F326': 'verde', 'F327': 'verde', 'F328': 'verde', 'F329': 'verde', 'F330': 'vacio', 'F331': 'vacio', 'F332': 'rojo', 'F333': 'verde', 'F334': 'vacio', 'F335': 'natural', 'conector': 'conector'}, 'PDC-P2': {'CONECTOR1': 'conector1', 'CONECTOR2': 'conector2'}, 'PDC-R': {'F405': 'vacio', 'F404': 'vacio', 'F403': 'vacio', 'F402': 'vacio', 'F401': 'vacio', 'F400': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'vacio', 'F414': 'vacio', 'F415': 'vacio', 'F416': 'vacio', 'F417': 'vacio', 'F420': 'vacio', 'F419': 'vacio', 'F418': 'vacio', 'F421': 'vacio', 'F422': 'vacio', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'vacio', 'F426': 'vacio', 'F430': 'vacio', 'F431': 'vacio', 'F437': 'vacio', 'F438': 'vacio', 'F439': 'vacio', 'F440': 'vacio', 'F441': 'vacio', 'F432': 'vacio', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'vacio', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'vacio', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'F462': 'vacio', 'F463': 'vacio', 'F464': 'vacio', 'F465': 'vacio', 'F466': 'vacio', 'F467': 'vacio', 'F468': 'vacio', 'F469': 'vacio', 'F470': 'vacio', 'F471': 'vacio', 'F472': 'vacio', 'F473': 'vacio', 'F474': 'vacio', 'F475': 'vacio', 'F476': 'vacio', 'F477': 'vacio', 'F478': 'vacio', 'F479': 'vacio', 'F480': 'vacio', 'F481': 'vacio', 'F482': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'RELX': 'vacio'}, 'PDC-RMID': {'F400': 'vacio', 'F401': 'natural', 'F402': 'natural', 'F403': 'vacio', 'F404': 'vacio', 'F405': 'vacio', 'F411': 'cafe', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'verde', 'F414': 'vacio', 'F415': 'verde', 'F416': 'verde', 'F417': 'verde', 'F420': 'naranja', 'F419': 'naranja', 'F418': 'naranja', 'F421': 'verde', 'F422': 'natural', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'amarillo', 'F426': 'vacio', 'F430': 'azul', 'F431': 'rojo', 'F437': 'vacio', 'F438': 'cafe', 'F439': 'azul', 'F440': 'vacio', 'F441': 'beige', 'F432': 'cafe', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'beige', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'beige', 'F450': 'verde', 'F451': 'amarillo', 'F452': 'natural', 'F453': 'natural', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'natural', 'F458': 'verde', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'RELU': 'vacio', 'RELT': '1010733', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'RELX': '1008695'}, 'PDC-RS': {'F400': 'vacio', 'F401': 'vacio', 'F402': 'vacio', 'F403': 'vacio', 'F404': 'vacio', 'F405': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'vacio', 'F414': 'vacio', 'F415': 'vacio', 'F416': 'vacio', 'F417': 'vacio', 'F420': 'vacio', 'F419': 'vacio', 'F418': 'vacio', 'F421': 'vacio', 'F422': 'vacio', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'vacio', 'F426': 'vacio', 'F430': 'vacio', 'F431': 'vacio', 'F437': 'vacio', 'F438': 'vacio', 'F439': 'vacio', 'F440': 'vacio', 'F441': 'vacio', 'F432': 'vacio', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'vacio', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'vacio', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'RELX': 'vacio'}, 'PDC-S': {'1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'}, 'TBLU': {'1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio', '7': 'vacio', '8': 'vacio', '9': 'vacio'}, 'F96': {'F96': 'vacio'}}
+
                 self.model.datetime = datetime.now()
 
                 #se regresa la variable de rework a False para preguntar en cada arnés...
                 if self.model.local_data["qr_rework"]:
                     self.model.local_data["qr_rework"] = False
-                event = dbEvent.upper()
+                event = self.model.dbEvent.upper()
                 evento = event.replace('_',' ')
                 command = {
                     "lbl_result" : {"text": "Datamatrix validado", "color": "green"},
                     "lbl_steps" : {"text": "Obteniendo Contenido de Arnés", "color": "black"},
-                    "statusBar" : pedido["PEDIDO"]+" "+self.model.qr_codes["HM"]+" "+evento,
+                    "statusBar" : self.model.pedido["PEDIDO"]+" "+self.model.qr_codes["HM"]+" "+evento,
                     "cycle_started": True
                     }
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
@@ -823,10 +907,8 @@ class CheckQr (QState):
                 self.model.contador_scan_pdcr = 1
                 ################################################################################################################################# OK EMIT
                 self.ok.emit()
-            else:
-                #se va a el estado rework
-                self.rework.emit()
-                return
+
+            ##################################################################################################################
 
         except Exception as ex:
             print("Datamatrix request exception: ", ex) 
@@ -839,14 +921,276 @@ class CheckQr (QState):
             self.model.input_data["database"]["modularity"].clear()
             self.nok.emit()
 
+    def build_contenido_torques (self):
+        print("\nbuild_contenido_torques")
+        try:
+                #se leen los módulos de Torque cargados en la estación
+                modules = json.loads(self.model.pedido["MODULOS_TORQUE"])
+                modules = modules[list(modules)[0]]
 
-    #Función para buscar el HM obtenido de la etiqueta (Consulta para saber si tiene historial de torque, y jalar sus resultados)
+                print("\n\t+++++++++++MODULARIDAD REFERENCIA+++++++++++\n",self.model.qr_codes["REF"])
+                print(f"\n\t\tMODULOS_TORQUE PARA ESTA REFERENCIA:\n{modules}")
+
+                #################################################################### TORQUE NUEVO METODO CONSULTA ####################################################################
+
+                endpoint = "http://{}/api/get/{}/modulos_torques/all/_/_/_/_/_".format(self.model.server, self.model.dbEvent)
+                response = requests.get(endpoint).json()
+
+                if "MODULO" in response:
+                    pass
+                else:
+                    command = {
+                            "lbl_result" : {"text": "Modulos de torque no encontrados", "color": "red"},
+                            "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
+                            }
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                    self.nok.emit()
+                    return
+
+                modulos_de_evento = {} #se inicializa variable vacía para guardar contenido de evento
+
+                contenido = list(response.keys())
+                contenido.pop(contenido.index("ID"))
+                contenido.pop(contenido.index("MODULO"))
+                print("contenido: ",contenido) #se deja la lista contenido solamente con las cajas
+                
+                #response[MODULO] contiene una lista de los modulos que existen para este evento
+                for modulo in response['MODULO']:
+                    modulo = modulo.replace(" ","") #se eliminan los espacios
+                    modulos_de_evento[modulo] = {} #se crea el diccionario vacío para ese módulo
+                    indice_modulo = response['MODULO'].index(modulo) #se obtiene el indice en la lista del módulo
+                    for caja in contenido:
+                        #si la caja en su indice igual al del módulo está vacío, no hace nada, de lo contrario se agrega el dato
+                        if response[caja][indice_modulo] != "" and response[caja][indice_modulo] != "{}" and response[caja][indice_modulo] != 0:
+                            modulos_de_evento[modulo][caja] = response[caja][indice_modulo]
+
+                #los modulos vacíos deben ir en el resultado final para saber cuando un módulo que lleve la modularidad no significa torque o fusible
+                #print("modulos_de_evento")
+                #pprint.pprint(modulos_de_evento)
+
+                for modulo in modules:
+                    if modulo in modulos_de_evento:
+                        temp = {} #se reinicia temp en cada modulo
+                        for elemento in modulos_de_evento[modulo]: #elemento son los valores de las columnas CAJA_1,CAJA_2,etc de la tabla de modulos del evento correspondientes al módulo actual
+                            if "CAJA_" in elemento:
+                                #se agregan a la variable temp todos los contenidos de CAJA_1,CAJA_2,etc. del módulo que se está evaluando
+                                temp.update(json.loads(modulos_de_evento[modulo][elemento]))
+                        for caja in temp:
+                            caja_nueva = False
+                            #ejemplo: temp = { CAJA_1:{}, CAJA_2:{"MFB-P2": {"A22": true,"A23": true}} }
+                            #si el contenido del elemento es vacío: CAJA_1:{} entonces se inspecciona el siguiente: CAJA_2:{"MFB-P2": {"A22": true,"A23": true}}
+                            if len(temp[caja]) == 0:
+                                continue
+                            #si la caja actual dentro de temp si tiene contenido...
+                            else:
+                                #si se trata de una de las cajas válidas para inspección de torque
+                                if caja in self.model.lista_cajas_torque:
+
+                                    #se recorren las tuercas de la caja: MFB-P2": {"A22": true,"A23": true}
+                                    for tuerca in temp[caja]:
+                                        #si la tuerca está activa, tiene true...
+                                        if temp[caja][tuerca] == True:
+
+                                            #si la caja no existe aún en la variable del modelo...
+                                            if not(caja in self.model.input_data["database"]["modularity_nuts"]):
+                                                self.model.input_data["database"]["modularity_nuts"][caja] = [] #se agrega la nueva caja
+
+                                            #si no existe la tuerca en la caja de modularity_nuts...
+                                            if not(tuerca in self.model.input_data["database"]["modularity_nuts"][caja]):
+                                                self.model.input_data["database"]["modularity_nuts"][caja].append(tuerca)#se agrega la tuerca en esta caja
+
+                                    self.model.input_data["database"]["modularity_nuts"][caja].sort()
+
+                    else:
+                        command = {
+                                "lbl_result" : {"text": "Modulo de Torque NO encontrado", "color": "red"},
+                                "lbl_steps" : {"text": f"{modulo}, Inténtalo de nuevo", "color": "black"}
+                                }
+                        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                        self.nok.emit()
+                        return
+                    
+                print("-------------------------------------TAREAS: TUERCAS -----------------------------------")
+                print(self.model.input_data["database"]["modularity_nuts"])
+
+                self.model.cronometro_ciclo=True
+                command = {
+                    "lbl_result" : {"text": "Torques Generados Correctamente", "color": "green"},
+                    "lbl_steps" : {"text": "Generando Combinación de Fusibles", "color": "black"}
+                    }
+                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                print("modularity_nuts terminado correctamente, continuando...")
+
+        except Exception as ex:
+            self.model.input_data["database"]["modularity_nuts"].clear()
+            print("build_content_torques exception: ", ex)
+            command = {
+                    "lbl_result" : {"text": "Error de Carga en Tuercas de Arnés", "color": "red", "font": "40pt"},
+                    "lbl_steps" : {"text": "Intentelo de Nuevo", "color": "black", "font": "22pt"}
+                    }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            self.nok.emit()
+            return
+
+    def build_contenido_fusibles (self):
+        print("\nbuild_contenido_fusibles")
+        try:
+
+            #Consulta a la API para ver cuales son los módulos Determinantes de cajas PDC-R y guardarlas en una variable que se utilizará más adelante.
+            endpoint = "http://{}/api/get/{}/pdcr/variantes".format(self.model.server, self.model.dbEvent)
+            pdcrVariantes = requests.get(endpoint).json()
+            print("Lista Final de Variantes PDC-R:\n",pdcrVariantes)
+
+            flag_s = False
+            flag_m = False
+            flag_l = False
+
+            for i in pdcrVariantes["small"]:
+                if i in modules:
+                    self.model.pdcrvariant = "PDC-RS"
+                    flag_s = True
+
+            for i in pdcrVariantes["medium"]:
+                if i in modules:
+                    self.model.pdcrvariant = "PDC-RMID"
+                    flag_m = True
+
+            for i in pdcrVariantes["large"]:
+                if i in modules:
+                    self.model.pdcrvariant = "PDC-R"
+                    flag_l = True
+
+            print("\t\tFLAGS:\n Flag S - ",flag_s," Flag M - ",flag_m," Flag L - ",flag_l)
+            print("PDC-R VARIANT: "+self.model.pdcrvariant)
+
+            #se leen los módulos de Torque cargados en la estación
+            modules = json.loads(self.model.pedido["MODULOS_VISION"])
+            modules = modules[list(modules)[0]]
+
+            print("\n\t+++++++++++MODULARIDAD REFERENCIA+++++++++++\n",self.model.qr_codes["REF"])
+            print(f"\n\t\tMODULOS_FUSIBLES PARA ESTA REFERENCIA:\n{modules}")
+
+            #################################################################### TORQUE NUEVO METODO CONSULTA ####################################################################
+
+            endpoint = "http://{}/api/get/{}/modulos_fusibles/all/_/_/_/_/_".format(self.model.server, self.model.dbEvent)
+            response = requests.get(endpoint).json()
+
+            if "MODULO" in response:
+                pass
+            else:
+                command = {
+                        "lbl_result" : {"text": "Modulos de fusibles no encontrados", "color": "red"},
+                        "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
+                        }
+                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                self.nok.emit()
+                return
+
+            modulos_de_evento = {} #se inicializa variable vacía para guardar contenido de evento
+
+            contenido = list(response.keys())
+            contenido.pop(contenido.index("ID"))
+            contenido.pop(contenido.index("MODULO"))
+            print("contenido: ",contenido) #se deja la lista contenido solamente con las cajas
+                
+            #response[MODULO] contiene una lista de los modulos que existen para este evento
+            for modulo in response['MODULO']:
+                modulo = modulo.replace(" ","") #se eliminan los espacios
+                modulos_de_evento[modulo] = {} #se crea el diccionario vacío para ese módulo
+                indice_modulo = response['MODULO'].index(modulo) #se obtiene el indice en la lista del módulo
+                for caja in contenido:
+                    #si la caja en su indice igual al del módulo está vacío, no hace nada, de lo contrario se agrega el dato
+                    if response[caja][indice_modulo] != "" and response[caja][indice_modulo] != "{}" and response[caja][indice_modulo] != 0:
+                        modulos_de_evento[modulo][caja] = response[caja][indice_modulo]
+
+            #los modulos vacíos deben ir en el resultado final para saber cuando un módulo que lleve la modularidad no significa torque o fusible
+            #print("modulos_de_evento")
+
+            for modulo in modules:
+                if modulo in modulos_de_evento:
+                    temp = {} #se reinicia temp en cada modulo
+                    for elemento in modulos_de_evento[modulo]: #elemento son los valores de las columnas CAJA_1,CAJA_2,etc de la tabla de modulos del evento correspondientes al módulo actual
+                        if "CAJA_" in elemento:
+                            #se agregan a la variable temp todos los contenidos de CAJA_1,CAJA_2,etc. del módulo que se está evaluando
+                            temp.update(json.loads(modulos_de_evento[modulo][elemento]))
+                    for caja in temp:
+                        caja_nueva = False
+                        #ejemplo: temp = { CAJA_1:{}, CAJA_2:{"MFB-P2": {"A22": true,"A23": true}} }
+                        #si el contenido del elemento es vacío: CAJA_1:{} entonces se inspecciona el siguiente: CAJA_2:{"MFB-P2": {"A22": true,"A23": true}}
+                        if len(temp[caja]) == 0:
+                            continue
+                        #si la caja actual dentro de temp si tiene contenido...
+                        else:
+                            #si se trata de una de las cajas válidas para inspección de torque
+                            if caja in self.model.lista_cajas_torque:
+
+                                #se recorren las tuercas de la caja: MFB-P2": {"A22": true,"A23": true}
+                                for tuerca in temp[caja]:
+                                    #si la tuerca está activa, tiene true...
+                                    if temp[caja][tuerca] == True:
+
+                                        #si la caja no existe aún en la variable del modelo...
+                                        if not(caja in self.model.input_data["database"]["modularity"]):
+                                            self.model.input_data["database"]["modularity"][caja] = [] #se agrega la nueva caja
+
+                                        #si no existe la tuerca en la caja de modularity...
+                                        if not(tuerca in self.model.input_data["database"]["modularity"][caja]):
+                                            self.model.input_data["database"]["modularity"][caja].append(tuerca)#se agrega la tuerca en esta caja
+
+                                self.model.input_data["database"]["modularity"][caja].sort()
+
+                else:
+                    command = {
+                            "lbl_result" : {"text": "Modulo de Fusible NO encontrado", "color": "red"},
+                            "lbl_steps" : {"text": f"{modulo}, Inténtalo de nuevo", "color": "black"}
+                            }
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                    self.nok.emit()
+                    return
+                    
+            print("-------------------------------------TAREAS: FUSIBLES A INSPECCIONAR -----------------------------------")
+            print(self.model.input_data["database"]["modularity"])
+
+
+            #Hasta este punto faltan 2 cosas...
+            #self.model.modularity_fuses debe terminar con un diccionario con todos los fusibles y su contenido incluyendo vacíos
+            #self.model.input_data["database"]["modularity"] solamente con un diccionario de listas de lo que sí lleva
+
+
+            command = {
+                "lbl_result" : {"text": "Fusibles Generados Correctamente", "color": "green"},
+                "lbl_steps" : {"text": "Iniciando Ciclo", "color": "green"}
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            print("modularity terminado correctamente, continuando...")
+
+        except Exception as ex:
+            self.model.input_data["database"]["modularity"].clear()
+            print("build_content_fusibles exception: ", ex)
+            command = {
+                    "lbl_result" : {"text": "Error de Carga en Fusibles de Arnés", "color": "red", "font": "40pt"},
+                    "lbl_steps" : {"text": "Intentelo de Nuevo", "color": "black", "font": "22pt"}
+                    }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            self.nok.emit()
+            return
+
     def ETIQUETA(self, ID):
+        #Función para buscar el HM obtenido de la etiqueta (Consulta para saber si tiene historial de torque, y jalar sus resultados)
+
         #Si la Trazabilida está ACTIVADA, busca los resultados de torque en el servidor de FAMX2
         print("BUSCANDO RESULTADOS DE TORQUE EN |||SISTEMA DE TRAZABILIDAD|||")
         try:
             endpoint = "http://{}/server_famx2/get/seghm_valores/HM/=/{}/RESULTADO/=/1".format(self.model.server, ID)
             response = requests.get(endpoint).json()
+
+            if ("items" in response and not(response["items"])):
+                print("No se encontraron valores en el arnés por lo tanto no se podrán generar las cajas que lleva desde aquí...")
+                self.model.valores_torques_red = False
+            else:
+                print("Sí se encontraros valores en el arnés, se generarán las cajas desde estos valores de torque del servidor")
+                self.model.valores_torques_red = True
+
             print("Respuesta de Etiqueta a Trazabilidad: \n",response)
             qr_codes = {}
             #Si la API NO tiene conexión a la red, regresa una excepción
@@ -898,6 +1242,7 @@ class CheckQr (QState):
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                     sleep(3)
                     return True
+
             #Si la api SI tiene conexión a la red continúa el proceso y regresa un valor True
             else:
                 #Si la respuesta contiene "items" y el valor de esa llave es 0 ó False, significa que no halló ninguna coincidencia, permitirá continuar con el ciclo pero al imprimir la etiqueta, los valores de los torques dirán "NoResults"

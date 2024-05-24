@@ -36,6 +36,16 @@ class Model (object):
         #variable para inhabilitar la llave
         self.disable_key = False
 
+        #variable para guardar el pedido
+        self.pedido = ""
+        #variable para guardar el evento del arnés
+        self.dbEvent = ""
+        #variable para buscar contenido de torque solamente en estas cajas
+        self.lista_cajas_torque = ["MFB-P2","MFB-P1","MFB-S","MFB-E"]
+
+        #se verifica que el arnés tenga valores guardados en el servidor
+        self.valores_torques_red = False
+
         #variable para no volver a entrara a reciver, si estás en trigger visión (y ya quitaste el trigger de la lista con un pop)
         # y ya te había llegado un resultado de la visión y te vuelve a llegar nuevamente (por volver a abrir la GDI o mandar un trigger manual)
         self.revisando_resultado = False
@@ -175,6 +185,7 @@ class Model (object):
         self.input_data = {
             "database":{
                 "modularity": {},
+                "modularity_nuts": {},
                 "pedido": {}},
             "plc": {
                 "emergency": True,
@@ -447,6 +458,7 @@ class Model (object):
     ###########################################################
 
     def reset (self):
+        self.valores_torques_red = False
         self.revisando_resultado_height = False
         self.revisando_resultado = False
         self.BRACKET_PDCD_clampeado=False
