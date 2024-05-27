@@ -43,6 +43,12 @@ class Model (object):
         #variable para buscar contenido de torque solamente en estas cajas
         self.lista_cajas_torque = ["MFB-P2","MFB-P1","MFB-S","MFB-E"]
 
+        #variable para buscar contenido de fusibles solamente en estas cajas
+        self.lista_cajas_fusibles = ["PDC-R","PDC-RMID","PDC-RS","PDC-D","PDC-P","PDC-S","TBLU","F96"]
+
+        #variable para guardar toda la información de la configuración del arnés sin los fusibles vacíos
+        self.arnes_data = {}
+
         #se verifica que el arnés tenga valores guardados en el servidor
         self.valores_torques_red = False
 
