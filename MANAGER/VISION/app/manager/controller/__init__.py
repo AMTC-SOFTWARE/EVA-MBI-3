@@ -316,85 +316,95 @@ class StartCycle (QState):
         
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
-        try:
-            turnos = {
-            "1":["07-00","18-59"],
-            "2":["19-00","06-59"],
-            }
-            horario_turno1={"7":0,
-                        "8":0,
-                        "9":0,
-                        "10":0,
-                        "11":0,
-                        "12":0,
-                        "13":0,
-                        "14":0,
-                        "15":0,
-                        "16":0,
-                        "17":0,
-                        "18":0,
-                        "19":0,
-                        "20":0,
-                        "21":0,
-                        "22":0,
-                        "23":0,
-                        "00":0,
-                        "01":0,
-                        "02":0,
-                        "03":0,
-                        "04":0,
-                        "05":0,
-                        "06":0,
-                        }
-            endpoint = "http://{}/contar/historial/FIN".format(self.model.server)
-            response = requests.get(endpoint, data=json.dumps(turnos))
-            response = response.json()
-            print("response: ",response)
-            print("Startup para mostrar conteo de arneses")
-            command["lcdNumber"] = {"value": response["conteo"]}
-            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
+        if self.model.saliendo_config == True:
+            self.model.saliendo_config = False
+        else:
 
-            endpoint = "http://{}/horaxhora/historial/FIN".format(self.model.server)
-            response = requests.get(endpoint, data=json.dumps(turnos))
-            response = response.json()
+            print("CALCULO DE CONTEO ARNESES")
+
+            try:
             
-            arneses_turno=pd.DataFrame({'HM': response['HM'],
-                   'INICIO': response['INICIO'],
-                   'FIN': response['FIN'],
-                   'RESULTADO': response['RESULTADO'],
-                   'USUARIO': response['USUARIO']})
+                turnos = {
+                "1":["07-00","18-59"],
+                "2":["19-00","06-59"],
+                }
+                horario_turno1={"7":0,
+                            "8":0,
+                            "9":0,
+                            "10":0,
+                            "11":0,
+                            "12":0,
+                            "13":0,
+                            "14":0,
+                            "15":0,
+                            "16":0,
+                            "17":0,
+                            "18":0,
+                            "19":0,
+                            "20":0,
+                            "21":0,
+                            "22":0,
+                            "23":0,
+                            "00":0,
+                            "01":0,
+                            "02":0,
+                            "03":0,
+                            "04":0,
+                            "05":0,
+                            "06":0,
+                            }
+                print("endpoint = http://{}/contar/historial/FIN.format(self.model.server)")
+                endpoint = "http://{}/contar/historial/FIN".format(self.model.server)
+                response = requests.get(endpoint, data=json.dumps(turnos))
+                response = response.json()
+                print("response: ",response)
+                print("Startup para mostrar conteo de arneses")
+                command["lcdNumber"] = {"value": response["conteo"]}
+                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+                print("endpoint = http://{}/horaxhora/historial/FIN".format(self.model.server))
+                endpoint = "http://{}/horaxhora/historial/FIN".format(self.model.server)
+                response = requests.get(endpoint, data=json.dumps(turnos))
+                response = response.json()
+            
+                print("calculando promedios con pd")
+
+                arneses_turno=pd.DataFrame({'HM': response['HM'],
+                        'INICIO': response['INICIO'],
+                        'FIN': response['FIN'],
+                        'RESULTADO': response['RESULTADO'],
+                        'USUARIO': response['USUARIO']})
             
             
-            arneses_turno['INICIO']=pd.to_datetime(arneses_turno['INICIO'])
-            arneses_turno['FIN']=pd.to_datetime(arneses_turno['FIN'])
-            arneses_turno['RESULTADO']=arneses_turno['RESULTADO'].astype("string")
+                arneses_turno['INICIO']=pd.to_datetime(arneses_turno['INICIO'])
+                arneses_turno['FIN']=pd.to_datetime(arneses_turno['FIN'])
+                arneses_turno['RESULTADO']=arneses_turno['RESULTADO'].astype("string")
 
-            #Calcula Duración de ciclo de los arneses
-            arneses_turno["INTERVALO"]=arneses_turno['FIN']-arneses_turno['INICIO']
+                #Calcula Duración de ciclo de los arneses
+                arneses_turno["INTERVALO"]=arneses_turno['FIN']-arneses_turno['INICIO']
             
-            promedio_ciclo_turno=arneses_turno["INTERVALO"].mean().total_seconds() / 60
+                promedio_ciclo_turno=arneses_turno["INTERVALO"].mean().total_seconds() / 60
             
-            # Obtener la parte entera y decimal
-            parte_entera = int(promedio_ciclo_turno)
-            parte_decimal = promedio_ciclo_turno - parte_entera
+                # Obtener la parte entera y decimal
+                parte_entera = int(promedio_ciclo_turno)
+                parte_decimal = promedio_ciclo_turno - parte_entera
             
-            # Convertir la parte decimal a segundos
-            segundos = round(parte_decimal * 60)
-            if segundos<10:
-                segundos="0"+str(segundos)
-            tiempo_ciclo_promedio=str(parte_entera)+":"+str(segundos)
+                # Convertir la parte decimal a segundos
+                segundos = round(parte_decimal * 60)
+                if segundos<10:
+                    segundos="0"+str(segundos)
+                tiempo_ciclo_promedio=str(parte_entera)+":"+str(segundos)
 
-            command = {
-            "lcdNumtiempo": {"label_name": "Tiempo Ciclo\n Promedio", "color":"#68FD94", "value": tiempo_ciclo_promedio}
-            }
+                command = {
+                "lcdNumtiempo": {"label_name": "Tiempo Ciclo\n Promedio", "color":"#68FD94", "value": tiempo_ciclo_promedio}
+                }
+                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
+            except Exception as ex:
+                print("Error en el conteo ", ex)
 
-            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-
-
-        except Exception as ex:
-            print("Error en el conteo ", ex)
+            ############ FIN DE CALCULO DE CONTEO ARNESES
 
         if not(self.model.shutdown):
             self.ok.emit()
@@ -436,6 +446,10 @@ class Config (QState):
             "lbl_steps" : {"text": "Ciclo de operación deshabilitado", "color": "black"}
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+    def onExit(self, event):
+        self.model.saliendo_config = True
+        print("Saliendo de Config")
 
 class ScanQr (QState):
     def __init__(self, model = None, parent = None):
@@ -722,191 +736,209 @@ class CheckQr (QState):
 
             print("\nINICIO PROCESAMIENTO DE ARNÉS: ",strftime("%Y/%m/%d %H:%M:%S"))
 
-            ##################################################################################################################
-
-            #Consulta a la API para ver cuales son los módulos Determinantes de cajas PDC-R y guardarlas en una variable que se utilizará más adelante.
-            endpoint = "http://{}/api/get/{}/pdcr/variantes".format(self.model.server, self.model.dbEvent)
-            pdcrVariantes = requests.get(endpoint).json()
-            print("Lista Final de Variantes PDC-R:\n",pdcrVariantes)
-
-            if 1:
-                modules = json.loads(self.model.pedido["MODULOS_VISION"])
-                modules = modules[list(modules)[0]]
-                flag_s = False
-                flag_m = False
-                flag_l = False
-
-                print(f"\n\t\tMODULOS_VISION:\n{modules}")
-
-                for i in pdcrVariantes["small"]:
-                    if i in modules:
-                       self.model.pdcrvariant = "PDC-RS"
-                       flag_s = True
-
-                for i in pdcrVariantes["medium"]:
-                    if i in modules:
-                       self.model.pdcrvariant = "PDC-RMID"
-                       flag_m = True
-
-                for i in pdcrVariantes["large"]:
-                    if i in modules:
-                       self.model.pdcrvariant = "PDC-R"
-                       flag_l = True
-
-                print("\t\tFLAGS:\n Flag S - ",flag_s," Flag M - ",flag_m," Flag L - ",flag_l)
-                print("PDC-R VARIANT: "+self.model.pdcrvariant)
-
-                #variable para guardar toda la información de la configuración del arnés sin los fusibles vacíos
-                self.model.arnes_data = {}
-
-                #recorremos los modulos del arnés
-                for i in modules:
-                    #petición a la base de datos local para ver que fusibles lleva cada modulo
-                    endpoint = "http://{}/api/get/{}/modulos_fusibles/MODULO/=/{}/_/=/_".format(self.model.server, self.model.dbEvent, i)
-                    response = requests.get(endpoint).json()
-                    #si encuentra el módulo en la respuesta (que si existe en la base de datos local)...
-                    if "MODULO" in response:
-                        #si la respuesta para ese módulo no es de tipo lista ( esto quiere decir que no hay más de un módulo de este tipo)
-                        if type(response["MODULO"]) != list:
-                            current_module = {}
-                            for j in response:
-                                #si j tiene "CAJA_" y además no está vacío el objeto
-                                if "CAJA_" in j and len(response[j]):
-                                    #a current_module le añades esa información
-                                    current_module.update(json.loads(response[j]))
-                            #recorremos las cajas en current_module
-                            for box in current_module:
-                                #Si la caja contiene "PDC-R"... se realiza el siguiente fragmento para (en base a la variable pdcrvariant del modelo) dejar finalmente una sola variante de la PDC-R y asignarle fusibles.
-                                if "PDC-R" in box:
-                                    #recorremos las cavidades de los datos del modulo que tienen esa misma caja
-                                    for cavity in current_module[box]:
-                                        print("cavity",cavity)
-                                        if cavity == "F96":
-                                            #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-                                            if current_module[box][cavity] != "vacio":
-                                                #si no esta la caja en self.model.arnes_data, agregar llave
-                                                if not("F96" in self.model.arnes_data):
-                                                    self.model.arnes_data["F96"] = {}
-                                                    print("si va a llevar F96")
-                                                #si la caja no está, encender bandera de que es una nueva caja
-                                                if not("F96" in self.model.input_data["database"]["modularity"]):
-                                                    self.model.input_data["database"]["modularity"]["F96"] = []
-                                                    print("f96 inputdata",self.model.input_data)
-                                                #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-                                                if not(cavity in self.model.input_data["database"]["modularity"]["F96"]):
-                                                    self.model.input_data["database"]["modularity"]["F96"].append(cavity)
-                                                    print("f96 inputdata appnd",self.model.input_data)
-                                                #si la caja no tiene esa cavidad entonces se agrega al diccionario
-                                                if not(cavity in self.model.arnes_data["F96"]):
-                                                    print("self.model.arnes_data[F96][cavity]",self.model.arnes_data)
-                                                    self.model.arnes_data["F96"][cavity] =  current_module[box][cavity]
-                                        else:
-                                            #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-                                            if current_module[box][cavity] != "vacio":
-                                                #si no esta la caja en self.model.arnes_data, agregar llave
-                                                if not(self.model.pdcrvariant in self.model.arnes_data):
-                                                    self.model.arnes_data[self.model.pdcrvariant] = {}
-                                                #si la caja no está, agregar lista vacía para dicha caja
-                                                if not(self.model.pdcrvariant in self.model.input_data["database"]["modularity"]):
-                                                    self.model.input_data["database"]["modularity"][self.model.pdcrvariant] = []
-                                                #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-                                                if not(cavity in self.model.input_data["database"]["modularity"][self.model.pdcrvariant]):
-                                                    self.model.input_data["database"]["modularity"][self.model.pdcrvariant].append(cavity)
-                                                #si la caja no tiene esa cavidad entonces se agrega al diccionario
-                                                if not(cavity in self.model.arnes_data[self.model.pdcrvariant]):
-                                                    self.model.arnes_data[self.model.pdcrvariant][cavity] =  current_module[box][cavity]
-                                ##########
-                                else:
-                                    #recorremos las cavidades de los datos del modulo que tienen esa misma caja
-                                    for cavity in current_module[box]:
-                                        #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-                                        if current_module[box][cavity] != "vacio":
-                                            #si no esta la caja en self.model.arnes_data, agregar llave
-                                            if not(box in self.model.arnes_data):
-                                                self.model.arnes_data[box] = {}
-                                            #si la caja no está, encender bandera de que es una nueva caja
-                                            if not(box in self.model.input_data["database"]["modularity"]):
-                                                self.model.input_data["database"]["modularity"][box] = []
-                                            #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-                                            if not(cavity in self.model.input_data["database"]["modularity"][box]):
-                                                self.model.input_data["database"]["modularity"][box].append(cavity)
-                                            #si la caja no tiene esa cavidad entonces se agrega al diccionario
-                                            if not(cavity in self.model.arnes_data[box]):
-                                                self.model.arnes_data[box][cavity] =  current_module[box][cavity]
-                            
-                        else:
-                            command = {
-                                    "lbl_result" : {"text": "Módulos de visión redundantes", "color": "red"},
-                                    "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
-                                  }
-                            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-                            self.nok.emit()
-                            return
-                    else:
-                        command = {
-                                "lbl_result" : {"text": "Modulos de visión no encontrados", "color": "red"},
-                                "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
-                                }
-                        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-                        self.nok.emit()
-                        return 
-
-                self.model.input_data["database"]["pedido"] = self.model.pedido
 
 
-                ################################ SE AGREGAN CAVIDADES VACÍAS ################################
+            print("##############################################################################################################################")
+
+            self.build_contenido_fusibles()
+
+            ##############################################################################################################################################
+            ##############################################################################################################################################
+            ####print("#################################################### METODO ANTERIOR ##############################################################")
+
+            #####Consulta a la API para ver cuales son los módulos Determinantes de cajas PDC-R y guardarlas en una variable que se utilizará más adelante.
+            ####endpoint = "http://{}/api/get/{}/pdcr/variantes".format(self.model.server, self.model.dbEvent)
+            ####pdcrVariantes = requests.get(endpoint).json()
+            ####print("Lista Final de Variantes PDC-R:\n",pdcrVariantes)
+
+            
+            ####modules = json.loads(self.model.pedido["MODULOS_VISION"])
+            ####modules = modules[list(modules)[0]]
+            ####flag_s = False
+            ####flag_m = False
+            ####flag_l = False
+
+            ####print(f"\n\t\tMODULOS_VISION:\n{modules}")
+
+            ####for i in pdcrVariantes["small"]:
+            ####    if i in modules:
+            ####       self.model.pdcrvariant = "PDC-RS"
+            ####       flag_s = True
+
+            ####for i in pdcrVariantes["medium"]:
+            ####    if i in modules:
+            ####       self.model.pdcrvariant = "PDC-RMID"
+            ####       flag_m = True
+
+            ####for i in pdcrVariantes["large"]:
+            ####    if i in modules:
+            ####       self.model.pdcrvariant = "PDC-R"
+            ####       flag_l = True
+
+            ####print("\t\tFLAGS:\n Flag S - ",flag_s," Flag M - ",flag_m," Flag L - ",flag_l)
+            ####print("PDC-R VARIANT: "+self.model.pdcrvariant)
+
+            #####variable para guardar toda la información de la configuración del arnés sin los fusibles vacíos
+            ####self.model.arnes_data = {}
+
+            #####recorremos los modulos del arnés
+            ####for i in modules:
+            ####    #petición a la base de datos local para ver que fusibles lleva cada modulo
+            ####    endpoint = "http://{}/api/get/{}/modulos_fusibles/MODULO/=/{}/_/=/_".format(self.model.server, self.model.dbEvent, i)
+            ####    response = requests.get(endpoint).json()
+            ####    #si encuentra el módulo en la respuesta (que si existe en la base de datos local)...
+            ####    if "MODULO" in response:
+            ####        #si la respuesta para ese módulo no es de tipo lista ( esto quiere decir que no hay más de un módulo de este tipo)
+            ####        if type(response["MODULO"]) != list:
+            ####            current_module = {}
+            ####            for j in response:
+            ####                #si j tiene "CAJA_" y además no está vacío el objeto
+            ####                if "CAJA_" in j and len(response[j]):
+            ####                    #a current_module le añades esa información
+            ####                    current_module.update(json.loads(response[j]))
+            ####            #recorremos las cajas en current_module
+            ####            for box in current_module:
+            ####                #Si la caja contiene "PDC-R"... se realiza el siguiente fragmento para (en base a la variable pdcrvariant del modelo) dejar finalmente una sola variante de la PDC-R y asignarle fusibles.
+            ####                if "PDC-R" in box:
+            ####                    #recorremos las cavidades de los datos del modulo que tienen esa misma caja
+            ####                    for cavity in current_module[box]:
+            ####                        print("cavity",cavity)
+            ####                        if cavity == "F96":
+            ####                            #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
+            ####                            if current_module[box][cavity] != "vacio":
+            ####                                #si no esta la caja en self.model.arnes_data, agregar llave
+            ####                                if not("F96" in self.model.arnes_data):
+            ####                                    self.model.arnes_data["F96"] = {}
+            ####                                    print("si va a llevar F96")
+            ####                                #si la caja no está, encender bandera de que es una nueva caja
+            ####                                if not("F96" in self.model.input_data["database"]["modularity"]):
+            ####                                    self.model.input_data["database"]["modularity"]["F96"] = []
+            ####                                    print("f96 inputdata",self.model.input_data)
+            ####                                #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
+            ####                                if not(cavity in self.model.input_data["database"]["modularity"]["F96"]):
+            ####                                    self.model.input_data["database"]["modularity"]["F96"].append(cavity)
+            ####                                    print("f96 inputdata appnd",self.model.input_data)
+            ####                                #si la caja no tiene esa cavidad entonces se agrega al diccionario
+            ####                                if not(cavity in self.model.arnes_data["F96"]):
+            ####                                    print("self.model.arnes_data[F96][cavity]",self.model.arnes_data)
+            ####                                    self.model.arnes_data["F96"][cavity] =  current_module[box][cavity]
+            ####                        else:
+            ####                            #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
+            ####                            if current_module[box][cavity] != "vacio":
+            ####                                #si no esta la caja en self.model.arnes_data, agregar llave
+            ####                                if not(self.model.pdcrvariant in self.model.arnes_data):
+            ####                                    self.model.arnes_data[self.model.pdcrvariant] = {}
+            ####                                #si la caja no está, agregar lista vacía para dicha caja
+            ####                                if not(self.model.pdcrvariant in self.model.input_data["database"]["modularity"]):
+            ####                                    self.model.input_data["database"]["modularity"][self.model.pdcrvariant] = []
+            ####                                #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
+            ####                                if not(cavity in self.model.input_data["database"]["modularity"][self.model.pdcrvariant]):
+            ####                                    self.model.input_data["database"]["modularity"][self.model.pdcrvariant].append(cavity)
+            ####                                #si la caja no tiene esa cavidad entonces se agrega al diccionario
+            ####                                if not(cavity in self.model.arnes_data[self.model.pdcrvariant]):
+            ####                                    self.model.arnes_data[self.model.pdcrvariant][cavity] =  current_module[box][cavity]
+            ####                ##########
+            ####                else:
+            ####                    #recorremos las cavidades de los datos del modulo que tienen esa misma caja
+            ####                    for cavity in current_module[box]:
+            ####                        #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
+            ####                        if current_module[box][cavity] != "vacio":
+            ####                            #si no esta la caja en self.model.arnes_data, agregar llave
+            ####                            if not(box in self.model.arnes_data):
+            ####                                self.model.arnes_data[box] = {}
+            ####                            #si la caja no está, encender bandera de que es una nueva caja
+            ####                            if not(box in self.model.input_data["database"]["modularity"]):
+            ####                                self.model.input_data["database"]["modularity"][box] = []
+            ####                            #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
+            ####                            if not(cavity in self.model.input_data["database"]["modularity"][box]):
+            ####                                self.model.input_data["database"]["modularity"][box].append(cavity)
+            ####                            #si la caja no tiene esa cavidad entonces se agrega al diccionario
+            ####                            if not(cavity in self.model.arnes_data[box]):
+            ####                                self.model.arnes_data[box][cavity] =  current_module[box][cavity]
+                           
+            ####        else:
+            ####            command = {
+            ####                    "lbl_result" : {"text": "Módulos de visión redundantes", "color": "red"},
+            ####                    "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
+            ####                  }
+            ####            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            ####            self.nok.emit()
+            ####            return
+            ####    else:
+            ####        command = {
+            ####                "lbl_result" : {"text": "Modulos de visión no encontrados", "color": "red"},
+            ####                "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
+            ####                }
+            ####        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            ####        self.nok.emit()
+            ####        return 
+
+            ####self.model.input_data["database"]["pedido"] = self.model.pedido
+
+            ####print("\t\tself.model.input_data[database][modularity]:\n", self.model.input_data["database"]["modularity"])
+            ####print("\t\tself.model.arnes_data:\n ",self.model.arnes_data)
+            ##############################################################################################################################################
+            ##############################################################################################################################################
+
+
+
+            ################################ SE AGREGAN CAVIDADES VACÍAS ################################
                 
-                #se llena la variable modularity_fuses con todas las cavidades con fusibles vacíos
-                self.model.modularity_fuses.update(copy(self.model.fuses_base))
+            #se llena la variable modularity_fuses con todas las cavidades con fusibles vacíos
+            self.model.modularity_fuses.update(copy(self.model.fuses_base))
                 
-                try:
-                    for caja in self.model.arnes_data:
-                        for cavidad in self.model.arnes_data[caja]:
-                            self.model.modularity_fuses[caja][cavidad] = self.model.arnes_data[caja][cavidad]
+            try:
+                for caja in self.model.arnes_data:
+                    for cavidad in self.model.arnes_data[caja]:
+                        self.model.modularity_fuses[caja][cavidad] = self.model.arnes_data[caja][cavidad]
 
-                except Exception as ex:
-                    print (ex)
+            except Exception as ex:
+                print (ex)
 
-                ################################ CONECTORES PDC-P2 & PDC-Dbracket ################################
+            ################################ CONECTORES PDC-P2 & PDC-Dbracket ################################
 
-                #Se agrega nueva inspeccion obligatoria para todos los arneses la caja 
-                self.model.input_data["database"]["modularity"]["PDC-P2"] = ['CONECTOR1', 'CONECTOR2']
-                #Se agrega nueva inspeccion obligatoria para todos los arneses el bracket de la caja PDCD
-                self.model.input_data["database"]["modularity"]["PDC-Dbracket"] = ['bracket']
+            #Se agrega nueva inspeccion obligatoria para todos los arneses la caja 
+            self.model.input_data["database"]["modularity"]["PDC-P2"] = ['CONECTOR1', 'CONECTOR2']
+            #Se agrega nueva inspeccion obligatoria para todos los arneses el bracket de la caja PDCD
+            self.model.input_data["database"]["modularity"]["PDC-Dbracket"] = ['bracket']
                 
-                ##################################################################################################
+            ##################################################################################################
 
-                #self.model.input_data["database"]["modularity"]    # vairable que guarda un diccionario con las cajas de fusibles encontradas, pero cada clave contiene una lista de los fusibles 
-                #self.model.modularity_fuses                        # variable de diccionario con cada caja con el valor del color deseado para cada fusible y  contando ya las cavidades vacías
+            #self.model.input_data["database"]["modularity"]    # variable que guarda un diccionario con las cajas de fusibles encontradas, pero cada clave contiene una lista de los fusibles (solamente el nombre de la cavidad)
+            #self.model.arnes_data                              # variable que guarda un diccionario con cada caja del arnés, y cada una con claves de sus fusibles (cavidades) con valor de su color correspondiente
+            #self.model.modularity_fuses                        # variable de diccionario con cada caja con el valor del color deseado para cada fusible y contando ya las cavidades vacías
 
-                print("\t\self.model.input_data[database][modularity]:\n", self.model.input_data["database"]["modularity"])
-                print("\t\tself.model.arnes_data\n: ",self.model.arnes_data)
-                print("\t\tmodularity_fuses:\n", self.model.modularity_fuses)
+            print("-------------------------------------TAREAS: FUSIBLES A INSPECCIONAR -----------------------------------")
+            print("\n\n\t\tCOLECCIÓN:\n\t\tself.model.input_data[database][modularity]:\n\n", self.model.input_data["database"]["modularity"])
+            print("\n\n\t\tself.model.arnes_data:\n\n ",self.model.arnes_data)
+            print("\n\n\t\tmodularity_fuses:\n\n", self.model.modularity_fuses)
                 
-                # EJEMPLO::::::::::::::::::::
-                #self.model.input_data["database"]["modularity"]:
-                #{'PDC-RMID': ['F419', 'F450', 'F451', 'F452', 'F453', 'F425', 'F458', 'F402', 'F441', 'F431', 'F439', 'F416', 'F417', 'F411', 'F443', 'F446', 'F418', 'F422', 'F420', 'F438', 'F457', 'RELX', 'F430', 'RELT', 'F432', 'F413', 'F415', 'F401', 'F421'], 'PDC-P': ['F305', 'F303', 'MF1', 'F321', 'F328', 'F329', 'F333', 'F323', 'F319', 'F327', 'F304', 'F318', 'F300', 'F320', 'F322', 'F326', 'F332', 'F335', 'MF2', 'F302'], 'PDC-D': ['F216', 'F200', 'F204', 'F209', 'F211', 'F213', 'F214', 'F215', 'F217', 'F218', 'F219', 'F220', 'F221', 'F222', 'F225', 'F226', 'F227', 'F229', 'F230', 'F231', 'F232', 'F223', 'F205'], 'PDC-P2': ['CONECTOR1', 'CONECTOR2'], 'PDC-Dbracket': ['bracket']}
-                #modularity_fuses:
-                #{'PDC-D': {'F200': 'beige', 'F201': 'vacio', 'F202': 'vacio', 'F203': 'vacio', 'F204': 'rojo', 'F205': 'beige', 'F206': 'vacio', 'F207': 'vacio', 'F208': 'vacio', 'F209': 'verde', 'F210': 'vacio', 'F211': 'verde', 'F212': 'vacio', 'F213': 'beige', 'F214': 'verde', 'F215': 'verde', 'F216': 'natural', 'F217': 'azul', 'F218': 'beige', 'F219': 'rojo', 'F220': 'beige', 'F221': 'azul', 'F222': 'rojo', 'F223': 'cafe', 'F224': 'vacio', 'F225': 'azul', 'F226': 'cafe', 'F227': 'beige', 'F228': 'vacio', 'F229': 'beige', 'F230': 'beige', 'F231': 'beige', 'F232': 'beige'}, 'PDC-Dbracket': {'bracket': 'bracket1'}, 'PDC-P': {'MF1': 'cafe', 'MF2': 'beige', 'F301': 'vacio', 'F302': 'beige', 'F303': 'beige', 'F304': 'beige', 'F305': 'beige', 'F300': 'rojo', 'F318': 'cafe', 'F319': 'cafe', 'F320': 'cafe', 'F321': 'cafe', 'F322': 'rojo', 'F323': 'cafe', 'F324': 'vacio', 'F325': 'vacio', 'F326': 'verde', 'F327': 'verde', 'F328': 'verde', 'F329': 'verde', 'F330': 'vacio', 'F331': 'vacio', 'F332': 'rojo', 'F333': 'verde', 'F334': 'vacio', 'F335': 'natural', 'conector': 'conector'}, 'PDC-P2': {'CONECTOR1': 'conector1', 'CONECTOR2': 'conector2'}, 'PDC-R': {'F405': 'vacio', 'F404': 'vacio', 'F403': 'vacio', 'F402': 'vacio', 'F401': 'vacio', 'F400': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'vacio', 'F414': 'vacio', 'F415': 'vacio', 'F416': 'vacio', 'F417': 'vacio', 'F420': 'vacio', 'F419': 'vacio', 'F418': 'vacio', 'F421': 'vacio', 'F422': 'vacio', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'vacio', 'F426': 'vacio', 'F430': 'vacio', 'F431': 'vacio', 'F437': 'vacio', 'F438': 'vacio', 'F439': 'vacio', 'F440': 'vacio', 'F441': 'vacio', 'F432': 'vacio', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'vacio', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'vacio', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'F462': 'vacio', 'F463': 'vacio', 'F464': 'vacio', 'F465': 'vacio', 'F466': 'vacio', 'F467': 'vacio', 'F468': 'vacio', 'F469': 'vacio', 'F470': 'vacio', 'F471': 'vacio', 'F472': 'vacio', 'F473': 'vacio', 'F474': 'vacio', 'F475': 'vacio', 'F476': 'vacio', 'F477': 'vacio', 'F478': 'vacio', 'F479': 'vacio', 'F480': 'vacio', 'F481': 'vacio', 'F482': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'RELX': 'vacio'}, 'PDC-RMID': {'F400': 'vacio', 'F401': 'natural', 'F402': 'natural', 'F403': 'vacio', 'F404': 'vacio', 'F405': 'vacio', 'F411': 'cafe', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'verde', 'F414': 'vacio', 'F415': 'verde', 'F416': 'verde', 'F417': 'verde', 'F420': 'naranja', 'F419': 'naranja', 'F418': 'naranja', 'F421': 'verde', 'F422': 'natural', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'amarillo', 'F426': 'vacio', 'F430': 'azul', 'F431': 'rojo', 'F437': 'vacio', 'F438': 'cafe', 'F439': 'azul', 'F440': 'vacio', 'F441': 'beige', 'F432': 'cafe', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'beige', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'beige', 'F450': 'verde', 'F451': 'amarillo', 'F452': 'natural', 'F453': 'natural', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'natural', 'F458': 'verde', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'RELU': 'vacio', 'RELT': '1010733', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'RELX': '1008695'}, 'PDC-RS': {'F400': 'vacio', 'F401': 'vacio', 'F402': 'vacio', 'F403': 'vacio', 'F404': 'vacio', 'F405': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'vacio', 'F414': 'vacio', 'F415': 'vacio', 'F416': 'vacio', 'F417': 'vacio', 'F420': 'vacio', 'F419': 'vacio', 'F418': 'vacio', 'F421': 'vacio', 'F422': 'vacio', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'vacio', 'F426': 'vacio', 'F430': 'vacio', 'F431': 'vacio', 'F437': 'vacio', 'F438': 'vacio', 'F439': 'vacio', 'F440': 'vacio', 'F441': 'vacio', 'F432': 'vacio', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'vacio', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'vacio', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'RELX': 'vacio'}, 'PDC-S': {'1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'}, 'TBLU': {'1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio', '7': 'vacio', '8': 'vacio', '9': 'vacio'}, 'F96': {'F96': 'vacio'}}
+            # EJEMPLO::::::::::::::::::::
+            #self.model.input_data["database"]["modularity"]:
+            #{'PDC-S': ['1', '2', '3', '6'], 'PDC-RMID': ['F401', 'F411', 'F413', 'F415', 'F416', 'F417', 'F418', 'F419', 'F420', 'F421', 'F430', 'F431', 'F432', 'F438', 'F439', 'F441', 'F443', 'F446', 'RELT', 'RELX'], 'PDC-P': ['F300', 'F304', 'F305', 'F318', 'F319', 'F320', 'F321', 'F322', 'F323', 'F324', 'F326', 'F327', 'F328', 'F329', 'F332', 'F333', 'F335', 'MF1', 'MF2'], 'PDC-D': ['F200', 'F204', 'F205', 'F209', 'F211', 'F213', 'F214', 'F215', 'F216', 'F217', 'F218', 'F219', 'F220', 'F221', 'F222', 'F223', 'F225', 'F226', 'F227', 'F229', 'F230', 'F231', 'F232'], 'F96': ['F96'], 'PDC-P2': ['CONECTOR1', 'CONECTOR2'], 'PDC-Dbracket': ['bracket']}
+            #self.model.arnes_data:
+            #{'PDC-S': {'3': 'azul', '1': 'beige', '6': 'beige', '2': 'verde'}, 'PDC-RMID': {'F419': 'naranja', 'F441': 'beige', 'F431': 'rojo', 'F416': 'verde', 'F417': 'verde', 'F411': 'cafe', 'F443': 'beige', 'F446': 'beige', 'F418': 'naranja', 'F420': 'naranja', 'F439': 'azul', 'F438': 'cafe', 'RELX': '1008695', 'F430': 'azul', 'RELT': '1010733', 'F432': 'cafe', 'F413': 'verde', 'F415': 'verde', 'F401': 'natural', 'F421': 'verde'}, 'PDC-P': {'F305': 'beige', 'F319': 'cafe', 'MF1': 'cafe', 'F321': 'cafe', 'F328': 'verde', 'F329': 'verde', 'F333': 'verde', 'F323': 'cafe', 'F324': 'cafe', 'F327': 'verde', 'F304': 'beige', 'F318': 'cafe', 'F300': 'rojo', 'F320': 'cafe', 'F322': 'rojo', 'F326': 'verde', 'F332': 'rojo', 'F335': 'natural', 'MF2': 'beige'}, 'PDC-D': {'F216': 'natural', 'F200': 'beige', 'F204': 'rojo', 'F209': 'verde', 'F211': 'verde', 'F213': 'beige', 'F214': 'verde', 'F215': 'verde', 'F217': 'azul', 'F218': 'beige', 'F219': 'rojo', 'F220': 'beige', 'F221': 'azul', 'F222': 'rojo', 'F225': 'azul', 'F226': 'cafe', 'F227': 'beige', 'F229': 'beige', 'F230': 'beige', 'F231': 'beige', 'F232': 'beige', 'F223': 'cafe', 'F205': 'beige'}, 'F96': {'F96': 'cafe'}}
+            #modularity_fuses:
+            #{'PDC-D': {'F200': 'beige', 'F201': 'vacio', 'F202': 'vacio', 'F203': 'vacio', 'F204': 'rojo', 'F205': 'beige', 'F206': 'vacio', 'F207': 'vacio', 'F208': 'vacio', 'F209': 'verde', 'F210': 'vacio', 'F211': 'verde', 'F212': 'vacio', 'F213': 'beige', 'F214': 'verde', 'F215': 'verde', 'F216': 'natural', 'F217': 'azul', 'F218': 'beige', 'F219': 'rojo', 'F220': 'beige', 'F221': 'azul', 'F222': 'rojo', 'F223': 'cafe', 'F224': 'vacio', 'F225': 'azul', 'F226': 'cafe', 'F227': 'beige', 'F228': 'vacio', 'F229': 'beige', 'F230': 'beige', 'F231': 'beige', 'F232': 'beige'}, 'PDC-Dbracket': {'bracket': 'bracket1'}, 'PDC-P': {'MF1': 'cafe', 'MF2': 'beige', 'F301': 'vacio', 'F302': 'vacio', 'F303': 'vacio', 'F304': 'beige', 'F305': 'beige', 'F300': 'rojo', 'F318': 'cafe', 'F319': 'cafe', 'F320': 'cafe', 'F321': 'cafe', 'F322': 'rojo', 'F323': 'cafe', 'F324': 'cafe', 'F325': 'vacio', 'F326': 'verde', 'F327': 'verde', 'F328': 'verde', 'F329': 'verde', 'F330': 'vacio', 'F331': 'vacio', 'F332': 'rojo', 'F333': 'verde', 'F334': 'vacio', 'F335': 'natural', 'conector': 'conector'}, 'PDC-P2': {'CONECTOR1': 'conector1', 'CONECTOR2': 'conector2'}, 'PDC-R': {'F405': 'vacio', 'F404': 'vacio', 'F403': 'vacio', 'F402': 'vacio', 'F401': 'vacio', 'F400': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'vacio', 'F414': 'vacio', 'F415': 'vacio', 'F416': 'vacio', 'F417': 'vacio', 'F420': 'vacio', 'F419': 'vacio', 'F418': 'vacio', 'F421': 'vacio', 'F422': 'vacio', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'vacio', 'F426': 'vacio', 'F430': 'vacio', 'F431': 'vacio', 'F437': 'vacio', 'F438': 'vacio', 'F439': 'vacio', 'F440': 'vacio', 'F441': 'vacio', 'F432': 'vacio', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'vacio', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'vacio', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'F462': 'vacio', 'F463': 'vacio', 'F464': 'vacio', 'F465': 'vacio', 'F466': 'vacio', 'F467': 'vacio', 'F468': 'vacio', 'F469': 'vacio', 'F470': 'vacio', 'F471': 'vacio', 'F472': 'vacio', 'F473': 'vacio', 'F474': 'vacio', 'F475': 'vacio', 'F476': 'vacio', 'F477': 'vacio', 'F478': 'vacio', 'F479': 'vacio', 'F480': 'vacio', 'F481': 'vacio', 'F482': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'RELX': 'vacio'}, 'PDC-RMID': {'F400': 'vacio', 'F401': 'natural', 'F402': 'vacio', 'F403': 'vacio', 'F404': 'vacio', 'F405': 'vacio', 'F411': 'cafe', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'verde', 'F414': 'vacio', 'F415': 'verde', 'F416': 'verde', 'F417': 'verde', 'F420': 'naranja', 'F419': 'naranja', 'F418': 'naranja', 'F421': 'verde', 'F422': 'vacio', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'vacio', 'F426': 'vacio', 'F430': 'azul', 'F431': 'rojo', 'F437': 'vacio', 'F438': 'cafe', 'F439': 'azul', 'F440': 'vacio', 'F441': 'beige', 'F432': 'cafe', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'beige', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'beige', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'RELU': 'vacio', 'RELT': '1010733', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'RELX': '1008695'}, 'PDC-RS': {'F400': 'vacio', 'F401': 'vacio', 'F402': 'vacio', 'F403': 'vacio', 'F404': 'vacio', 'F405': 'vacio', 'F411': 'vacio', 'F410': 'vacio', 'F409': 'vacio', 'F408': 'vacio', 'F407': 'vacio', 'F406': 'vacio', 'F412': 'vacio', 'F413': 'vacio', 'F414': 'vacio', 'F415': 'vacio', 'F416': 'vacio', 'F417': 'vacio', 'F420': 'vacio', 'F419': 'vacio', 'F418': 'vacio', 'F421': 'vacio', 'F422': 'vacio', 'F423': 'vacio', 'F424': 'vacio', 'F425': 'vacio', 'F426': 'vacio', 'F430': 'vacio', 'F431': 'vacio', 'F437': 'vacio', 'F438': 'vacio', 'F439': 'vacio', 'F440': 'vacio', 'F441': 'vacio', 'F432': 'vacio', 'F433': 'vacio', 'F436': 'vacio', 'F442': 'vacio', 'F443': 'vacio', 'F444': 'vacio', 'F445': 'vacio', 'F446': 'vacio', 'F450': 'vacio', 'F451': 'vacio', 'F452': 'vacio', 'F453': 'vacio', 'F454': 'vacio', 'F455': 'vacio', 'F456': 'vacio', 'F457': 'vacio', 'F458': 'vacio', 'F459': 'vacio', 'F460': 'vacio', 'F461': 'vacio', 'RELU': 'vacio', 'RELT': 'vacio', 'F449': 'vacio', 'F448': 'vacio', 'F447': 'vacio', 'RELX': 'vacio'}, 'PDC-S': {'1': 'beige', '2': 'verde', '3': 'azul', '4': 'vacio', '5': 'vacio', '6': 'beige'}, 'TBLU': {'1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio', '7': 'vacio', '8': 'vacio', '9': 'vacio'}, 'F96': {'F96': 'cafe'}}
 
-                self.model.datetime = datetime.now()
+            self.model.datetime = datetime.now()
 
-                #se regresa la variable de rework a False para preguntar en cada arnés...
-                if self.model.local_data["qr_rework"]:
-                    self.model.local_data["qr_rework"] = False
-                event = self.model.dbEvent.upper()
-                evento = event.replace('_',' ')
-                command = {
-                    "lbl_result" : {"text": "Datamatrix validado", "color": "green"},
-                    "lbl_steps" : {"text": "Obteniendo Contenido de Arnés", "color": "black"},
-                    "statusBar" : self.model.pedido["PEDIDO"]+" "+self.model.qr_codes["HM"]+" "+evento,
-                    "cycle_started": True
-                    }
-                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            #se regresa la variable de rework a False para preguntar en cada arnés...
+            if self.model.local_data["qr_rework"]:
+                self.model.local_data["qr_rework"] = False
+            event = self.model.dbEvent.upper()
+            evento = event.replace('_',' ')
+            command = {
+                "lbl_result" : {"text": "Datamatrix validado", "color": "green"},
+                "lbl_steps" : {"text": "Obteniendo Contenido de Arnés", "color": "black"},
+                "statusBar" : self.model.pedido["PEDIDO"]+" "+self.model.qr_codes["HM"]+" "+evento,
+                "cycle_started": True
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                 
-                self.model.contador_scan_pdcr = 1
-                ################################################################################################################################# OK EMIT
-                self.ok.emit()
+            self.model.contador_scan_pdcr = 1
+            ###### OK EMIT
+            self.ok.emit()
 
             ##################################################################################################################
 
@@ -931,7 +963,7 @@ class CheckQr (QState):
                 print("\n\t+++++++++++MODULARIDAD REFERENCIA+++++++++++\n",self.model.qr_codes["REF"])
                 print(f"\n\t\tMODULOS_TORQUE PARA ESTA REFERENCIA:\n{modules}")
 
-                #################################################################### TORQUE NUEVO METODO CONSULTA ####################################################################
+                #################################################################### TORQUE CONSULTA ####################################################################
 
                 endpoint = "http://{}/api/get/{}/modulos_torques/all/_/_/_/_/_".format(self.model.server, self.model.dbEvent)
                 response = requests.get(endpoint).json()
@@ -1036,6 +1068,13 @@ class CheckQr (QState):
         print("\nbuild_contenido_fusibles")
         try:
 
+            #se leen los módulos de Torque cargados en la estación
+            modules = json.loads(self.model.pedido["MODULOS_VISION"])
+            modules = modules[list(modules)[0]]
+
+            print("\n\t+++++++++++MODULARIDAD REFERENCIA+++++++++++\n",self.model.qr_codes["REF"])
+            print(f"\n\t\tMODULOS_FUSIBLES PARA ESTA REFERENCIA:\n{modules}")
+
             #Consulta a la API para ver cuales son los módulos Determinantes de cajas PDC-R y guardarlas en una variable que se utilizará más adelante.
             endpoint = "http://{}/api/get/{}/pdcr/variantes".format(self.model.server, self.model.dbEvent)
             pdcrVariantes = requests.get(endpoint).json()
@@ -1063,14 +1102,7 @@ class CheckQr (QState):
             print("\t\tFLAGS:\n Flag S - ",flag_s," Flag M - ",flag_m," Flag L - ",flag_l)
             print("PDC-R VARIANT: "+self.model.pdcrvariant)
 
-            #se leen los módulos de Torque cargados en la estación
-            modules = json.loads(self.model.pedido["MODULOS_VISION"])
-            modules = modules[list(modules)[0]]
-
-            print("\n\t+++++++++++MODULARIDAD REFERENCIA+++++++++++\n",self.model.qr_codes["REF"])
-            print(f"\n\t\tMODULOS_FUSIBLES PARA ESTA REFERENCIA:\n{modules}")
-
-            #################################################################### TORQUE NUEVO METODO CONSULTA ####################################################################
+            #################################################################### FUSIBLES CONSULTA ####################################################################
 
             endpoint = "http://{}/api/get/{}/modulos_fusibles/all/_/_/_/_/_".format(self.model.server, self.model.dbEvent)
             response = requests.get(endpoint).json()
@@ -1105,7 +1137,6 @@ class CheckQr (QState):
 
             #los modulos vacíos deben ir en el resultado final para saber cuando un módulo que lleve la modularidad no significa torque o fusible
             #print("modulos_de_evento")
-
 
             #variable para guardar toda la información de la configuración del arnés (Fusibles que sí lleva, en forma de diccionario)
             self.model.arnes_data = {}
@@ -1153,13 +1184,13 @@ class CheckQr (QState):
 
                                         #si la caja no existe aún en la variable del modelo...
                                         if not(caja in self.model.input_data["database"]["modularity"]):
-                                            self.model.arnes_data[caja] = [] #se agrega la nueva caja como lista
+                                            self.model.input_data["database"]["modularity"][caja] = [] #se agrega la nueva caja como lista
 
                                         ############ aquí ya nos aseguramos que exista la caja ############
 
                                         #si no existe la cavidad en la lista de la caja de modularity...
                                         if not(cavidad in self.model.arnes_data[caja]):
-                                            self.model.arnes_data[caja] =  temp[caja][cavidad] #se agrega "F328": "verde"
+                                            self.model.arnes_data[caja][cavidad] =  temp[caja][cavidad] #se agrega "F328": "verde"
 
                                         #si no existe la cavidad en la lista de la caja de modularity...
                                         if not(cavidad in self.model.input_data["database"]["modularity"][caja]):
@@ -1176,15 +1207,16 @@ class CheckQr (QState):
                     self.nok.emit()
                     return
                     
-            print("-------------------------------------TAREAS: FUSIBLES A INSPECCIONAR -----------------------------------")
-            print("\t\self.model.input_data[database][modularity]:\n", self.model.input_data["database"]["modularity"])
-            print("\t\tself.model.arnes_data\n: ",self.model.arnes_data)
+            #print("-------------------------------------TAREAS: FUSIBLES A INSPECCIONAR -----------------------------------")
+            #print("\t\tself.model.input_data[database][modularity]:\n", self.model.input_data["database"]["modularity"])
+            #print("\t\tself.model.arnes_data:\n ",self.model.arnes_data)
 
             command = {
                 "lbl_result" : {"text": "Fusibles Generados Correctamente", "color": "green"},
                 "lbl_steps" : {"text": "Iniciando Ciclo", "color": "green"}
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
             print("modularity terminado correctamente, continuando...")
 
         except Exception as ex:

@@ -36,6 +36,9 @@ class Model (object):
         #variable para inhabilitar la llave
         self.disable_key = False
 
+        #variable para avisar que se está saliendo de config y no es necesario re-calcular el conteo de arneses
+        self.saliendo_config = False
+
         #variable para guardar el pedido
         self.pedido = ""
         #variable para guardar el evento del arnés
