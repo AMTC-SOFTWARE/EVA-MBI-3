@@ -705,6 +705,9 @@ class MainWindow (QMainWindow):
     def resizeEvent(self, event):
         try:
             self.ui.img_center.setPixmap(QPixmap(self.model.centerImage).scaled(self.ui.img_center.width(), self.ui.img_center.height(), Qt.KeepAspectRatio))
+            ### F96 ###
+            if self.model.img_fuse != "":
+                self.ui.img_fuse.setPixmap(QPixmap(self.model.img_fuse).scaled(self.ui.img_fuse.width(), self.ui.img_fuse.height(), Qt.KeepAspectRatio))
             self.ui.frame.setMaximumWidth(self.width() - 328)
         except Exception as ex:
             print("resizeEvent() exception: ", ex)
@@ -735,7 +738,6 @@ class MainWindow (QMainWindow):
             QTimer.singleShot(2000, self.pop_out.button(QMessageBox.Ok).click)
             self.pop_out.exec()
 
-
 class Login (QDialog):
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -749,8 +751,7 @@ class Login (QDialog):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             print("Escape key was pressed")
-     
-            
+           
 class Scanner (QDialog):
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -791,7 +792,6 @@ class Img_popout (QDialog):
         self.ui.setupUi(self) 
         self.ui.label.setText("")
         
-
 class PopOut (QMessageBox):
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -805,7 +805,6 @@ class PopOut (QMessageBox):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             print("Escape key was pressed")
-
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication

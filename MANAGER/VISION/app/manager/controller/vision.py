@@ -145,7 +145,6 @@ class Triggers (QState):
         box = self.model.vision_data[self.module]["box"]
         print("current_trig-------",current_trig)
         print("results-------\n",results)
-        #print("img----*---",img)
         print("box-------",box)
 
         epoches = self.model.vision_data[self.module]["epoches"]
@@ -294,10 +293,10 @@ class Triggers (QState):
             else:
                 print("ya existe carpeta LOCAL: ",carpeta_nueva)
 
-            command = {
-                "lbl_result" : {"text": "Creando Carpeta en RED...", "color": "navy"},
-            }
-            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            #command = {
+            #    "lbl_result" : {"text": "Creando Carpeta en RED...", "color": "navy"},
+            #}
+            #publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
             carpeta_nueva = "//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-3/" + nombre_carpeta
 

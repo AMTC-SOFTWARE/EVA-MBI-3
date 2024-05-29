@@ -7,6 +7,7 @@ class Model (object):
     def __init__(self):   
         self.name = "GUI"
         self.imgsPath = "data/imgs/"
+        self.img_fuse = ""
         self.centerImage = ":/images/images/blanco.png"
         self.user = {"type":"", "pass":"", "user":""}
         self.setTopic = "gui/set"

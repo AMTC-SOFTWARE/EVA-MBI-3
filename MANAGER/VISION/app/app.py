@@ -6,8 +6,8 @@
 
 ###############################################################################
 commands to exe generation:
-        pyinstaller --noconsole --icon=icon.ico --add-data data;data app.py
-        pyinstaller --icon=icon.ico --add-data data;data app.py
+        pyinstaller --noconsole --icon=icon.ico --add-data data;data --noconfirm app.py
+        pyinstaller --icon=icon.ico --add-data data;data --noconfirm app.py
         
         special case pyinstaller not recognized
         Python -m PyInstaller --icon=icon.ico --add-data data;data app.py

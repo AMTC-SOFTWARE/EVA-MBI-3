@@ -224,7 +224,8 @@ class Model (object):
         self.t_scrap = {}
 
     #################### Vision-Altura #####################
-        self.fuses_base = {}
+        self.fuses_base = {} #mas abajo en el modelo se llena, en cada reset
+
         #Se usan como coordenadas para dibujar el cuadro de inspeccion en la imagen de las cajas
         self.fuses_BB = {
             'PDC-D': {
@@ -251,12 +252,11 @@ class Model (object):
                 'F322': [(344, 368), (366, 379)], 'F323': [(342, 354), (366, 364)], 'F324': [(344, 340), (366, 348)], 'F325': [(343, 326), (368, 335)], 
                 'F326': [(378, 427), (422, 438)], 'F327': [(379, 413), (422, 425)], 'F328': [(379, 398), (423, 409)], 'F329': [(380, 384), (424, 395)], 
                 'F330': [(380, 369), (422, 380)], 'F331': [(380, 354), (422, 364)], 'F332': [(381, 339), (422, 349)], 'F333': [(380, 324), (422, 335)], 
-                'F334': [(380, 309), (422, 319)], 'F335': [(380, 294), (422, 307)], 'E21': [(287, 423), (295, 441)], 'E22': [(295, 442), (302, 460)],
+                'F334': [(380, 309), (422, 319)], 'F335': [(380, 294), (422, 307)],
                 'conector': [(275, 422), (304, 462)]
                 }, 
             'PDC-P2': {
-                'CONECTOR1': [(395, 1060), (910, 1390)], 'CONECTOR2': [(1180, 780), (1585, 1110)], 'CONECTOR3': [(282, 395), (326, 408)], 'CONECTOR4': [(289, 380), (315, 390)], 
-                'CONECTOR5': [(295, 442), (302, 460)]
+                'CONECTOR1': [(395, 1060), (910, 1390)], 'CONECTOR2': [(1180, 780), (1585, 1110)]
                 }, 
             'PDC-R': {
                 'F400': [(510, 214), (519, 246)], 'F401': [(499, 214), (508, 246)], 'F402': [(487, 214), (497, 246)], 'F403': [(477, 214), (485, 246)], 
@@ -449,11 +449,7 @@ class Model (object):
             "conector":" PDCP",
             "conector1":" PDCP2",
             "conector2":" PDCP2",
-            "conector3":" PDCP2",
-            "conector4":" PDCP2",
-            "conector5":" PDCP2",
             "bracket1":" PDCD"
-
             }
 
         self.robot = Robot(self.pub_topics["robot"], self.robot_data)
@@ -547,6 +543,18 @@ class Model (object):
         self.robot_data["box"] = ""
 
         self.fuses_base = {
+            ###'MFB-P2': {
+            ###    'A20': 'no_nut_m8', 'A21': 'no_nut_m6', 'A22': 'no_nut_m6', 'A23': 'no_nut_m6', 'A24': 'no_nut_m6', 'A25': 'no_nut_m8', 'A26': 'no_nut_m6', 'A27': 'no_nut_m6', 'A28': 'no_nut_m6', 'A29': 'no_nut_m6', 'A30': 'no_nut_m8'
+            ###    },
+            ###'MFB-P1': {
+            ###    'A41': 'no_nut_m8', 'A42': 'no_nut_m6', 'A43': 'no_nut_m6', 'A44': 'no_nut_m6', 'A45': 'no_nut_m6', 'A46': 'no_nut_m8', 'A47': 'no_nut_m8'
+            ###    },
+            ###'MFB-S': {
+            ###    'A51': 'no_nut_m8', 'A52': 'no_nut_m8', 'A53': 'no_nut_m6', 'A54': 'no_nut_m6', 'A55': 'no_nut_m6', 'A56': 'no_nut_m6'
+            ###    },
+            ###'MFB-E': {
+            ###    'AE1': 'no_nut_m8', 'A1': 'no_nut_m8', 'A2': 'no_nut_m8'
+            ###    },
             'PDC-D': {
                 'F200': 'vacio', 'F201': 'vacio', 'F202': 'vacio', 'F203': 'vacio', 'F204': 'vacio', 'F205': 'vacio', 'F206': 'vacio', 'F207': 'vacio', 'F208': 'vacio',
                 'F209': 'vacio', 'F210': 'vacio', 'F211': 'vacio', 'F212': 'vacio', 'F213': 'vacio', 'F214': 'vacio', 'F215': 'vacio', 'F216': 'vacio', 'F217': 'vacio',
@@ -672,11 +680,11 @@ class Model (object):
         #print("segundos_transcurridos por iteración: ",segundos_transcurridos)
         
         diferencia = fechaActual - self.fechaAnterior #se obtiene el tiempo total que ha transcurrido desde la última actualización de la hora desde el servidor (donde se han ido acumulando los segundos transcurridos de cada iteración y la fecha original obtenida del servidor)
-        # Compara si han pasado más de 3 minutos (180 segundos)
+        # Compara si han pasado más de 5 minutos (300 segundos)
         #print("diferenciaLocalAcumulada: ",diferencia)
 
-        if diferencia > timedelta(minutes=3) or diferencia < timedelta(minutes=0):
-            #print("Han pasado más de 3 minutos. Actualizando hora desde servidor...")
+        if diferencia > timedelta(minutes=5) or diferencia < timedelta(minutes=0):
+            #print("Han pasado más de 5 minutos. Actualizando hora desde servidor...")
             fechaActual = self.get_currentTime() #se actualiza del servidor la fecha
             print("update pedido desde update_fecha_actual")
             self.fechaAnterior = fechaActual #se guarda la última fecha obtenida de la actualización del servidor

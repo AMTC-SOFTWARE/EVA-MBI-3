@@ -162,7 +162,6 @@ class Startup(QState):
         except OSError as error:
             print("ERROR AL CREAR CARPETA:::\n",error)
         
-
         QTimer.singleShot(15, self.kioskMode)
         self.model.robot.stop()
         self.ok.emit()
@@ -719,18 +718,17 @@ class CheckQr (QState):
                 queue_tuercas = self.model.input_data["database"]["modularity_nuts"] #inicia vacío queue_tuercas = {}
 
                 for caja in lista_cajas:
-                    print("caja: ",caja)
                     if caja in self.model.t_result:
-                        print("caja encontrada en self.model.t_result...")
                         for tuerca in self.model.t_result[caja]:
                             print("nombre tuerca: ",tuerca)
                             if str(self.model.t_result[caja][tuerca]).upper() != "NONE":
-                                print("agregando tuerca diferente de None")
                                 if not(caja in queue_tuercas):
-                                    queue_tuercas[caja] = {}
-                                queue_tuercas[caja][tuerca] = str(self.model.t_result[caja][tuerca])
+                                    queue_tuercas[caja] = []
+                                queue_tuercas[caja].append(tuerca)
 
                 print("self.model.input_data[database][modularity_nuts]: ",self.model.input_data["database"]["modularity_nuts"])
+                #EJEMPLO 
+                #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
 
             ##################################################################################################################
 
@@ -741,6 +739,8 @@ class CheckQr (QState):
             print("##############################################################################################################################")
 
             self.build_contenido_fusibles()
+
+            self.model.input_data["database"]["pedido"] = self.model.pedido
 
             ##############################################################################################################################################
             ##############################################################################################################################################
@@ -1043,7 +1043,9 @@ class CheckQr (QState):
                         return
                     
                 print("-------------------------------------TAREAS: TUERCAS -----------------------------------")
-                print(self.model.input_data["database"]["modularity_nuts"])
+                print("self.model.input_data[database][modularity_nuts]: ",self.model.input_data["database"]["modularity_nuts"])
+                #EJEMPLO:
+                #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
 
                 self.model.cronometro_ciclo=True
                 command = {
