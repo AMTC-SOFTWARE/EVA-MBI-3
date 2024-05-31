@@ -696,7 +696,6 @@ class CheckQr (QState):
             else:
                 print("se acomodan los queue necesarios para las cajas de torque con la información de la tabla en red: valores")
                 print("self.model.t_result: ",self.model.t_result)
-                print("self.model.t_resultAngle: ",self.model.t_resultAngle)
 
                 #EJEMPLO DE CONTENIDO DE VARIABLES:
                 #self.model.t_result:  
@@ -720,7 +719,6 @@ class CheckQr (QState):
                 for caja in lista_cajas:
                     if caja in self.model.t_result:
                         for tuerca in self.model.t_result[caja]:
-                            print("nombre tuerca: ",tuerca)
                             if str(self.model.t_result[caja][tuerca]).upper() != "NONE":
                                 if not(caja in queue_tuercas):
                                     queue_tuercas[caja] = []
