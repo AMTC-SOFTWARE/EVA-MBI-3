@@ -606,20 +606,21 @@ class CheckQr (QState):
 
             ##################################################################################################################
             ################################## HISTORIAL PROCESADO ANTERIORMENTE #############################################
+            procesado = False
 
-            endpoint = "http://{}/api/get/historial/HM/=/{}/RESULTADO/=/2".format(self.model.server, self.model.qr_codes["HM"])
-            response = requests.get(endpoint).json()
-            #si response tiene items y esta es response["items"] = False (NO se encontró un arnés previamente en el historial),
-            #o si está qr_rework en True (ya fue aprobado), entonces NO se emite self.rework (esto te llevaría a esperar llave para confirmar).
-            #si no entra a rework.emit, quiere decir que no tiene historial y continúa normalmente...
-            if not(("items" in response and response["items"] == False) or (self.model.local_data["qr_rework"] == True)):
-                #se va a el estado rework
-                print("se trata de un retrabajo, yendo a estado rework para pedir llave")
-                self.rework.emit()
+            procesado = self.procesado_anteriormente()
+            if procesado == True:
                 return
 
             ##################################################################################################################
             ######################################### BUSQUEDA DE EVENTOS ####################################################
+
+            print("Buscando evento de arnés")
+            command = {
+                "lbl_result" : {"text": "Buscando Evento de Arnés", "color": "green"},
+                "lbl_steps" : {"text": "Encontrando Nivel Técnico", "color": "black"}
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
             endpoint = "http://{}/api/get/eventos".format(self.model.server)
             eventos = requests.get(endpoint).json()
@@ -690,19 +691,37 @@ class CheckQr (QState):
             self.model.input_data["database"]["modularity"].clear() #variable para guardar la infromación de los fusibles en las cavidades que no están vacías para el arnés
 
             ############################################ SE GENERAN TUERCAS QUE SE INSPECCIONARÁN ###############################
-
-            #aquí se revisa que se hayan leído datos de qué torques lleva, de lo contrario se deben consultar para armar las cajas de torque...
-            #(En ambos casos se debe terminar con el contenido necesario para las cajas de torque)
-            if self.model.valores_torques_red == False: #se revisa esta variable en la función ETIQUETA para saber si el arnés tiene esta información o no
-                print("se generan los torques que llevará el arnés a partir de la base de datos cargada en la estación...")
-                self.build_contenido_torques()
-
-            else:
-                print("se generan los torques que llevará el arnés a partir de la tabla seghm_valores en servidor donde se guardaron resultados")
-                self.build_contenido_torques_from_results()
             
-            #EJEMPLO:
-            #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
+            #estado actual de cajas para inspección de tuercas habilitadas
+            print("self.model.inspeccion_tuercas: ",self.model.inspeccion_tuercas)
+
+            #variable para saber si al menos una tuerca está habilitada
+            tuercas_habilitadas = False
+            for caja in self.model.inspeccion_tuercas:
+                if self.model.inspeccion_tuercas[caja] == True:
+                    tuercas_habilitadas = True
+
+            #si al menos una inspección de tuercas está habilitada...
+            if tuercas_habilitadas == True:
+
+                #aquí se revisa que se hayan leído datos de qué torques lleva, de lo contrario se deben consultar para armar las cajas de torque...
+                #(En ambos casos se debe terminar con el contenido necesario para las cajas de torque)
+                if self.model.valores_torques_red == False: #se revisa esta variable en la función ETIQUETA para saber si el arnés tiene esta información o no
+                    print("se generan los torques que llevará el arnés a partir de la base de datos cargada en la estación...")
+                    self.build_contenido_torques()
+
+                else:
+                    print("se generan los torques que llevará el arnés a partir de la tabla seghm_valores en servidor donde se guardaron resultados")
+                    self.build_contenido_torques_from_results()
+            else:
+                print("no hay inspecciones de tuercas habilitadas")
+            
+            #EJEMPLO:::::::::::::::::::: self.model.input_data["database"]["modularity_nuts"]
+            #{
+            #    'MFB-P1': ['A41', 'A42', 'A43', 'A46'],
+            #    'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'],
+            #    'MFB-E': ['A1', 'A2', 'E1']
+            #}
 
             ############################################ SE GENERAN FUSIBLES QUE SE INSPECCIONARÁN ###############################
             ##################################################################################################################
@@ -711,23 +730,157 @@ class CheckQr (QState):
             self.build_contenido_fusibles()
             self.model.input_data["database"]["pedido"] = self.model.pedido
 
-            # EJEMPLO::::::::::::::::::::
+            # EJEMPLO:::::::::::::::::::: self.model.input_data["database"]["modularity"]
             #self.model.input_data["database"]["modularity"]:
-            #{'PDC-S': ['1', '2', '3', '6'], 'PDC-RMID': ['F401', 'F411', 'F413', 'F415', 'F416', 'F417', 'F418', 'F419', 'F420', 'F421', 'F430', 'F431', 'F432', 'F438', 'F439', 'F441', 'F443', 'F446', 'RELT', 'RELX'], 'PDC-P': ['F300', 'F304', 'F305', 'F318', 'F319', 'F320', 'F321', 'F322', 'F323', 'F324', 'F326', 'F327', 'F328', 'F329', 'F332', 'F333', 'F335', 'MF1', 'MF2'], 'PDC-D': ['F200', 'F204', 'F205', 'F209', 'F211', 'F213', 'F214', 'F215', 'F216', 'F217', 'F218', 'F219', 'F220', 'F221', 'F222', 'F223', 'F225', 'F226', 'F227', 'F229', 'F230', 'F231', 'F232'], 'F96': ['F96'], 'PDC-P2': ['CONECTOR1', 'CONECTOR2'], 'PDC-Dbracket': ['bracket']}
-            #self.model.arnes_data:
-            #{'PDC-S': {'3': 'azul', '1': 'beige', '6': 'beige', '2': 'verde'}, 'PDC-RMID': {'F419': 'naranja', 'F441': 'beige', 'F431': 'rojo', 'F416': 'verde', 'F417': 'verde', 'F411': 'cafe', 'F443': 'beige', 'F446': 'beige', 'F418': 'naranja', 'F420': 'naranja', 'F439': 'azul', 'F438': 'cafe', 'RELX': '1008695', 'F430': 'azul', 'RELT': '1010733', 'F432': 'cafe', 'F413': 'verde', 'F415': 'verde', 'F401': 'natural', 'F421': 'verde'}, 'PDC-P': {'F305': 'beige', 'F319': 'cafe', 'MF1': 'cafe', 'F321': 'cafe', 'F328': 'verde', 'F329': 'verde', 'F333': 'verde', 'F323': 'cafe', 'F324': 'cafe', 'F327': 'verde', 'F304': 'beige', 'F318': 'cafe', 'F300': 'rojo', 'F320': 'cafe', 'F322': 'rojo', 'F326': 'verde', 'F332': 'rojo', 'F335': 'natural', 'MF2': 'beige'}, 'PDC-D': {'F216': 'natural', 'F200': 'beige', 'F204': 'rojo', 'F209': 'verde', 'F211': 'verde', 'F213': 'beige', 'F214': 'verde', 'F215': 'verde', 'F217': 'azul', 'F218': 'beige', 'F219': 'rojo', 'F220': 'beige', 'F221': 'azul', 'F222': 'rojo', 'F225': 'azul', 'F226': 'cafe', 'F227': 'beige', 'F229': 'beige', 'F230': 'beige', 'F231': 'beige', 'F232': 'beige', 'F223': 'cafe', 'F205': 'beige'}, 'F96': {'F96': 'cafe'}}
+            #{
+            #    'PDC-S': ['1', '2', '3', '6'],
+            #    'PDC-RMID': ['F401', 'F411', 'F413', 'F415', 'F416', 'F417', 'F418', 'F419', 'F420', 'F421', 'F430', 'F431', 'F432', 'F438', 'F439', 'F441', 'F443', 'F446', 'RELT', 'RELX'],
+            #    'PDC-P': ['F300', 'F304', 'F305', 'F318', 'F319', 'F320', 'F321', 'F322', 'F323', 'F324', 'F326', 'F327', 'F328', 'F329', 'F332', 'F333', 'F335', 'MF1', 'MF2'],
+            #    'PDC-D': ['F200', 'F204', 'F205', 'F209', 'F211', 'F213', 'F214', 'F215', 'F216', 'F217', 'F218', 'F219', 'F220', 'F221', 'F222', 'F223', 'F225', 'F226', 'F227', 'F229', 'F230', 'F231', 'F232'],
+            #    'F96': ['F96'],
+            #    'PDC-P2': ['CONECTOR1', 'CONECTOR2'],
+            #    'PDC-Dbracket': ['bracket']
+            #}
 
+            # EJEMPLO:::::::::::::::::::: self.model.arnes_data:
+            # {
+            #     'PDC-S': {
+            #         '3': 'azul',
+            #         '1': 'beige',
+            #         '6': 'beige',
+            #         '2': 'verde'
+            #     },
+            #     'PDC-RMID': {
+            #         'F419': 'naranja',
+            #         'F441': 'beige',
+            #         'F431': 'rojo',
+            #         'F416': 'verde',
+            #         'F417': 'verde',
+            #         'F411': 'cafe',
+            #         'F443': 'beige',
+            #         'F446': 'beige',
+            #         'F418': 'naranja',
+            #         'F420': 'naranja',
+            #         'F439': 'azul',
+            #         'F438': 'cafe',
+            #         'RELX': '1008695',
+            #         'F430': 'azul',
+            #         'RELT': '1010733',
+            #         'F432': 'cafe',
+            #         'F413': 'verde',
+            #         'F415': 'verde',
+            #         'F401': 'natural',
+            #         'F421': 'verde'
+            #     },
+            #     'PDC-P': {
+            #         'F305': 'beige',
+            #         'F319': 'cafe',
+            #         'MF1': 'cafe',
+            #         'F321': 'cafe',
+            #         'F328': 'verde',
+            #         'F329': 'verde',
+            #         'F333': 'verde',
+            #         'F323': 'cafe',
+            #         'F324': 'cafe',
+            #         'F327': 'verde',
+            #         'F304': 'beige',
+            #         'F318': 'cafe',
+            #         'F300': 'rojo',
+            #         'F320': 'cafe',
+            #         'F322': 'rojo',
+            #         'F326': 'verde',
+            #         'F332': 'rojo',
+            #         'F335': 'natural',
+            #         'MF2': 'beige'
+            #     },
+            #     'PDC-D': {
+            #         'F216': 'natural',
+            #         'F200': 'beige',
+            #         'F204': 'rojo',
+            #         'F209': 'verde',
+            #         'F211': 'verde',
+            #         'F213': 'beige',
+            #         'F214': 'verde',
+            #         'F215': 'verde',
+            #         'F217': 'azul',
+            #         'F218': 'beige',
+            #         'F219': 'rojo',
+            #         'F220': 'beige',
+            #         'F221': 'azul',
+            #         'F222': 'rojo',
+            #         'F225': 'azul',
+            #         'F226': 'cafe',
+            #         'F227': 'beige',
+            #         'F229': 'beige',
+            #         'F230': 'beige',
+            #         'F231': 'beige',
+            #         'F232': 'beige',
+            #         'F223': 'cafe',
+            #         'F205': 'beige'
+            #     },
+            #     'F96': {
+            #         'F96': 'cafe'
+            #     }
+            # }
             ################################ SE AGREGAN CAVIDADES VACÍAS ################################
                 
-            print("self.model.inspeccion_tuercas: ",self.model.inspeccion_tuercas)
-            #AGREGAR TUERCAS de modularity_nuts EN modularity
-            #AGREGAR en arnes_data las tuercas a inspeccionar pero con un valor constante o con A21,A22 respectivamente ...mmm?
-            #AGREGAR lo de self.model.nuts_base para los vacíos a lgenerar self.model.modularity_fuses
-
-
             #se llena la variable modularity_fuses con todas las cavidades con fusibles vacíos
             self.model.modularity_fuses.update(copy(self.model.fuses_base))
-                
+
+            #AGREGAR TUERCAS de modularity_nuts EN modularity
+            #si al menos una inspección de tuercas está habilitada...
+            if tuercas_habilitadas == True:
+                # Combinación de diccionarios
+                combined_dict = self.model.input_data["database"]["modularity"].copy()
+                for key, value in self.model.input_data["database"]["modularity_nuts"].items(): #modularity_nuts ya solamente trae las cajas de tuercas habilitadas
+                    if key in combined_dict:
+                        combined_dict[key] = list(set(combined_dict[key] + value))
+                    else:
+                        combined_dict[key] = value
+
+                self.model.input_data["database"]["modularity"] = combined_dict
+
+                for caja in self.model.nuts_base:
+                    if (not caja in self.model.modularity_fuses) and (self.model.inspeccion_tuercas[caja] == True):
+                        self.model.modularity_fuses[caja] = self.model.nuts_base[caja]
+
+                #nuts_base = {
+                #    "caja1" : {"A21":"nonut", "A22":"nonut"},
+                #    "caja2" : {"A43":"nonut", "A44":"nonut"},
+                #}
+                #modularity_fuses = {
+                #    "cajaR" : {"F300":"vacio", "F301":"vacio"},
+                #    "cajaP" : {"F200":"vacio", "F205":"vacio"},
+                #}
+                ##cajas extra habilitadas para inspección:
+                #inspeccion_tuercas = {
+                #    "caja1": True,
+                #    "caja2": False
+                #}
+                #for caja in nuts_base:
+                #    if (not caja in modularity_fuses) and (inspeccion_tuercas[caja] == True):
+                #        modularity_fuses[caja] = nuts_base[caja]
+
+                #se agrega todo el contenido de tuercas obtenidas del datamatrix
+                try:
+                    for caja in self.model.input_data["database"]["modularity_nuts"]:
+                        if self.model.inspeccion_tuercas[caja] == True:
+                            for cavidad in self.model.input_data["database"]["modularity_nuts"][caja]:
+                                if not(caja in self.model.arnes_data):
+                                    self.model.arnes_data[caja] = {}
+                                if not(cavidad in self.model.arnes_data[caja]):
+                                    self.model.arnes_data[caja][cavidad] = cavidad #se agrega contenido con su misma tuerca, "MFB-P2": {"A20" : "A20", "A21" : "A21"...}
+
+                except Exception as ex:
+                    print (ex)
+
+                print("\n\nself.model.arnes_data ya con info de tuercas:\n",self.model.arnes_data)
+                #EJEMPLO::::::: self.model.arnes_data ya con tuercas
+                #{'PDC-S': {'3': 'azul', '1': 'beige', '6': 'beige', '2': 'verde'}, 'PDC-RMID': {'F419': 'naranja', 'F441': 'beige', 'F431': 'rojo', 'F416': 'verde', 'F417': 'verde', 'F411': 'cafe', 'F443': 'beige', 'F446': 'beige', 'F418': 'naranja', 'F420': 'naranja', 'F439': 'azul', 'F438': 'cafe', 'RELX': '1008695', 'F430': 'azul', 'RELT': '1010733', 'F432': 'cafe', 'F413': 'verde', 'F415': 'verde', 'F401': 'natural', 'F421': 'verde'}, 'PDC-P': {'F305': 'beige', 'F319': 'cafe', 'MF1': 'cafe', 'F321': 'cafe', 'F328': 'verde', 'F329': 'verde', 'F333': 'verde', 'F323': 'cafe', 'F324': 'cafe', 'F327': 'verde', 'F304': 'beige', 'F318': 'cafe', 'F300': 'rojo', 'F320': 'cafe', 'F322': 'rojo', 'F326': 'verde', 'F332': 'rojo', 'F335': 'natural', 'MF2': 'beige'}, 'PDC-D': {'F216': 'natural', 'F200': 'beige', 'F204': 'rojo', 'F209': 'verde', 'F211': 'verde', 'F213': 'beige', 'F214': 'verde', 'F215': 'verde', 'F217': 'azul', 'F218': 'beige', 'F219': 'rojo', 'F220': 'beige', 'F221': 'azul', 'F222': 'rojo', 'F225': 'azul', 'F226': 'cafe', 'F227': 'beige', 'F229': 'beige', 'F230': 'beige', 'F231': 'beige', 'F232': 'beige', 'F223': 'cafe', 'F205': 'beige'}, 'F96': {'F96': 'cafe'}, 'MFB-P2': {'A20': 'A20', 'A21': 'A21', 'A22': 'A22', 'A23': 'A23', 'A24': 'A24', 'A25': 'A25', 'A26': 'A26', 'A29': 'A29', 'A30': 'A30'}}
+               
+
+            #aquí modularity_fuses ya tiene todas la cavidades vacías que se inspeccionarán incluyendo fusibles y tuercas
+            #se reemplaza todo el contenido de tuercas y fusibles vacíos por el que se obtuvo del datamatrix
             try:
                 for caja in self.model.arnes_data:
                     for cavidad in self.model.arnes_data[caja]:
@@ -749,7 +902,7 @@ class CheckQr (QState):
             #self.model.arnes_data                              # variable que guarda un diccionario con cada caja del arnés, y cada una con claves de sus fusibles (cavidades) con valor de su color correspondiente
             #self.model.modularity_fuses                        # variable de diccionario con cada caja con el valor del color deseado para cada fusible y contando ya las cavidades vacías
 
-            print("-------------------------------------TAREAS: FUSIBLES A INSPECCIONAR -----------------------------------")
+            print("\n\n\n-------------------------------------TAREAS FINALES -----------------------------------")
             print("\n\n\t\tCOLECCIÓN:\n\t\tself.model.input_data[database][modularity]:\n\n", self.model.input_data["database"]["modularity"])
             print("\n\n\t\tself.model.arnes_data:\n\n ",self.model.arnes_data)
             print("\n\n\t\tmodularity_fuses:\n\n", self.model.modularity_fuses)
@@ -771,7 +924,7 @@ class CheckQr (QState):
             evento = event.replace('_',' ')
             command = {
                 "lbl_result" : {"text": "Datamatrix validado", "color": "green"},
-                "lbl_steps" : {"text": "Obteniendo Contenido de Arnés", "color": "black"},
+                "lbl_steps" : {"text": "Iniciando Ciclo", "color": "black"},
                 "statusBar" : self.model.pedido["PEDIDO"]+" "+self.model.qr_codes["HM"]+" "+evento,
                 "cycle_started": True
                 }
@@ -793,6 +946,34 @@ class CheckQr (QState):
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             self.model.input_data["database"]["modularity"].clear()
             self.nok.emit()
+
+    def procesado_anteriormente (self):
+        print("buscando procesado_anteriormente")
+
+        if self.model.local_data["qr_rework"] == False:
+            command = {
+                    "lbl_result" : {"text": "Revisando Historial de Arnés", "color": "green"},
+                    "lbl_steps" : {"text": "Buscando HM Procesado", "color": "black"},
+                    }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+            print(datetime.now())
+
+            endpoint = "http://{}/api/get/historial/HM/=/{}/RESULTADO/=/2".format(self.model.server, self.model.qr_codes["HM"])
+            response = requests.get(endpoint).json()
+
+            print(datetime.now())
+
+            #si response tiene items y esta es response["items"] = False (NO se encontró un arnés previamente en el historial),
+            #o si está qr_rework en True (ya fue aprobado), entonces NO se emite self.rework (esto te llevaría a esperar llave para confirmar).
+            #si no entra a rework.emit, quiere decir que no tiene historial y continúa normalmente...
+            if not(("items" in response and response["items"] == False) or (self.model.local_data["qr_rework"] == True)):
+                #se va a el estado rework
+                print("se trata de un retrabajo, yendo a estado rework para pedir llave")
+                self.rework.emit()
+                return True
+            else:
+                print("no se encontró arnés procesado anteriormente, continunando normalmente...")
 
     def build_contenido_torques_from_results (self):
         print("\nbuild_contenido_torques_from_results")
@@ -827,15 +1008,15 @@ class CheckQr (QState):
                                 queue_tuercas[caja] = []
                             queue_tuercas[caja].append(tuerca)
 
-            print("self.model.input_data[database][modularity_nuts]: ",self.model.input_data["database"]["modularity_nuts"])
-            #EJEMPLO 
-            #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
-
             command = {
                 "lbl_result" : {"text": "Torques Generados Correctamente", "color": "green"},
                 "lbl_steps" : {"text": "Generando Combinación de Fusibles", "color": "black"}
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+            print("-------------------------------------TAREAS: TUERCAS -----------------------------------")
+            print("self.model.input_data[database][modularity_nuts]: ",self.model.input_data["database"]["modularity_nuts"])
+
             print("modularity_nuts terminado correctamente desde seghm_valores, continuando...")
 
         except Exception as ex:
@@ -939,9 +1120,7 @@ class CheckQr (QState):
                         return
                     
                 print("-------------------------------------TAREAS: TUERCAS -----------------------------------")
-                print("self.model.input_data[database][modularity_nuts]: ",self.model.input_data["database"]["modularity_nuts"])
-                #EJEMPLO:
-                #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
+                print("\n\n\t\tself.model.input_data[database][modularity_nuts]:\n",self.model.input_data["database"]["modularity_nuts"])
 
                 command = {
                     "lbl_result" : {"text": "Torques Generados Correctamente", "color": "green"},
@@ -1104,13 +1283,13 @@ class CheckQr (QState):
                     self.nok.emit()
                     return
                     
-            #print("-------------------------------------TAREAS: FUSIBLES A INSPECCIONAR -----------------------------------")
-            #print("\t\tself.model.input_data[database][modularity]:\n", self.model.input_data["database"]["modularity"])
-            #print("\t\tself.model.arnes_data:\n ",self.model.arnes_data)
+            print("-------------------------------------TAREAS: FUSIBLES A INSPECCIONAR -----------------------------------")
+            print("\n\n\t\tself.model.input_data[database][modularity]:\n", self.model.input_data["database"]["modularity"])
+            print("\n\n\t\tself.model.arnes_data:\n ",self.model.arnes_data)
 
             command = {
                 "lbl_result" : {"text": "Fusibles Generados Correctamente", "color": "green"},
-                "lbl_steps" : {"text": "Iniciando Ciclo", "color": "green"}
+                "lbl_steps" : {"text": "Generando Arnés", "color": "green"}
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
@@ -1129,6 +1308,13 @@ class CheckQr (QState):
 
     def ETIQUETA(self, ID):
         #Función para buscar el HM obtenido de la etiqueta (Consulta para saber si tiene historial de torque, y jalar sus resultados)
+
+        print("self.ETIQUETA()")
+        command = {
+                "lbl_result" : {"text": "Buscando Historial para Etiqueta", "color": "green"},
+                "lbl_steps" : {"text": "Incluir en Etiqueta Final", "color": "black"}
+                }
+        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
         #Si la Trazabilida está ACTIVADA, busca los resultados de torque en el servidor de FAMX2
         print("BUSCANDO RESULTADOS DE TORQUE EN |||SISTEMA DE TRAZABILIDAD|||")

@@ -555,16 +555,16 @@ class Model (object):
 
         self.nuts_base = {
             'MFB-P2': {
-                'A20': 'no_nut_m8', 'A21': 'no_nut_m6', 'A22': 'no_nut_m6', 'A23': 'no_nut_m6', 'A24': 'no_nut_m6', 'A25': 'no_nut_m8', 'A26': 'no_nut_m6', 'A27': 'no_nut_m6', 'A28': 'no_nut_m6', 'A29': 'no_nut_m6', 'A30': 'no_nut_m8'
+                'A20': 'no_A20', 'A21': 'no_A21', 'A22': 'no_A22', 'A23': 'no_A23', 'A24': 'no_A24', 'A25': 'no_A25', 'A26': 'no_A26', 'A27': 'no_A27', 'A28': 'no_A28', 'A29': 'no_A29', 'A30': 'no_A30'
                 },
             'MFB-P1': {
-                'A41': 'no_nut_m8', 'A42': 'no_nut_m6', 'A43': 'no_nut_m6', 'A44': 'no_nut_m6', 'A45': 'no_nut_m6', 'A46': 'no_nut_m8', 'A47': 'no_nut_m8'
+                'A41': 'no_A41', 'A42': 'no_A42', 'A43': 'no_A43', 'A44': 'no_A44', 'A45': 'no_A45', 'A46': 'no_A46', 'A47': 'no_A47'
                 },
             'MFB-S': {
-                'A51': 'no_nut_m8', 'A52': 'no_nut_m8', 'A53': 'no_nut_m6', 'A54': 'no_nut_m6', 'A55': 'no_nut_m6', 'A56': 'no_nut_m6'
+                'A51': 'no_A51', 'A52': 'no_A52', 'A53': 'no_A53', 'A54': 'no_A54', 'A55': 'no_A55', 'A56': 'no_A56'
                 },
             'MFB-E': {
-                'AE1': 'no_nut_m8', 'A1': 'no_nut_m8', 'A2': 'no_nut_m8'
+                'E1': 'no_E1', 'A1': 'no_A1', 'A2': 'no_A2'
                 },
         }
 
