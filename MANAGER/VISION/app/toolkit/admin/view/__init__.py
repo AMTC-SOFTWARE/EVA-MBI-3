@@ -40,28 +40,19 @@ class Admin (QDialog):
         self.client.on_message = self.on_message
         QTimer.singleShot(100, self.startClient)
 
-        #if exists("data\config"):
-        #    with open("data\config", "rb") as f:
-        #        self.config = load(f)
-        #        if "untwist" in self.config:
-        #            if self.config["untwist"] == True:
-        #                self.ui.checkBox_2.setChecked(True)
-        #            else:
-        #                self.ui.checkBox_2.setChecked(False)
-        #else:
-        #    self.config["untwist"] = False
-        if self.data.config_data["untwist"]:
-            self.ui.checkBox_4.setChecked(True)
-        else:
-            self.ui.checkBox_4.setChecked(False)
-        if self.data.config_data["flexible_mode"]:
-            self.ui.checkBox_5.setChecked(True)
-        else:
-            self.ui.checkBox_5.setChecked(False)
-        if self.data.config_data["trazabilidad"]:
-            self.ui.checkBox_6.setChecked(True)
-        else:
-            self.ui.checkBox_6.setChecked(False)
+        #empieza sin utilizar inspecciones de tuercas
+        self.ui.checkBox_5.setChecked(False)
+        #se deshabilita el checkbox4
+        self.ui.checkBox_4.setEnabled(False)
+        #se esconde checkbox4
+        self.ui.checkBox_4.setVisible(False) 
+
+        self.ui.checkBox_6.setChecked(self.data.config_data["trazabilidad"])
+
+        self.ui.checkBoxMFBP2.setChecked(self.data.inspeccion_tuercas["MFB-P2"])
+        self.ui.checkBoxMFBP1.setChecked(self.data.inspeccion_tuercas["MFB-P1"])
+        self.ui.checkBoxMFBS.setChecked(self.data.inspeccion_tuercas["MFB-S"])
+        self.ui.checkBoxMFBE.setChecked(self.data.inspeccion_tuercas["MFB-E"])
 
         self.ui.btn_reset.clicked.connect(self.resetMachine)
 
@@ -72,6 +63,11 @@ class Admin (QDialog):
         self.ui.checkBox_5.stateChanged.connect(self.onClicked_5)
         self.ui.checkBox_6.stateChanged.connect(self.onClicked_6)
         
+        self.ui.checkBoxMFBP2.stateChanged.connect(self.onClicked_5)
+        self.ui.checkBoxMFBP1.stateChanged.connect(self.onClicked_5)
+        self.ui.checkBoxMFBS.stateChanged.connect(self.onClicked_5)
+        self.ui.checkBoxMFBE.stateChanged.connect(self.onClicked_5)
+
         self.permissions()
 
 ######################################### Plugins #######################################
@@ -83,7 +79,7 @@ class Admin (QDialog):
             self.ui.checkBox_2.setEnabled(True)
             self.ui.checkBox_3.setEnabled(True)
             self.ui.checkBox_4.setEnabled(False)
-            self.ui.checkBox_5.setEnabled(False)
+            self.ui.checkBox_5.setEnabled(True)
             self.ui.checkBox_6.setEnabled(True)
         elif self.user_type == "CALIDAD":
             self.ui.btn_reset.setEnabled(True)
@@ -169,10 +165,28 @@ class Admin (QDialog):
             self.data.config_data["untwist"] = False
 
     def onClicked_5(self):
+        
         if self.ui.checkBox_5.isChecked():
-            self.data.config_data["flexible_mode"] = True
+
+            self.ui.checkBoxMFBP2.setEnabled(True)
+            self.ui.checkBoxMFBP1.setEnabled(True)
+            self.ui.checkBoxMFBS.setEnabled(True)
+            self.ui.checkBoxMFBE.setEnabled(True)
+
         else:
-            self.data.config_data["flexible_mode"] = False
+            
+            self.ui.checkBoxMFBP2.setChecked(False)
+            self.ui.checkBoxMFBP1.setChecked(False)
+            self.ui.checkBoxMFBS.setChecked(False)
+            self.ui.checkBoxMFBE.setChecked(False)
+
+
+        self.data.inspeccion_tuercas["MFB-P2"] = self.ui.checkBoxMFBP2.isChecked()
+        self.data.inspeccion_tuercas["MFB-P1"] = self.ui.checkBoxMFBP1.isChecked()
+        self.data.inspeccion_tuercas["MFB-S"]  = self.ui.checkBoxMFBS.isChecked()
+        self.data.inspeccion_tuercas["MFB-E"]  = self.ui.checkBoxMFBE.isChecked()
+
+        print("cambio en tuercas a inspeccionar: ",self.data.inspeccion_tuercas)
 
     def onClicked_6(self):     #Descomentar el día que se habilite el envío de info al servidor de P2
         if self.ui.checkBox_6.isChecked():

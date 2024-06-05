@@ -224,6 +224,37 @@ class Ui_admin(object):
         self.checkBox_6.setChecked(True)
         self.checkBox_6.setObjectName("checkBox_6")
 
+        font = QtGui.QFont()
+        font.setPointSize(10)
+
+        self.checkBoxMFBP2 = QtWidgets.QCheckBox(admin)
+        self.checkBoxMFBP2.setEnabled(False)
+        self.checkBoxMFBP2.setGeometry(QtCore.QRect(240, 200, 150, 14))
+        self.checkBoxMFBP2.setFont(font)
+        self.checkBoxMFBP2.setObjectName("checkBoxMFBP2")
+        self.checkBoxMFBP2.setText("MFB-P2")
+        
+        self.checkBoxMFBP1 = QtWidgets.QCheckBox(admin)
+        self.checkBoxMFBP1.setEnabled(False)
+        self.checkBoxMFBP1.setGeometry(QtCore.QRect(240, 230, 150, 14))
+        self.checkBoxMFBP1.setFont(font)
+        self.checkBoxMFBP1.setObjectName("checkBoxMFBP1")
+        self.checkBoxMFBP1.setText("MFB-P1")
+        
+        self.checkBoxMFBS = QtWidgets.QCheckBox(admin)
+        self.checkBoxMFBS.setEnabled(False)
+        self.checkBoxMFBS.setGeometry(QtCore.QRect(240, 260, 150, 14))
+        self.checkBoxMFBS.setFont(font)
+        self.checkBoxMFBS.setObjectName("checkBoxMFBS")
+        self.checkBoxMFBS.setText("MFB-S")
+        
+        self.checkBoxMFBE = QtWidgets.QCheckBox(admin)
+        self.checkBoxMFBE.setEnabled(False)
+        self.checkBoxMFBE.setGeometry(QtCore.QRect(240, 290, 150, 14))
+        self.checkBoxMFBE.setFont(font)
+        self.checkBoxMFBE.setObjectName("checkBoxMFBE")
+        self.checkBoxMFBE.setText("MFB-E")
+
         self.retranslateUi(admin)
         QtCore.QMetaObject.connectSlotsByName(admin)
 
@@ -235,7 +266,7 @@ class Ui_admin(object):
         self.btn_reset.setText(_translate("admin", "Reiniciar"))
         self.checkBox_3.setText(_translate("admin", "Administración de visión"))
         self.checkBox_4.setText(_translate("admin", "Modo desapriete"))
-        self.checkBox_5.setText(_translate("admin", "Modo puntual"))
+        self.checkBox_5.setText(_translate("admin", "Inspección de Tuercas"))
         self.checkBox_6.setText(_translate("admin", "Sistema de Trazabilidad"))
 
 

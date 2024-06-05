@@ -43,6 +43,15 @@ class Model (object):
         self.pedido = ""
         #variable para guardar el evento del arnés
         self.dbEvent = ""
+
+        #variable para determinar si se realizará la inspección de estas cajas de tuercas
+        self.inspeccion_tuercas =   {
+                        "MFB-P2":False,
+                        "MFB-P1":False,
+                        "MFB-S":False,
+                        "MFB-E":False,
+                    }
+
         #variable para buscar contenido de torque solamente en estas cajas
         self.lista_cajas_torque = ["MFB-P2","MFB-P1","MFB-S","MFB-E"]
 
@@ -225,6 +234,7 @@ class Model (object):
 
     #################### Vision-Altura #####################
         self.fuses_base = {} #mas abajo en el modelo se llena, en cada reset
+        self.nuts_base = {} #abajo en el modelo se llena, en cada reset
 
         #Se usan como coordenadas para dibujar el cuadro de inspeccion en la imagen de las cajas
         self.fuses_BB = {
@@ -542,19 +552,23 @@ class Model (object):
         self.robot_data["current_trig"] = None
         self.robot_data["box"] = ""
 
+
+        self.nuts_base = {
+            'MFB-P2': {
+                'A20': 'no_nut_m8', 'A21': 'no_nut_m6', 'A22': 'no_nut_m6', 'A23': 'no_nut_m6', 'A24': 'no_nut_m6', 'A25': 'no_nut_m8', 'A26': 'no_nut_m6', 'A27': 'no_nut_m6', 'A28': 'no_nut_m6', 'A29': 'no_nut_m6', 'A30': 'no_nut_m8'
+                },
+            'MFB-P1': {
+                'A41': 'no_nut_m8', 'A42': 'no_nut_m6', 'A43': 'no_nut_m6', 'A44': 'no_nut_m6', 'A45': 'no_nut_m6', 'A46': 'no_nut_m8', 'A47': 'no_nut_m8'
+                },
+            'MFB-S': {
+                'A51': 'no_nut_m8', 'A52': 'no_nut_m8', 'A53': 'no_nut_m6', 'A54': 'no_nut_m6', 'A55': 'no_nut_m6', 'A56': 'no_nut_m6'
+                },
+            'MFB-E': {
+                'AE1': 'no_nut_m8', 'A1': 'no_nut_m8', 'A2': 'no_nut_m8'
+                },
+        }
+
         self.fuses_base = {
-            ###'MFB-P2': {
-            ###    'A20': 'no_nut_m8', 'A21': 'no_nut_m6', 'A22': 'no_nut_m6', 'A23': 'no_nut_m6', 'A24': 'no_nut_m6', 'A25': 'no_nut_m8', 'A26': 'no_nut_m6', 'A27': 'no_nut_m6', 'A28': 'no_nut_m6', 'A29': 'no_nut_m6', 'A30': 'no_nut_m8'
-            ###    },
-            ###'MFB-P1': {
-            ###    'A41': 'no_nut_m8', 'A42': 'no_nut_m6', 'A43': 'no_nut_m6', 'A44': 'no_nut_m6', 'A45': 'no_nut_m6', 'A46': 'no_nut_m8', 'A47': 'no_nut_m8'
-            ###    },
-            ###'MFB-S': {
-            ###    'A51': 'no_nut_m8', 'A52': 'no_nut_m8', 'A53': 'no_nut_m6', 'A54': 'no_nut_m6', 'A55': 'no_nut_m6', 'A56': 'no_nut_m6'
-            ###    },
-            ###'MFB-E': {
-            ###    'AE1': 'no_nut_m8', 'A1': 'no_nut_m8', 'A2': 'no_nut_m8'
-            ###    },
             'PDC-D': {
                 'F200': 'vacio', 'F201': 'vacio', 'F202': 'vacio', 'F203': 'vacio', 'F204': 'vacio', 'F205': 'vacio', 'F206': 'vacio', 'F207': 'vacio', 'F208': 'vacio',
                 'F209': 'vacio', 'F210': 'vacio', 'F211': 'vacio', 'F212': 'vacio', 'F213': 'vacio', 'F214': 'vacio', 'F215': 'vacio', 'F216': 'vacio', 'F217': 'vacio',

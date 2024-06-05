@@ -523,8 +523,8 @@ class CheckQr (QState):
                 return
 
             ##################################################################################################################
-
             ##################################### Trazabilidad FAMX2 #########################################################
+
             if self.model.config_data["trazabilidad"]:
                 try:
                     print("||||||||||||Consulta de HM a FAMX2...")
@@ -605,8 +605,8 @@ class CheckQr (QState):
                     return
 
             ##################################################################################################################
-
             ################################## HISTORIAL PROCESADO ANTERIORMENTE #############################################
+
             endpoint = "http://{}/api/get/historial/HM/=/{}/RESULTADO/=/2".format(self.model.server, self.model.qr_codes["HM"])
             response = requests.get(endpoint).json()
             #si response tiene items y esta es response["items"] = False (NO se encontró un arnés previamente en el historial),
@@ -617,9 +617,10 @@ class CheckQr (QState):
                 print("se trata de un retrabajo, yendo a estado rework para pedir llave")
                 self.rework.emit()
                 return
-            ##################################################################################################################
 
+            ##################################################################################################################
             ######################################### BUSQUEDA DE EVENTOS ####################################################
+
             endpoint = "http://{}/api/get/eventos".format(self.model.server)
             eventos = requests.get(endpoint).json()
             #print("Lista eventos:\n",eventos)
@@ -671,7 +672,6 @@ class CheckQr (QState):
                 return
 
             ##################################################################################################################
-
             ############################################ PREPARACIÓN DE INFORMACIÓN DE ETIQUETA ###############################
 
             if not(self.ETIQUETA(self.model.qr_codes["HM"])): #de aquí se obtiene la información de la ETIQUETA y se llena la variable self.model.t_result
@@ -683,205 +683,48 @@ class CheckQr (QState):
                 self.nok.emit()
                 return
             
-            #aquí se revisa que se hayan leído datos de qué torques lleva, de lo contrario se deben consultar para armar las cajas de torque...
-            #(En ambos casos se debe terminar con el contenido necesario para las cajas de torque)
+            print("\nINICIO PROCESAMIENTO DE ARNÉS: ",strftime("%Y/%m/%d %H:%M:%S"))
+            print("##############################################################################################################################")
 
             self.model.input_data["database"]["modularity_nuts"].clear() #se limpia la variable que guarda las tuercas a inspeccionar (sin cavidades de  tuercas vacías)
             self.model.input_data["database"]["modularity"].clear() #variable para guardar la infromación de los fusibles en las cavidades que no están vacías para el arnés
 
+            ############################################ SE GENERAN TUERCAS QUE SE INSPECCIONARÁN ###############################
+
+            #aquí se revisa que se hayan leído datos de qué torques lleva, de lo contrario se deben consultar para armar las cajas de torque...
+            #(En ambos casos se debe terminar con el contenido necesario para las cajas de torque)
             if self.model.valores_torques_red == False: #se revisa esta variable en la función ETIQUETA para saber si el arnés tiene esta información o no
                 print("se generan los torques que llevará el arnés a partir de la base de datos cargada en la estación...")
                 self.build_contenido_torques()
 
             else:
-                print("se acomodan los queue necesarios para las cajas de torque con la información de la tabla en red: valores")
-                print("self.model.t_result: ",self.model.t_result)
+                print("se generan los torques que llevará el arnés a partir de la tabla seghm_valores en servidor donde se guardaron resultados")
+                self.build_contenido_torques_from_results()
+            
+            #EJEMPLO:
+            #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
 
-                #EJEMPLO DE CONTENIDO DE VARIABLES:
-                #self.model.t_result:  
-                #{'PDC-P': {'E1': 8.02}, 
-                #'PDC-D': {'E1': 8.0}, 
-                #'BATTERY': {'BT': 6.54}, 
-                #'BATTERY-2': {'BT': None}, 
-                #'MFB-P1': {'A47': None, 'A46': 16.04, 'A45': None, 'A44': None, 'A43': 8.02, 'A41': 16.1, 'A42': 7.99}, 
-                #'MFB-S': {'A51': None, 'A52': None, 'A53': None, 'A54': None, 'A55': None, 'A56': None}, 
-                #'MFB-E': {'E1': None, 'A1': None, 'A2': None}, 
-                #'MFB-P2': {'A20': 16.13, 'A21': 8.04, 'A22': 8.0, 'A23': None, 'A24': 8.02, 'A25': 16.07, 
-                #           'A26': 8.04, 'A27': None, 'A28': None, 'A29': 8.0, 'A30': 16.0}, 
-                #'PDC-R': {'E1': None}, 'PDC-RS': {'E1': None}, 'PDC-RMID': {'E1': 16.19}}
-
-                #self.model.t_resultAngle:  {'PDC-P': {'E1': 31.0}, 'PDC-D': {'E1': 37.7}, 'BATTERY': {'BT': 21.5}, 'BATTERY-2': {'BT': None}, 'MFB-P1': {'A47': None, 'A46': 46.1, 'A45': None, 'A44': None, 'A43': 24.0, 'A41': 46.6, 'A42': 34.5}, 'MFB-S': {'A51': None, 'A52': None, 'A53': None, 'A54': None, 'A55': None, 'A56': None}, 'MFB-E': {'E1': None, 'A1': None, 'A2': None}, 'MFB-P2': {'A20': 35.1, 'A21': 34.7, 'A22': 23.0, 'A23': None, 'A24': 26.9, 'A25': 31.4, 'A26': 22.5, 'A27': None, 'A28': None, 'A29': 22.3, 'A30': 43.3}, 'PDC-R': {'E1': None}, 'PDC-RS': {'E1': None}, 'PDC-RMID': {'E1': 31.3}}
-
-                #lista_cajas = ["MFB-P2","MFB-P1","MFB-S","MFB-E"]
-                lista_cajas = self.model.lista_cajas_torque
-                queue_tuercas = self.model.input_data["database"]["modularity_nuts"] #inicia vacío queue_tuercas = {}
-
-                for caja in lista_cajas:
-                    if caja in self.model.t_result:
-                        for tuerca in self.model.t_result[caja]:
-                            if str(self.model.t_result[caja][tuerca]).upper() != "NONE":
-                                if not(caja in queue_tuercas):
-                                    queue_tuercas[caja] = []
-                                queue_tuercas[caja].append(tuerca)
-
-                print("self.model.input_data[database][modularity_nuts]: ",self.model.input_data["database"]["modularity_nuts"])
-                #EJEMPLO 
-                #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
-
+            ############################################ SE GENERAN FUSIBLES QUE SE INSPECCIONARÁN ###############################
             ##################################################################################################################
-
-            print("\nINICIO PROCESAMIENTO DE ARNÉS: ",strftime("%Y/%m/%d %H:%M:%S"))
-
-
-
-            print("##############################################################################################################################")
-
+            
+            print("se generan fusibles del arnés con DB local")
             self.build_contenido_fusibles()
-
             self.model.input_data["database"]["pedido"] = self.model.pedido
 
-            ##############################################################################################################################################
-            ##############################################################################################################################################
-            ####print("#################################################### METODO ANTERIOR ##############################################################")
-
-            #####Consulta a la API para ver cuales son los módulos Determinantes de cajas PDC-R y guardarlas en una variable que se utilizará más adelante.
-            ####endpoint = "http://{}/api/get/{}/pdcr/variantes".format(self.model.server, self.model.dbEvent)
-            ####pdcrVariantes = requests.get(endpoint).json()
-            ####print("Lista Final de Variantes PDC-R:\n",pdcrVariantes)
-
-            
-            ####modules = json.loads(self.model.pedido["MODULOS_VISION"])
-            ####modules = modules[list(modules)[0]]
-            ####flag_s = False
-            ####flag_m = False
-            ####flag_l = False
-
-            ####print(f"\n\t\tMODULOS_VISION:\n{modules}")
-
-            ####for i in pdcrVariantes["small"]:
-            ####    if i in modules:
-            ####       self.model.pdcrvariant = "PDC-RS"
-            ####       flag_s = True
-
-            ####for i in pdcrVariantes["medium"]:
-            ####    if i in modules:
-            ####       self.model.pdcrvariant = "PDC-RMID"
-            ####       flag_m = True
-
-            ####for i in pdcrVariantes["large"]:
-            ####    if i in modules:
-            ####       self.model.pdcrvariant = "PDC-R"
-            ####       flag_l = True
-
-            ####print("\t\tFLAGS:\n Flag S - ",flag_s," Flag M - ",flag_m," Flag L - ",flag_l)
-            ####print("PDC-R VARIANT: "+self.model.pdcrvariant)
-
-            #####variable para guardar toda la información de la configuración del arnés sin los fusibles vacíos
-            ####self.model.arnes_data = {}
-
-            #####recorremos los modulos del arnés
-            ####for i in modules:
-            ####    #petición a la base de datos local para ver que fusibles lleva cada modulo
-            ####    endpoint = "http://{}/api/get/{}/modulos_fusibles/MODULO/=/{}/_/=/_".format(self.model.server, self.model.dbEvent, i)
-            ####    response = requests.get(endpoint).json()
-            ####    #si encuentra el módulo en la respuesta (que si existe en la base de datos local)...
-            ####    if "MODULO" in response:
-            ####        #si la respuesta para ese módulo no es de tipo lista ( esto quiere decir que no hay más de un módulo de este tipo)
-            ####        if type(response["MODULO"]) != list:
-            ####            current_module = {}
-            ####            for j in response:
-            ####                #si j tiene "CAJA_" y además no está vacío el objeto
-            ####                if "CAJA_" in j and len(response[j]):
-            ####                    #a current_module le añades esa información
-            ####                    current_module.update(json.loads(response[j]))
-            ####            #recorremos las cajas en current_module
-            ####            for box in current_module:
-            ####                #Si la caja contiene "PDC-R"... se realiza el siguiente fragmento para (en base a la variable pdcrvariant del modelo) dejar finalmente una sola variante de la PDC-R y asignarle fusibles.
-            ####                if "PDC-R" in box:
-            ####                    #recorremos las cavidades de los datos del modulo que tienen esa misma caja
-            ####                    for cavity in current_module[box]:
-            ####                        print("cavity",cavity)
-            ####                        if cavity == "F96":
-            ####                            #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-            ####                            if current_module[box][cavity] != "vacio":
-            ####                                #si no esta la caja en self.model.arnes_data, agregar llave
-            ####                                if not("F96" in self.model.arnes_data):
-            ####                                    self.model.arnes_data["F96"] = {}
-            ####                                    print("si va a llevar F96")
-            ####                                #si la caja no está, encender bandera de que es una nueva caja
-            ####                                if not("F96" in self.model.input_data["database"]["modularity"]):
-            ####                                    self.model.input_data["database"]["modularity"]["F96"] = []
-            ####                                    print("f96 inputdata",self.model.input_data)
-            ####                                #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-            ####                                if not(cavity in self.model.input_data["database"]["modularity"]["F96"]):
-            ####                                    self.model.input_data["database"]["modularity"]["F96"].append(cavity)
-            ####                                    print("f96 inputdata appnd",self.model.input_data)
-            ####                                #si la caja no tiene esa cavidad entonces se agrega al diccionario
-            ####                                if not(cavity in self.model.arnes_data["F96"]):
-            ####                                    print("self.model.arnes_data[F96][cavity]",self.model.arnes_data)
-            ####                                    self.model.arnes_data["F96"][cavity] =  current_module[box][cavity]
-            ####                        else:
-            ####                            #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-            ####                            if current_module[box][cavity] != "vacio":
-            ####                                #si no esta la caja en self.model.arnes_data, agregar llave
-            ####                                if not(self.model.pdcrvariant in self.model.arnes_data):
-            ####                                    self.model.arnes_data[self.model.pdcrvariant] = {}
-            ####                                #si la caja no está, agregar lista vacía para dicha caja
-            ####                                if not(self.model.pdcrvariant in self.model.input_data["database"]["modularity"]):
-            ####                                    self.model.input_data["database"]["modularity"][self.model.pdcrvariant] = []
-            ####                                #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-            ####                                if not(cavity in self.model.input_data["database"]["modularity"][self.model.pdcrvariant]):
-            ####                                    self.model.input_data["database"]["modularity"][self.model.pdcrvariant].append(cavity)
-            ####                                #si la caja no tiene esa cavidad entonces se agrega al diccionario
-            ####                                if not(cavity in self.model.arnes_data[self.model.pdcrvariant]):
-            ####                                    self.model.arnes_data[self.model.pdcrvariant][cavity] =  current_module[box][cavity]
-            ####                ##########
-            ####                else:
-            ####                    #recorremos las cavidades de los datos del modulo que tienen esa misma caja
-            ####                    for cavity in current_module[box]:
-            ####                        #nunca debería de llega una información de la base de datos de los modulos con un vacío, pero si llegara, no entrará al if
-            ####                        if current_module[box][cavity] != "vacio":
-            ####                            #si no esta la caja en self.model.arnes_data, agregar llave
-            ####                            if not(box in self.model.arnes_data):
-            ####                                self.model.arnes_data[box] = {}
-            ####                            #si la caja no está, encender bandera de que es una nueva caja
-            ####                            if not(box in self.model.input_data["database"]["modularity"]):
-            ####                                self.model.input_data["database"]["modularity"][box] = []
-            ####                            #si la cavidad no se encuentra en esa caja... y no es una cavidad vacía...
-            ####                            if not(cavity in self.model.input_data["database"]["modularity"][box]):
-            ####                                self.model.input_data["database"]["modularity"][box].append(cavity)
-            ####                            #si la caja no tiene esa cavidad entonces se agrega al diccionario
-            ####                            if not(cavity in self.model.arnes_data[box]):
-            ####                                self.model.arnes_data[box][cavity] =  current_module[box][cavity]
-                           
-            ####        else:
-            ####            command = {
-            ####                    "lbl_result" : {"text": "Módulos de visión redundantes", "color": "red"},
-            ####                    "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
-            ####                  }
-            ####            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-            ####            self.nok.emit()
-            ####            return
-            ####    else:
-            ####        command = {
-            ####                "lbl_result" : {"text": "Modulos de visión no encontrados", "color": "red"},
-            ####                "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
-            ####                }
-            ####        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-            ####        self.nok.emit()
-            ####        return 
-
-            ####self.model.input_data["database"]["pedido"] = self.model.pedido
-
-            ####print("\t\tself.model.input_data[database][modularity]:\n", self.model.input_data["database"]["modularity"])
-            ####print("\t\tself.model.arnes_data:\n ",self.model.arnes_data)
-            ##############################################################################################################################################
-            ##############################################################################################################################################
-
-
+            # EJEMPLO::::::::::::::::::::
+            #self.model.input_data["database"]["modularity"]:
+            #{'PDC-S': ['1', '2', '3', '6'], 'PDC-RMID': ['F401', 'F411', 'F413', 'F415', 'F416', 'F417', 'F418', 'F419', 'F420', 'F421', 'F430', 'F431', 'F432', 'F438', 'F439', 'F441', 'F443', 'F446', 'RELT', 'RELX'], 'PDC-P': ['F300', 'F304', 'F305', 'F318', 'F319', 'F320', 'F321', 'F322', 'F323', 'F324', 'F326', 'F327', 'F328', 'F329', 'F332', 'F333', 'F335', 'MF1', 'MF2'], 'PDC-D': ['F200', 'F204', 'F205', 'F209', 'F211', 'F213', 'F214', 'F215', 'F216', 'F217', 'F218', 'F219', 'F220', 'F221', 'F222', 'F223', 'F225', 'F226', 'F227', 'F229', 'F230', 'F231', 'F232'], 'F96': ['F96'], 'PDC-P2': ['CONECTOR1', 'CONECTOR2'], 'PDC-Dbracket': ['bracket']}
+            #self.model.arnes_data:
+            #{'PDC-S': {'3': 'azul', '1': 'beige', '6': 'beige', '2': 'verde'}, 'PDC-RMID': {'F419': 'naranja', 'F441': 'beige', 'F431': 'rojo', 'F416': 'verde', 'F417': 'verde', 'F411': 'cafe', 'F443': 'beige', 'F446': 'beige', 'F418': 'naranja', 'F420': 'naranja', 'F439': 'azul', 'F438': 'cafe', 'RELX': '1008695', 'F430': 'azul', 'RELT': '1010733', 'F432': 'cafe', 'F413': 'verde', 'F415': 'verde', 'F401': 'natural', 'F421': 'verde'}, 'PDC-P': {'F305': 'beige', 'F319': 'cafe', 'MF1': 'cafe', 'F321': 'cafe', 'F328': 'verde', 'F329': 'verde', 'F333': 'verde', 'F323': 'cafe', 'F324': 'cafe', 'F327': 'verde', 'F304': 'beige', 'F318': 'cafe', 'F300': 'rojo', 'F320': 'cafe', 'F322': 'rojo', 'F326': 'verde', 'F332': 'rojo', 'F335': 'natural', 'MF2': 'beige'}, 'PDC-D': {'F216': 'natural', 'F200': 'beige', 'F204': 'rojo', 'F209': 'verde', 'F211': 'verde', 'F213': 'beige', 'F214': 'verde', 'F215': 'verde', 'F217': 'azul', 'F218': 'beige', 'F219': 'rojo', 'F220': 'beige', 'F221': 'azul', 'F222': 'rojo', 'F225': 'azul', 'F226': 'cafe', 'F227': 'beige', 'F229': 'beige', 'F230': 'beige', 'F231': 'beige', 'F232': 'beige', 'F223': 'cafe', 'F205': 'beige'}, 'F96': {'F96': 'cafe'}}
 
             ################################ SE AGREGAN CAVIDADES VACÍAS ################################
                 
+            print("self.model.inspeccion_tuercas: ",self.model.inspeccion_tuercas)
+            #AGREGAR TUERCAS de modularity_nuts EN modularity
+            #AGREGAR en arnes_data las tuercas a inspeccionar pero con un valor constante o con A21,A22 respectivamente ...mmm?
+            #AGREGAR lo de self.model.nuts_base para los vacíos a lgenerar self.model.modularity_fuses
+
+
             #se llena la variable modularity_fuses con todas las cavidades con fusibles vacíos
             self.model.modularity_fuses.update(copy(self.model.fuses_base))
                 
@@ -951,6 +794,61 @@ class CheckQr (QState):
             self.model.input_data["database"]["modularity"].clear()
             self.nok.emit()
 
+    def build_contenido_torques_from_results (self):
+        print("\nbuild_contenido_torques_from_results")
+        try:
+            print("se acomodan los queue necesarios para las cajas de torque con la información de la tabla en red: valores")
+            print("self.model.t_result: ",self.model.t_result)
+
+            #EJEMPLO DE CONTENIDO DE VARIABLES:
+            #self.model.t_result:  
+            #{'PDC-P': {'E1': 8.02}, 
+            #'PDC-D': {'E1': 8.0}, 
+            #'BATTERY': {'BT': 6.54}, 
+            #'BATTERY-2': {'BT': None}, 
+            #'MFB-P1': {'A47': None, 'A46': 16.04, 'A45': None, 'A44': None, 'A43': 8.02, 'A41': 16.1, 'A42': 7.99}, 
+            #'MFB-S': {'A51': None, 'A52': None, 'A53': None, 'A54': None, 'A55': None, 'A56': None}, 
+            #'MFB-E': {'E1': None, 'A1': None, 'A2': None}, 
+            #'MFB-P2': {'A20': 16.13, 'A21': 8.04, 'A22': 8.0, 'A23': None, 'A24': 8.02, 'A25': 16.07, 
+            #           'A26': 8.04, 'A27': None, 'A28': None, 'A29': 8.0, 'A30': 16.0}, 
+            #'PDC-R': {'E1': None}, 'PDC-RS': {'E1': None}, 'PDC-RMID': {'E1': 16.19}}
+
+            #self.model.t_resultAngle:  {'PDC-P': {'E1': 31.0}, 'PDC-D': {'E1': 37.7}, 'BATTERY': {'BT': 21.5}, 'BATTERY-2': {'BT': None}, 'MFB-P1': {'A47': None, 'A46': 46.1, 'A45': None, 'A44': None, 'A43': 24.0, 'A41': 46.6, 'A42': 34.5}, 'MFB-S': {'A51': None, 'A52': None, 'A53': None, 'A54': None, 'A55': None, 'A56': None}, 'MFB-E': {'E1': None, 'A1': None, 'A2': None}, 'MFB-P2': {'A20': 35.1, 'A21': 34.7, 'A22': 23.0, 'A23': None, 'A24': 26.9, 'A25': 31.4, 'A26': 22.5, 'A27': None, 'A28': None, 'A29': 22.3, 'A30': 43.3}, 'PDC-R': {'E1': None}, 'PDC-RS': {'E1': None}, 'PDC-RMID': {'E1': 31.3}}
+
+            #self.model.lista_cajas_torque = ["MFB-P2","MFB-P1","MFB-S","MFB-E"]
+            lista_cajas = self.model.lista_cajas_torque
+            queue_tuercas = self.model.input_data["database"]["modularity_nuts"] #inicia vacío queue_tuercas = {}
+
+            for caja in lista_cajas:
+                if (caja in self.model.t_result) and (self.model.inspeccion_tuercas[caja] == True): #si se encuentra la caja en los resultados, y está habilitada su inspección
+                    for tuerca in self.model.t_result[caja]:
+                        if str(self.model.t_result[caja][tuerca]).upper() != "NONE":
+                            if not(caja in queue_tuercas):
+                                queue_tuercas[caja] = []
+                            queue_tuercas[caja].append(tuerca)
+
+            print("self.model.input_data[database][modularity_nuts]: ",self.model.input_data["database"]["modularity_nuts"])
+            #EJEMPLO 
+            #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
+
+            command = {
+                "lbl_result" : {"text": "Torques Generados Correctamente", "color": "green"},
+                "lbl_steps" : {"text": "Generando Combinación de Fusibles", "color": "black"}
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            print("modularity_nuts terminado correctamente desde seghm_valores, continuando...")
+
+        except Exception as ex:
+            self.model.input_data["database"]["modularity_nuts"].clear()
+            print("build_content_torques_from_results exception: ", ex)
+            command = {
+                    "lbl_result" : {"text": "Error de Carga en Tuercas de Arnés", "color": "red", "font": "40pt"},
+                    "lbl_steps" : {"text": "Generando desde DB local...", "color": "black", "font": "22pt"}
+                    }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            self.build_contenido_torques()
+            return
+
     def build_contenido_torques (self):
         print("\nbuild_contenido_torques")
         try:
@@ -1013,8 +911,8 @@ class CheckQr (QState):
                                 continue
                             #si la caja actual dentro de temp si tiene contenido...
                             else:
-                                #si se trata de una de las cajas válidas para inspección de torque
-                                if caja in self.model.lista_cajas_torque:
+                                #si se trata de una de las cajas válidas para inspección de torque, y está habilitada la inspección de esta caja
+                                if (caja in self.model.lista_cajas_torque) and (self.model.inspeccion_tuercas[caja] == True):
 
                                     #se recorren las tuercas de la caja: MFB-P2": {"A22": true,"A23": true}
                                     for tuerca in temp[caja]:
@@ -1045,7 +943,6 @@ class CheckQr (QState):
                 #EJEMPLO:
                 #{'MFB-P1': ['A41', 'A42', 'A43', 'A46'], 'MFB-P2': ['A20', 'A21', 'A22', 'A23', 'A24', 'A25', 'A26', 'A29', 'A30'], 'MFB-E': ['A1', 'A2', 'E1']}
 
-                self.model.cronometro_ciclo=True
                 command = {
                     "lbl_result" : {"text": "Torques Generados Correctamente", "color": "green"},
                     "lbl_steps" : {"text": "Generando Combinación de Fusibles", "color": "black"}
