@@ -33,7 +33,6 @@ class Vision (QState):
          #Estado Inicial Process
         self.setInitialState(self.process)
 
-
 class Process (QState):
     nok         = pyqtSignal()
     finished    = pyqtSignal()
@@ -70,7 +69,6 @@ class Process (QState):
         self.pose.finished.connect(self.finished.emit)
         self.setInitialState(self.pose)   
 
-
 class Stop(QState):
     def __init__(self, module = "vision1", model = None, parent = None):
         super().__init__(parent)
@@ -93,7 +91,6 @@ class Stop(QState):
         self.model.vision_data[self.module]["current_trig"] = None
         self.model.vision_data[self.module]["results"].clear()
         self.model.vision_data[self.module]["rqst"] = None
-
 
 class Triggers (QState):
     finished    = pyqtSignal()
@@ -160,33 +157,34 @@ class Triggers (QState):
 
         self.model.expected_fuses = "\tLectura\t         Esperado\n"
 
-        print("Modelo Amperaje Arreglo:\n",self.model.amperaje)
+        #print("Modelo Amperaje Arreglo:\n",self.model.amperaje)
         amp_keys = self.model.amperaje.keys()
-        print("Modelo Amperaje Arreglo KEYS:\n",amp_keys)
+        #print("Modelo Amperaje Arreglo KEYS:\n",amp_keys)
 
         for fuse in self.model.modularity_fuses[box]:
             score = 0
+
             if fuse in results[box]:
                 self.model.history_fuses.append(fuse) #Variable que va guardando cada fusible que llega en "results"
                 #print(fuse, " ", results[box][fuse], " -- ", self.model.modularity_fuses[box][fuse])
                 #revisar color "i" en box, fuse de los resultados de visión
                 for i in results[box][fuse]:
                     #si el color leído es igual al esperado (de la modularidad del arnés)
+                    print("color leído: ",i)
+                    print("color esperado: ",self.model.modularity_fuses[box][fuse])
+
                     if i == self.model.modularity_fuses[box][fuse]:
                         score += 1
                     else:
                         temp = i
                         print("||||||||||Cavidad en la que hubo error: ",fuse, " Caja: ",box)
-                        print("Modelo: ",self.model.tries)
                         if fuse in self.model.tries["VISION"][box]:
                             self.model.tries["VISION"][box][fuse] += 1
                         else:
                             self.model.tries["VISION"][box][fuse] = 1
-                        print("Modelo Final: ",self.model.tries)
                         #para guardar fusible actual vs esperado para mostrar en pantalla
                         #self.model.expected_fuses.append(fuse+":\t["+i+"]\t["+self.model.modularity_fuses[box][fuse]+"]\n")
                         print("self.model.modularity_fuses[box][fuse]",self.model.modularity_fuses[box][fuse])
-                        print("amp_keys",amp_keys)
                         if self.model.modularity_fuses[box][fuse] in amp_keys:
                             if self.model.modularity_fuses[box][fuse] == "rojo":
                                 if fuse in self.model.amperaje["rojo"]:
@@ -200,6 +198,8 @@ class Triggers (QState):
                                     amperaje = self.model.amperaje[self.model.modularity_fuses[box][fuse]]
                                 else:
                                     amperaje =""
+                        else:
+                            amperaje = ""
 
 
                             #print("****DB-Este color se encuentra en el modelo de Amperaje****: ",self.model.modularity_fuses[box][fuse],amperaje)
@@ -379,7 +379,6 @@ class Triggers (QState):
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             self.nok.emit()
 
-
 class Receiver (QState):
     ok      = pyqtSignal()
     nok     = pyqtSignal()
@@ -400,6 +399,8 @@ class Receiver (QState):
 
         print("############################## ESTADO: Receiver VISION ############################")
 
+        print("self.queue; ",self.queue)
+
         try:
             if not(self.model.vision_data["rqst"]):
                 self.ok.emit()
@@ -411,16 +412,29 @@ class Receiver (QState):
             results = self.model.vision_data[self.module]["results"]
             box = self.model.vision_data[self.module]["box"]
 
+            print("trigger de Receiver:",trigger)
+            print("results de Receiver:",results)
+            print("box de Receiver:",box)
+
             if not(box in results):
                 results[box] = {}
+
+            print("self.model.input_data[vision]: ",self.model.input_data["vision"])
 
             for item in self.model.input_data["vision"]:
                 if not(item in results[box]):
                     results[box][item] = []
                 results[box][item].append(self.model.input_data["vision"][item])
+
+                print("results[box][item]: ",results[box][item])
+
                 try:
+
+                    print("item: ",item)
+
                     if item in self.model.modularity_fuses[box]:
                         if self.model.input_data["vision"][item] != self.model.modularity_fuses[box][item]:
+                            print("ok = False")
                             ok = False
                 except Exception as ex:
                     print(ex)
@@ -428,15 +442,18 @@ class Receiver (QState):
             self.epoch_cnt += 1
             if ok:
                 self.score += 1
+
             if self.score == self.thresh or self.epoch_cnt == self.epoches:
                 self.score = 0
                 self.epoch_cnt = 0
+                print("pop de queue - trigger: ",trigger)
                 self.queue.pop(self.queue.index(trigger))
+
             self.ok.emit()
+
         except Exception as ex:
             print("Vision.Receiver exception: ", ex)
             self.ok.emit()
-
 
 class Error (QState):
     ok      = pyqtSignal()
@@ -486,7 +503,6 @@ class Error (QState):
             "lbl_steps" : {"text": "Espera el resultado", "color": "black"},
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-
 
 class Pose(QState):
     finished    = pyqtSignal()

@@ -41,6 +41,10 @@ class MqttClient (QObject):
     nido_TBLU = ""
     nido_PDCP2= ""
     nido_F96= ""
+    nido_MFBP2 = ""
+    nido_MFBP1 = ""
+    nido_MFBS = ""
+    nido_MFBE = ""
 
     color_PDCD = "blue"
     color_PDCP = "blue"
@@ -49,6 +53,10 @@ class MqttClient (QObject):
     color_TBLU = "blue"
     color_PDCP2 = "blue"
     color_F96 = "blue"
+    color_MFBP2 = "blue"
+    color_MFBP1 = "blue"
+    color_MFBS  = "blue"
+    color_MFBE  = "blue"
 
     puertaA = ""
     puertaB = ""
@@ -457,6 +465,122 @@ class MqttClient (QObject):
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
+                if "MFB-P2" in payload_str:
+                    if "MFB-P2" in payload:
+                        if payload["MFB-P2"] == True:
+                            self.nido_MFBP2 = "MFB-P2:\n Habilitada"
+                            self.color_MFBP2 = "blue"
+
+                        if payload["MFB-P2"] == False:
+                            self.nido_MFBP2 = ""
+                            self.color_MFBP2 = "blue"
+
+                    if "MFB-P2_ERROR" in payload:
+                        if payload["MFB-P2_ERROR"] == True:
+                            self.nido_MFBP2 = "MFB-P2:\n clampeo incorrecto"
+                            self.color_MFBP2 = "red"
+
+                    if "clamp_MFB-P2" in payload:
+                        if payload["clamp_MFB-P2"] == True:
+                            self.nido_MFBP2 = "MFB-P2:\n clampeo correcto"
+                            self.color_MFBP2 = "green"
+
+                    if "clamp_MFB-P2" in payload:
+                        if payload["clamp_MFB-P2"] == False:
+                            self.nido_MFBP2 = ""
+                            self.color_MFBP2 = "blue"
+                    command = {
+                                "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}"}
+                              }
+                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                if "MFB-P1" in payload_str:
+                    if "MFB-P1" in payload:
+                        if payload["MFB-P1"] == True:
+                            self.nido_MFBP1 = "MFB-P1:\n Habilitada"
+                            self.color_MFBP1 = "blue"
+
+                        if payload["MFB-P1"] == False:
+                            self.nido_MFBP1 = ""
+                            self.color_MFBP1 = "blue"
+
+                    if "MFB-P1_ERROR" in payload:
+                        if payload["MFB-P1_ERROR"] == True:
+                            self.nido_MFBP1 = "MFB-P1:\n clampeo incorrecto"
+                            self.color_MFBP1 = "red"
+
+                    if "clamp_MFB-P1" in payload:
+                        if payload["clamp_MFB-P1"] == True:
+                            self.nido_MFBP1 = "MFB-P1:\n clampeo correcto"
+                            self.color_MFBP1 = "green"
+
+                    if "clamp_MFB-P1" in payload:
+                        if payload["clamp_MFB-P1"] == False:
+                            self.nido_MFBP1 = ""
+                            self.color_MFBP1 = "blue"
+                    command = {
+                                "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}"}
+                              }
+                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                if "MFB-S" in payload_str:
+                    if "MFB-S" in payload:
+                        if payload["MFB-S"] == True:
+                            self.nido_MFBS = "MFB-S:\n Habilitada"
+                            self.color_MFBS = "blue"
+
+                        if payload["MFB-S"] == False:
+                            self.nido_MFBS = ""
+                            self.color_MFBS = "blue"
+
+                    if "MFB-S_ERROR" in payload:
+                        if payload["MFB-S_ERROR"] == True:
+                            self.nido_MFBS = "MFB-S:\n clampeo incorrecto"
+                            self.color_MFBS = "red"
+
+                    if "clamp_MFB-S" in payload:
+                        if payload["clamp_MFB-S"] == True:
+                            self.nido_MFBS = "MFB-S:\n clampeo correcto"
+                            self.color_MFBS = "green"
+
+                    if "clamp_MFB-S" in payload:
+                        if payload["clamp_MFB-S"] == False:
+                            self.nido_MFBS = ""
+                            self.color_MFBS = "blue"
+                    command = {
+                                "lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}"}
+                              }
+                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                if "MFB-E" in payload_str:
+                    if "MFB-E" in payload:
+                        if payload["MFB-E"] == True:
+                            self.nido_MFBE = "MFB-E:\n Habilitada"
+                            self.color_MFBE = "blue"
+
+                        if payload["MFB-E"] == False:
+                            self.nido_MFBE = ""
+                            self.color_MFBE = "blue"
+
+                    if "MFB-E_ERROR" in payload:
+                        if payload["MFB-E_ERROR"] == True:
+                            self.nido_MFBE = "MFB-E:\n clampeo incorrecto"
+                            self.color_MFBE = "red"
+
+                    if "clamp_MFB-E" in payload:
+                        if payload["clamp_MFB-E"] == True:
+                            self.nido_MFBE = "MFB-E:\n clampeo correcto"
+                            self.color_MFBE = "green"
+
+                    if "clamp_MFB-E" in payload:
+                        if payload["clamp_MFB-E"] == False:
+                            self.nido_MFBE = ""
+                            self.color_MFBE = "blue"
+                    command = {
+                                "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}"}
+                              }
+                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
                         if payload["ERROR_cortina"] == True:
                             command = {"lbl_info4" : {"text": "Cortina\nInterrumpida", "color": "red", "ancho":400,"alto":400}}  
@@ -534,6 +658,27 @@ class MqttClient (QObject):
                     #    self.error_cortina.emit()
             #variable para guardar los resultados obtenidos al hacer una inspección con visycam desde la GDI
             if message.topic == self.model.sub_topics["vision"]:
+
+                #EJEMPLO:::::::::::
+                #Camera/4/status  {
+                #    "F200": "rojo",
+                #    "F201": "cafe",
+                #    "F202": "cafe",
+                #    "F203": "cafe",
+                #    "F204": "cafe",
+                #    "F205": "cafe",
+                #    "F206": "beige",
+                #    "F207": "beige",
+                #    "F208": "beige",
+                #    "F209": "beigeclear",
+                #    "F210": "beigeclear",
+                #    "F211": "beigeclear",
+                #    "F212": "beigeclear",
+                #    "F213": "beigeclear",
+                #    "F214": "beigeclear",
+                #    "F215": "beigeclear",
+                #    "F216": "beigeclear"
+                #}
 
                 if self.model.revisando_resultado == False: #para no leer resultados si ya se estaba revisando un resultado correcto
                     print("Llegó resultado de visión guardado en self.model.input_data[vision], vision.emit()")

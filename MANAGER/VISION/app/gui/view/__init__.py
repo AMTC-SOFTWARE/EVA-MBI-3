@@ -545,6 +545,22 @@ class MainWindow (QMainWindow):
                 if "color" in message["lbl_box7"]:
                     self.ui.lbl_box7.setStyleSheet("color: " + message["lbl_box7"]["color"])
             ######### Modificación para F96 #########
+            if "lbl_box8" in message:
+                self.ui.lbl_box8.setText(message["lbl_box8"]["text"])
+                if "color" in message["lbl_box8"]:
+                    self.ui.lbl_box8.setStyleSheet("color: " + message["lbl_box8"]["color"])
+            if "lbl_box9" in message:
+                self.ui.lbl_box9.setText(message["lbl_box9"]["text"])
+                if "color" in message["lbl_box9"]:
+                    self.ui.lbl_box9.setStyleSheet("color: " + message["lbl_box9"]["color"])
+            if "lbl_box10" in message:
+                self.ui.lbl_box10.setText(message["lbl_box10"]["text"])
+                if "color" in message["lbl_box10"]:
+                    self.ui.lbl_box10.setStyleSheet("color: " + message["lbl_box10"]["color"])
+            if "lbl_box11" in message:
+                self.ui.lbl_box11.setText(message["lbl_box11"]["text"])
+                if "color" in message["lbl_box11"]:
+                    self.ui.lbl_box11.setStyleSheet("color: " + message["lbl_box11"]["color"])
             ###########################################################################
             if "lbl_result" in message:
                 self.ui.lbl_result.setText(message["lbl_result"]["text"])

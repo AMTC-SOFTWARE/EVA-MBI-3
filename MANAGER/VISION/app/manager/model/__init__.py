@@ -87,51 +87,6 @@ class Model (object):
         self.PDCD_bracket_pendiente=False
         self.PDCD_bracket_terminado=False
 
-        self.BB = {
-            'BATTERY': {
-                'BT': ((169, 157), (231, 212))}, 
-            'BATTERY_2': {
-                'BT': ((169, 157), (231, 212))},
-            'MFB-P1': {
-                'A41': ((533, 349), (575, 393)), 
-                'A42': ((597, 389), (631, 421)), 
-                'A43': ((479, 352), (513, 389)), 
-                'A44': ((431, 354), (466, 386)), 
-                'A45': ((391, 356), (420, 384)), 
-                'A46': ((334, 349), (373, 384)), 
-                'A47': ((266, 352), (310, 388))}, 
-            'MFB-P2': {
-                'A20': ((527, 272), (576, 313)), 
-                'A21': ((258, 463), (292, 497)), 
-                'A22': ((312, 464), (343, 493)), 
-                'A23': ((362, 464), (393, 493)), 
-                'A24': ((409, 465), (442, 493)), 
-                'A25': ((470, 466), (512, 509)), 
-                'A26': ((538, 463), (572, 497)), 
-                'A27': ((587, 464), (622, 498)), 
-                'A28': ((638, 466), (674, 499)), 
-                'A29': ((687, 464), (725, 496)), 
-                'A30': ((403, 267), (449, 308))}, 
-            'MFB-S': {
-                'A51': ((447, 265), (493, 311)), 
-                'A52': ((315, 402), (357, 442)), 
-                'A53': ((379, 410), (415, 444)), 
-                'A54': ((430, 411), (464, 447)), 
-                'A55': ((478, 410), (513, 443)), 
-                'A56': ((528, 409), (564, 441))}, 
-            'PDC-D': {
-                'E1': ((358, 467), (396, 507))}, 
-            'PDC-P': {
-                'E1': ((361, 460), (396, 495))}, 
-            'PDC-R': {
-                'E1': ((408, 330), (443, 358))}
-            }
-
-        self.imgs = {}
-        for i in list(self.BB):
-            temp = self.imgs_path +"boxes/" + i + ".jpg"
-            self.imgs[i] = imread(temp)
-
         self.tries = {
             "VISION": {},
             "ALTURA": {}
@@ -264,10 +219,10 @@ class Model (object):
                 'F330': [(380, 369), (422, 380)], 'F331': [(380, 354), (422, 364)], 'F332': [(381, 339), (422, 349)], 'F333': [(380, 324), (422, 335)], 
                 'F334': [(380, 309), (422, 319)], 'F335': [(380, 294), (422, 307)],
                 'conector': [(275, 422), (304, 462)]
-                }, 
+                },
             'PDC-P2': {
                 'CONECTOR1': [(395, 1060), (910, 1390)], 'CONECTOR2': [(1180, 780), (1585, 1110)]
-                }, 
+                },
             'PDC-R': {
                 'F400': [(510, 214), (519, 246)], 'F401': [(499, 214), (508, 246)], 'F402': [(487, 214), (497, 246)], 'F403': [(477, 214), (485, 246)], 
                 'F404': [(467, 214), (475, 246)], 'F405': [(455, 214), (464, 246)], 'F411': [(385, 220), (392, 241)], 'F410': [(395, 220), (402, 241)], 
@@ -291,7 +246,7 @@ class Model (object):
                 'F476': [(231, 53),  (264, 61)],  'F477': [(187, 107), (220, 115)], 'F478': [(187, 97),  (220, 105)], 'F479': [(187, 86),  (220, 94)], 
                 'F480': [(187, 75),  (220, 83)],  'F481': [(187, 64),  (220, 71)],  'F482': [(187, 53),  (220, 61)],  'RELX': [(478, 162), (525, 206)], 
                 'RELU': [(427, 162), (476, 206)], 'RELT': [(378, 162), (425, 206)], 'F96': [(253, 337), (483, 425)]
-                }, 
+                },
             'PDC-RMID': {
                 'F400': [(613, 350), (627, 388)], 'F401': [(601, 350), (612, 388)], 'F402': [(587, 350), (599, 388)], 'F403': [(577, 350), (588, 388)], 
                 'F404': [(565, 350), (576, 388)], 'F405': [(553, 350), (564, 388)], 'F411': [(463, 357), (474, 378)], 'F410': [(475, 357), (486, 378)], 
@@ -329,15 +284,31 @@ class Model (object):
                 'F459': [(487, 180), (497, 218)], 'F460': [(473, 180), (486, 218)], 'F461': [(463, 180), (474, 218)], 'RELX': [(578, 291), (629, 348)], 
                 'RELU': [(517, 291), (573, 348)], 'RELT': [(461, 291), (512, 348)], 'F449': [(398, 200), (455, 224)], 'F448': [(398, 232), (455, 250)], 
                 'F447': [(398, 260), (455, 278)], 'F96': [(253, 337), (483, 425)]
-                }, 
+                },
             'PDC-S': {
                 '1': [(439, 218), (486, 392)], '2': [(494, 218), (540, 389)], '3': [(550, 218), (596, 387)], '4': [(607, 219), (653, 387)], 
                 '5': [(661, 218), (711, 382)], '6': [(719, 218), (763, 380)]
-                }, 
+                },
             'TBLU': {
                 '9': [(79, 531), (117, 600)], '8': [(125, 532), (159, 599)], '7': [(167, 532), (207, 599)], '6': [(212, 532), (251, 600)], 
                 '5': [(257, 531), (296, 600)], '4': [(300, 530), (338, 601)], '3': [(347, 533), (385, 600)], '2': [(388, 531), (428, 598)], 
                 '1': [(435, 531), (472, 600)]
+                },
+            'MFB-P1': {
+                'A41': [(533, 349), (575, 393)], 'A42': [(597, 389), (631, 421)], 'A43': [(479, 352), (513, 389)], 'A44': [(431, 354), (466, 386)], 
+                'A45': [(391, 356), (420, 384)], 'A46': [(334, 349), (373, 384)], 'A47': [(266, 352), (310, 388)]
+                },
+            'MFB-P2': {
+                'A20': [(527, 272), (576, 313)], 'A21': [(258, 463), (292, 497)], 'A22': [(312, 464), (343, 493)], 'A23': [(362, 464), (393, 493)], 
+                'A24': [(409, 465), (442, 493)], 'A25': [(470, 466), (512, 509)], 'A26': [(538, 463), (572, 497)], 'A27': [(587, 464), (622, 498)], 
+                'A28': [(638, 466), (674, 499)], 'A29': [(687, 464), (725, 496)], 'A30': [(403, 267), (449, 308)]
+                },
+            'MFB-S': {
+                'A51': [(447, 265), (493, 311)], 'A52': [(315, 402), (357, 442)], 'A53': [(379, 410), (415, 444)], 'A54': [(430, 411), (464, 447)], 
+                'A55': [(478, 410), (513, 443)], 'A56': [(528, 409), (564, 441)]
+                }, 
+            'MFB-E': {
+                'E1': [(1700, 650), (2250, 1250)], 'A1': [(2600, 1700), (3150, 2300)], 'A2': [(750, 1700), (1300, 2300)]
                 }
             }
 
@@ -367,7 +338,11 @@ class Model (object):
             "PDC-RMID": ["R1","R2","R3","R4","R5","R6"],
             "PDC-RS": ["R1","R2","R3","R4","R5","R6"],
             "F96": ["F96"],
-            "PDC-Dbracket": ["Db1"]
+            "PDC-Dbracket": ["Db1"],
+            "MFB-P2":["1MFBP2","2MFBP2","3MFBP2"],
+            "MFB-P1":["1MFBP1","2MFBP1"],
+            "MFB-S":["1MFBS"],
+            "MFB-E":["1MFBE"],
             }
         #puntos guardados en robot a los que irá para sus inspecciones de visión
         self.rv_triggers = {
@@ -380,7 +355,11 @@ class Model (object):
             "PDC-RMID": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
             "PDC-RS": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
             "F96": ["F96_vision_1"],
-            "PDC-Dbracket": ["PDCDbracket_vision_1"]
+            "PDC-Dbracket": ["PDCDbracket_vision_1"],
+            "MFB-P2":["MFBP2_vision_1","MFBP2_vision_2","MFBP2_vision_3"],
+            "MFB-P1":["MFBP1_vision_1","MFBP1_vision_2"],
+            "MFB-S":["MFBS_vision_1"],
+            "MFB-E":["MFBE_vision_1"],
             }
         #nombre de programas a llamar para inspección de zonas(por bloque) en sensor (altura) en cada punto del robot
         self.h_triggers = {
@@ -694,11 +673,11 @@ class Model (object):
         #print("segundos_transcurridos por iteración: ",segundos_transcurridos)
         
         diferencia = fechaActual - self.fechaAnterior #se obtiene el tiempo total que ha transcurrido desde la última actualización de la hora desde el servidor (donde se han ido acumulando los segundos transcurridos de cada iteración y la fecha original obtenida del servidor)
-        # Compara si han pasado más de 5 minutos (300 segundos)
+        # Compara si han pasado más de 10 minutos (600 segundos)
         #print("diferenciaLocalAcumulada: ",diferencia)
 
-        if diferencia > timedelta(minutes=5) or diferencia < timedelta(minutes=0):
-            #print("Han pasado más de 5 minutos. Actualizando hora desde servidor...")
+        if diferencia > timedelta(minutes=10) or diferencia < timedelta(minutes=0):
+            #print("Han pasado más de 10 minutos. Actualizando hora desde servidor...")
             fechaActual = self.get_currentTime() #se actualiza del servidor la fecha
             print("update pedido desde update_fecha_actual")
             self.fechaAnterior = fechaActual #se guarda la última fecha obtenida de la actualización del servidor

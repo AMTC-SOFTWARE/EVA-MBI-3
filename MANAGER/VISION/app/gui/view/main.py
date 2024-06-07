@@ -535,6 +535,36 @@ class Ui_main(object):
         self.lbl_clock.setObjectName("lbl_clock")
         self.lbl_clock.setStyleSheet('background-color: navy; color: white; font-weight:bold; font-size:15pt; font: Century Schoolbook')
 
+        font = QtGui.QFont()
+        font.setFamily("Century Schoolbook")
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+
+        self.lbl_box8 = QtWidgets.QLabel(main)
+        self.lbl_box8.setGeometry(QtCore.QRect(1700, 200, 250, 50))
+        self.lbl_box8.setFont(font)
+        self.lbl_box8.setObjectName("lbl_box8")
+        self.lbl_box8.setText("")
+        
+        self.lbl_box9 = QtWidgets.QLabel(main)
+        self.lbl_box9.setGeometry(QtCore.QRect(1700, 300, 250, 50))
+        self.lbl_box9.setFont(font)
+        self.lbl_box9.setObjectName("lbl_box9")
+        self.lbl_box9.setText("")
+        
+        self.lbl_box10 = QtWidgets.QLabel(main)
+        self.lbl_box10.setGeometry(QtCore.QRect(1700, 400, 250, 50))
+        self.lbl_box10.setFont(font)
+        self.lbl_box10.setObjectName("lbl_box10")
+        self.lbl_box10.setText("")
+        
+        self.lbl_box11 = QtWidgets.QLabel(main)
+        self.lbl_box11.setGeometry(QtCore.QRect(1700, 500, 250, 50))
+        self.lbl_box11.setFont(font)
+        self.lbl_box11.setObjectName("lbl_box11")
+        self.lbl_box11.setText("")
+
         self.retranslateUi(main)
         QtCore.QMetaObject.connectSlotsByName(main)
 

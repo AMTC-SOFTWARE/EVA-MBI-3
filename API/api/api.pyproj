@@ -12,6 +12,7 @@
     <Name>api</Name>
     <RootNamespace>api</RootNamespace>
     <InterpreterId>Global|VisualStudio|Main Environment</InterpreterId>
+    <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

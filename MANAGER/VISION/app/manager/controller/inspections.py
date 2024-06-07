@@ -212,8 +212,6 @@ class UpdateTriggers(QState):
                 #si la caja está en las modularidades...
                 if i in modularity:
 
-                    print("v_triggers \n")
-                    print(self.model.v_triggers[i])
                     ################################################################################################################
                     #al leer un arnés, se llena modularity con los fusibles asignados y se rellena con los demás fusibles vacios
                     #entonces siempre habrá una cavidad F96 pero no siempre llevará el fusible. Entonces cuando sea diferente de vacio...
@@ -241,13 +239,29 @@ class UpdateTriggers(QState):
                     #        self.model.v_triggers[self.model.pdcrvariant].pop(-1)
                     ################################################################################################################
 
-                    #aquí se modifica robot_data usando de base lo de rv_triggers y rh_triggers del modelo
-                    self.model.robot_data["v_queue"][i] = copy(self.model.rv_triggers[i])
-                    print(i)
-                    if i=='PDC-P2':
-                        self.model.robot_data["h_queue"][i]=[]
+                    #si la caja está en el listado del modelo de triggers de visión
+                    if i in self.model.v_triggers:
+
+                        print("v_triggers \n")
+                        print(self.model.v_triggers[i])
+
+                        #aquí se modifica robot_data usando de base lo de rv_triggers y rh_triggers del modelo
+                        self.model.robot_data["v_queue"][i] = copy(self.model.rv_triggers[i])
+                        print(i)
+
+                    #si la caja está en el listado del modelo de triggers de alturas
+                    if i in self.model.rh_triggers:
+
+                        print("h_triggers \n")
+                        print(self.model.h_triggers[i])
+
+                        #aquí se modifica robot_data usando de base lo de rv_triggers y rh_triggers del modelo
+                        self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
+
                     else:
-                       self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
+                        #se agrega la caja con contenido vacío
+                        self.model.robot_data["h_queue"][i] = []
+
 
                     print("self.model.robot_data[v_queue]-------",self.model.robot_data["v_queue"])
                     print("self.model.robot_data[v_queue][i]",self.model.robot_data["v_queue"][i])

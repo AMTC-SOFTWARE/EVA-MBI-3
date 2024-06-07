@@ -1,0 +1,89 @@
+#arnés con MFB-P2, MFB-P1, MFB-E, PDC-S, F96
+A 294 540 91 00 EL. LTG.A 294 540 91 00 EL. LTG.SATZ LL RBA ZGS\u00d1 011 X294 AJ23-2PRO3 HM000000PRUEBAW03 ILX294243B1016867 6731751 FET 3 05-21-24 15\u00d141\u00d108
+
+#arnés con MFB-P2, MFB-P1, MFB-S
+A 294 540 91 00 EL. LTG.A 294 540 91 00 EL. LTG.SATZ LL RBA ZGS\u00d1 011 X294 AJ23-2PRO3 HM000000PRUEBAW04 ILX294243B1016851 6731751 FET 3 05-21-24 15\u00d141\u00d108
+
+A2239061502TESTWACKS
+
+PLC/1/status
+{"key":true}
+{"PDC-S": true, "PDC-RMID": true, "PDC-P": true, "PDC-D": true, "F96": true, "MFB-P1": true, "MFB-P2": true, "PDC-P2": true, "PDC-Dbracket": true}
+{"clamp_MFB-P2": true}
+{"start": true}
+{"retry_btn": true}
+
+RobotEpson/2/status
+{"response":"home_reached"}
+{"response":"position_reached"}
+
+Camera/4/status
+_________________________
+
+MFB-P2
+
+NOK
+
+{
+    "A21": "no_A21",
+    "A22": "no_A22",
+    "A23": "no_A23",
+    "A24": "no_A24"
+}
+
+OK
+
+{
+    "A21": "A21",
+    "A22": "A22",
+    "A23": "A23",
+    "A24": "A24"
+}
+
+
+NOK
+
+{
+    "A20": "A20",
+    "A25": "A25",
+    "A30": "no_A30"
+}
+
+OK
+
+{
+    "A20": "A20",
+    "A25": "A25",
+    "A30": "A30"
+}
+
+NOK
+
+{
+    "A26": "A26",
+    "A27": "A27",
+    "A28": "A28",
+    "A29": "A29"
+}
+
+OK
+
+{
+    "A26": "A26",
+    "A27": "no_A27",
+    "A28": "no_A28",
+    "A29": "A29"
+}
+_________________________
+MFB-P1
+{
+    "A41": "no_A41",
+    "A42": "A42",
+    "A43": "A43",
+    "A44": "no_A44"
+}
+{
+    "A45": "A45",
+    "A46": "A46",
+    "A47": "A47",
+}

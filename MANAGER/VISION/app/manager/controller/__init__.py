@@ -840,13 +840,18 @@ class CheckQr (QState):
 
                 self.model.input_data["database"]["modularity"] = combined_dict
 
-                for caja in self.model.nuts_base:
-                    if (not caja in self.model.modularity_fuses) and (self.model.inspeccion_tuercas[caja] == True):
+                for caja in self.model.input_data["database"]["modularity_nuts"]: # solo se agregarán los vacíos de las cajas con contenido de tuercas
+                    if (not caja in self.model.modularity_fuses) and (self.model.inspeccion_tuercas[caja] == True): # de los que tienen contenido solamente los que estén habilitados para su inspección
                         self.model.modularity_fuses[caja] = self.model.nuts_base[caja]
-
+                
+                #modularity_nuts = {
+                #   "caja1":["A21","A22"],
+                #   "caja2":["A43"]
+                #}
                 #nuts_base = {
                 #    "caja1" : {"A21":"nonut", "A22":"nonut"},
                 #    "caja2" : {"A43":"nonut", "A44":"nonut"},
+                #    "caja3" : {"E1":"nonut", "A1": "nonut", "A2"; "nonut"}
                 #}
                 #modularity_fuses = {
                 #    "cajaR" : {"F300":"vacio", "F301":"vacio"},
@@ -857,7 +862,7 @@ class CheckQr (QState):
                 #    "caja1": True,
                 #    "caja2": False
                 #}
-                #for caja in nuts_base:
+                #for caja in modularity_nuts:
                 #    if (not caja in modularity_fuses) and (inspeccion_tuercas[caja] == True):
                 #        modularity_fuses[caja] = nuts_base[caja]
 
