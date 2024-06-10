@@ -874,7 +874,11 @@ class CheckQr (QState):
                                 if not(caja in self.model.arnes_data):
                                     self.model.arnes_data[caja] = {}
                                 if not(cavidad in self.model.arnes_data[caja]):
-                                    self.model.arnes_data[caja][cavidad] = cavidad #se agrega contenido con su misma tuerca, "MFB-P2": {"A20" : "A20", "A21" : "A21"...}
+                                    #self.model.arnes_data[caja][cavidad] = cavidad #se agrega contenido con su misma tuerca, "MFB-P2": {"A20" : "A20", "A21" : "A21"...}
+                                    if (caja in self.model.nuts_fill) and (cavidad in self.model.nuts_fill[caja]):
+                                        self.model.arnes_data[caja][cavidad] = self.model.nuts_fill[caja][cavidad] #se agrega contenido correspondiente, "MFB-P2": {"A20" : "conTuerca", "A21" : "conTuerca"...}
+                                    else:
+                                        self.model.arnes_data[caja][cavidad] = "conTuerca" #en cualquier caso extra se llenaría con el string "conTuerca"
 
                 except Exception as ex:
                     print (ex)
