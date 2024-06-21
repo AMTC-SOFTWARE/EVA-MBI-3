@@ -46,9 +46,9 @@ class Model (object):
 
         #variable para determinar si se realizará la inspección de estas cajas de tuercas
         self.inspeccion_tuercas =   {
-                        "MFB-P2":False,
-                        "MFB-P1":False,
-                        "MFB-S":False,
+                        "MFB-P2":True,
+                        "MFB-P1":True,
+                        "MFB-S":True,
                         "MFB-E":False,
                     }
 
