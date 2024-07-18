@@ -232,12 +232,14 @@ class Triggers (QState):
                 BB = [box, fuse]
                 if current_trig == self.model.h_triggers[box][-1]: #Cuando el trigger actual es igual al ultimo h_trigger de la caja actual[box]
                     #Si el fuse no estra dentro de model.history_fuses, se emite un error = True y se muestra en pantalla las cavidades faltantes por inspeccionar
-                    if fuse not in self.model.history_fuses: 
-                        error = True
-                        img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
-                        print("||||||||||Alturas faltantes en: ",fuse, " Caja: ",box)
+                    if fuse not in self.model.history_fuses:
+                        #SOLAMENTE SE EXCLUYEN DE ALTURAS DE FUSIBELS EXTERNOS DE PDC-R, SIEMPRE Y CUANDO TODOS SEAN VACIOS
+                        if (fuse not in self.model.external_fuses) or (self.model.eliminar_inspeccion_externos == False): #se excluyen los fusibles ya que pueden faltar de inspeccionar si se requiere (PDC-R fusibles externos de caja grande)
+                            error = True
+                            img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
+                            print("||||||||||Alturas faltantes en: ",fuse, " Caja: ",box)
 
-                        self.model.missing_fuses += "Inspección de alturas faltante: " + str(fuse) + "\n"
+                            self.model.missing_fuses += "Inspección de alturas faltante: " + str(fuse) + "\n"
 
         imwrite(self.model.imgs_path + self.module + ".jpg", img)
 

@@ -192,52 +192,33 @@ class UpdateTriggers(QState):
             return
         modularity = self.model.input_data["database"]["modularity"]
         clamps = self.model.input_data["plc"]["clamps"]
-        if not(len (modularity)):
-   ##################################### Reuslts doble check IN CONSTRUCTION ##########################
-   ####################################################################################################
+
+        #ya se ha terminado la inspección de todas las cajas
+        if not(len(modularity)):
             Timer(0.05,self.finished.emit).start()
             return
 
-         #revisar las llaves que tiene modularity (o sea las cajas)
+
+        #revisar cajas que tiene modularity pendientes por hacer inspección
+        print("\n\n-------------------- cajas pendientes... --------------------")
         for j in modularity:
-            #si la llave actual no está en el arreglo de clamps entonces... (o sea no es una caja válida)
+            print("\n\t" + caja)
+            #si la caja actual no está en el arreglo de clamps actuales entonces... (o sea no es una caja válida)
             if not(j in clamps):
+
+                print("\t(esta caja no está en clamps)")
+
                 #quitar del modelo los puntos de vision y altura de esa caja que no se encontró
                 #none, si la llave está en el diccionario la remueve y retorna su valor, si no retorna un default
                 #si la llave no está y el default no está definido manda error, entonces se usa un none para decir que no se encontró
                 self.model.robot_data["v_queue"].pop(j, None)
                 self.model.robot_data["h_queue"].pop(j, None)
+
+        #si se llega este punto ya se sabe que aún quedan cajas pendientes por hacer, se revisa cuáles de esas están clampeadas
         if len(clamps):
             for i in clamps:
                 #si la caja está en las modularidades...
                 if i in modularity:
-
-                    ################################################################################################################
-                    #al leer un arnés, se llena modularity con los fusibles asignados y se rellena con los demás fusibles vacios
-                    #entonces siempre habrá una cavidad F96 pero no siempre llevará el fusible. Entonces cuando sea diferente de vacio...
-                    #if self.model.modularity_fuses[self.model.pdcrvariant]["F96"] != "vacio":
-                    #    print("F96 es diferente de vacio \n")
-                    #    #si ya trae el trigger (porque un arnés anterior lo traía y se modificó el vector)
-                    #    if "F96" in self.model.v_triggers[self.model.pdcrvariant]:
-                    #        print("pass porque ya trae el trigger \n")
-                    #        #no se agrega para evitar duplicados
-                    #        pass
-                    #    #si no trae el trigger, pero si hay un valor para F96, lo agregas al vector
-                    #    else:
-                    #        print("no trae trigger pero si hay F96, se agrega a la lista (append): \n")
-                    #        
-                    #        self.model.rv_triggers[self.model.pdcrvariant].append(self.model.rv_F96_trigger)
-                    #        self.model.v_triggers[self.model.pdcrvariant].append(self.model.v_F96_trigger)
-                    ##si no lleva el F96, asegurarse de que el vector no lleve este trigger por arneses anteriores
-                    #else:
-                    #    print("F96 es vacio \n")
-                    #    if "F96" in self.model.v_triggers[self.model.pdcrvariant]:
-                    #        print("F96 es vacio pero si está agegado el punto, se hace un pop: \n")
-                    #        #self.model.rv_triggers[self.model.pdcrvariant].pop(self.model.rv_triggers[self.model.pdcrvariant].index("F96_pv1"))
-                    #        self.model.rv_triggers[self.model.pdcrvariant].pop(-1)
-                    #        #self.model.v_triggers[self.model.pdcrvariant].pop(self.model.v_triggers[self.model.pdcrvariant].index("F96"))
-                    #        self.model.v_triggers[self.model.pdcrvariant].pop(-1)
-                    ################################################################################################################
 
                     #si la caja está en el listado del modelo de triggers de visión
                     if i in self.model.v_triggers:
@@ -245,7 +226,7 @@ class UpdateTriggers(QState):
                         print("v_triggers \n")
                         print(self.model.v_triggers[i])
 
-                        #aquí se modifica robot_data usando de base lo de rv_triggers y rh_triggers del modelo
+                        #aquí se agregan los triggers a robot_data usando de base lo de rv_triggers del modelo
                         self.model.robot_data["v_queue"][i] = copy(self.model.rv_triggers[i])
                         print(i)
 
@@ -255,8 +236,28 @@ class UpdateTriggers(QState):
                         print("h_triggers \n")
                         print(self.model.h_triggers[i])
 
-                        #aquí se modifica robot_data usando de base lo de rv_triggers y rh_triggers del modelo
-                        self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
+                        ############################################################
+                        #se agrega revisión de altura solamente si hay contenido de fusibles diferentes a vacío en los fusibles externos de PDC-R
+                        if i == "PDC-R":
+                            print("se trata de alturas en PDC-R grande")
+                            self.model.eliminar_inspeccion_externos = True
+
+                            temp_rh_triggers = {"PDC-R": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"]}
+
+                            for fusible in self.model.external_fuses:
+                                if self.model.modularity_fuses[i][fusible] != "vacio": #si cualquier fusible externo es diferente de vacío, se hacen inspecciones
+                                    self.model.eliminar_inspeccion_externos = False
+
+                            if self.model.eliminar_inspeccion_externos == False:
+                                self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
+                            else:
+                                self.model.robot_data["h_queue"][i] = copy(temp_rh_triggers[i])
+                        else:
+                        ############################################################
+                            #FUNCIONAMIENTO NORMAL para agregar inspección de alturas...
+
+                            #aquí se agregan triggers a robot_data usando de base lo de rh_triggers del modelo
+                            self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
 
                     else:
                         #se agrega la caja con contenido vacío

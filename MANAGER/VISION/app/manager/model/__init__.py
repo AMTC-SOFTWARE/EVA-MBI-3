@@ -61,6 +61,17 @@ class Model (object):
         #variable para guardar toda la información de la configuración del arnés sin los fusibles vacíos
         self.arnes_data = {}
 
+        #variable para saber si se ignoran las inspecciones de alturas de fusibles externos de PDC-R, solamente si todos son vacíos
+        self.eliminar_inspeccion_externos = False
+
+        #fusibles externos de caja grande PDC-R, correspondientes a alturas:     self.h_triggers["PDC-R"] =    "R11"    ,    "R12"    ,    "R13"     ,    "R14"    
+        #                                        correspondiente a posiciones:  self.rh_triggers["PDC-R"] = "PDCR_pa11" , "PDCR_pa12" , "PDCR_pa13"  , "PDCR_pa14"  
+        self.external_fuses = [
+                'F462', 'F463', 'F464', 'F465', 'F466', 'F467', 
+                'F468', 'F469', 'F470', 'F471', 'F472', 'F473', 
+                'F474', 'F475', 'F476', 'F477', 'F478', 'F479', 
+                'F480', 'F481', 'F482']
+
         #se verifica que el arnés tenga valores guardados en el servidor
         self.valores_torques_red = False
 
