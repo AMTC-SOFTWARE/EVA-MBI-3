@@ -382,7 +382,7 @@ class Model (object):
             "PDC-RMID": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
             "PDC-RS": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
             "F96": ["F96"],
-            "PDC-Dbracket": ["Db1"]
+            #"PDC-Dbracket": ["Db1"]
             }
         
         #puntos guardados en robot a los que irá para sus inspecciones de alturas
@@ -395,7 +395,7 @@ class Model (object):
             "PDC-RMID": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
             "PDC-RS": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
             "F96": ["F96_pa1"],
-            "PDC-Dbracket": ["PDCDbracket_pa1"]
+            #"PDC-Dbracket": ["PDCDbracket_pa1"]
             }
 
         print("v_triggers:\n",self.v_triggers)
