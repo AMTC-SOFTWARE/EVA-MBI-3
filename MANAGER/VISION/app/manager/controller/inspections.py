@@ -202,7 +202,7 @@ class UpdateTriggers(QState):
         #revisar cajas que tiene modularity pendientes por hacer inspección
         print("\n\n-------------------- cajas pendientes... --------------------")
         for j in modularity:
-            print("\n\t" + caja)
+            print("\n\t" + j)
             #si la caja actual no está en el arreglo de clamps actuales entonces... (o sea no es una caja válida)
             if not(j in clamps):
 
