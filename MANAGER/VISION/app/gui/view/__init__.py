@@ -100,6 +100,20 @@ class MainWindow (QMainWindow):
         self.qw_scanner.ui.lineEdit.returnPressed.connect(self.scanner)
         self.qw_scanner.ui.btn_cancel.clicked.connect(self.qw_scanner.ui.lineEdit.clear)
         self.ui.btn_hxh.clicked.connect(self.horaxhora)
+        
+        #Botones para Clamp/Desclamp
+        self.ui.lbl_box1.clicked.connect(self.nidoPDCD)
+        self.ui.lbl_box2.clicked.connect(self.nidoPCDP)
+        self.ui.lbl_box3.clicked.connect(self.nidoPDCR)
+        self.ui.lbl_box4.clicked.connect(self.nidoPDCS)
+        self.ui.lbl_box5.clicked.connect(self.nidoTBLU)
+        self.ui.lbl_box6.clicked.connect(self.nidoPDCP2)
+        self.ui.lbl_box7.clicked.connect(self.nidoF96)
+        self.ui.lbl_box8.clicked.connect(self.nidoMFBP2)
+        self.ui.lbl_box9.clicked.connect(self.nidoMFBP1)
+        self.ui.lbl_box10.clicked.connect(self.nidoMFBS)
+        self.ui.lbl_box11.clicked.connect(self.nidoMFBE)
+
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.status)
         #self.timer.start(200)
@@ -107,6 +121,108 @@ class MainWindow (QMainWindow):
         self.allow_close        = True
         self.cycle_started      = False
         self.shutdown           = False
+        
+    def nidoPDCD(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box1.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            
+
+    def nidoPCDP(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box2.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            
+
+    def nidoPDCR(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box3.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            
+    def nidoPDCS(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box4.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            
+    def nidoTBLU(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box5.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+
+    def nidoPDCP2(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box6.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            
+    def nidoF96(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box7.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            
+    def nidoMFBP2(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box8.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            
+    def nidoMFBP1(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box9.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+    
+    def nidoMFBS(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box10.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            
+    def nidoMFBE(self):
+        #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
+        currentText = self.ui.lbl_box11.text()
+        
+        if "correcto" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+        elif "Habilitar" in currentText:
+            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+
     def horaxhora(self):
         #self.qw_Tabla_horas.show()
         print("vamos a calcular los hora por hora")
@@ -519,6 +635,8 @@ class MainWindow (QMainWindow):
                 self.ui.lbl_box1.setText(message["lbl_box1"]["text"])
                 if "color" in message["lbl_box1"]:
                     self.ui.lbl_box1.setStyleSheet("color: " + message["lbl_box1"]["color"])
+                if "visible" in message["lbl_box1"]:
+                    self.ui.lbl_box1.setVisible(message["lbl_box1"]["visible"])
             if "lbl_box2" in message:
                 self.ui.lbl_box2.setText(message["lbl_box2"]["text"])
                 if "color" in message["lbl_box2"]:

@@ -338,78 +338,69 @@ class Ui_main(object):
         font.setBold(True)
         font.setWeight(75)
 
-
-        self.lbl_box1 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box2 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box3 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box4 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box5 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box6 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box7 = QtWidgets.QLabel(self.splitter_3) ######### Modificación para F96 #########
-
+        #Boton para PDC-D
+        self.lbl_box1 = QtWidgets.QPushButton(self.splitter_3)
         sizePolicy.setHeightForWidth(self.lbl_box1.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box2.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box3.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box4.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box5.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box6.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box7.sizePolicy().hasHeightForWidth()) ######### Modificación para F96 #########
-
         self.lbl_box1.setSizePolicy(sizePolicy)
-        self.lbl_box1.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box1.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box2.setSizePolicy(sizePolicy)
-        self.lbl_box2.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box2.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box3.setSizePolicy(sizePolicy)
-        self.lbl_box3.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box3.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box4.setSizePolicy(sizePolicy)
-        self.lbl_box4.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box4.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box5.setSizePolicy(sizePolicy)
-        self.lbl_box5.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box5.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box6.setSizePolicy(sizePolicy)
-        self.lbl_box6.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box6.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box7.setSizePolicy(sizePolicy) ######### Modificación para F96 #########
-        self.lbl_box7.setMinimumSize(QtCore.QSize(250, 70)) ######### Modificación para F96 #########
-        self.lbl_box7.setMaximumSize(QtCore.QSize(250, 70)) ######### Modificación para F96 #########
-
+        self.lbl_box1.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box1.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box1.setFont(font)
-        self.lbl_box1.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.lbl_box1.setObjectName("lbl_box1")
-
+        
+        #Boton para PDC-P
+        self.lbl_box2 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box2.sizePolicy().hasHeightForWidth())
+        self.lbl_box2.setSizePolicy(sizePolicy)
+        self.lbl_box2.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box2.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box2.setFont(font)
-        self.lbl_box2.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.lbl_box2.setObjectName("lbl_box2")
-
+        
+        #Boton para PDC-RS O RMID
+        self.lbl_box3 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box3.sizePolicy().hasHeightForWidth())
+        self.lbl_box3.setSizePolicy(sizePolicy)
+        self.lbl_box3.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box3.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box3.setFont(font)
-        self.lbl_box3.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.lbl_box3.setObjectName("lbl_box3")
-
+        
+        #Boton para PDC-S
+        self.lbl_box4 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box4.sizePolicy().hasHeightForWidth())
+        self.lbl_box4.setSizePolicy(sizePolicy)
+        self.lbl_box4.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box4.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box4.setFont(font)
-        self.lbl_box4.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.lbl_box4.setObjectName("lbl_box4")
-
+        
+        #Boton para TBLU
+        self.lbl_box5 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box5.sizePolicy().hasHeightForWidth())
+        self.lbl_box5.setSizePolicy(sizePolicy)
+        self.lbl_box5.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box5.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box5.setFont(font)
-        self.lbl_box5.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.lbl_box5.setObjectName("lbl_box5")
 
+        #Boton para PDC-P2
+        self.lbl_box6 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box6.sizePolicy().hasHeightForWidth())
+        self.lbl_box6.setSizePolicy(sizePolicy)
+        self.lbl_box6.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box6.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box6.setFont(font)
-        self.lbl_box6.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.lbl_box6.setObjectName("lbl_box6")
 
-        self.lbl_box7.setFont(font) ######### Modificación para F96 #########
-        self.lbl_box7.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop) ######### Modificación para F96 #########
-        self.lbl_box7.setObjectName("lbl_box7") ######### Modificación para F96 #########
+        #F96
+        self.lbl_box7 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box7.sizePolicy().hasHeightForWidth())
+        self.lbl_box7.setSizePolicy(sizePolicy)
+        self.lbl_box7.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box7.setMaximumSize(QtCore.QSize(180, 60))
+        self.lbl_box7.setFont(font)
+        self.lbl_box7.setObjectName("lbl_box7")
+        
         ######################################################################
         self.lbl_info4 = QtWidgets.QLabel(self.splitter_3)
         self.lbl_info4.setMinimumSize(QtCore.QSize(450, 0))
@@ -540,31 +531,32 @@ class Ui_main(object):
         font.setPointSize(16)
         font.setBold(True)
         font.setWeight(75)
-
-        self.lbl_box8 = QtWidgets.QLabel(main)
-        self.lbl_box8.setGeometry(QtCore.QRect(1700, 200, 250, 50))
+        
+        #MFB-P2
+        self.lbl_box8 = QtWidgets.QPushButton(main)
+        self.lbl_box8.setGeometry(QtCore.QRect(1700, 200, 170, 60))
         self.lbl_box8.setFont(font)
         self.lbl_box8.setObjectName("lbl_box8")
-        self.lbl_box8.setText("")
         
-        self.lbl_box9 = QtWidgets.QLabel(main)
-        self.lbl_box9.setGeometry(QtCore.QRect(1700, 300, 250, 50))
+        #MFB-P1
+        self.lbl_box9 = QtWidgets.QPushButton(main)
+        self.lbl_box9.setGeometry(QtCore.QRect(1700, 300, 170, 60))
         self.lbl_box9.setFont(font)
         self.lbl_box9.setObjectName("lbl_box9")
-        self.lbl_box9.setText("")
         
-        self.lbl_box10 = QtWidgets.QLabel(main)
-        self.lbl_box10.setGeometry(QtCore.QRect(1700, 400, 250, 50))
+        #MFB-S
+        self.lbl_box10 = QtWidgets.QPushButton(main)
+        self.lbl_box10.setGeometry(QtCore.QRect(1700, 400, 170, 60))
         self.lbl_box10.setFont(font)
         self.lbl_box10.setObjectName("lbl_box10")
-        self.lbl_box10.setText("")
         
-        self.lbl_box11 = QtWidgets.QLabel(main)
-        self.lbl_box11.setGeometry(QtCore.QRect(1700, 500, 250, 50))
+        #MFB-E
+        self.lbl_box11 = QtWidgets.QPushButton(main)
+        self.lbl_box11.setGeometry(QtCore.QRect(1700, 500, 170, 60))
         self.lbl_box11.setFont(font)
         self.lbl_box11.setObjectName("lbl_box11")
-        self.lbl_box11.setText("")
-
+        
+        
         self.retranslateUi(main)
         QtCore.QMetaObject.connectSlotsByName(main)
 

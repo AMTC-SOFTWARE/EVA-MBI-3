@@ -273,17 +273,17 @@ class MqttClient (QObject):
                             self.color_PDCD = "blue"
 
                         if payload["PDC-D"] == False:
-                            self.nido_PDCD = ""
-                            self.color_PDCD = "blue"
+                            self.nido_PDCD = "PDC-D:\n Habilitar"
+                            self.color_PDCD = "red"
 
                     if "PDC-D_ERROR" in payload:
                         if payload["PDC-D_ERROR"] == True:
-                            self.nido_PDCD = "PDC-D:\n clampeo incorrecto"
+                            self.nido_PDCD = "PDC-D:\n clamp incorrecto"
                             self.color_PDCD = "red"
 
                     if "clamp_PDC-D" in payload:
                         if payload["clamp_PDC-D"] == True:
-                            self.nido_PDCD = "PDC-D:\n clampeo correcto"
+                            self.nido_PDCD = "PDC-D:\n clamp correcto"
                             self.color_PDCD = "green"
 
                     command = {
@@ -298,16 +298,16 @@ class MqttClient (QObject):
                             self.color_PDCP = "blue"
 
                         if payload["PDC-P"] == False:
-                            self.nido_PDCP = ""
-                            self.color_PDCP = "blue"
+                            self.nido_PDCP = "PDC-P:\n Habilitar"
+                            self.color_PDCP = "red"
 
                     if "PDC-P_ERROR" in payload:
                         if payload["PDC-P_ERROR"] == True:
-                            self.nido_PDCP = "PDC-P:\n clampeo incorrecto"
+                            self.nido_PDCP = "PDC-P:\n clamp incorrecto"
                             self.color_PDCP = "red"
                     if "clamp_PDC-P" in payload:
                         if payload["clamp_PDC-P"] == True:
-                            self.nido_PDCP = "PDC-P:\n clampeo correcto"
+                            self.nido_PDCP = "PDC-P:\n clamp correcto"
                             self.color_PDCP = "green"
 
                     command = {
@@ -338,18 +338,18 @@ class MqttClient (QObject):
                             self.color_PDCR = "blue"
 
                         if payload[PDCR] == False:
-                            self.nido_PDCR = ""
-                            self.color_PDCR = "blue"
+                            self.nido_PDCR = f"{PDCR}:\n Habilitar"
+                            self.color_PDCR = "red"
 
                     if "PDC-R_ERROR" in payload:
                         if payload["PDC-R_ERROR"] == True:
                             self.color_PDCR = "red"
-                            self.nido_PDCR = f"{PDCR}:\n clampeo incorrecto"
+                            self.nido_PDCR = f"{PDCR}:\n clamp incorrecto"
 
                     if "clamp_PDC-R" in payload:
                         if payload["clamp_PDC-R"] == True:
                             self.color_PDCR = "green"
-                            self.nido_PDCR = f"{PDCR}:\n clampeo correcto"
+                            self.nido_PDCR = f"{PDCR}:\n clamp correcto"
                     
                     command = {
                             "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"}
@@ -371,12 +371,12 @@ class MqttClient (QObject):
                             self.color_PDCS = "blue"
 
                         if payload["PDC-S"] == False:
-                            self.nido_PDCS = ""
+                            self.nido_PDCS = "PDC-S:\n Habilitar"
                             self.color_PDCS = "blue"
 
                     if "clamp_PDC-S" in payload:
                         if payload["clamp_PDC-S"] == True:
-                            self.nido_PDCS = "PDC-S:\n clampeo correcto"
+                            self.nido_PDCS = "PDC-S:\n clamp correcto"
                             self.color_PDCS = "green"
 
                     if "clamp_PDC-S" in payload:
@@ -397,16 +397,16 @@ class MqttClient (QObject):
                             self.color_TBLU = "blue"
 
                         if payload["TBLU"] == False:
-                            self.nido_TBLU = ""
+                            self.nido_TBLU = "TBLU:\n Habilitar"
                             self.color_TBLU = "blue"
 
                     if "TBLU_ERROR" in payload:
                         if payload["TBLU_ERROR"] == True:
-                            self.nido_TBLU = "TBLU:\n clampeo incorrecto"
+                            self.nido_TBLU = "TBLU:\n clamp incorrecto"
                             self.color_TBLU = "red"
                     if "clamp_TBLU" in payload:
                         if payload["clamp_TBLU"] == True:
-                            self.nido_TBLU = "TBLU:\n clampeo correcto"
+                            self.nido_TBLU = "TBLU:\n clamp correcto"
                             self.color_TBLU = "green"
 
 
@@ -422,16 +422,16 @@ class MqttClient (QObject):
                             self.color_PDCP2 = "blue"
 
                         if payload["PDC-P2"] == False:
-                            self.nido_PDCP2 = ""
+                            self.nido_PDCP2 = "PDC-P2:\n Habilitar"
                             self.color_PDCP2 = "blue"
 
                     if "PDC-P2_ERROR" in payload:
                         if payload["PDC-P2_ERROR"] == True:
-                            self.nido_PDCP2 = "TBLU:\n clampeo incorrecto"
+                            self.nido_PDCP2 = "TBLU:\n clamp incorrecto"
                             self.color_PDCP2 = "red"
                     if "clamp_PDC-P2" in payload:
                         if payload["clamp_PDC-P2"] == True:
-                            self.nido_PDCP2 = "PDC-P2:\n clampeo correcto"
+                            self.nido_PDCP2 = "PDC-P2:\n clamp correcto"
                             self.color_PDCP2 = "green"
 
 
@@ -447,16 +447,16 @@ class MqttClient (QObject):
                             self.color_F96 = "blue"
 
                         if payload["F96"] == False:
-                            self.nido_F96 = ""
-                            self.color_F96 = "blue"
+                            self.nido_F96 = "F96:\n Habilitar"
+                            self.color_F96 = "red"
 
                     if "F96_ERROR" in payload:
                         if payload["F96_ERROR"] == True:
-                            self.nido_F96 = "F96:\n clampeo incorrecto"
+                            self.nido_F96 = "F96:\n clamp incorrecto"
                             self.color_F96 = "red"
                     if "clamp_F96" in payload:
                         if payload["clamp_F96"] == True:
-                            self.nido_F96 = "F96:\n clampeo correcto"
+                            self.nido_F96 = "F96:\n clamp correcto"
                             self.color_F96 = "green"
 
 
@@ -472,17 +472,17 @@ class MqttClient (QObject):
                             self.color_MFBP2 = "blue"
 
                         if payload["MFB-P2"] == False:
-                            self.nido_MFBP2 = ""
-                            self.color_MFBP2 = "blue"
+                            self.nido_MFBP2 = "MFB-P2:\n Habilitar"
+                            self.color_MFBP2 = "red"
 
                     if "MFB-P2_ERROR" in payload:
                         if payload["MFB-P2_ERROR"] == True:
-                            self.nido_MFBP2 = "MFB-P2:\n clampeo incorrecto"
+                            self.nido_MFBP2 = "MFB-P2:\n clamp incorrecto"
                             self.color_MFBP2 = "red"
 
                     if "clamp_MFB-P2" in payload:
                         if payload["clamp_MFB-P2"] == True:
-                            self.nido_MFBP2 = "MFB-P2:\n clampeo correcto"
+                            self.nido_MFBP2 = "MFB-P2:\n clamp correcto"
                             self.color_MFBP2 = "green"
 
                     if "clamp_MFB-P2" in payload:
@@ -501,17 +501,17 @@ class MqttClient (QObject):
                             self.color_MFBP1 = "blue"
 
                         if payload["MFB-P1"] == False:
-                            self.nido_MFBP1 = ""
-                            self.color_MFBP1 = "blue"
+                            self.nido_MFBP1 = "MFB-P1:\n Habilitar"
+                            self.color_MFBP1 = "red"
 
                     if "MFB-P1_ERROR" in payload:
                         if payload["MFB-P1_ERROR"] == True:
-                            self.nido_MFBP1 = "MFB-P1:\n clampeo incorrecto"
+                            self.nido_MFBP1 = "MFB-P1:\n clamp incorrecto"
                             self.color_MFBP1 = "red"
 
                     if "clamp_MFB-P1" in payload:
                         if payload["clamp_MFB-P1"] == True:
-                            self.nido_MFBP1 = "MFB-P1:\n clampeo correcto"
+                            self.nido_MFBP1 = "MFB-P1:\n clamp correcto"
                             self.color_MFBP1 = "green"
 
                     if "clamp_MFB-P1" in payload:
@@ -530,17 +530,17 @@ class MqttClient (QObject):
                             self.color_MFBS = "blue"
 
                         if payload["MFB-S"] == False:
-                            self.nido_MFBS = ""
-                            self.color_MFBS = "blue"
+                            self.nido_MFBS = "MFB-S:\n Habilitar"
+                            self.color_MFBS = "red"
 
                     if "MFB-S_ERROR" in payload:
                         if payload["MFB-S_ERROR"] == True:
-                            self.nido_MFBS = "MFB-S:\n clampeo incorrecto"
+                            self.nido_MFBS = "MFB-S:\n clamp incorrecto"
                             self.color_MFBS = "red"
 
                     if "clamp_MFB-S" in payload:
                         if payload["clamp_MFB-S"] == True:
-                            self.nido_MFBS = "MFB-S:\n clampeo correcto"
+                            self.nido_MFBS = "MFB-S:\n clamp correcto"
                             self.color_MFBS = "green"
 
                     if "clamp_MFB-S" in payload:
@@ -559,17 +559,17 @@ class MqttClient (QObject):
                             self.color_MFBE = "blue"
 
                         if payload["MFB-E"] == False:
-                            self.nido_MFBE = ""
-                            self.color_MFBE = "blue"
+                            self.nido_MFBE = "MFB-E:\n Habilitar"
+                            self.color_MFBE = "red"
 
                     if "MFB-E_ERROR" in payload:
                         if payload["MFB-E_ERROR"] == True:
-                            self.nido_MFBE = "MFB-E:\n clampeo incorrecto"
+                            self.nido_MFBE = "MFB-E:\n clamp incorrecto"
                             self.color_MFBE = "red"
 
                     if "clamp_MFB-E" in payload:
                         if payload["clamp_MFB-E"] == True:
-                            self.nido_MFBE = "MFB-E:\n clampeo correcto"
+                            self.nido_MFBE = "MFB-E:\n clamp correcto"
                             self.color_MFBE = "green"
 
                     if "clamp_MFB-E" in payload:
@@ -612,6 +612,336 @@ class MqttClient (QObject):
                         self.torque.emit() 
 
             if message.topic == self.model.sub_topics["gui"]:
+                
+                ################################################## CAJAS PDC-D #################################################################
+                #PDC-D
+                if "statenido_PDC-D" in payload:
+ 
+                    if payload["statenido_PDC-D"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-D" : False}), qos = 2)
+
+                        # self.nido_PDCD = "PDC-D:\n Habilitar"
+                        # self.color_PDCD = "red"
+                       
+                        # command = {"lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_PDC-D"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-D" : False}), qos = 2)
+
+                        # self.nido_PDCD = "PDC-D:\n Habilitada"
+                        # self.color_PDCD = "blue"
+                       
+                        # command = {"lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                #PDC-Dbracket       
+                elif "statenido_PDC-Dbracket" in payload:
+ 
+                    if payload["statenido_PDC-Dbracket"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-Dbracket" : False}), qos = 2)
+
+                        # self.nido_PDCD = "PDC-Dbracket:\n Habilitar"
+                        # self.color_PDCD = "red"
+                       
+                        # command = {"lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_PDC-Dbracket"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-Dbracket" : False}), qos = 2)
+
+                        # self.nido_PDCD = "PDC-Dbracket:\n Habilitada"
+                        # self.color_PDCD = "blue"
+                       
+                        # command = {"lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                ################################################## CAJAS PDC-P #################################################################
+                #PDC-P
+                if "statenido_PDC-P" in payload:
+ 
+                    if payload["statenido_PDC-P"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-P" : False}), qos = 2)
+
+                        # self.nido_PDCP = "PDC-P:\n Habilitar"
+                        # self.color_PDCP = "red"
+                       
+                        # command = {"lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_PDC-P"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-P" : False}), qos = 2)
+
+                        # self.nido_PDCP = "PDC-P:\n Habilitada"
+                        # self.color_PDCP = "blue"
+                       
+                        # command = {"lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)        
+                        
+
+                ################################################## CAJAS PDC-R #################################################################
+                
+                if "statenido_PDC-RS" in payload:
+                    if payload["statenido_PDC-RS"] == True:
+                        
+                         #Se manda a habilitar el nido
+                         self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-RS" : True}), qos = 2)
+
+                         # self.nido_PDCR = "PDC-RS:\n Deshabilitar"
+                         # self.color_PDCR = "red"
+                       
+                         # command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"}}
+                         # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_PDC-RS"] == False:
+                        
+                         #Se manda a deshabilitar el nido
+                         self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-RS" : False}), qos = 2)
+
+                         # self.nido_PDCR = "PDC-RS:\n Habilitar"
+                         # self.color_PDCR = "blue"
+                       
+                         # command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"}}
+                         # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                elif "statenido_PDC-RMID" in payload:
+ 
+                    if payload["statenido_PDC-RMID"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-RMID" : False}), qos = 2)
+
+                        # self.nido_PDCR = "PDC-RMID:\n Habilitar"
+                        # self.color_PDCR = "red"
+                       
+                        # command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_PDC-RMID"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-RMID" : False}), qos = 2)
+
+                        # self.nido_PDCR = "PDC-RMID:\n Habilitada"
+                        # self.color_PDCR = "blue"
+                       
+                        # command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                ################################################## CAJAS PDC-S #################################################################
+                if "statenido_PDC-S" in payload:
+ 
+                    if payload["statenido_PDC-S"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-S" : False}), qos = 2)
+
+                        # self.nido_PDCS = "PDC-S:\n Habilitar"
+                        # self.color_PDCS = "red"
+                       
+                        # command = {"lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_PDC-S"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-S" : False}), qos = 2)
+
+                        # self.nido_PDCS = "PDC-S:\n Habilitada"
+                        # self.color_PDCS = "blue"
+                       
+                        # command = {"lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2) 
+                        
+                ################################################## CAJAS TBLU #################################################################
+                if "statenido_TBLU" in payload:
+ 
+                    if payload["statenido_TBLU"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"TBLU" : False}), qos = 2)
+
+                        # self.nido_TBLU = "TBLU:\n Habilitar"
+                        # self.color_TBLU = "red"
+                       
+                        # command = {"lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_TBLU"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"TBLU" : False}), qos = 2)
+
+                        # self.nido_TBLU = "TBLU:\n Habilitada"
+                        # self.color_TBLU = "blue"
+                       
+                        # command = {"lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2) 
+                        
+                ################################################## CAJAS PDCP2 #################################################################
+                if "statenido_PDC-P2" in payload:
+ 
+                    if payload["statenido_PDC-P2"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-P2" : False}), qos = 2)
+
+                        # self.nido_PDCP2 = "PDC-P2:\n Habilitar"
+                        # self.color_PDCP2 = "red"
+                       
+                        # command = {"lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_PDC-P2"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-P2" : False}), qos = 2)
+
+                        # self.nido_PDCP2 = "PDC-P2:\n Habilitada"
+                        # self.color_PDCP2 = "blue"
+                       
+                        # command = {"lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2) 
+
+
+                ################################################## CAJAS F96 #################################################################
+                if "statenido_F96" in payload:
+ 
+                    if payload["statenido_F96"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"F96" : False}), qos = 2)
+
+                        # self.nido_F96 = "F96:\n Habilitar"
+                        # self.color_F96 = "red"
+                       
+                        # command = {"lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_F96"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"F96" : False}), qos = 2)
+
+                        # self.nido_F96 = "F96:\n Habilitada"
+                        # self.color_F96 = "blue"
+                       
+                        # command = {"lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2) 
+
+                ################################################## CAJAS MFBP2 #################################################################
+                if "statenido_MFB-P2" in payload:
+ 
+                    if payload["statenido_MFB-P2"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"MFB-P2" : False}), qos = 2)
+
+                        # self.nido_MFBP2 = "MFBP2:\n Habilitar"
+                        # self.color_MFBP2 = "red"
+                       
+                        # command = {"lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_MFB-P2"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"MFB-P2" : False}), qos = 2)
+
+                        # self.nido_MFBP2 = "MFBP2:\n Habilitada"
+                        # self.color_MFBP2 = "blue"
+                       
+                        # command = {"lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2) 
+                        
+                ################################################## CAJAS MFBP1 #################################################################
+                if "statenido_MFB-P1" in payload:
+ 
+                    if payload["statenido_MFB-P1"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"MFB-P1" : False}), qos = 2)
+
+                        # self.nido_MFBP1 = "MFB-P1:\n Habilitar"
+                        # self.color_MFBP1 = "red"
+                       
+                        # command = {"lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_MFB-P1"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"MFB-P1" : False}), qos = 2)
+
+                        # self.nido_MFBP1 = "MFB-P1:\n Habilitada"
+                        # self.color_MFBP1 = "blue"
+                       
+                        # command = {"lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                ################################################## CAJAS MFB-S #################################################################
+                if "statenido_MFB-S" in payload:
+ 
+                    if payload["statenido_MFB-S"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"MFB-S" : False}), qos = 2)
+
+                        # self.nido_MFBS = "MFB-S:\n Habilitar"
+                        # self.color_MFBS = "red"
+                       
+                        # command = {"lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_MFB-S"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"MFB-S" : False}), qos = 2)
+
+                        # self.nido_MFBS = "MFB-S:\n Habilitada"
+                        # self.color_MFBS = "blue"
+                       
+                        # command = {"lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                ################################################## CAJAS MFB-E #################################################################
+                if "statenido_MFB-E" in payload:
+ 
+                    if payload["statenido_MFB-E"] == False:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"MFB-E" : False}), qos = 2)
+
+                        # self.nido_MFBE = "MFB-E:\n Habilitar"
+                        # self.color_MFBE = "red"
+                       
+                        # command = {"lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    elif payload["statenido_MFB-E"] == True:
+                        
+                        #Se manda a deshabilitar el nido
+                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"MFB-E" : False}), qos = 2)
+
+                        # self.nido_MFBE = "MFB-E:\n Habilitada"
+                        # self.color_MFBE = "blue"
+                       
+                        # command = {"lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}"}}
+                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+
                 if "request" in payload:
                     self.model.input_data["gui"]["request"] = payload["request"]
                     if payload["request"] == "login":

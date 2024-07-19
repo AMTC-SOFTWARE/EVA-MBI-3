@@ -128,13 +128,17 @@ class Startup(QState):
             "lbl_info4" : {"text": "", "color": "black"},
             "lbl_nuts"  : {"text": "", "color": "black"},
             ##############################################
-            "lbl_box1"  : {"text": "", "color": "black"},
+            "lbl_box1"  : {"text": "", "color": "black", "visible": True},
             "lbl_box2"  : {"text": "", "color": "black"},
             "lbl_box3"  : {"text": "", "color": "black"},
             "lbl_box4"  : {"text": "", "color": "black"},
             "lbl_box5"  : {"text": "", "color": "black"},
             "lbl_box6"  : {"text": "", "color": "black"},
             "lbl_box7"  : {"text": "", "color": "black"}, ######### Modificación para F96 #########
+            "lbl_box8"  : {"text": "", "color": "black"},
+            "lbl_box9"  : {"text": "", "color": "black"},
+            "lbl_box10"  : {"text": "", "color": "black"},
+            "lbl_box11"  : {"text": "", "color": "black"},
             ##############################################
             "lbl_result" : {"text": "Se requiere un login para continuar", "color": "green"},
             "lbl_steps" : {"text": "Ingresa tu código de acceso", "color": "black"},
@@ -162,7 +166,7 @@ class Startup(QState):
         except OSError as error:
             print("ERROR AL CREAR CARPETA:::\n",error)
         
-        QTimer.singleShot(15, self.kioskMode)
+        #QTimer.singleShot(15, self.kioskMode)
         self.model.robot.stop()
         self.ok.emit()
 
@@ -285,6 +289,10 @@ class StartCycle (QState):
             "lbl_box5" : {"text": "", "color": "orange"},
             "lbl_box6" : {"text": "", "color": "orange"},
             "lbl_box7" : {"text": "", "color": "orange"},######### Modificación para F96 #########
+            "lbl_box8"  : {"text": "", "color": "black"},
+            "lbl_box9"  : {"text": "", "color": "black"},
+            "lbl_box10"  : {"text": "", "color": "black"},
+            "lbl_box11"  : {"text": "", "color": "black"},
             #############################################
             "lbl_result" : {"text": "Nuevo ciclo iniciado", "color": "green"},
             "lbl_steps" : {"text": "Escanea el numero HM", "color": "black"},
