@@ -637,31 +637,50 @@ class MainWindow (QMainWindow):
                     self.ui.lbl_box1.setStyleSheet("color: " + message["lbl_box1"]["color"])
                 if "visible" in message["lbl_box1"]:
                     self.ui.lbl_box1.setVisible(message["lbl_box1"]["visible"])
+                    
             if "lbl_box2" in message:
                 self.ui.lbl_box2.setText(message["lbl_box2"]["text"])
                 if "color" in message["lbl_box2"]:
                     self.ui.lbl_box2.setStyleSheet("color: " + message["lbl_box2"]["color"])
+                if "visible" in message["lbl_box2"]:
+                    self.ui.lbl_box2.setVisible(message["lbl_box2"]["visible"])
+                    
             if "lbl_box3" in message:
                 self.ui.lbl_box3.setText(message["lbl_box3"]["text"])
                 if "color" in message["lbl_box3"]:
                     self.ui.lbl_box3.setStyleSheet("color: " + message["lbl_box3"]["color"])
+                if "visible" in message["lbl_box3"]:
+                    self.ui.lbl_box3.setVisible(message["lbl_box3"]["visible"])
+                    
             if "lbl_box4" in message:
                 self.ui.lbl_box4.setText(message["lbl_box4"]["text"])
                 if "color" in message["lbl_box4"]:
                     self.ui.lbl_box4.setStyleSheet("color: " + message["lbl_box4"]["color"])
+                if "visible" in message["lbl_box4"]:
+                    self.ui.lbl_box4.setVisible(message["lbl_box4"]["visible"])
+                    
             if "lbl_box5" in message:
                 self.ui.lbl_box5.setText(message["lbl_box5"]["text"])
                 if "color" in message["lbl_box5"]:
                     self.ui.lbl_box5.setStyleSheet("color: " + message["lbl_box5"]["color"])
+                if "visible" in message["lbl_box5"]:
+                    self.ui.lbl_box5.setVisible(message["lbl_box5"]["visible"])
+                    
             if "lbl_box6" in message:
                 self.ui.lbl_box6.setText(message["lbl_box6"]["text"])
                 if "color" in message["lbl_box6"]:
                     self.ui.lbl_box6.setStyleSheet("color: " + message["lbl_box6"]["color"])
+                if "visible" in message["lbl_box6"]:
+                    self.ui.lbl_box6.setVisible(message["lbl_box6"]["visible"])
+                    
             ######### Modificación para F96 #########
             if "lbl_box7" in message:
                 self.ui.lbl_box7.setText(message["lbl_box7"]["text"])
                 if "color" in message["lbl_box7"]:
                     self.ui.lbl_box7.setStyleSheet("color: " + message["lbl_box7"]["color"])
+                if "visible" in message["lbl_box7"]:
+                    self.ui.lbl_box7.setVisible(message["lbl_box7"]["visible"])
+                    
             ######### Modificación para F96 #########
             if "lbl_box8" in message:
                 self.ui.lbl_box8.setText(message["lbl_box8"]["text"])

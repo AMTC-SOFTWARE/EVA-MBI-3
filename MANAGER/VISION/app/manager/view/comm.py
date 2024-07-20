@@ -253,16 +253,16 @@ class MqttClient (QObject):
                     #
                     if "PDC-Dbracket_ERROR" in payload:
                         if payload["PDC-D_ERROR"] == True:
-                            self.nido_PDCD = "PDC-Dbracket:\n clampeo incorrecto"
+                            self.nido_PDCD = "PDC-Dbracket:\n clamp incorrecto"
                             self.color_PDCD = "red"
 
                     if "clamp_PDC-Dbracket" in payload:
                         if payload["clamp_PDC-Dbracket"] == True:
-                            self.nido_PDCD = "PDC-Dbracket:\n clampeo correcto"
+                            self.nido_PDCD = "PDC-Dbracket:\n clamp correcto"
                             self.color_PDCD = "green"
 
                     command = {
-                        "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}
+                        "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}", "visible" : True}
                         }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
@@ -271,10 +271,12 @@ class MqttClient (QObject):
                         if payload["PDC-D"] == True:
                             self.nido_PDCD = "PDC-D:\n Habilitada"
                             self.color_PDCD = "blue"
+                           
 
                         if payload["PDC-D"] == False:
                             self.nido_PDCD = "PDC-D:\n Habilitar"
                             self.color_PDCD = "red"
+                          
 
                     if "PDC-D_ERROR" in payload:
                         if payload["PDC-D_ERROR"] == True:
@@ -287,7 +289,7 @@ class MqttClient (QObject):
                             self.color_PDCD = "green"
 
                     command = {
-                        "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}
+                        "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}", "visible" : True}
                         }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
@@ -311,7 +313,7 @@ class MqttClient (QObject):
                             self.color_PDCP = "green"
 
                     command = {
-                                "lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}"}
+                                "lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
@@ -352,7 +354,7 @@ class MqttClient (QObject):
                             self.nido_PDCR = f"{PDCR}:\n clamp correcto"
                     
                     command = {
-                            "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"}
+                            "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "visible" : True}
                             }
 
                     ##recorrer las cajas de la colección buscando que exista una cavidad F96 en el arnés
@@ -386,7 +388,7 @@ class MqttClient (QObject):
 
 
                     command = {
-                                "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}"}
+                                "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
@@ -411,7 +413,7 @@ class MqttClient (QObject):
 
 
                     command = {
-                                "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}"}
+                                "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
@@ -436,7 +438,7 @@ class MqttClient (QObject):
 
 
                     command = {
-                                "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}"}
+                                "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
@@ -461,7 +463,7 @@ class MqttClient (QObject):
 
 
                     command = {
-                                "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}"}
+                                "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
@@ -490,7 +492,7 @@ class MqttClient (QObject):
                             self.nido_MFBP2 = ""
                             self.color_MFBP2 = "blue"
                     command = {
-                                "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}"}
+                                "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
@@ -519,7 +521,7 @@ class MqttClient (QObject):
                             self.nido_MFBP1 = ""
                             self.color_MFBP1 = "blue"
                     command = {
-                                "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}"}
+                                "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
@@ -548,7 +550,7 @@ class MqttClient (QObject):
                             self.nido_MFBS = ""
                             self.color_MFBS = "blue"
                     command = {
-                                "lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}"}
+                                "lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
@@ -577,7 +579,7 @@ class MqttClient (QObject):
                             self.nido_MFBE = ""
                             self.color_MFBE = "blue"
                     command = {
-                                "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}"}
+                                "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}", "visible" : True}
                               }
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
