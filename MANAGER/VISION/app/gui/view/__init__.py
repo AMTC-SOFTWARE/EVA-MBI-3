@@ -686,18 +686,33 @@ class MainWindow (QMainWindow):
                 self.ui.lbl_box8.setText(message["lbl_box8"]["text"])
                 if "color" in message["lbl_box8"]:
                     self.ui.lbl_box8.setStyleSheet("color: " + message["lbl_box8"]["color"])
+                if "visible" in message["lbl_box8"]:
+                    self.ui.lbl_box8.setVisible(message["lbl_box8"]["visible"])
+                    
             if "lbl_box9" in message:
                 self.ui.lbl_box9.setText(message["lbl_box9"]["text"])
                 if "color" in message["lbl_box9"]:
                     self.ui.lbl_box9.setStyleSheet("color: " + message["lbl_box9"]["color"])
+                if "visible" in message["lbl_box9"]:
+                    self.ui.lbl_box9.setVisible(message["lbl_box9"]["visible"])
+
+                    
             if "lbl_box10" in message:
                 self.ui.lbl_box10.setText(message["lbl_box10"]["text"])
                 if "color" in message["lbl_box10"]:
                     self.ui.lbl_box10.setStyleSheet("color: " + message["lbl_box10"]["color"])
+                if "visible" in message["lbl_box10"]:
+                    self.ui.lbl_box10.setVisible(message["lbl_box10"]["visible"])
+
+                    
             if "lbl_box11" in message:
                 self.ui.lbl_box11.setText(message["lbl_box11"]["text"])
                 if "color" in message["lbl_box11"]:
                     self.ui.lbl_box11.setStyleSheet("color: " + message["lbl_box11"]["color"])
+                if "visible" in message["lbl_box11"]:
+                    self.ui.lbl_box11.setVisible(message["lbl_box11"]["visible"])
+
+                    
             ###########################################################################
             if "lbl_result" in message:
                 self.ui.lbl_result.setText(message["lbl_result"]["text"])
