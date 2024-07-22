@@ -25,6 +25,7 @@ import sys
 class MainWindow (QMainWindow):
 
     output = pyqtSignal(dict)
+    plc_output = pyqtSignal(dict)
     ready =  pyqtSignal()
     def quitar_numeros_enteros(self,cadena):
         # Utilizar una expresión regular para encontrar y reemplazar números enteros
@@ -45,6 +46,7 @@ class MainWindow (QMainWindow):
         self.client = MqttClient(self.model, self)
         self.client.subscribe.connect(self.input)
         self.output.connect(self.client.publish)
+        self.plc_output.connect(self.client.plc_publish)
         self.client.connected.connect(self.ready.emit)
 
         self.model.name = name
@@ -123,23 +125,36 @@ class MainWindow (QMainWindow):
         self.shutdown           = False
         
     def nidoPDCD(self):
+        print("botón PDC-D presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box1.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de PDC-D, enviando señal PDC-D:False a PLC")
+            self.plc_output.emit({"PDC-D":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de PDC-D")
+            self.plc_output.emit({"PDC-D":True})
+        else:
+            print("no entró a ninguna acción en PDC-D")
             
 
     def nidoPCDP(self):
+
+        print("botón PDC-P presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box2.text()
-        
+        print("currentText: ",currentText)
+
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de PDC-P, enviando señal PDC-P:False a PLC")
+            self.plc_output.emit({"PDC-P":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de PDC-P")
+            self.plc_output.emit({"PDC-P":True})
+        else:
+            print("no entró a ninguna acción en PDC-P")
             
 
     def nidoPDCR(self):

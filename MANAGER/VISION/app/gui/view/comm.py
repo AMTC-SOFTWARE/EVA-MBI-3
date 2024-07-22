@@ -50,7 +50,7 @@ class MqttClient (QObject):
                         "popOut": "GUI MQTT connection fail",
                         "lbl_result" : {"text": "GUI MQTT connection fail", "color": "red"}, 
                         "lbl_steps" : {"text": "Check broker and restart", "color": "black"}
-                    }) 
+                    })
         except Exception as ex:
             print("GUI MQTT client connection fail. Exception: ", ex.args)
             self.subscribe.emit(
@@ -73,7 +73,13 @@ class MqttClient (QObject):
     def publish (self, message):
         try:
             self.client.publish(self.model.statusTopic,json.dumps(message), qos = 2)
-            #print("GUI piublish:", message, "in topic: ", self.model.statusTopic)
+        except Exception as ex:
+            print (ex.args)
+
+    @pyqtSlot(dict)
+    def plc_publish (self, message):
+        try:
+            self.client.publish(self.model.plcTopic,json.dumps(message), qos = 2)
         except Exception as ex:
             print (ex.args)
 

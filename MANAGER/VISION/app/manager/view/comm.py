@@ -294,6 +294,7 @@ class MqttClient (QObject):
                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "PDC-P" in payload_str:
+
                     if "PDC-P" in payload:
                         if payload["PDC-P"] == True:
                             self.nido_PDCP = "PDC-P:\n Habilitada"
@@ -307,6 +308,7 @@ class MqttClient (QObject):
                         if payload["PDC-P_ERROR"] == True:
                             self.nido_PDCP = "PDC-P:\n clamp incorrecto"
                             self.color_PDCP = "red"
+                    
                     if "clamp_PDC-P" in payload:
                         if payload["clamp_PDC-P"] == True:
                             self.nido_PDCP = "PDC-P:\n clamp correcto"
@@ -616,33 +618,33 @@ class MqttClient (QObject):
             if message.topic == self.model.sub_topics["gui"]:
                 
                 ################################################## CAJAS PDC-D #################################################################
-                #PDC-D
-                if "statenido_PDC-D" in payload:
+                ##PDC-D
+                #if "statenido_PDC-D" in payload:
  
-                    if payload["statenido_PDC-D"] == False:
+                #    if payload["statenido_PDC-D"] == False:
                         
-                        #Se manda a deshabilitar el nido
-                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-D" : False}), qos = 2)
+                #        #Se manda a deshabilitar el nido
+                #        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-D" : False}), qos = 2)
 
-                        # self.nido_PDCD = "PDC-D:\n Habilitar"
-                        # self.color_PDCD = "red"
+                #        # self.nido_PDCD = "PDC-D:\n Habilitar"
+                #        # self.color_PDCD = "red"
                        
-                        # command = {"lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}}
-                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                #        # command = {"lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}}
+                #        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                         
-                    elif payload["statenido_PDC-D"] == True:
+                #    elif payload["statenido_PDC-D"] == True:
                         
-                        #Se manda a deshabilitar el nido
-                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-D" : False}), qos = 2)
+                #        #Se manda a deshabilitar el nido
+                #        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-D" : False}), qos = 2)
 
-                        # self.nido_PDCD = "PDC-D:\n Habilitada"
-                        # self.color_PDCD = "blue"
+                #        # self.nido_PDCD = "PDC-D:\n Habilitada"
+                #        # self.color_PDCD = "blue"
                        
-                        # command = {"lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}}
-                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                #        # command = {"lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}}
+                #        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                         
                 #PDC-Dbracket       
-                elif "statenido_PDC-Dbracket" in payload:
+                if "statenido_PDC-Dbracket" in payload:
  
                     if payload["statenido_PDC-Dbracket"] == False:
                         
@@ -667,30 +669,30 @@ class MqttClient (QObject):
                         # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                         
                 ################################################## CAJAS PDC-P #################################################################
-                #PDC-P
-                if "statenido_PDC-P" in payload:
+                ##PDC-P
+                #if "statenido_PDC-P" in payload:
  
-                    if payload["statenido_PDC-P"] == False:
+                #    if payload["statenido_PDC-P"] == False:
                         
-                        #Se manda a deshabilitar el nido
-                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-P" : False}), qos = 2)
+                #        #Se manda a deshabilitar el nido
+                #        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-P" : False}), qos = 2)
 
-                        # self.nido_PDCP = "PDC-P:\n Habilitar"
-                        # self.color_PDCP = "red"
+                #        # self.nido_PDCP = "PDC-P:\n Habilitar"
+                #        # self.color_PDCP = "red"
                        
-                        # command = {"lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}"}}
-                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                #        # command = {"lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}"}}
+                #        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                         
-                    elif payload["statenido_PDC-P"] == True:
+                #    elif payload["statenido_PDC-P"] == True:
                         
-                        #Se manda a deshabilitar el nido
-                        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-P" : False}), qos = 2)
+                #        #Se manda a deshabilitar el nido
+                #        self.client.publish(self.model.pub_topics["plc"],json.dumps({"PDC-P" : False}), qos = 2)
 
-                        # self.nido_PDCP = "PDC-P:\n Habilitada"
-                        # self.color_PDCP = "blue"
+                #        # self.nido_PDCP = "PDC-P:\n Habilitada"
+                #        # self.color_PDCP = "blue"
                        
-                        # command = {"lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}"}}
-                        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)        
+                #        # command = {"lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}"}}
+                #        # self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)        
                         
 
                 ################################################## CAJAS PDC-R #################################################################
@@ -982,12 +984,13 @@ class MqttClient (QObject):
                     if "position_reached" in payload["response"]:
                         self.rbt_pose.emit()
 
-                    if "home_reached" in payload["response"]:
-                        self.rbt_home.emit()
-
                     #if "Error, is Safety OK?" in payload["response"]:
                     #    print("cortina interrumpida signal")
                     #    self.error_cortina.emit()
+
+                    if "home_reached" in payload["response"]:
+                        self.rbt_home.emit()
+
             #variable para guardar los resultados obtenidos al hacer una inspección con visycam desde la GDI
             if message.topic == self.model.sub_topics["vision"]:
 
