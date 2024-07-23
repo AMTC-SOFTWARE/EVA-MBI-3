@@ -134,7 +134,7 @@ class MainWindow (QMainWindow):
             print("entró a correcto de PDC-D, enviando señal PDC-D:False a PLC")
             self.plc_output.emit({"PDC-D":False})
         elif "Habilitar" in currentText:
-            print("entró a Habilitar de PDC-D")
+            print("entró a Habilitar de PDC-D, enviando señal PDC-D:True a PLC")
             self.plc_output.emit({"PDC-D":True})
         else:
             print("no entró a ninguna acción en PDC-D")
@@ -151,92 +151,147 @@ class MainWindow (QMainWindow):
             print("entró a correcto de PDC-P, enviando señal PDC-P:False a PLC")
             self.plc_output.emit({"PDC-P":False})
         elif "Habilitar" in currentText:
-            print("entró a Habilitar de PDC-P")
+            print("entró a Habilitar de PDC-P, enviando señal PDC-P:True a PLC")
             self.plc_output.emit({"PDC-P":True})
         else:
             print("no entró a ninguna acción en PDC-P")
             
 
     def nidoPDCR(self):
+        print("botón PDC-R presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box3.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de PDC-R, enviando señal PDC-R:False a PLC")
+            self.plc_output.emit({currentText.split(":\n")[0]:False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de PDC-R, enviando señal PDC-R:True a PLC")
+            self.plc_output.emit({currentText.split(":\n")[0]:True})
+        else:
+            print("no entró a ninguna acción en PDC-R")
             
     def nidoPDCS(self):
+        print("botón PDC-S presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box4.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de PDC-S, enviando señal PDC-S:False a PLC")
+            self.plc_output.emit({"PDC-S":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de PDC-S, enviando señal PDC-S:True a PLC")
+            self.plc_output.emit({"PDC-S":True})
+        else:
+            print("no entró a ninguna acción en PDC-S")
             
     def nidoTBLU(self):
+        print("botón TBLU presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box5.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de TBLU, enviando señal TBLU:False a PLC")
+            self.plc_output.emit({"TBLU":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de TBLU, enviando señal TBLU:True a PLC")
+            self.plc_output.emit({"TBLU":True})
+        else:
+            print("no entró a ninguna acción en TBLU")
 
     def nidoPDCP2(self):
+        print("botón PDC-P2 presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box6.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de PDC-P2, enviando señal PDC-P2:False a PLC")
+            self.plc_output.emit({"PDC-P2":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de PDC-P2, enviando señal PDC-P2:True a PLC")
+            self.plc_output.emit({"PDC-P2":True})
+        else:
+            print("no entró a ninguna acción en PDC-P2")
             
     def nidoF96(self):
+        print("botón F96 presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box7.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de F96, enviando señal F96:False a PLC")
+            self.plc_output.emit({"F96":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de F96, enviando señal F96:True a PLC")
+            self.plc_output.emit({"F96":True})
+        else:
+            print("no entró a ninguna acción en F96")
             
     def nidoMFBP2(self):
+        print("botón MFB-P2 presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box8.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de MFB-P2, enviando señal MFB-P2:False a PLC")
+            self.plc_output.emit({"MFB-P2":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de MFB-P2, enviando señal MFB-P2:True a PLC")
+            self.plc_output.emit({"MFB-P2":True})
+        else:
+            print("no entró a ninguna acción en MFB-P2")
             
     def nidoMFBP1(self):
+        print("botón MFB-P1 presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box9.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de MFB-P1, enviando señal MFB-P1:False a PLC")
+            self.plc_output.emit({"MFB-P1":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de MFB-P1, enviando señal MFB-P1:True a PLC")
+            self.plc_output.emit({"MFB-P1":True})
+        else:
+            print("no entró a ninguna acción en MFB-P1")
+        
     
     def nidoMFBS(self):
+        print("botón MFB-S presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box10.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de MFB-S, enviando señal MFB-S:False a PLC")
+            self.plc_output.emit({"MFB-S":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de MFB-S, enviando señal MFB-S:True a PLC")
+            self.plc_output.emit({"MFB-S":True})
+        else:
+            print("no entró a ninguna acción en MFB-S")
             
     def nidoMFBE(self):
+        print("botón MFB-E presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box11.text()
+        print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:False})
+            print("entró a correcto de MFB-E, enviando señal MFB-E:False a PLC")
+            self.plc_output.emit({"MFB-E":False})
         elif "Habilitar" in currentText:
-            self.output.emit({"statenido_"+currentText.split(":\n")[0]:True})
+            print("entró a Habilitar de MFB-E, enviando señal MFB-E:True a PLC")
+            self.plc_output.emit({"MFB-E":True})
+        else:
+            print("no entró a ninguna acción en MFB-E")
 
     def horaxhora(self):
         #self.qw_Tabla_horas.show()
@@ -447,9 +502,6 @@ class MainWindow (QMainWindow):
         
     
 
-    
-
-
     def menuProcess(self, q):
         try:
             case = q.text()               
@@ -650,82 +702,82 @@ class MainWindow (QMainWindow):
                 self.ui.lbl_box1.setText(message["lbl_box1"]["text"])
                 if "color" in message["lbl_box1"]:
                     self.ui.lbl_box1.setStyleSheet("color: " + message["lbl_box1"]["color"])
-                if "visible" in message["lbl_box1"]:
-                    self.ui.lbl_box1.setVisible(message["lbl_box1"]["visible"])
+                if "hidden" in message["lbl_box1"]:
+                    self.ui.lbl_box1.setHidden(message["lbl_box1"]["hidden"])
                     
             if "lbl_box2" in message:
                 self.ui.lbl_box2.setText(message["lbl_box2"]["text"])
                 if "color" in message["lbl_box2"]:
                     self.ui.lbl_box2.setStyleSheet("color: " + message["lbl_box2"]["color"])
-                if "visible" in message["lbl_box2"]:
-                    self.ui.lbl_box2.setVisible(message["lbl_box2"]["visible"])
+                if "hidden" in message["lbl_box2"]:
+                    self.ui.lbl_box2.setHidden(message["lbl_box2"]["hidden"])
                     
             if "lbl_box3" in message:
                 self.ui.lbl_box3.setText(message["lbl_box3"]["text"])
                 if "color" in message["lbl_box3"]:
                     self.ui.lbl_box3.setStyleSheet("color: " + message["lbl_box3"]["color"])
-                if "visible" in message["lbl_box3"]:
-                    self.ui.lbl_box3.setVisible(message["lbl_box3"]["visible"])
+                if "hidden" in message["lbl_box3"]:
+                    self.ui.lbl_box3.setHidden(message["lbl_box3"]["hidden"])
                     
             if "lbl_box4" in message:
                 self.ui.lbl_box4.setText(message["lbl_box4"]["text"])
                 if "color" in message["lbl_box4"]:
                     self.ui.lbl_box4.setStyleSheet("color: " + message["lbl_box4"]["color"])
-                if "visible" in message["lbl_box4"]:
-                    self.ui.lbl_box4.setVisible(message["lbl_box4"]["visible"])
+                if "hidden" in message["lbl_box4"]:
+                    self.ui.lbl_box4.setHidden(message["lbl_box4"]["hidden"])
                     
             if "lbl_box5" in message:
                 self.ui.lbl_box5.setText(message["lbl_box5"]["text"])
                 if "color" in message["lbl_box5"]:
                     self.ui.lbl_box5.setStyleSheet("color: " + message["lbl_box5"]["color"])
-                if "visible" in message["lbl_box5"]:
-                    self.ui.lbl_box5.setVisible(message["lbl_box5"]["visible"])
+                if "hidden" in message["lbl_box5"]:
+                    self.ui.lbl_box5.setHidden(message["lbl_box5"]["hidden"])
                     
             if "lbl_box6" in message:
                 self.ui.lbl_box6.setText(message["lbl_box6"]["text"])
                 if "color" in message["lbl_box6"]:
                     self.ui.lbl_box6.setStyleSheet("color: " + message["lbl_box6"]["color"])
-                if "visible" in message["lbl_box6"]:
-                    self.ui.lbl_box6.setVisible(message["lbl_box6"]["visible"])
+                if "hidden" in message["lbl_box6"]:
+                    self.ui.lbl_box6.setHidden(message["lbl_box6"]["hidden"])
                     
             ######### Modificación para F96 #########
             if "lbl_box7" in message:
                 self.ui.lbl_box7.setText(message["lbl_box7"]["text"])
                 if "color" in message["lbl_box7"]:
                     self.ui.lbl_box7.setStyleSheet("color: " + message["lbl_box7"]["color"])
-                if "visible" in message["lbl_box7"]:
-                    self.ui.lbl_box7.setVisible(message["lbl_box7"]["visible"])
+                if "hidden" in message["lbl_box7"]:
+                    self.ui.lbl_box7.setHidden(message["lbl_box7"]["hidden"])
                     
             ######### Modificación para F96 #########
             if "lbl_box8" in message:
                 self.ui.lbl_box8.setText(message["lbl_box8"]["text"])
                 if "color" in message["lbl_box8"]:
                     self.ui.lbl_box8.setStyleSheet("color: " + message["lbl_box8"]["color"])
-                if "visible" in message["lbl_box8"]:
-                    self.ui.lbl_box8.setVisible(message["lbl_box8"]["visible"])
+                if "hidden" in message["lbl_box8"]:
+                    self.ui.lbl_box8.setHidden(message["lbl_box8"]["hidden"])
                     
             if "lbl_box9" in message:
                 self.ui.lbl_box9.setText(message["lbl_box9"]["text"])
                 if "color" in message["lbl_box9"]:
                     self.ui.lbl_box9.setStyleSheet("color: " + message["lbl_box9"]["color"])
-                if "visible" in message["lbl_box9"]:
-                    self.ui.lbl_box9.setVisible(message["lbl_box9"]["visible"])
+                if "hidden" in message["lbl_box9"]:
+                    self.ui.lbl_box9.setHidden(message["lbl_box9"]["hidden"])
 
                     
             if "lbl_box10" in message:
                 self.ui.lbl_box10.setText(message["lbl_box10"]["text"])
                 if "color" in message["lbl_box10"]:
                     self.ui.lbl_box10.setStyleSheet("color: " + message["lbl_box10"]["color"])
-                if "visible" in message["lbl_box10"]:
-                    self.ui.lbl_box10.setVisible(message["lbl_box10"]["visible"])
+                if "hidden" in message["lbl_box10"]:
+                    self.ui.lbl_box10.setHidden(message["lbl_box10"]["hidden"])
 
                     
             if "lbl_box11" in message:
                 self.ui.lbl_box11.setText(message["lbl_box11"]["text"])
                 if "color" in message["lbl_box11"]:
                     self.ui.lbl_box11.setStyleSheet("color: " + message["lbl_box11"]["color"])
-                if "visible" in message["lbl_box11"]:
-                    self.ui.lbl_box11.setVisible(message["lbl_box11"]["visible"])
+                if "hidden" in message["lbl_box11"]:
+                    self.ui.lbl_box11.setHidden(message["lbl_box11"]["hidden"])
 
                     
             ###########################################################################

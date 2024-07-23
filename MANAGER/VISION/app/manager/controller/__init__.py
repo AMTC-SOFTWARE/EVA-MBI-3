@@ -128,17 +128,17 @@ class Startup(QState):
             "lbl_info4" : {"text": "", "color": "black"},
             "lbl_nuts"  : {"text": "", "color": "black"},
             ##############################################
-            "lbl_box1"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box2"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box3"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box4"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box5"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box6"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box7"  : {"text": "", "color": "black", "visible": False}, ######### Modificación para F96 #########
-            "lbl_box8"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box9"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box10"  : {"text": "", "color": "black", "visible": False},
-            "lbl_box11"  : {"text": "", "color": "black", "visible": False},
+            "lbl_box1"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box2"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box3"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box4"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box5"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box6"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box7"  : {"text": "", "color": "black", "hidden": True}, ######### Modificación para F96 #########
+            "lbl_box8"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box9"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box10"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box11"  : {"text": "", "color": "black", "hidden": True},
             ##############################################
             "lbl_result" : {"text": "Se requiere un login para continuar", "color": "green"},
             "lbl_steps" : {"text": "Ingresa tu código de acceso", "color": "black"},
