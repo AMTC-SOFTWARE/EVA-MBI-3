@@ -356,22 +356,24 @@ class MqttClient (QObject):
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
                 if "PDC-R" in payload_str:
+                    
+                    PDCR = "PDC-R"
                                        
                     #dependiendo del mensaje que le llegue desde la GDI
                     if "PDC-RMID" in payload_str:
                         PDCR = "PDC-RMID"
                     if "PDC-RS" in payload_str:
                         PDCR = "PDC-RS"
-                    else:
-                        PDCR = "PDC-R"
+                        
                     
                     #Iterar sobre cada caja en el diccionario para que al menos coincida elguna con el string "PDC-R"
                     for key in self.model.input_data["database"]["modularity"].keys():
-                        
+                       
                         #Si PDCR se encuentra en el diccionario entonces entra a hacer los procedimientos
                         if PDCR in key:
-                    
+                            
                             if PDCR in payload:
+ 
                      
                                 if payload[PDCR] == True:
                                     self.nido_PDCR = f"{PDCR}:\n Habilitada"
@@ -381,18 +383,18 @@ class MqttClient (QObject):
                                     self.nido_PDCR = f"{PDCR}:\n Habilitar"
                                     self.color_PDCR = "red"
 
-                                if "PDC-R_ERROR" in payload:
-                                    if payload["PDC-R_ERROR"] == True:
-                                        self.color_PDCR = "red"
-                                        self.nido_PDCR = f"{PDCR}:\n clamp incorrecto"
+                            if "PDC-R_ERROR" in payload:
+                                if payload["PDC-R_ERROR"] == True:
+                                    self.color_PDCR = "red"
+                                    self.nido_PDCR = f"{PDCR}:\n clamp incorrecto"
 
-                                if "clamp_PDC-R" in payload:
-                                    if payload["clamp_PDC-R"] == True:
-                                        self.color_PDCR = "green"
-                                        self.nido_PDCR = f"{PDCR}:\n clamp correcto"
+                            if "clamp_PDC-R" in payload:
+                                if payload["clamp_PDC-R"] == True:
+                                    self.color_PDCR = "green"
+                                    self.nido_PDCR = f"{PDCR}:\n clamp correcto"
                   
-                                command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : False}}
-                                self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                            command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : False}}
+                            self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
                 if "PDC-S" in payload_str:
                     
