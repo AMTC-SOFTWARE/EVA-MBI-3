@@ -61,6 +61,9 @@ class Model (object):
         #variable para guardar toda la información de la configuración del arnés sin los fusibles vacíos
         self.arnes_data = {}
 
+        #variable para saber cuando se está en el estado WaitingHome
+        self.waiting_home = False
+
         #variable para saber si se ignoran las inspecciones de alturas de fusibles externos de PDC-R, solamente si todos son vacíos
         self.eliminar_inspeccion_externos = False
 
@@ -463,6 +466,7 @@ class Model (object):
     ###########################################################
 
     def reset (self):
+        self.waiting_home = False
         self.valores_torques_red = False
         self.revisando_resultado_height = False
         self.revisando_resultado = False

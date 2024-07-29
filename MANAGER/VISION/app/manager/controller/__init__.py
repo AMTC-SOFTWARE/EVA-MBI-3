@@ -565,16 +565,21 @@ class CheckQr (QState):
                                     "NAMEVISION": "EVA-MBI-3"
                                     }
                                 endpointUpdate = "http://{}/server_famx2/update/seghm/{}".format(self.model.server,self.model.id_HM)
-                                
                                 respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
                                 respTrazabilidad = respTrazabilidad.json()
-                                sleep(0.1)
-                                respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
-                                respTrazabilidad = respTrazabilidad.json()
-                                sleep(0.1)
-                                respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
-                                respTrazabilidad = respTrazabilidad.json()
+
+                                if "exception" in respTrazabilidad:
+                                    sleep(0.1)
+                                    respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
+                                    respTrazabilidad = respTrazabilidad.json()
+
+                                    if "exception" in respTrazabilidad:
+                                        sleep(0.1)
+                                        respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
+                                        respTrazabilidad = respTrazabilidad.json()
+
                                 print("respTrazabilidad del update: ",respTrazabilidad)
+
                             #Si la columna que indica la hora de salida de INSERCIÓN es None, significa que no ha completado esa estación y NO puede entrar aún a Visión.
                             else:
                                 print("El Arnés no ha pasado por la estación anterior (INSERCION) por lo que no puede entrar a Visión")
@@ -1854,18 +1859,18 @@ class Finish (QState):
                 
                 resp = requests.post(endpoint, data=json.dumps(trazabilidad))
                 resp = resp.json()
-                sleep(0.1)
-                resp = requests.post(endpoint, data=json.dumps(trazabilidad))
-                resp = resp.json()
-                sleep(0.1)
-                resp = requests.post(endpoint, data=json.dumps(trazabilidad))
-                resp = resp.json()
+                if "exception" in respTrazabilidad:
+                    sleep(0.1)
+                    resp = requests.post(endpoint, data=json.dumps(trazabilidad))
+                    resp = resp.json()
 
-
-
-
+                    if "exception" in respTrazabilidad:
+                        sleep(0.1)
+                        resp = requests.post(endpoint, data=json.dumps(trazabilidad))
+                        resp = resp.json()
 
                 print("Resp de Update Trazabilidad: ",resp)
+
             except Exception as ex:
                 print("Conexión con FAMX2 exception: ", ex)
                 command = {
