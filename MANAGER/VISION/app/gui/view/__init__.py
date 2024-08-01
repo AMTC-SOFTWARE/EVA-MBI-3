@@ -26,6 +26,8 @@ class MainWindow (QMainWindow):
 
     output = pyqtSignal(dict)
     plc_output = pyqtSignal(dict)
+    rbt_output = pyqtSignal(dict)
+    
     ready =  pyqtSignal()
     def quitar_numeros_enteros(self,cadena):
         # Utilizar una expresión regular para encontrar y reemplazar números enteros
@@ -44,7 +46,7 @@ class MainWindow (QMainWindow):
         self.qw_Tabla_horas = Tabla_hora_w(parent = self)
 
         self.client = MqttClient(self.model, self)
-        self.client.subscribe.connect(self.input)
+        self.client.subscribe.connect(self.input)        
         self.output.connect(self.client.publish)
         self.plc_output.connect(self.client.plc_publish)
         self.client.connected.connect(self.ready.emit)
@@ -105,7 +107,7 @@ class MainWindow (QMainWindow):
         
         #Botones para Clamp/Desclamp
         self.ui.lbl_box1.clicked.connect(self.nidoPDCD)
-        self.ui.lbl_box2.clicked.connect(self.nidoPCDP)
+        self.ui.lbl_box2.clicked.connect(self.nidoPDCP)
         self.ui.lbl_box3.clicked.connect(self.nidoPDCR)
         self.ui.lbl_box4.clicked.connect(self.nidoPDCS)
         self.ui.lbl_box5.clicked.connect(self.nidoTBLU)
@@ -119,11 +121,20 @@ class MainWindow (QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.status)
         #self.timer.start(200)
+        
+        
+        
 
         self.allow_close        = True
         self.cycle_started      = False
         self.shutdown           = False
+        self.rbt_home           = False
         
+    def start_robot(self):
+        print("Ejecutando funcion start_robot")
+        self.rbt_output.emit({"command": "start"})
+        
+    
     def nidoPDCD(self):
         print("botón PDC-D presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
@@ -131,25 +142,70 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de PDC-D, enviando señal PDC-D:False a PLC")
-            self.plc_output.emit({"PDC-D":False})
+            
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "PDC-D" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("PDC-D")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de PDC-D, enviando señal PDC-D:False a PLC")
+                    self.plc_output.emit({"PDC-D":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("PDC-D") 
+                print(self.model.cajas_raffi)
+                
         elif "Habilitar" in currentText:
             print("entró a Habilitar de PDC-D, enviando señal PDC-D:True a PLC")
             self.plc_output.emit({"PDC-D":True})
         else:
             print("no entró a ninguna acción en PDC-D")
-            
-
-    def nidoPCDP(self):
-
+   
+    def nidoPDCP(self):
         print("botón PDC-P presionado...")
+       
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box2.text()
         print("currentText: ",currentText)
 
-        if "correcto" in currentText:
-            print("entró a correcto de PDC-P, enviando señal PDC-P:False a PLC")
-            self.plc_output.emit({"PDC-P":False})
+        if "correcto" in currentText: 
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "PDC-P" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("PDC-P")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de PDC-P, enviando señal PDC-P:False a PLC")
+                    self.plc_output.emit({"PDC-P":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("PDC-P") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de PDC-P, enviando señal PDC-P:True a PLC")
             self.plc_output.emit({"PDC-P":True})
@@ -164,8 +220,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de PDC-R, enviando señal PDC-R:False a PLC")
-            self.plc_output.emit({currentText.split(":\n")[0]:False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "PDC-R" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("PDC-R")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de PDC-R, enviando señal PDC-R:False a PLC")
+                    self.plc_output.emit({currentText.split(":\n")[0]:False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("PDC-R") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de PDC-R, enviando señal PDC-R:True a PLC")
             self.plc_output.emit({currentText.split(":\n")[0]:True})
@@ -179,8 +257,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de PDC-S, enviando señal PDC-S:False a PLC")
-            self.plc_output.emit({"PDC-S":False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "PDC-S" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("PDC-S")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de PDC-S, enviando señal PDC-S:False a PLC")
+                    self.plc_output.emit({"PDC-S":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("PDC-S") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de PDC-S, enviando señal PDC-S:True a PLC")
             self.plc_output.emit({"PDC-S":True})
@@ -194,8 +294,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de TBLU, enviando señal TBLU:False a PLC")
-            self.plc_output.emit({"TBLU":False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "TBLU" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("TBLU")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de TBLU, enviando señal TBLU:False a PLC")
+                    self.plc_output.emit({"TBLU":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("TBLU") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de TBLU, enviando señal TBLU:True a PLC")
             self.plc_output.emit({"TBLU":True})
@@ -209,8 +331,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de PDC-P2, enviando señal PDC-P2:False a PLC")
-            self.plc_output.emit({"PDC-P2":False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "PDC-P2" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("PDC-P2")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de PDC-P2, enviando señal PDC-P2:False a PLC")
+                    self.plc_output.emit({"PDC-P2":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("PDC-P2") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de PDC-P2, enviando señal PDC-P2:True a PLC")
             self.plc_output.emit({"PDC-P2":True})
@@ -224,8 +368,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de F96, enviando señal F96:False a PLC")
-            self.plc_output.emit({"F96":False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "F96" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("F96")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de F96, enviando señal F96:False a PLC")
+                    self.plc_output.emit({"F96":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("F96") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de F96, enviando señal F96:True a PLC")
             self.plc_output.emit({"F96":True})
@@ -239,8 +405,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de MFB-P2, enviando señal MFB-P2:False a PLC")
-            self.plc_output.emit({"MFB-P2":False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "MFB-P2" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("MFB-P2")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de MFB-P2, enviando señal MFB-P2:False a PLC")
+                    self.plc_output.emit({"MFB-P2":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("MFB-P2") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de MFB-P2, enviando señal MFB-P2:True a PLC")
             self.plc_output.emit({"MFB-P2":True})
@@ -254,8 +442,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de MFB-P1, enviando señal MFB-P1:False a PLC")
-            self.plc_output.emit({"MFB-P1":False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "MFB-P1" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("MFB-P1")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de MFB-P1, enviando señal MFB-P1:False a PLC")
+                    self.plc_output.emit({"MFB-P1":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("MFB-P1") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de MFB-P1, enviando señal MFB-P1:True a PLC")
             self.plc_output.emit({"MFB-P1":True})
@@ -270,8 +480,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de MFB-S, enviando señal MFB-S:False a PLC")
-            self.plc_output.emit({"MFB-S":False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "MFB-S" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("MFB-S")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de MFB-S, enviando señal MFB-S:False a PLC")
+                    self.plc_output.emit({"MFB-S":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("MFB-S") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de MFB-S, enviando señal MFB-S:True a PLC")
             self.plc_output.emit({"MFB-S":True})
@@ -285,8 +517,30 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
-            print("entró a correcto de MFB-E, enviando señal MFB-E:False a PLC")
-            self.plc_output.emit({"MFB-E":False})
+            #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
+            if self.rbt_home == False:
+                print("Enviando el robot a Home...")
+                self.rbt_output.emit({"command":"stop"})
+                
+                Timer(0.5, self.start_robot).start()
+             
+            #Si la caja se encuentra en la lista, entra en la condicion
+            if "MFB-E" in self.model.cajas_raffi:
+                if self.rbt_home == True:
+                    #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                    indx_pdcd = self.model.cajas_raffi.index("MFB-E")
+
+                    #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                    self.model.cajas_raffi.pop(indx_pdcd)
+                    
+                    print("entró a correcto de MFB-S, enviando señal MFB-E:False a PLC")
+                    self.plc_output.emit({"MFB-E":False})
+                else:
+                    print("El Robot aun no esta en Home...")
+            else:
+                #Se agrega una vez a la lista
+                self.model.cajas_raffi.append("MFB-E") 
+                print(self.model.cajas_raffi)
         elif "Habilitar" in currentText:
             print("entró a Habilitar de MFB-E, enviando señal MFB-E:True a PLC")
             self.plc_output.emit({"MFB-E":True})
@@ -612,6 +866,67 @@ class MainWindow (QMainWindow):
     @pyqtSlot(dict)
     def input(self, message):
         try:
+            #Respuesta del Robot
+            if "response" in message:
+                if "home_reached" in message["response"]:
+                    print("*********Llego un HOME REACHED********")
+                    
+                    #Verificamos si hay alguna caja en la lista
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Lista de cajas", self.model.cajas_raffi)
+                        
+                        #Se hace true la variable en caso de que si hay cajas dentro de la lista
+                        print("rbt_home = True")
+                        self.rbt_home = True
+                        
+                        if "PDC-D" in self.model.cajas_raffi:
+                            print("Llamando a la funcion nidoPDCD para desclampear caja...")
+                            self.nidoPDCD()
+                            
+                        elif "PDC-P" in self.model.cajas_raffi:
+                            print("Llamando a la funcion nidoPDCP para desclampear caja...")
+                            self.nidoPDCP()
+
+                        elif "PDC-R" in self.model.cajas_raffi:
+                            print("Llamando a la funcion nidoPDCR para desclampear caja...")
+                            self.nidoPDCR()
+                            
+                        elif "PDC-S" in self.model.cajas_raffi:
+                            print("Llamando a la funcion nidoPDCS para desclampear caja...")
+                            self.nidoPDCS()
+                            
+                        elif "TBLU" in self.model.cajas_raffi:
+                            print("Llamando a la funcion nidoTBLU para desclampear caja...")
+                            self.nidoTBLU()
+                            
+                        elif "PDC-P2" in self.model.cajas_raffi:
+                            print("Llamando a la funcion PDC-P2 para desclampear caja...")
+                            self.nidoPDCP2()
+
+                        elif "F96" in self.model.cajas_raffi:
+                            print("Llamando a la funcion F96 para desclampear caja...")
+                            self.nidoF96()
+                            
+                        elif "MFB-P2" in self.model.cajas_raffi:
+                            print("Llamando a la funcion MFV-P2 para desclampear caja...")
+                            self.nidoMFBP2()
+                            
+                        elif "MFB-P1" in self.model.cajas_raffi:
+                            print("Llamando a la funcion MFB-P1 para desclampear caja...")
+                            self.nidoMFBP1()
+                            
+                        elif "MFB-S" in self.model.cajas_raffi:
+                            print("Llamando a la funcion MFB-S para desclampear caja...")
+                            self.nidoMFBS()
+                            
+                        elif "MFB-E" in self.model.cajas_raffi:
+                            print("Llamando a la funcion MFB-E para desclampear caja...")
+                            self.nidoMFBE()    
+                    else:
+                        print("No hay cajas en la lista ...")
+                        print("rbt_home = False")
+                        self.rbt_home = False
+                    
             #print(message)
             if "shutdown" in message:
                 if message["shutdown"] == True:

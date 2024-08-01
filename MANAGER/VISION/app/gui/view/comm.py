@@ -15,6 +15,7 @@ class MqttClient (QObject):
     subscribe = pyqtSignal(dict)
     connected = pyqtSignal()
 
+
     def __init__(self, model = None, parent = None):
         super().__init__(parent)
         self.model = model
@@ -39,18 +40,23 @@ class MqttClient (QObject):
 
     def on_connect(self, client, userdata, flags, rc):
         try:
-            client.subscribe(self.model.setTopic)
-            if rc == 0:
-                print("GUI MQTT client connected with code [{}]".format(rc))
-                self.connected.emit()
-            else:
-                print("GUI MQTT client connection fail, code [{}]".format(rc))
-                self.subscribe.emit(
-                    {
-                        "popOut": "GUI MQTT connection fail",
-                        "lbl_result" : {"text": "GUI MQTT connection fail", "color": "red"}, 
-                        "lbl_steps" : {"text": "Check broker and restart", "color": "black"}
-                    })
+            #Generamos una lista con los topicos a los que nos vamos a subscribir
+            topics = [self.model.setTopic, self.model.statusrbtTopic]
+            
+            #Generamos un for para recorrar cada topico y asi el cliente pueda subscribirse individualmente a cada uno.
+            for topic in topics:
+                client.subscribe(topic)
+                if rc == 0:
+                    print("GUI MQTT client connected with code [{}]".format(rc))
+                    self.connected.emit()
+                else:
+                    print("GUI MQTT client connection fail, code [{}]".format(rc))
+                    self.subscribe.emit(
+                        {
+                            "popOut": "GUI MQTT connection fail",
+                            "lbl_result" : {"text": "GUI MQTT connection fail", "color": "red"}, 
+                            "lbl_steps" : {"text": "Check broker and restart", "color": "black"}
+                        })
         except Exception as ex:
             print("GUI MQTT client connection fail. Exception: ", ex.args)
             self.subscribe.emit(
@@ -80,6 +86,13 @@ class MqttClient (QObject):
     def plc_publish (self, message):
         try:
             self.client.publish(self.model.plcTopic,json.dumps(message), qos = 2)
+        except Exception as ex:
+            print (ex.args)
+            
+    @pyqtSlot(dict)
+    def rbt_publish (self, message):
+        try:           
+            self.client.publish(self.model.rbtTopic,json.dumps(message), qos = 2)         
         except Exception as ex:
             print (ex.args)
 
