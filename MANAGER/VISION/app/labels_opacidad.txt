@@ -1,0 +1,126 @@
+mandar llamar funciones para loading:
+
+
+
+	print("llegó aquí")
+
+        def finalizadohxh():
+            print("finalizadohxh")
+            command = {
+                "lbl_hxh_off" : {"text": "noimporta", "color": "black"},
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+        def cargando3():
+            print("cargando3")
+            command = {
+                "lbl_hxh2" : {"text": "noimporta", "color": "black"},
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+            Timer(2,finalizadohxh).start()
+
+        def cargando2():
+            print("cargando2")
+            command = {
+                "lbl_hxh1" : {"text": "noimporta", "color": "black"},
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+            Timer(2,cargando3).start()
+
+        def cargando1():
+            print("cargando1")
+            command = {
+                "lbl_hxh" : {"text": "noimporta", "color": "black"},
+                }
+            publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
+            Timer(2,cargando2).start()
+
+        Timer(2,cargando1).start()
+
+____________________________________________________________
+
+función para llamar
+
+    @pyqtSlot(dict)
+    def input(self, message):
+        try:
+            #print(message)
+            if "shutdown" in message:
+                if message["shutdown"] == True:
+                    self.shutdown = True
+                    QTimer.singleShot(4000, self.close)
+            if "allow_close" in message:
+                if type(message["allow_close"]) == bool:
+                    self.allow_close = message["allow_close"]
+                else:
+                    raise ValueError('allow_close must a boolean.')
+            if "cycle_started" in message:
+                if type(message["cycle_started"]) == bool:
+                    self.cycle_started = message["cycle_started"]
+                else:
+                    raise ValueError('allow_close must a boolean.')
+            if "request" in message:
+                if message["request"] == "status":
+                    QTimer.singleShot(100, self.sendStatus)
+
+            if "lbl_hxh" in message:
+                print("lbl_hxh")
+                self.ui.lbl_hxh.setVisible(True)
+                self.ui.lbl_hxh1.setVisible(False)
+                self.ui.lbl_hxh2.setVisible(False)
+
+            if "lbl_hxh1" in message:
+                print("lbl_hxh1")
+                self.ui.lbl_hxh1.setVisible(True)
+                self.ui.lbl_hxh.setVisible(False)
+                self.ui.lbl_hxh2.setVisible(False)
+
+            if "lbl_hxh2" in message:
+                print("lbl_hxh2")
+                self.ui.lbl_hxh2.setVisible(True)
+                self.ui.lbl_hxh.setVisible(False)
+                self.ui.lbl_hxh1.setVisible(False)
+
+            if "lbl_hxh_off" in message:
+                print("lbl_hxh_off")
+                self.ui.lbl_hxh.setVisible(False)
+                self.ui.lbl_hxh1.setVisible(False)
+                self.ui.lbl_hxh2.setVisible(False)
+
+
+____________________________________________________________
+
+crear objetos pyQT en main window:
+
+        self.lbl_hxh = QtWidgets.QLabel(main)
+        self.lbl_hxh.setGeometry(QtCore.QRect(230, 50, 40, 35)) #posx, posy, ancho, alto
+        self.lbl_hxh.setStyleSheet('background-color: rgba(50, 150, 50, 50); color: black; font-weight:bold; font-size:12pt; font: Segoe UI Black')
+        self.lbl_hxh.setObjectName("lbl_hxh")
+        self.lbl_hxh.setText("")
+        self.lbl_hxh.setVisible(True)
+
+        self.lbl_hxh1 = QtWidgets.QLabel(main)
+        self.lbl_hxh1.setGeometry(QtCore.QRect(230, 50, 100, 35)) #posx, posy, ancho, alto
+        self.lbl_hxh1.setStyleSheet('background-color: rgba(50, 150, 50, 100); color: black; font-weight:bold; font-size:12pt; font: Segoe UI Black')
+        self.lbl_hxh1.setObjectName("lbl_hxh1")
+        self.lbl_hxh1.setText("")
+        self.lbl_hxh.setVisible(True)
+
+        self.lbl_hxh2 = QtWidgets.QLabel(main)
+        self.lbl_hxh2.setGeometry(QtCore.QRect(230, 50, 140, 35)) #posx, posy, ancho, alto
+        self.lbl_hxh2.setStyleSheet('background-color: rgba(50, 150, 50, 150); color: black; font-weight:bold; font-size:12pt; font: Segoe UI Black')
+        self.lbl_hxh2.setObjectName("lbl_hxh2")
+        self.lbl_hxh2.setText("")
+        self.lbl_hxh.setVisible(True)
+
+        self.retranslateUi(main)
+        QtCore.QMetaObject.connectSlotsByName(main)
+
+    def retranslateUi(self, main):
+
+
+
+
