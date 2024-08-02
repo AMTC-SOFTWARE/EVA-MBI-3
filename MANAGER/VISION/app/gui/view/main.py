@@ -347,6 +347,15 @@ class Ui_main(object):
         self.lbl_box1.setFont(font)
         self.lbl_box1.setObjectName("lbl_box1")
         
+        #Gif de Prueba
+        self.lbl_box1_animation = QtWidgets.QLabel(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box1_animation.sizePolicy().hasHeightForWidth())
+        self.lbl_box1_animation.setSizePolicy(sizePolicy)
+        self.lbl_box1_animation.setMinimumSize(QtCore.QSize(200, 300))
+        self.lbl_box1_animation.setMaximumSize(QtCore.QSize(200, 300))
+        self.lbl_box1_animation.setFont(font)
+        self.lbl_box1_animation.setObjectName("lbl_box1_animation")       
+        
         #Boton para PDC-P
         self.lbl_box2 = QtWidgets.QPushButton(self.splitter_3)
         sizePolicy.setHeightForWidth(self.lbl_box2.sizePolicy().hasHeightForWidth())

@@ -3,9 +3,10 @@
 @author: MSc. Marco Rutiaga Quezada
 """
 
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QMainWindow, QPushButton, QMessageBox, QLineEdit, QAction, QTableWidgetItem
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QTimer, QSize
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtCore import QPropertyAnimation, pyqtSignal, pyqtSlot, Qt, QTimer, QSize, QObject
+from PyQt5.QtGui import QMovie, QPixmap, QColor
 from threading import Timer
 from os.path import exists
 from os import system 
@@ -129,6 +130,21 @@ class MainWindow (QMainWindow):
         self.cycle_started      = False
         self.shutdown           = False
         self.rbt_home           = False
+    
+    #Primera opcion, mediante una ventana popout
+    def raffi_animation(self):
+        print("Entro a raffi_animation")
+        
+        self.movie = QMovie(self.model.imgsPath+"ani.gif")
+        self.ui.lbl_box1_animation.setMovie(self.movie)
+        self.movie.start()
+        
+
+        # self.pop_out.setText("Espere un momento...")
+        # self.pop_out.setWindowTitle("Warning")
+        # QTimer.singleShot(3000, self.pop_out.button(QMessageBox.Ok).click)
+        # self.pop_out.exec()
+        
         
     def start_robot(self):
         print("Ejecutando funcion start_robot")
@@ -142,6 +158,8 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+            
+            self.raffi_animation()
             
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
@@ -161,6 +179,15 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de PDC-D, enviando señal PDC-D:False a PLC")
                     self.plc_output.emit({"PDC-D":False})
+                    
+
+                    
+                    #Si ya no quedan mas cajas en la lista, se manda a false la variable rbt_home
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -181,7 +208,10 @@ class MainWindow (QMainWindow):
         currentText = self.ui.lbl_box2.text()
         print("currentText: ",currentText)
 
-        if "correcto" in currentText: 
+        if "correcto" in currentText:
+            
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -200,6 +230,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de PDC-P, enviando señal PDC-P:False a PLC")
                     self.plc_output.emit({"PDC-P":False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -220,6 +256,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -238,6 +277,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de PDC-R, enviando señal PDC-R:False a PLC")
                     self.plc_output.emit({currentText.split(":\n")[0]:False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -257,6 +302,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+            
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -275,6 +323,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de PDC-S, enviando señal PDC-S:False a PLC")
                     self.plc_output.emit({"PDC-S":False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -294,6 +348,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+            
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -312,6 +369,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de TBLU, enviando señal TBLU:False a PLC")
                     self.plc_output.emit({"TBLU":False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -331,6 +394,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+            
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -349,6 +415,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de PDC-P2, enviando señal PDC-P2:False a PLC")
                     self.plc_output.emit({"PDC-P2":False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -368,6 +440,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+            
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -386,6 +461,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de F96, enviando señal F96:False a PLC")
                     self.plc_output.emit({"F96":False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -405,6 +486,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -423,6 +507,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de MFB-P2, enviando señal MFB-P2:False a PLC")
                     self.plc_output.emit({"MFB-P2":False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -442,6 +532,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+            
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -460,6 +553,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de MFB-P1, enviando señal MFB-P1:False a PLC")
                     self.plc_output.emit({"MFB-P1":False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -480,6 +579,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+            
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -498,6 +600,13 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de MFB-S, enviando señal MFB-S:False a PLC")
                     self.plc_output.emit({"MFB-S":False})
+                    
+
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
@@ -517,6 +626,9 @@ class MainWindow (QMainWindow):
         print("currentText: ",currentText)
         
         if "correcto" in currentText:
+            
+            self.raffi_animation()
+
             #Si la variable que condiciona el estado del robot esta en False, se envia el comando al Robot para que se detenga
             if self.rbt_home == False:
                 print("Enviando el robot a Home...")
@@ -535,6 +647,12 @@ class MainWindow (QMainWindow):
                     
                     print("entró a correcto de MFB-S, enviando señal MFB-E:False a PLC")
                     self.plc_output.emit({"MFB-E":False})
+                    
+                    if len(self.model.cajas_raffi) > 0:
+                        print("Aun quedan cajas:", self.model.cajas_raffi)
+                    else:
+                        self.rbt_home = False
+
                 else:
                     print("El Robot aun no esta en Home...")
             else:
