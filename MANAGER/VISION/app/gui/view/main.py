@@ -347,12 +347,12 @@ class Ui_main(object):
         self.lbl_box1.setFont(font)
         self.lbl_box1.setObjectName("lbl_box1")
         
-        #Gif de Prueba
+        #Gif para PDC-D
         self.lbl_box1_animation = QtWidgets.QLabel(self.splitter_3)
         sizePolicy.setHeightForWidth(self.lbl_box1_animation.sizePolicy().hasHeightForWidth())
         self.lbl_box1_animation.setSizePolicy(sizePolicy)
-        self.lbl_box1_animation.setMinimumSize(QtCore.QSize(200, 300))
-        self.lbl_box1_animation.setMaximumSize(QtCore.QSize(200, 300))
+        self.lbl_box1_animation.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box1_animation.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box1_animation.setFont(font)
         self.lbl_box1_animation.setObjectName("lbl_box1_animation")       
         
@@ -364,6 +364,15 @@ class Ui_main(object):
         self.lbl_box2.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box2.setFont(font)
         self.lbl_box2.setObjectName("lbl_box2")
+
+        #Gif para PDC-P
+        self.lbl_box2_animation = QtWidgets.QLabel(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box2_animation.sizePolicy().hasHeightForWidth())
+        self.lbl_box2_animation.setSizePolicy(sizePolicy)
+        self.lbl_box2_animation.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box2_animation.setMaximumSize(QtCore.QSize(180, 60))
+        self.lbl_box2_animation.setFont(font)
+        self.lbl_box2_animation.setObjectName("lbl_box2_animation")
         
         #Boton para PDC-RS O RMID
         self.lbl_box3 = QtWidgets.QPushButton(self.splitter_3)
@@ -373,6 +382,15 @@ class Ui_main(object):
         self.lbl_box3.setMaximumSize(QtCore.QSize(180, 60))
         self.lbl_box3.setFont(font)
         self.lbl_box3.setObjectName("lbl_box3")
+
+        #Gif para PDC-R
+        self.lbl_box3_animation = QtWidgets.QLabel(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box3_animation.sizePolicy().hasHeightForWidth())
+        self.lbl_box3_animation.setSizePolicy(sizePolicy)
+        self.lbl_box3_animation.setMinimumSize(QtCore.QSize(180, 60))
+        self.lbl_box3_animation.setMaximumSize(QtCore.QSize(180, 60))
+        self.lbl_box3_animation.setFont(font)
+        self.lbl_box3_animation.setObjectName("lbl_box3_animation")
         
         #Boton para PDC-S
         self.lbl_box4 = QtWidgets.QPushButton(self.splitter_3)
