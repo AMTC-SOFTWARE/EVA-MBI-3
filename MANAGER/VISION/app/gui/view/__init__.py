@@ -52,6 +52,8 @@ class MainWindow (QMainWindow):
         self.plc_output.connect(self.client.plc_publish)
         self.client.connected.connect(self.ready.emit)
 
+        
+
         self.model.name = name
         self.model.setTopic = topic.lower() + "/set"
         self.model.statusTopic = topic.lower() + "/status"
@@ -107,51 +109,120 @@ class MainWindow (QMainWindow):
         self.ui.btn_hxh.clicked.connect(self.horaxhora)
         
         #Botones para Clamp/Desclamp
-        self.ui.lbl_box1.clicked.connect(self.nidoPDCD)
-        self.ui.lbl_box2.clicked.connect(self.nidoPDCP)
-        self.ui.lbl_box3.clicked.connect(self.nidoPDCR)
-        self.ui.lbl_box4.clicked.connect(self.nidoPDCS)
-        self.ui.lbl_box5.clicked.connect(self.nidoTBLU)
-        self.ui.lbl_box6.clicked.connect(self.nidoPDCP2)
-        self.ui.lbl_box7.clicked.connect(self.nidoF96)
-        self.ui.lbl_box8.clicked.connect(self.nidoMFBP2)
-        self.ui.lbl_box9.clicked.connect(self.nidoMFBP1)
-        self.ui.lbl_box10.clicked.connect(self.nidoMFBS)
-        self.ui.lbl_box11.clicked.connect(self.nidoMFBE)
+        self.ui.lbl_box1.clicked.connect(lambda: self.raffi_activation("PDC-D"))
+        self.ui.lbl_box2.clicked.connect(lambda: self.raffi_activation("PDC-P"))
+        self.ui.lbl_box3.clicked.connect(lambda: self.raffi_activation("PDC-R"))
+        self.ui.lbl_box4.clicked.connect(lambda: self.raffi_activation("PDC-S"))
+        self.ui.lbl_box5.clicked.connect(lambda: self.raffi_activation("TBLU"))
+        self.ui.lbl_box6.clicked.connect(lambda: self.raffi_activation("PDC-P2"))
+        self.ui.lbl_box7.clicked.connect(lambda: self.raffi_activation("F96"))
+        self.ui.lbl_box8.clicked.connect(lambda: self.raffi_activation("MFB-P2"))
+        self.ui.lbl_box9.clicked.connect(lambda: self.raffi_activation("MFB-P1"))
+        self.ui.lbl_box10.clicked.connect(lambda: self.raffi_activation("MFB-S"))
+        self.ui.lbl_box11.clicked.connect(lambda: self.raffi_activation("MFB-E"))
+        
+        # self.ui.lbl_box1.clicked.connect(self.nidoPDCD)
+        # self.ui.lbl_box2.clicked.connect(self.nidoPDCP)
+        # self.ui.lbl_box3.clicked.connect(self.nidoPDCR)
+        # self.ui.lbl_box4.clicked.connect(self.nidoPDCS)
+        # self.ui.lbl_box5.clicked.connect(self.nidoTBLU)
+        # self.ui.lbl_box6.clicked.connect(self.nidoPDCP2)
+        # self.ui.lbl_box7.clicked.connect(self.nidoF96)
+        # self.ui.lbl_box8.clicked.connect(self.nidoMFBP2)
+        # self.ui.lbl_box9.clicked.connect(self.nidoMFBP1)
+        # self.ui.lbl_box10.clicked.connect(self.nidoMFBS)
+        # self.ui.lbl_box11.clicked.connect(self.nidoMFBE)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.status)
         #self.timer.start(200)
         
         
-        
-
         self.allow_close        = True
         self.cycle_started      = False
         self.shutdown           = False
         self.rbt_home           = False
     
-    #Primera opcion, mediante una ventana popout
-    def raffi_animation(self):
-        print("Entro a raffi_animation")
-        
-        self.movie = QMovie(self.model.imgsPath+"ani.gif")
-        self.ui.lbl_box1_animation.setMovie(self.movie)
-        self.movie.start()
-        
-
-        # self.pop_out.setText("Espere un momento...")
-        # self.pop_out.setWindowTitle("Warning")
-        # QTimer.singleShot(3000, self.pop_out.button(QMessageBox.Ok).click)
-        # self.pop_out.exec()
-        
+    def stop_raffi_animation(self):
+        self.movie.stop()
         
     def start_robot(self):
         print("Ejecutando funcion start_robot")
         self.rbt_output.emit({"command": "start"})
+            
+    #Refactorizacion del funcionamiento
+    def raffi_activation(self, box):
+        #Primero en una lista guardamos cada texto contenido de los botones que se llenan al momento de escanear el ARNES
+        text_buttons = [self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
+                        self.ui.lbl_box3.text(), self.ui.lbl_box4.text(),
+                        self.ui.lbl_box5.text(), self.ui.lbl_box6.text(),
+                        self.ui.lbl_box7.text(), self.ui.lbl_box8.text(),
+                        self.ui.lbl_box9.text(), self.ui.lbl_box10.text(),
+                        self.ui.lbl_box11.text()]
         
+        #Hacemos un recorrido de cada texto en la lista text_buttons
+        for i in text_buttons:
+            
+            """
+                Si "box" que es la que se recibe en la funcion al momento de presionar el boton,
+                esta dentro de "i" que son los textos obtenidos y ademas esta correcto, entonces
+                entra a seguir con el funcionamiento.
+            """
+            
+            if box in i and "correcto" in i:
+                print("Correcto en", box)
+
+                if self.rbt_home == False:
+                    print("Enviando el robot a Home...")
+                    self.rbt_output.emit({"command":"stop"})
+                
+                    Timer(0.5, self.start_robot).start()
+                    
+                
+                if box in self.model.cajas_raffi:
+                    if self.rbt_home == True:
+                        #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                        indx_pdcd = self.model.cajas_raffi.index(box)
+
+                        #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
+                        self.model.cajas_raffi.pop(indx_pdcd)
+
+                        print(f"entró a correcto de {box}, enviando señal {box}:False a PLC")
+                        self.plc_output.emit({box:False})
+                        
+                        #Si ya no quedan mas cajas en la lista, se manda a false la variable rbt_home
+                        if len(self.model.cajas_raffi) > 0:
+                            print("Aun quedan cajas:", self.model.cajas_raffi)
+                        else:
+                            self.rbt_home = False
+                else:
+                    #Se agrega una vez a la lista
+                    self.model.cajas_raffi.append(box) 
+                    print(self.model.cajas_raffi)
+                        
+            elif box in i and "Habilitar" in i:
+                print(f"entró a Habilitar de {box}, enviando señal {box}:False a PLC")
+                self.plc_output.emit({box:True})
+            else:
+                print("No se envio ninguna accion")
+                break
+  
+    #Primera opcion, mediante una ventana popout
+    def raffi_animation(self):
+        print("Entro a raffi_animation")
+        self.ui.lbl_box1.setHidden(True)
+        
+        self.movie = QMovie(self.model.imgsPath+"giphy.gif")
+        self.ui.lbl_box1_animation.setMovie(self.movie)
+        self.movie.start()
+       
     
-    def nidoPDCD(self):
+        
+
+        
+
+    
+    def nidoPDCD(self):        
         print("botón PDC-D presionado...")
         #Se obtiene todo el texto actual del boton y se guarda en una variable para despues condicionarla
         currentText = self.ui.lbl_box1.text()
@@ -999,47 +1070,47 @@ class MainWindow (QMainWindow):
                         
                         if "PDC-D" in self.model.cajas_raffi:
                             print("Llamando a la funcion nidoPDCD para desclampear caja...")
-                            self.nidoPDCD()
+                            self.raffi_activation("PDC-D")
                             
                         elif "PDC-P" in self.model.cajas_raffi:
                             print("Llamando a la funcion nidoPDCP para desclampear caja...")
-                            self.nidoPDCP()
+                            self.raffi_activation("PDC-P")
 
                         elif "PDC-R" in self.model.cajas_raffi:
                             print("Llamando a la funcion nidoPDCR para desclampear caja...")
-                            self.nidoPDCR()
+                            self.raffi_activation("PDC-R")
                             
                         elif "PDC-S" in self.model.cajas_raffi:
                             print("Llamando a la funcion nidoPDCS para desclampear caja...")
-                            self.nidoPDCS()
+                            self.raffi_activation("PDC-S")
                             
                         elif "TBLU" in self.model.cajas_raffi:
                             print("Llamando a la funcion nidoTBLU para desclampear caja...")
-                            self.nidoTBLU()
+                            self.raffi_activation("TBLU")
                             
                         elif "PDC-P2" in self.model.cajas_raffi:
                             print("Llamando a la funcion PDC-P2 para desclampear caja...")
-                            self.nidoPDCP2()
+                            self.raffi_activation("PDC-P2")
 
                         elif "F96" in self.model.cajas_raffi:
                             print("Llamando a la funcion F96 para desclampear caja...")
-                            self.nidoF96()
+                            self.raffi_activation("F96")
                             
                         elif "MFB-P2" in self.model.cajas_raffi:
                             print("Llamando a la funcion MFV-P2 para desclampear caja...")
-                            self.nidoMFBP2()
+                            self.raffi_activation("MFB-P2")
                             
                         elif "MFB-P1" in self.model.cajas_raffi:
                             print("Llamando a la funcion MFB-P1 para desclampear caja...")
-                            self.nidoMFBP1()
+                            self.raffi_activation("MFB-P1")
                             
                         elif "MFB-S" in self.model.cajas_raffi:
                             print("Llamando a la funcion MFB-S para desclampear caja...")
-                            self.nidoMFBS()
+                            self.raffi_activation("MFB-S")
                             
                         elif "MFB-E" in self.model.cajas_raffi:
                             print("Llamando a la funcion MFB-E para desclampear caja...")
-                            self.nidoMFBE()    
+                            self.raffi_activation("MFB-E")    
                     else:
                         print("No hay cajas en la lista ...")
                         print("rbt_home = False")
