@@ -340,7 +340,7 @@ class Ui_main(object):
         
         #Boton para PDC-D
         #Gif para PDC-D
-        self.lbl_box_1movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_1movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_1movie.setScaledSize(QtCore.QSize(30, 30))
         
         self.lbl_box1 = QtWidgets.QPushButton(self.splitter_3)
@@ -356,7 +356,7 @@ class Ui_main(object):
         
         #Boton para PDC-P
         #Gif para PDC-P
-        self.lbl_box_2movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_2movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_2movie.setScaledSize(QtCore.QSize(30, 30))
         
         self.lbl_box2 = QtWidgets.QPushButton(self.splitter_3)
@@ -374,7 +374,7 @@ class Ui_main(object):
 
         #Boton para PDC-RS O RMID
         #Gif para PDC-R
-        self.lbl_box_3movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_3movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_3movie.setScaledSize(QtCore.QSize(30, 30))
         
         self.lbl_box3 = QtWidgets.QPushButton(self.splitter_3)
@@ -392,7 +392,7 @@ class Ui_main(object):
 
         #Boton para PDC-S
         #Gif para PDC-S
-        self.lbl_box_4movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_4movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_4movie.setScaledSize(QtCore.QSize(30, 30))
 
         self.lbl_box4 = QtWidgets.QPushButton(self.splitter_3)
@@ -409,7 +409,7 @@ class Ui_main(object):
         
         #Boton para TBLU
         #Gif para TBLU
-        self.lbl_box_5movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_5movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_5movie.setScaledSize(QtCore.QSize(30, 30))
 
         self.lbl_box5 = QtWidgets.QPushButton(self.splitter_3)
@@ -427,7 +427,7 @@ class Ui_main(object):
 
         #Boton para PDC-P2
         #Gif para PDC-P2
-        self.lbl_box_6movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_6movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_6movie.setScaledSize(QtCore.QSize(30, 30))
 
         self.lbl_box6 = QtWidgets.QPushButton(self.splitter_3)
@@ -445,7 +445,7 @@ class Ui_main(object):
 
         #F96
         #Gif para F96
-        self.lbl_box_7movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_7movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_7movie.setScaledSize(QtCore.QSize(30, 30))
 
         self.lbl_box7 = QtWidgets.QPushButton(self.splitter_3)
@@ -595,7 +595,7 @@ class Ui_main(object):
         
         #MFB-P2
         #Gif para MFB-P2
-        self.lbl_box_8movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_8movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_8movie.setScaledSize(QtCore.QSize(30, 30))
 
         self.lbl_box8 = QtWidgets.QPushButton(main)
@@ -608,7 +608,7 @@ class Ui_main(object):
         
         #MFB-P1
         #Gif para MFB-P1
-        self.lbl_box_9movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_9movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_9movie.setScaledSize(QtCore.QSize(30, 30))
 
         self.lbl_box9 = QtWidgets.QPushButton(main)
@@ -621,7 +621,7 @@ class Ui_main(object):
         
         #MFB-S
         #Gif para MFB-S
-        self.lbl_box_10movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_10movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_10movie.setScaledSize(QtCore.QSize(30, 30))
         
         self.lbl_box10 = QtWidgets.QPushButton(main)
@@ -634,7 +634,7 @@ class Ui_main(object):
         
         #MFB-E
         #Gif para MFB-E
-        self.lbl_box_11movie = QtGui.QMovie("data/imgs/gif_load.gif") 
+        self.lbl_box_11movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
         self.lbl_box_11movie.setScaledSize(QtCore.QSize(30, 30))
         
         self.lbl_box11 = QtWidgets.QPushButton(main)

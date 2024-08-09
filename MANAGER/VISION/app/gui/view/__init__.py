@@ -222,7 +222,7 @@ class MainWindow (QMainWindow):
         print("Ejecutando raffi_activation...")
 
         print("variable del modelo pero de controller:")
-        print(self.model.input_data["plc"]["clamps"])
+        print("THIS->:",self.model.input_data["plc"]["clamps"])
 
         #Primero en una lista guardamos cada texto contenido de los botones que se llenan al momento de escanear el ARNES
         text_buttons = [self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
@@ -231,6 +231,7 @@ class MainWindow (QMainWindow):
                         self.ui.lbl_box7.text(), self.ui.lbl_box8.text(),
                         self.ui.lbl_box9.text(), self.ui.lbl_box10.text(),
                         self.ui.lbl_box11.text()]
+        
         
 
         #Hacemos un recorrido de cada texto en la lista text_buttons
@@ -259,6 +260,19 @@ class MainWindow (QMainWindow):
 
                             print(f"entró a correcto de {box}, enviando señal {box}:False a PLC")
                             self.plc_output.emit({box:False})
+                            
+                            if len(self.model.input_data["plc"]["clamps"]) > 0:
+
+                                print("hay cajas en los nidos")
+
+                                self.ui.lbl_steps.setText("Presiona START para comenzar")
+                                self.ui.lbl_steps.setStyleSheet("color: green;")
+                                
+                            else:
+                                self.ui.lbl_steps.setText("Coloca las cajas en los nidos para continuar")
+                                self.ui.lbl_steps.setStyleSheet("color: navy;")
+                            
+
                         
                             #Si ya no quedan mas cajas en la lista, se manda a false la variable rbt_home
                             if len(self.model.cajas_raffi) > 0:
