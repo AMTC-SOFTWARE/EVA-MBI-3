@@ -20,7 +20,7 @@ import requests
 import pandas as pd
 from gui.view import resources_rc, main, login, scanner, img_popout, Tabla_horas
 from gui.view.comm import MqttClient
-from gui.model import Model
+from manager.model import Model
 import math
 import re
 import sys
@@ -180,7 +180,7 @@ class MainWindow (QMainWindow):
         
         if box == "PDC-D":
             self.ui.lbl_box1.setIcon(QtGui.QIcon())
-            self.ui.ui.lbl_box_1movie.stop()
+            self.ui.lbl_box_1movie.stop()
         elif box == "PDC-P":
             self.ui.lbl_box2.setIcon(QtGui.QIcon())
             self.ui.lbl_box_2movie.stop()
@@ -220,6 +220,10 @@ class MainWindow (QMainWindow):
             
     def raffi_activation(self, box):
         print("Ejecutando raffi_activation...")
+
+        print("variable del modelo pero de controller:")
+        print(self.model.input_data["plc"]["clamps"])
+
         #Primero en una lista guardamos cada texto contenido de los botones que se llenan al momento de escanear el ARNES
         text_buttons = [self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
                         self.ui.lbl_box3.text(), self.ui.lbl_box4.text(),

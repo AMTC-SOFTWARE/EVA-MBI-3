@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     app     = QApplication(sys.argv)
     gui     = MainWindow(name = "EVA-MBI-3", topic = "gui")
-    manager = Controller(gui)
+    manager = Controller(gui,gui.model)
     gui.ready.connect(gui.showMaximized)
     gui.ready.connect(manager.start)
     #os.startfile('C:\\xampp\\xampp-control.exe')

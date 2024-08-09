@@ -17,9 +17,15 @@ from toolkit.admin import Admin
 import math
 class Controller (QObject):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent = None, model_gui = None):
         super().__init__(parent)
-        self.model              = Model(parent = self)
+
+        if hasattr(self.parent(),'model'):
+            print("simon ke si tiene un objeto que se llama model")
+            
+        self.model              = model_gui
+        
+
         self.client             = MqttClient(self.model, parent = self)
         self.model.transitions  = self.client
         self.model.mainWindow   = parent

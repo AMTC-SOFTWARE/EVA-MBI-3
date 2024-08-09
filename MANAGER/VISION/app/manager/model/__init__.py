@@ -16,6 +16,30 @@ class Model (object):
 
     def __init__(self, parent = None):
 
+        self.name = "GUI"
+        self.imgsPath = "data/imgs/"
+        self.img_fuse = ""
+        self.centerImage = ":/images/images/blanco.png"
+        self.user = {"type":"", "pass":"", "user":""}
+        self.setTopic = "gui/set"
+        self.statusTopic = "gui/status"
+        self.plcTopic = "PLC/1"
+        self.rbtTopic = "RobotEpson/2"
+        self.statusrbtTopic = "RobotEpson/2/status"
+        self.inBuffer = {}
+        self.mejor_tiempo=1000
+        self.cajas_raffi = [] #Lista para evaluar cajas a desclampear
+        self.status = {
+            "visible": {
+                "gui": False, 
+                "login": False,
+                "scanner": False,
+                "pop_out": False
+                }
+            }
+
+
+
         self.shutdown = False
         self.main_window = None
         self.transitions = None
