@@ -4,6 +4,7 @@
 """
 
 from PyQt5 import QtCore
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import QDialog, QMainWindow, QPushButton, QMessageBox, QLineEdit, QAction, QTableWidgetItem
 from PyQt5.QtCore import QPropertyAnimation, pyqtSignal, pyqtSlot, Qt, QTimer, QSize, QObject
 from PyQt5.QtGui import QMovie, QPixmap, QColor
@@ -131,47 +132,94 @@ class MainWindow (QMainWindow):
         self.cycle_started      = False
         self.shutdown           = False
         self.rbt_home           = False
-    
-   #Funcion para cargar el gif
+
+        
+   #Funcion para iniciar la animacion gif
     def start_raffi_animation(self, box):
         print("Entro a start_raffi_animation")
-        
-        self.movie = QMovie(self.model.imgsPath+"giphy.gif")
-        
+
         if box == "PDC-D":
-            self.ui.lbl_box1.setHidden(True)
-            self.ui.lbl_box1_animation.setMovie(self.movie)
-            self.movie.start()
+            self.ui.lbl_box1.setIcon(QtGui.QIcon(self.ui.lbl_box_1movie.currentPixmap()))
+            self.ui.lbl_box_1movie.start()
         elif box == "PDC-P":
-            self.ui.lbl_box2.setHidden(True)
-            self.ui.lbl_box2_animation.setMovie(self.movie)
-            self.movie.start()
+            self.ui.lbl_box2.setIcon(QtGui.QIcon(self.ui.lbl_box_2movie.currentPixmap()))
+            self.ui.lbl_box_2movie.start()
         elif box == "PDC-R":
-            self.ui.lbl_box3.setHidden(True)
-            self.ui.lbl_box3_animation.setMovie(self.movie)
-            self.movie.start()
-            
+            self.ui.lbl_box3.setIcon(QtGui.QIcon(self.ui.lbl_box_3movie.currentPixmap()))
+            self.ui.lbl_box_3movie.start()
+        elif box == "PDC-S":
+            self.ui.lbl_box4.setIcon(QtGui.QIcon(self.ui.lbl_box_4movie.currentPixmap()))
+            self.ui.lbl_box_4movie.start()
+        elif box == "TBLU":
+            self.ui.lbl_box5.setIcon(QtGui.QIcon(self.ui.lbl_box_5movie.currentPixmap()))
+            self.ui.lbl_box_5movie.start()  
+        elif box == "PDC-P2":
+            self.ui.lbl_box6.setIcon(QtGui.QIcon(self.ui.lbl_box_6movie.currentPixmap()))
+            self.ui.lbl_box_6movie.start() 
+        elif box == "F96":
+            self.ui.lbl_box7.setIcon(QtGui.QIcon(self.ui.lbl_box_7movie.currentPixmap()))
+            self.ui.lbl_box_7movie.start() 
+        elif box == "MFB-P2":
+            self.ui.lbl_box8.setIcon(QtGui.QIcon(self.ui.lbl_box_8movie.currentPixmap()))
+            self.ui.lbl_box_8movie.start()
+        elif box == "MFB-P1":
+            self.ui.lbl_box9.setIcon(QtGui.QIcon(self.ui.lbl_box_9movie.currentPixmap()))
+            self.ui.lbl_box_9movie.start() 
+        elif box == "MFB-S":
+            self.ui.lbl_box10.setIcon(QtGui.QIcon(self.ui.lbl_box_10movie.currentPixmap()))
+            self.ui.lbl_box_10movie.start() 
+        elif box == "MFB-E":
+            self.ui.lbl_box11.setIcon(QtGui.QIcon(self.ui.lbl_box_11movie.currentPixmap()))
+            self.ui.lbl_box_11movie.start()      
+        
+        
+              
     def stop_raffi_animation(self, box):
-        print("Entro a stop_raffi_animation")
+        
+        print("Deteniendo animacion...")
         
         if box == "PDC-D":
-            self.movie.stop()
-            self.ui.lbl_box1_animation.setHidden(True)
-            self.ui.lbl_box1.setHidden(False)
+            self.ui.lbl_box1.setIcon(QtGui.QIcon())
+            self.ui.ui.lbl_box_1movie.stop()
         elif box == "PDC-P":
-            self.movie.stop()
-            self.ui.lbl_box2_animation.setHidden(True)
-            self.ui.lbl_box2.setHidden(False)
+            self.ui.lbl_box2.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_2movie.stop()
         elif box == "PDC-R":
-            self.movie.stop()
-            self.ui.lbl_box3_animation.setHidden(True)
-            self.ui.lbl_box3.setHidden(False)
+            self.ui.lbl_box3.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_3movie.stop()
+        elif box == "PDC-S":
+            self.ui.lbl_box4.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_4movie.stop()
+        elif box == "TBLU":
+            self.ui.lbl_box5.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_5movie.stop()  
+        elif box == "PDC-P2":
+            self.ui.lbl_box6.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_6movie.stop() 
+        elif box == "F96":
+            self.ui.lbl_box7.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_7movie.stop() 
+        elif box == "MFB-P2":
+            self.ui.lbl_box8.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_8movie.stop()
+        elif box == "MFB-P1":
+            self.ui.lbl_box9.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_9movie.stop() 
+        elif box == "MFB-S":
+            self.ui.lbl_box10.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_10movie.stop() 
+        elif box == "MFB-E":
+            self.ui.lbl_box11.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_11movie.stop()  
+        
+        
               
     def start_robot(self):
         print("Ejecutando funcion start_robot; command : start")
         self.rbt_output.emit({"command": "start"})
             
     def raffi_activation(self, box):
+        print("Ejecutando raffi_activation...")
         #Primero en una lista guardamos cada texto contenido de los botones que se llenan al momento de escanear el ARNES
         text_buttons = [self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
                         self.ui.lbl_box3.text(), self.ui.lbl_box4.text(),
@@ -182,7 +230,6 @@ class MainWindow (QMainWindow):
         
 
         #Hacemos un recorrido de cada texto en la lista text_buttons
-        
         flag = False
         
         for i in text_buttons:
@@ -580,34 +627,42 @@ class MainWindow (QMainWindow):
                         elif "PDC-S" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("PDC-S")
+                            self.stop_raffi_animation("PDC-S")
                             
                         elif "TBLU" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("TBLU")
+                            self.stop_raffi_animation("TBLU")
                             
                         elif "PDC-P2" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("PDC-P2")
+                            self.stop_raffi_animation("PDC-P2")
 
                         elif "F96" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("F96")
+                            self.stop_raffi_animation("F96")
                             
                         elif "MFB-P2" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("MFB-P2")
+                            self.stop_raffi_animation("MFB-P2")
                             
                         elif "MFB-P1" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("MFB-P1")
+                            self.stop_raffi_animation("MFB-P1")
                             
                         elif "MFB-S" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("MFB-S")
+                            self.stop_raffi_animation("MFB-S")
                             
                         elif "MFB-E" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("MFB-E")    
+                            self.stop_raffi_animation("MFB-E")    
                     else:
                         print("No hay cajas en la lista ...")
                         print("rbt_home = False")
