@@ -260,6 +260,22 @@ class MainWindow (QMainWindow):
 
                             print(f"entró a correcto de {box}, enviando señal {box}:False a PLC")
                             self.plc_output.emit({box:False})
+
+                            print("DICT CON CAJAS ACTUALES",self.model.input_data["plc"]["clamps"])
+                            print(f"Removiendo caja {box} del diccionario")
+
+                            #Se hace una condicion para la caja R y saber cual esta dentro del model.input_data
+                            if box == "PDC-R" and "PDC-RMID" in self.model.input_data["database"]["modularity"]:
+                                box = "PDC-RMID"
+                            ########################################################## PDC-RS
+                            elif box == "PDC-R" and "PDC-RS" in self.model.input_data["database"]["modularity"]:
+                                box = "PDC-RS"
+
+                            self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
+                            print("DICT ACTUALIZADO CON CAJAS ACTUALES",self.model.input_data["plc"]["clamps"])
+
+                            
+
                             
                             if len(self.model.input_data["plc"]["clamps"]) > 0:
 
@@ -269,6 +285,8 @@ class MainWindow (QMainWindow):
                                 self.ui.lbl_steps.setStyleSheet("color: green;")
                                 
                             else:
+                                print("NO HAY CAJAS, CAMBIANDO MENSAJE EN LA GUI...")
+
                                 self.ui.lbl_steps.setText("Coloca las cajas en los nidos para continuar")
                                 self.ui.lbl_steps.setStyleSheet("color: navy;")
                             
