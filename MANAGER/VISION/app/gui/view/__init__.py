@@ -228,9 +228,6 @@ class MainWindow (QMainWindow):
     def raffi_activation(self, box):
         print("Ejecutando raffi_activation...")
 
-        print("variable del modelo pero de controller:")
-        print("THIS->:",self.model.input_data["plc"]["clamps"])
-
         #Primero en una lista guardamos cada texto contenido de los botones que se llenan al momento de escanear el ARNES
         text_buttons = [self.ui.lbl_box0.text(),self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
                         self.ui.lbl_box3.text(), self.ui.lbl_box4.text(),
@@ -267,25 +264,25 @@ class MainWindow (QMainWindow):
                             
                             print(f"Enviando señal {box}:False a PLC")
                             self.plc_output.emit({box:False})
-                           
-                                
-                            self.output.emit({"clamp_PDC-Dbracket":False})
-
-
-                            print("DICT CON CAJAS ACTUALES",self.model.input_data["plc"]["clamps"])
-                            print(f"Removiendo caja {box} del diccionario")
-
+                          
                             #Se hace una condicion para la caja R y saber cual esta dentro del model.input_data
                             if box == "PDC-R" and "PDC-RMID" in self.model.input_data["database"]["modularity"]:
                                 box = "PDC-RMID"
                             ########################################################## PDC-RS
                             elif box == "PDC-R" and "PDC-RS" in self.model.input_data["database"]["modularity"]:
                                 box = "PDC-RS"
-
-                            self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
-                            print("DICT ACTUALIZADO CON CAJAS ACTUALES",self.model.input_data["plc"]["clamps"])
-
                             
+
+                            if box in self.model.input_data["plc"]["clamps"]:
+                                self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
+                                print("LISTA ACTUALIZADA DESPUES DEL POP",self.model.input_data["plc"]["clamps"])
+                            else:
+                                print("la caja " + box + " ya no estaba en la lista")
+                                
+                            if box == "PDC-Dbracket":
+                                self.ui.lbl_box0.setText("PDC-Dbracket:\n Habilitar") #tiene que decir Habilitar para su funcionamiento
+                                self.ui.lbl_box0.setStyleSheet("color: red;")
+
                             if len(self.model.input_data["plc"]["clamps"]) > 0:
 
                                 print("hay cajas en los nidos")
@@ -312,9 +309,14 @@ class MainWindow (QMainWindow):
                     flag = True
                         
                 elif box in i and "Habilitar" in i:
-                    print(f"entró a Habilitar de {box}, enviando señal {box}:True a PLC")
-                    
-                    self.plc_output.emit({"clamp_PDC-Dbracket":True})
+    
+                    if box == "PDC-Dbracket" and box not in self.model.input_data["plc"]["clamps"]:
+                        self.model.input_data["plc"]["clamps"].append(box)
+                        
+                        self.ui.lbl_box0.setText(" PDC-Dbracket:\n clamp correcto")
+                        self.ui.lbl_box0.setStyleSheet("color: green;") 
+
+                    print(f"entró a Habilitar de {box}, enviando señal {box}:True a PLC")      
                     self.plc_output.emit({box:True})
                     
                     flag = True
