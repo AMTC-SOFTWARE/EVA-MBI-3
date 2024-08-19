@@ -111,6 +111,7 @@ class MainWindow (QMainWindow):
         self.ui.btn_hxh.clicked.connect(self.horaxhora)
         
         #Botones para Clamp/Desclamp (lambda para darles entrada de un string a los connect)
+        self.ui.lbl_box0.clicked.connect(lambda: self.raffi_activation("PDC-Dbracket"))
         self.ui.lbl_box1.clicked.connect(lambda: self.raffi_activation("PDC-D"))
         self.ui.lbl_box2.clicked.connect(lambda: self.raffi_activation("PDC-P"))
         self.ui.lbl_box3.clicked.connect(lambda: self.raffi_activation("PDC-R"))
@@ -122,7 +123,7 @@ class MainWindow (QMainWindow):
         self.ui.lbl_box9.clicked.connect(lambda: self.raffi_activation("MFB-P1"))
         self.ui.lbl_box10.clicked.connect(lambda: self.raffi_activation("MFB-S"))
         self.ui.lbl_box11.clicked.connect(lambda: self.raffi_activation("MFB-E"))
-
+        
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.status)
         #self.timer.start(200)
@@ -137,8 +138,11 @@ class MainWindow (QMainWindow):
    #Funcion para iniciar la animacion gif
     def start_raffi_animation(self, box):
         print("Entro a start_raffi_animation")
-
-        if box == "PDC-D":
+        
+        if box == "PDC-Dbracket":
+            self.ui.lbl_box0.setIcon(QtGui.QIcon(self.ui.lbl_box_0movie.currentPixmap()))
+            self.ui.lbl_box_0movie.start()
+        elif box == "PDC-D":
             self.ui.lbl_box1.setIcon(QtGui.QIcon(self.ui.lbl_box_1movie.currentPixmap()))
             self.ui.lbl_box_1movie.start()
         elif box == "PDC-P":
@@ -178,7 +182,10 @@ class MainWindow (QMainWindow):
         
         print("Deteniendo animacion...")
         
-        if box == "PDC-D":
+        if box == "PDC-Dbracket":
+            self.ui.lbl_box0.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_0movie.stop()
+        elif box == "PDC-D":
             self.ui.lbl_box1.setIcon(QtGui.QIcon())
             self.ui.lbl_box_1movie.stop()
         elif box == "PDC-P":
@@ -225,15 +232,13 @@ class MainWindow (QMainWindow):
         print("THIS->:",self.model.input_data["plc"]["clamps"])
 
         #Primero en una lista guardamos cada texto contenido de los botones que se llenan al momento de escanear el ARNES
-        text_buttons = [self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
+        text_buttons = [self.ui.lbl_box0.text(),self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
                         self.ui.lbl_box3.text(), self.ui.lbl_box4.text(),
                         self.ui.lbl_box5.text(), self.ui.lbl_box6.text(),
                         self.ui.lbl_box7.text(), self.ui.lbl_box8.text(),
                         self.ui.lbl_box9.text(), self.ui.lbl_box10.text(),
                         self.ui.lbl_box11.text()]
-        
-        
-
+ 
         #Hacemos un recorrido de cada texto en la lista text_buttons
         flag = False
         
@@ -244,22 +249,28 @@ class MainWindow (QMainWindow):
                 
                     self.start_raffi_animation(box)
 
+                    #Si el robot no esta en HOME se envia el comando para enviarlo antes de desclampear una caja.
                     if self.rbt_home == False:
                         print("Enviando stop a robot: command : stop")
                         self.rbt_output.emit({"command":"stop"})
                         Timer(0.5, self.start_robot).start()
                     
-                
+                    #En model.cajas_raffi se van agregando las cajas que queremos desclampear
                     if box in self.model.cajas_raffi:
+                        #Si el Robot esta en Home, entra y si no, no desclampea la caja
                         if self.rbt_home == True:
                             #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
                             indx_pdcd = self.model.cajas_raffi.index(box)
 
                             #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
                             self.model.cajas_raffi.pop(indx_pdcd)
-
-                            print(f"entró a correcto de {box}, enviando señal {box}:False a PLC")
+                            
+                            print(f"Enviando señal {box}:False a PLC")
                             self.plc_output.emit({box:False})
+                           
+                                
+                            self.output.emit({"clamp_PDC-Dbracket":False})
+
 
                             print("DICT CON CAJAS ACTUALES",self.model.input_data["plc"]["clamps"])
                             print(f"Removiendo caja {box} del diccionario")
@@ -275,8 +286,6 @@ class MainWindow (QMainWindow):
                             print("DICT ACTUALIZADO CON CAJAS ACTUALES",self.model.input_data["plc"]["clamps"])
 
                             
-
-                            
                             if len(self.model.input_data["plc"]["clamps"]) > 0:
 
                                 print("hay cajas en los nidos")
@@ -290,8 +299,6 @@ class MainWindow (QMainWindow):
                                 self.ui.lbl_steps.setText("Coloca las cajas en los nidos para continuar")
                                 self.ui.lbl_steps.setStyleSheet("color: navy;")
                             
-
-                        
                             #Si ya no quedan mas cajas en la lista, se manda a false la variable rbt_home
                             if len(self.model.cajas_raffi) > 0:
                                 print("Aun quedan cajas:", self.model.cajas_raffi)
@@ -306,6 +313,8 @@ class MainWindow (QMainWindow):
                         
                 elif box in i and "Habilitar" in i:
                     print(f"entró a Habilitar de {box}, enviando señal {box}:True a PLC")
+                    
+                    self.plc_output.emit({"clamp_PDC-Dbracket":True})
                     self.plc_output.emit({box:True})
                     
                     flag = True
@@ -645,6 +654,11 @@ class MainWindow (QMainWindow):
                         print("rbt_home = True")
                         self.rbt_home = True
                         
+                        if "PDC-Dbracket" in self.model.cajas_raffi:
+                            print("Llamando a la funcion raffi_activation para desclampear caja...")
+                            self.raffi_activation("PDC-Dbracket")
+                            self.stop_raffi_animation("PDC-Dbracket")
+                            
                         if "PDC-D" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("PDC-D")
@@ -790,6 +804,14 @@ class MainWindow (QMainWindow):
                      color_back=message["lcdcronometro"]["color"]
                      self.ui.lbl_cant3.setStyleSheet("color: #214562; font-size:20px;background-color:" + message["lcdcronometro"]["color"]+ "; border-radius:20px; margin-bottom: 5px")
             ###########################################################################
+            #Modificacion para PDC-D Bracket         
+            if "lbl_box0" in message:
+                self.ui.lbl_box0.setText(message["lbl_box0"]["text"])
+                if "color" in message["lbl_box0"]:
+                    self.ui.lbl_box0.setStyleSheet("color: " + message["lbl_box0"]["color"])
+                if "hidden" in message["lbl_box0"]:
+                    self.ui.lbl_box0.setHidden(message["lbl_box0"]["hidden"])
+                    
             if "lbl_box1" in message:
                 self.ui.lbl_box1.setText(message["lbl_box1"]["text"])
                 if "color" in message["lbl_box1"]:

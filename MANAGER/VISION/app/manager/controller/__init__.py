@@ -134,6 +134,7 @@ class Startup(QState):
             "lbl_info4" : {"text": "", "color": "black"},
             "lbl_nuts"  : {"text": "", "color": "black"},
             ##############################################
+            "lbl_box0"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box1"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box2"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box3"  : {"text": "", "color": "black", "hidden": True},
@@ -288,6 +289,7 @@ class StartCycle (QState):
             "lbl_info3" : {"text": "", "color": "black"},
             "lbl_nuts" : {"text": "", "color": "orange"},
             #############################################
+            "lbl_box0"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box1"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box2"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box3"  : {"text": "", "color": "black", "hidden": True},
@@ -1345,7 +1347,9 @@ class CheckQr (QState):
             endpoint = "http://{}/server_famx2/get/seghm_valores/HM/=/{}/RESULTADO/=/1".format(self.model.server, ID)
             response = requests.get(endpoint).json()
 
-            if ("items" in response and not(response["items"])):
+            print(response)
+
+            if ("exception" in response):
                 print("No se encontraron valores en el arnés por lo tanto no se podrán generar las cajas que lleva desde aquí...")
                 self.model.valores_torques_red = False
             else:
@@ -1638,6 +1642,33 @@ class EnableClamps (QState):
         print("############################## ESTADO: EnableClamps ############################")
 
         self.model.disable_key = False
+
+        labels = {
+            "PDC-Dbracket" : {"lbl_box0" : {"text": "PDC-Dbracket", "color": "darkgray", "hidden": False}},
+            "PDC-D" : {"lbl_box1" : {"text": "PDC-D", "color": "darkgray", "hidden": False}},                    
+            "PDC-P" : {"lbl_box2" : {"text": "PDC-P", "color": "darkgray", "hidden": False}},                    
+            "PDC-RMID" : {"lbl_box3" : {"text": "PDC-RMID", "color": "darkgray", "hidden": False}},                   
+            "PDC-S" : {"lbl_box4" : {"text": "PDC-S", "color": "darkgray", "hidden": False}},                   
+            "TBLU" : {"lbl_box5" : {"text": "TBLU", "color": "darkgray", "hidden": False}},                   
+            "PDC-P2" : {"lbl_box6" : {"text": "PDC-P2", "color": "darkgray", "hidden": False}},                   
+            "F96" : {"lbl_box7" : {"text": "F96", "color": "darkgray", "hidden": False}},                   
+            "MFB-P2" : {"lbl_box8" : {"text": "MFB-P2", "color": "darkgray", "hidden": False}},                   
+            "MFB-P1" : {"lbl_box9" : {"text": "MFB-P1", "color": "darkgray", "hidden": False}},                   
+            "MFB-S" : {"lbl_box10" : {"text": "MFB-S", "color": "darkgray", "hidden": False}},                   
+            "MFB-E" : {"lbl_box11" : {"text": "MFB-E", "color": "darkgray", "hidden": False}}                   
+        }
+        
+        #Iteramnos la key que en este caso es la caja y el valor que seria los lbl
+        for key,value in labels.items():
+            #Si la key(caja) esta dentro del "self.model.input_data["database"]["modularity"]" entra a la condicion
+            if key in self.model.input_data["database"]["modularity"]:
+                print("cajas encontradas en el dic", key)
+                
+                #Agregamos el valor de cada key(caja) que vendria siendo cada lbl a la variable command para enviarla a la GUI
+                command = value
+                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+            else:
+                print("No se encontraron las cajas", key)
 
         command = {}
         for i in self.model.input_data["database"]["modularity"]:

@@ -33,7 +33,7 @@ class MqttClient (QObject):
     start       =   pyqtSignal()
     
     #error_cortina   =   pyqtSignal()
-
+    nido_PDCDB = ""
     nido_PDCD = ""
     nido_PDCP = ""
     nido_PDCR = ""
@@ -46,6 +46,7 @@ class MqttClient (QObject):
     nido_MFBS = ""
     nido_MFBE = ""
 
+    color_PDCDB = "blue"
     color_PDCD = "blue"
     color_PDCP = "blue"
     color_PDCR = "blue"
@@ -242,29 +243,33 @@ class MqttClient (QObject):
                 print("payload_str: ",payload_str)
                 
                 if "PDC-Dbracket" in payload_str: #busca en el string PDC-D
-                    #if "PDC-Dbracket" in payload:
-                    #    if payload["PDC-Dbracket"] == True:
-                    #        self.nido_PDCD = "PDC-Dbracket:\n Habilitada"
-                    #        self.color_PDCD = "blue"
-                    #
-                    #    if payload["PDC-Dbracket"] == False:
-                    #        self.nido_PDCD = ""
-                    #        self.color_PDCD = "blue"
-                    #
-                    if "PDC-Dbracket_ERROR" in payload:
-                        if payload["PDC-D_ERROR"] == True:
-                            self.nido_PDCD = "PDC-Dbracket:\n clamp incorrecto"
-                            self.color_PDCD = "red"
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-Dbracket" in self.model.input_data["database"]["modularity"]:
 
-                    if "clamp_PDC-Dbracket" in payload:
-                        if payload["clamp_PDC-Dbracket"] == True:
-                            self.nido_PDCD = " PDC-Dbracket:\n clamp correcto"
-                            self.color_PDCD = "green"
+                        if "PDC-Dbracket" in payload:
+                            if payload["PDC-Dbracket"] == True:
+                                self.nido_PDCDB = "PDC-Dbracket:\n Habilitada"
+                                self.color_PDCDB = "blue"
+                    
+                            if payload["PDC-Dbracket"] == False:
+                                self.nido_PDCDB = "PDC-Dbracket:\n Habilitar"
+                                self.color_PDCDB = "red"
+                    
+                        if "PDC-Dbracket_ERROR" in payload:
+                            if payload["PDC-D_ERROR"] == True:
+                                self.nido_PDCDB = "PDC-Dbracket:\n clamp incorrecto"
+                                self.color_PDCDB = "red"
 
-                    command = {
-                        "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}", "hidden" : False}
-                        }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        if "clamp_PDC-Dbracket" in payload:
+                            if payload["clamp_PDC-Dbracket"] == True:
+                                self.nido_PDCDB = " PDC-Dbracket:\n clamp correcto"
+                                self.color_PDCDB = "green"
+
+                        command = {
+                            "lbl_box0" : {"text": f"{self.nido_PDCDB}", "color": f"{self.color_PDCDB}", "hidden" : False}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
                 if "PDC-D" in payload_str: #busca en el string PDC-D
                     
