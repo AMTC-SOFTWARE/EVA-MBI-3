@@ -582,14 +582,20 @@ class CheckQr (QState):
                                     }
                                 endpointUpdate = "http://{}/server_famx2/update/seghm/{}".format(self.model.server,self.model.id_HM)
                                 
+                                
                                 respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
                                 respTrazabilidad = respTrazabilidad.json()
-                                sleep(0.1)
-                                respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
-                                respTrazabilidad = respTrazabilidad.json()
-                                sleep(0.1)
-                                respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
-                                respTrazabilidad = respTrazabilidad.json()
+
+                                if "exception" in respTrazabilidad:
+                                    sleep(0.1)
+                                    respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
+                                    respTrazabilidad = respTrazabilidad.json()
+
+                                    if "exception" in respTrazabilidad:
+                                        sleep(0.1)
+                                        respTrazabilidad = requests.post(endpointUpdate, data=json.dumps(entTrazabilidad))
+                                        respTrazabilidad = respTrazabilidad.json()
+
                                 print("respTrazabilidad del update: ",respTrazabilidad)
                             #Si la columna que indica la hora de salida de INSERCIÓN es None, significa que no ha completado esa estación y NO puede entrar aún a Visión.
                             else:

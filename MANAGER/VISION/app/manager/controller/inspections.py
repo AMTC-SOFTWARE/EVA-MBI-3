@@ -133,9 +133,13 @@ class WaitingHome(QState):
         print("############################## ESTADO: WaitingHome INSPECTIONS ############################")
         command = {
             "lbl_result" : {"text": "Enviando Robot a Home para liberar cajas", "color": "green"},
-            "lbl_steps" : {"text": "Por favor espere", "color": "black"}
+            "lbl_steps" : {"text": "Espere o reintente con botón amarillo", "color": "navy"}
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+        
+    def onExit(self, QEvent):
+        print("saliendo de WaitingHome")
+        self.model.waiting_home = False
 
 
 class LiberarCajas(QState):

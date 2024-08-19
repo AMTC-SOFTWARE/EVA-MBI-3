@@ -487,6 +487,7 @@ class Model (object):
     ###########################################################
 
     def reset (self):
+        self.waiting_home = False
         self.valores_torques_red = False
         self.revisando_resultado_height = False
         self.revisando_resultado = False
