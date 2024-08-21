@@ -174,6 +174,12 @@ class Triggers (QState):
         #copia de la caja que se está inspeccionando
         box = self.model.height_data[self.module]["box"]
 
+        print("current_trig: ",current_trig)
+        print("self.model.robot_data[h_queue][box]: ",self.model.robot_data["h_queue"][box])
+        print("len(self.model.robot_data[h_queue][box]): ",len(self.model.robot_data["h_queue"][box]))
+
+        ################################## SE REVISA QUE LOS FUSIBLES LEÍDOS CORRESPONDAN A LOS ESPERADOS #####################################
+
         if box in self.model.modularity_fuses:
             for fuse in self.model.modularity_fuses[box]:
                 #height_d es una copia elemento a elemento de la base de datos que te indica si hay fusible o no
@@ -228,19 +234,24 @@ class Triggers (QState):
                                 self.model.tries["ALTURA"][box][fuse] = 1
                             print("Modelo Final: ",self.model.tries)
 
-                #Aseguramiento de inspecciones de alturas 
-                BB = [box, fuse]
-                if current_trig == self.model.h_triggers[box][-1]: #Cuando el trigger actual es igual al ultimo h_trigger de la caja actual[box]
+                ############################################# EN EL ÚLTIMO TRIGGER DE LA CAJA ########################################################
+                ################################# SE REVISA QUE SE HAYAN INSPECCIONADO TODOS LOS FUSIBLES DE LA CAJA ##################################
+                if len(self.model.robot_data["h_queue"][box]) == 1: #cuando sea el último trigger solo queda este en robot_data
                     #Si el fuse no estra dentro de model.history_fuses, se emite un error = True y se muestra en pantalla las cavidades faltantes por inspeccionar
                     if fuse not in self.model.history_fuses:
                         #SOLAMENTE SE EXCLUYEN DE ALTURAS DE FUSIBELS EXTERNOS DE PDC-R, SIEMPRE Y CUANDO TODOS SEAN VACIOS
                         if (fuse not in self.model.external_fuses) or (self.model.eliminar_inspeccion_externos == False): #se excluyen los fusibles ya que pueden faltar de inspeccionar si se requiere (PDC-R fusibles externos de caja grande)
                             error = True
+                            BB = [box, fuse]
                             img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
                             print("||||||||||Alturas faltantes en: ",fuse, " Caja: ",box)
 
                             self.model.missing_fuses += "Inspección de alturas faltante: " + str(fuse) + "\n"
 
+        print("Finalizó inspección de trigger...")
+        ###################################################################################
+
+        #guardando imagen generada final en imgs_path + module + .jpg
         imwrite(self.model.imgs_path + self.module + ".jpg", img)
 
 

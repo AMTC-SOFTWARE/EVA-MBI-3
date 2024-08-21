@@ -161,6 +161,11 @@ class Triggers (QState):
         amp_keys = self.model.amperaje.keys()
         #print("Modelo Amperaje Arreglo KEYS:\n",amp_keys)
 
+        print("current_trig: ",current_trig)
+        print("self.model.robot_data[v_queue][box]: ",self.model.robot_data["v_queue"][box])
+        print("len(self.model.robot_data[v_queue][box]): ",len(self.model.robot_data["v_queue"][box]))
+        ################################## SE REVISA QUE LOS FUSIBLES LEÍDOS CORRESPONDAN A LOS ESPERADOS #####################################
+
         for fuse in self.model.modularity_fuses[box]:
             score = 0
 
@@ -224,15 +229,7 @@ class Triggers (QState):
 
                 #Validaccion de inspeccion por zonas
                 BB = [box, fuse]
-                if current_trig == self.model.v_triggers[box][-1]: #Cuando el trigger actual es igual al ultimo v_trigger de la caja actual[box]
-                    #Si la cavidad no estra dentro de model.history_fuses, se emite un error = True y se muestra en pantalla las cavidades faltantes por inspeccionar
-                    if fuse not in self.model.history_fuses: 
-                        error = True
-                        img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
-                        print("||||||||||Fusible faltante: ",fuse, " Caja: ",box)
-                        
-                        self.model.missing_fuses += "Inspecciones faltantes: " + str(fuse) + "\n"     
-                        
+                 
                 if score >= thresh:
                     img = self.model.drawBB(img = img, BB = BB, color = (0, 255, 0))
                     self.model.v_result[box][fuse] = self.model.modularity_fuses[box][fuse]
@@ -240,6 +237,20 @@ class Triggers (QState):
                     error = True
                     img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
                     self.model.v_result[box][fuse] = temp
+
+            ############################################## EN EL ÚLTIMO TRIGGER DE LA CAJA ########################################################
+            ################################# SE REVISA QUE SE HAYAN INSPECCIONADO TODOS LOS FUSIBLES DE LA CAJA ##################################
+            if len(self.model.robot_data["v_queue"][box]) == 1: #cuando sea el último trigger solo queda este en robot_data
+                #Si la cavidad no está dentro de model.history_fuses, se emite un error = True y se muestra en pantalla las cavidades faltantes por inspeccionar
+                if fuse not in self.model.history_fuses:
+                    error = True
+                    BB = [box, fuse]
+                    img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
+                    print("||||||||||Fusible faltante: ",fuse, " Caja: ",box)
+                    self.model.missing_fuses += "Inspecciones faltantes: " + str(fuse) + "\n"
+
+        print("Finalizó inspección de trigger...")
+        ###################################################################################
 
         current_day = self.model.datetime.strftime("%d")
         current_month = self.model.datetime.strftime("%m")
@@ -419,18 +430,12 @@ class Receiver (QState):
             if not(box in results):
                 results[box] = {}
 
-            print("self.model.input_data[vision]: ",self.model.input_data["vision"])
-
             for item in self.model.input_data["vision"]:
                 if not(item in results[box]):
                     results[box][item] = []
                 results[box][item].append(self.model.input_data["vision"][item])
 
-                print("results[box][item]: ",results[box][item])
-
                 try:
-
-                    print("item: ",item)
 
                     if item in self.model.modularity_fuses[box]:
                         if self.model.input_data["vision"][item] != self.model.modularity_fuses[box][item]:

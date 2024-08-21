@@ -246,8 +246,6 @@ class UpdateTriggers(QState):
                             print("se trata de alturas en PDC-R grande")
                             self.model.eliminar_inspeccion_externos = True
 
-                            temp_rh_triggers = {"PDC-R": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"]}
-
                             for fusible in self.model.external_fuses:
                                 if self.model.modularity_fuses[i][fusible] != "vacio": #si cualquier fusible externo es diferente de vacío, se hacen inspecciones
                                     self.model.eliminar_inspeccion_externos = False
@@ -255,7 +253,7 @@ class UpdateTriggers(QState):
                             if self.model.eliminar_inspeccion_externos == False:
                                 self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
                             else:
-                                self.model.robot_data["h_queue"][i] = copy(temp_rh_triggers[i])
+                                self.model.robot_data["h_queue"][i] = copy(self.model.rh_trigger_pdcr[i])
                         else:
                         ############################################################
                             #FUNCIONAMIENTO NORMAL para agregar inspección de alturas...

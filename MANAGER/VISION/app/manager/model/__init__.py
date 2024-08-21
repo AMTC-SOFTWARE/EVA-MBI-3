@@ -422,6 +422,9 @@ class Model (object):
             #"PDC-Dbracket": ["PDCDbracket_pa1"]
             }
 
+        #trigger sin inspecciones de alturas en cavidades externas de caja grande PDCR
+        self.rh_trigger_pdcr = {"PDC-R": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"]}
+
         print("v_triggers:\n",self.v_triggers)
         print("rv_triggers:\n",self.rv_triggers)
         print("h_triggers:\n",self.h_triggers)
