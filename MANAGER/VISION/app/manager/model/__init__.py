@@ -704,7 +704,7 @@ class Model (object):
         fecha_actuaal = None
         try:
             endpoint = "http://{}/server_famx/hora_servidor".format(self.server) #self.model.server
-            respuesta_hora = requests.get(endpoint).json()
+            respuesta_hora = requests.get(endpoint, timeout=2).json()
             if "exception" in respuesta_hora:
                 fecha_actuaal = datetime.now() #se toma la hora local de la PC
                 print("////////// fecha_local")
