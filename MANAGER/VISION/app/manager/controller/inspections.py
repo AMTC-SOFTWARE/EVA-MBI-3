@@ -131,6 +131,7 @@ class WaitingHome(QState):
     def onEntry(self, QEvent):
 
         print("############################## ESTADO: WaitingHome INSPECTIONS ############################")
+        self.model.waiting_home = True
         command = {
             "lbl_result" : {"text": "Enviando Robot a Home para liberar cajas", "color": "green"},
             "lbl_steps" : {"text": "Espere o reintente con botón amarillo", "color": "navy"}
