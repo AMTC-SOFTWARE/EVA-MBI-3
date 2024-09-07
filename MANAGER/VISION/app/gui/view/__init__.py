@@ -811,9 +811,14 @@ class Img_popout (QDialog):
 class PopOut (QMessageBox):
     def __init__(self, parent = None):
         super().__init__(parent)
-        self.setIcon(QMessageBox.Information)
+        self.setIcon(QMessageBox.Warning)
         self.setStandardButtons(QMessageBox.Ok)
         self.button(QMessageBox.Ok).setVisible(False)
+        
+        self.setStyleSheet("QPushButton { font-size: 20px; }"
+                           "QLabel { color : red; font-size: 40px; font-weight: bold; }"
+                           )
+        
 
     def closeEvent(self, event):
         event.ignore() 
