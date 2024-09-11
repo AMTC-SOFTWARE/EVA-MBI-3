@@ -1353,9 +1353,10 @@ class CheckQr (QState):
             endpoint = "http://{}/server_famx2/get/seghm_valores/HM/=/{}/RESULTADO/=/1".format(self.model.server, ID)
             response = requests.get(endpoint).json()
 
+            print("::::::::::::::::::::::::::::::: RESULTADOS TORQUES :::::::::::::::::::::::::::::::::")
             print(response)
 
-            if ("exception" in response):
+            if ("exception" in response) or ("items" in response):
                 print("No se encontraron valores en el arnés por lo tanto no se podrán generar las cajas que lleva desde aquí...")
                 self.model.valores_torques_red = False
             else:

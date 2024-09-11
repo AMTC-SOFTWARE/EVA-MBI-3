@@ -262,16 +262,22 @@ class MainWindow (QMainWindow):
                             #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
                             self.model.cajas_raffi.pop(indx_pdcd)
                             
-                            print(f"Enviando señal {box}:False a PLC")
-                            self.plc_output.emit({box:False})
-                          
-                            #Se hace una condicion para la caja R y saber cual esta dentro del model.input_data
+                            box_pdcrs = False
+                            #Se hace una condicion para la caja R y habilitar el nido correcto
                             if box == "PDC-R" and "PDC-RMID" in self.model.input_data["database"]["modularity"]:
                                 box = "PDC-RMID"
-                            ########################################################## PDC-RS
                             elif box == "PDC-R" and "PDC-RS" in self.model.input_data["database"]["modularity"]:
+                                print("es una caja PDC-RS pero se está convirtiendo a PDC-RMID en gui porque en GDI no hay PDC-RS")
+                                box_pdcrs = True
+                                box = "PDC-RMID" #esto es solamente para habilitar el nido
+
+                            print(f"Enviando señal {box}:False a PLC")
+                            self.plc_output.emit({box:False})
+
+                            if box_pdcrs == True:
+                                box_pdcrs = False
+                                print("regresando PDC-RMID a PDC-RS")
                                 box = "PDC-RS"
-                            
 
                             if box in self.model.input_data["plc"]["clamps"]:
                                 self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
@@ -284,15 +290,12 @@ class MainWindow (QMainWindow):
                                 self.ui.lbl_box0.setStyleSheet("color: red;")
 
                             if len(self.model.input_data["plc"]["clamps"]) > 0:
-
                                 print("hay cajas en los nidos")
-
-                                self.ui.lbl_steps.setText("Presiona START para comenzar")
+                                self.ui.lbl_steps.setText("Presiona START o REINTENTO para comenzar")
                                 self.ui.lbl_steps.setStyleSheet("color: green;")
                                 
                             else:
                                 print("NO HAY CAJAS, CAMBIANDO MENSAJE EN LA GUI...")
-
                                 self.ui.lbl_steps.setText("Coloca las cajas en los nidos para continuar")
                                 self.ui.lbl_steps.setStyleSheet("color: navy;")
                             
@@ -315,6 +318,14 @@ class MainWindow (QMainWindow):
                         
                         self.ui.lbl_box0.setText(" PDC-Dbracket:\n clamp correcto")
                         self.ui.lbl_box0.setStyleSheet("color: green;") 
+
+                    #Se hace una condicion para la caja R y habilitar el nido correcto
+                    if box == "PDC-R" and "PDC-RMID" in self.model.input_data["database"]["modularity"]:
+                        box = "PDC-RMID"
+                    elif box == "PDC-R" and "PDC-RS" in self.model.input_data["database"]["modularity"]:
+                        print("es una caja PDC-RS pero se está convirtiendo a PDC-RMID en gui porque en GDI no hay PDC-RS")
+                        box_pdcrs = True
+                        box = "PDC-RMID" #esto es solamente para habilitar el nido
 
                     print(f"entró a Habilitar de {box}, enviando señal {box}:True a PLC")      
                     self.plc_output.emit({box:True})
@@ -531,8 +542,6 @@ class MainWindow (QMainWindow):
         except Exception as ex:
             print("Error en el conteo ", ex)
         
-    
-
     def menuProcess(self, q):
         try:
             case = q.text()               
