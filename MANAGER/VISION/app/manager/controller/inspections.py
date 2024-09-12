@@ -77,7 +77,6 @@ class Stop(QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 
-
 class WaitStart(QState):
 
     def __init__(self, model = None, parent = None):
@@ -122,6 +121,7 @@ class SetRobot(QState):
         
         sleep(1)
         publish.single(self.model.pub_topics["robot"],json.dumps({"command": "start"}),hostname='127.0.0.1', qos = 2)
+
 
 class WaitingHome(QState):
     def __init__(self, model = None, parent = None):

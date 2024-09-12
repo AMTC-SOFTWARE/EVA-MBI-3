@@ -267,10 +267,6 @@ class MqttClient (QObject):
                                 self.nido_PDCDB = "PDC-Dbracket:\n Habilitada"
                                 self.color_PDCDB = "blue"
                     
-                            if payload["PDC-Dbracket"] == False:
-                                self.nido_PDCDB = "PDC-Dbracket:\n Habilitar"
-                                self.color_PDCDB = "red"
-                    
                         if "PDC-Dbracket_ERROR" in payload:
                             if payload["PDC-D_ERROR"] == True:
                                 self.nido_PDCDB = "PDC-Dbracket:\n clamp incorrecto"
@@ -286,6 +282,14 @@ class MqttClient (QObject):
                             }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
+                    else:
+                        self.nido_PDCDB = ""
+                        self.color_PDCDB = ""
+                        command = {
+                            "lbl_box0" : {"text": f"{self.nido_PDCDB}", "color": f"{self.color_PDCDB}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "PDC-D" in payload_str: #busca en el string PDC-D
                     
                     #dependiendo del arnés cargado
@@ -316,7 +320,14 @@ class MqttClient (QObject):
                             "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}", "hidden" : False}
                             }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                    
+                    else:
+                        self.nido_PDCD = ""
+                        self.color_PDCD = ""
+                        command = {
+                            "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "PDC-P2" in payload_str:
                     
                     #dependiendo del arnés cargado
@@ -344,6 +355,14 @@ class MqttClient (QObject):
                         command = {
                                     "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}", "hidden" : False}
                                   }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                    else:
+                        self.nido_PDCP2 = ""
+                        self.color_PDCP2 = ""
+                        command = {
+                            "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}", "hidden" : True}
+                            }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "PDC-P" in payload_str:
@@ -375,47 +394,59 @@ class MqttClient (QObject):
                                   }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
+                    else:
+                        self.nido_PDCP = ""
+                        self.color_PDCP = ""
+                        command = {
+                            "lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "PDC-R" in payload_str:
                     
-                    PDCR = "PDC-R"
-                                       
-                    #dependiendo del mensaje que le llegue desde la GDI
-                    if "PDC-RMID" in payload_str:
+                    PDCR = ""
+                    #detectar qué caja de PDC-R lleva el arnés
+                    if "PDC-R" in self.model.input_data["database"]["modularity"].keys():
+                        PDCR = "PDC-R"
+                    elif "PDC-RMID" in self.model.input_data["database"]["modularity"].keys():
                         PDCR = "PDC-RMID"
-                    if "PDC-RS" in payload_str:
-                        PDCR = "PDC-RS"
+                    elif "PDC-RS" in self.model.input_data["database"]["modularity"].keys():
+                        print("En realidad es una PDC-RS pero se cambia a PDC-RMID para GDI ya que es mismo nido")
+                        PDCR = "PDC-RMID"
+                    else: #si no hay ninguna caja PDCR en el contenido del arnés...
+                        self.nido_PDCR = ""
+                        self.color_PDCR = ""
+                        command = {
+                            "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                         
-                    
-                    #Iterar sobre cada caja en el diccionario para que al menos coincida elguna con el string "PDC-R"
-                    for key in self.model.input_data["database"]["modularity"].keys():
-                       
-                        #Si PDCR se encuentra en el diccionario entonces entra a hacer los procedimientos
-                        if PDCR in key:
-                            
-                            if PDCR in payload:
- 
-                     
-                                if payload[PDCR] == True:
-                                    self.nido_PDCR = f"{PDCR}:\n Habilitada"
-                                    self.color_PDCR = "blue"
-
-                                if payload[PDCR] == False:
-                                    self.nido_PDCR = f"{PDCR}:\n Habilitar"
-                                    self.color_PDCR = "red"
-
-                            if "PDC-R_ERROR" in payload:
+                    #si se encontró cualquier caja PDCR en el contenido del arnés...
+                    if PDCR != "":
+                        #no importa si es PDC-R o PDC-RMID los mensajes de ERROR y clamp no cambian (siempre se manda así desde GDI)
+                        if "PDC-R_ERROR" in payload:
                                 if payload["PDC-R_ERROR"] == True:
                                     self.color_PDCR = "red"
                                     self.nido_PDCR = f"{PDCR}:\n clamp incorrecto"
 
-                            if "clamp_PDC-R" in payload:
-                                if payload["clamp_PDC-R"] == True:
-                                    self.color_PDCR = "green"
-                                    self.nido_PDCR = f" {PDCR}:\n clamp correcto"
+                        if "clamp_PDC-R" in payload:
+                            if payload["clamp_PDC-R"] == True:
+                                self.color_PDCR = "green"
+                                self.nido_PDCR = f" {PDCR}:\n clamp correcto"
+                       
+                        if PDCR in payload:
+ 
+                            if payload[PDCR] == True:
+                                self.nido_PDCR = f"{PDCR}:\n Habilitada"
+                                self.color_PDCR = "blue"
+
+                            if payload[PDCR] == False:
+                                self.nido_PDCR = f"{PDCR}:\n Habilitar"
+                                self.color_PDCR = "red"
                   
-                            command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : False}}
-                            self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                
+                        command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : False}}
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "PDC-S" in payload_str:
                     
                     #dependiendo del arnés cargado
@@ -445,6 +476,13 @@ class MqttClient (QObject):
                                     "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}", "hidden" : False}
                                   }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_PDCS = ""
+                        self.color_PDCS = ""
+                        command = {
+                            "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "TBLU" in payload_str:
                     
@@ -464,6 +502,7 @@ class MqttClient (QObject):
                             if payload["TBLU_ERROR"] == True:
                                 self.nido_TBLU = "TBLU:\n clamp incorrecto"
                                 self.color_TBLU = "red"
+
                         if "clamp_TBLU" in payload:
                             if payload["clamp_TBLU"] == True:
                                 self.nido_TBLU = " TBLU:\n clamp correcto"
@@ -475,7 +514,13 @@ class MqttClient (QObject):
                                   }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
-                
+                    else:
+                        self.nido_TBLU = ""
+                        self.color_TBLU = ""
+                        command = {
+                            "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
                 if "F96" in payload_str:
                     
@@ -505,7 +550,15 @@ class MqttClient (QObject):
                                     "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}", "hidden" : False}
                                   }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                
+                        
+                    else:
+                        self.nido_F96 = ""
+                        self.color_F96 = ""
+                        command = {
+                            "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "MFB-P2" in payload_str:
                     
                     #dependiendo del arnés cargado
@@ -537,6 +590,14 @@ class MqttClient (QObject):
                         command = {
                                     "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}", "hidden" : False}
                                   }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    
+                    else:
+                        self.nido_MFBP2 = ""
+                        self.color_MFBP2 = ""
+                        command = {
+                            "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}", "hidden" : True}
+                            }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "MFB-P1" in payload_str:
@@ -572,6 +633,14 @@ class MqttClient (QObject):
                                   }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
+                    else:
+                        self.nido_MFBP1 = ""
+                        self.color_MFBP1 = ""
+                        command = {
+                            "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "MFB-S" in payload_str:
                     
                     #dependiendo del arnés cargado
@@ -605,6 +674,14 @@ class MqttClient (QObject):
                                   }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
+                    else:
+                        self.nido_MFBS = ""
+                        self.color_MFBS = ""
+                        command = {
+                            "lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "MFB-E" in payload_str:
                     
                     #dependiendo del arnés cargado
@@ -636,6 +713,14 @@ class MqttClient (QObject):
                         command = {
                                     "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}", "hidden" : False}
                                   }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                    else:
+                        self.nido_MFBE = ""
+                        self.color_MFBE = ""
+                        command = {
+                            "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}", "hidden" : True}
+                            }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario

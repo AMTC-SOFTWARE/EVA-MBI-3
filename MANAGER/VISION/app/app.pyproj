@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>app</Name>
     <RootNamespace>app</RootNamespace>
-    <InterpreterId>Global|VisualStudio|mainenv</InterpreterId>
+    <InterpreterId>Global|VisualStudio|Main Environment</InterpreterId>
     <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
     <IsWindowsApplication>False</IsWindowsApplication>
     <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
@@ -165,6 +165,7 @@
     <Content Include="toolkit\plugins\__pycache__\__init__.cpython-37.pyc" />
   </ItemGroup>
   <ItemGroup>
+    <InterpreterReference Include="Global|VisualStudio|Main Environment" />
     <InterpreterReference Include="Global|VisualStudio|mainenv" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

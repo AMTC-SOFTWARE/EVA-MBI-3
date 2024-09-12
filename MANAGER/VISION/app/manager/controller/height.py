@@ -474,6 +474,13 @@ class Pose(QState):
             self.model.height_data[self.module]["box"] = box
             self.model.height_data[self.module]["queue"].append(self.model.h_triggers[box][self.model.rh_triggers[box].index(current_trig)])
         else:
+
+            #######################################################################################
+            ################## INSPECCIÓN DE CAJAS SIEMPRE LLEGA AQUÍ AL TERMINAR ALTURAS #########
+            ################## O SI LA CAJA NO TENÍA ALTURAS TAMBIÉN LLEGA AQUÍ ###################
+            ###Se hace un pop de la tarea de -- self.model.input_data["database"]["modularity"] ###
+            print("CAJA TERMINADA, ELIMINANDO TAREA DE MODULARITY: ", box)
+
             command = {
                 "lbl_result" : {"text": "Caja " + box + " Terminada", "color": "green"}
                 }
