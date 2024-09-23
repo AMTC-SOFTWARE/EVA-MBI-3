@@ -167,6 +167,7 @@ class MqttClient (QObject):
                             if not(box in self.model.input_data["plc"]["clamps"]):
                                 self.model.input_data["plc"]["clamps"].append(box)
 
+
                                 # AGREGAR CODIGO PARA ORDENAR CAJAS CLAMPEADAS, primero PDCR, luego PDCS, luego TBLU, luego PDCD, y PDCP al final
                                 # si es que las lleva en ese momento (de lo que se ha clampeado antes de dar start)
 
@@ -266,6 +267,10 @@ class MqttClient (QObject):
                             if payload["PDC-Dbracket"] == True:
                                 self.nido_PDCDB = "PDC-Dbracket:\n Habilitada"
                                 self.color_PDCDB = "blue"
+                                
+                            if payload["PDC-Dbracket"] == False:
+                                self.nido_PDCDB = "PDC-Dbracket:\n Habilitar"
+                                self.color_PDCDB = "red"
                     
                         if "PDC-Dbracket_ERROR" in payload:
                             if payload["PDC-D_ERROR"] == True:
@@ -300,7 +305,6 @@ class MqttClient (QObject):
                                 self.nido_PDCD = "PDC-D:\n Habilitada"
                                 self.color_PDCD = "blue"
                            
-
                             if payload["PDC-D"] == False:
                                 self.nido_PDCD = "PDC-D:\n Habilitar"
                                 self.color_PDCD = "red"
@@ -315,6 +319,9 @@ class MqttClient (QObject):
                             if payload["clamp_PDC-D"] == True:
                                 self.nido_PDCD = " PDC-D:\n clamp correcto"
                                 self.color_PDCD = "green"
+                            else:
+                                self.nido_PDCD = "PDC-D:\n Habilitar"
+                                self.color_PDCD = "red"
 
                         command = {
                             "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}", "hidden" : False}
@@ -350,6 +357,9 @@ class MqttClient (QObject):
                             if payload["clamp_PDC-P2"] == True:
                                 self.nido_PDCP2 = " PDC-P2:\n clamp correcto"
                                 self.color_PDCP2 = "green"
+                            else:
+                                self.nido_PDCP2 = "PDC-P2:\n Habilitar"
+                                self.color_PDCP2 = "red"
 
 
                         command = {
@@ -388,6 +398,9 @@ class MqttClient (QObject):
                             if payload["clamp_PDC-P"] == True:
                                 self.nido_PDCP = " PDC-P:\n clamp correcto"
                                 self.color_PDCP = "green"
+                            else:
+                                self.nido_PDCP = "PDC-P:\n Habilitar"
+                                self.nido_PDCP = "red"
 
                         command = {
                                     "lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}", "hidden" : False}
@@ -403,7 +416,6 @@ class MqttClient (QObject):
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "PDC-R" in payload_str:
-                    
                     PDCR = ""
                     #detectar qué caja de PDC-R lleva el arnés
                     if "PDC-R" in self.model.input_data["database"]["modularity"].keys():
@@ -420,7 +432,8 @@ class MqttClient (QObject):
                             "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : True}
                             }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                        
+                    
+                    
                     #si se encontró cualquier caja PDCR en el contenido del arnés...
                     if PDCR != "":
                         #no importa si es PDC-R o PDC-RMID los mensajes de ERROR y clamp no cambian (siempre se manda así desde GDI)
@@ -433,9 +446,18 @@ class MqttClient (QObject):
                             if payload["clamp_PDC-R"] == True:
                                 self.color_PDCR = "green"
                                 self.nido_PDCR = f" {PDCR}:\n clamp correcto"
-                       
-                        if PDCR in payload:
- 
+                            else:
+                                self.nido_PDCR = f"{PDCR}:\n Habilitar"
+                                self.nido_PDCR = "red"
+                                                   
+
+                        if "PDC-R" in payload or "PDC-RS" in payload or PDCR in payload:
+                            
+                            if "True" in str(payload):
+                                payload = {PDCR:True}
+                            elif "False" in str(payload):
+                                payload = {PDCR:False}
+                            
                             if payload[PDCR] == True:
                                 self.nido_PDCR = f"{PDCR}:\n Habilitada"
                                 self.color_PDCR = "blue"
@@ -443,8 +465,9 @@ class MqttClient (QObject):
                             if payload[PDCR] == False:
                                 self.nido_PDCR = f"{PDCR}:\n Habilitar"
                                 self.color_PDCR = "red"
-                  
+ 
                         command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : False}}
+                        print("COMMAN",command)
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "PDC-S" in payload_str:
@@ -468,8 +491,8 @@ class MqttClient (QObject):
                                             
                         if "clamp_PDC-S" in payload:
                             if payload["clamp_PDC-S"] == False:
-                                self.nido_PDCS = ""
-                                self.color_PDCS = "blue"
+                                self.nido_PDCS = "PDC-S:\n Habilitar"
+                                self.color_PDCS = "red"
 
 
                         command = {
@@ -507,6 +530,9 @@ class MqttClient (QObject):
                             if payload["clamp_TBLU"] == True:
                                 self.nido_TBLU = " TBLU:\n clamp correcto"
                                 self.color_TBLU = "green"
+                            else:
+                                self.nido_TBLU = "TBLU:\n Habilitar"
+                                self.color_TBLU = "red"
 
 
                         command = {
@@ -544,6 +570,9 @@ class MqttClient (QObject):
                             if payload["clamp_F96"] == True:
                                 self.nido_F96 = " F96:\n clamp correcto"
                                 self.color_F96 = "green"
+                            else:
+                                self.nido_F96 = "F96:\n Habilitar"
+                                self.color_F96 = "red"
 
 
                         command = {
@@ -585,8 +614,8 @@ class MqttClient (QObject):
 
                         if "clamp_MFB-P2" in payload:
                             if payload["clamp_MFB-P2"] == False:
-                                self.nido_MFBP2 = ""
-                                self.color_MFBP2 = "blue"
+                                self.nido_MFBP2 = "MFB-P2:\n Habilitar"
+                                self.color_MFBP2 = "red"
                         command = {
                                     "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}", "hidden" : False}
                                   }
@@ -626,8 +655,8 @@ class MqttClient (QObject):
 
                         if "clamp_MFB-P1" in payload:
                             if payload["clamp_MFB-P1"] == False:
-                                self.nido_MFBP1 = ""
-                                self.color_MFBP1 = "blue"
+                                self.nido_MFBP1 = "MFB-P1:\n Habilitar"
+                                self.color_MFBP1 = "red"
                         command = {
                                     "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}", "hidden" : False}
                                   }
@@ -667,8 +696,8 @@ class MqttClient (QObject):
 
                         if "clamp_MFB-S" in payload:
                             if payload["clamp_MFB-S"] == False:
-                                self.nido_MFBS = ""
-                                self.color_MFBS = "blue"
+                                self.nido_MFBS = "MFB-S:\n Habilitar"
+                                self.color_MFBS = "red"
                         command = {
                                     "lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}", "hidden" : False}
                                   }
@@ -708,8 +737,8 @@ class MqttClient (QObject):
 
                         if "clamp_MFB-E" in payload:
                             if payload["clamp_MFB-E"] == False:
-                                self.nido_MFBE = ""
-                                self.color_MFBE = "blue"
+                                self.nido_MFBE = "MFB-E:\n Habilitar"
+                                self.color_MFBE = "red"
                         command = {
                                     "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}", "hidden" : False}
                                   }

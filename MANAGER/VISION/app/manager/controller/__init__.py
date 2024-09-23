@@ -1655,6 +1655,8 @@ class EnableClamps (QState):
             "PDC-D" : {"lbl_box1" : {"text": "PDC-D", "color": "darkgray", "hidden": False}},                    
             "PDC-P" : {"lbl_box2" : {"text": "PDC-P", "color": "darkgray", "hidden": False}},                    
             "PDC-RMID" : {"lbl_box3" : {"text": "PDC-RMID", "color": "darkgray", "hidden": False}},                   
+            "PDC-RS" : {"lbl_box3" : {"text": "PDC-RS", "color": "darkgray", "hidden": False}},                   
+            "PDC-R" : {"lbl_box3" : {"text": "PDC-R", "color": "darkgray", "hidden": False}},                   
             "PDC-S" : {"lbl_box4" : {"text": "PDC-S", "color": "darkgray", "hidden": False}},                   
             "TBLU" : {"lbl_box5" : {"text": "TBLU", "color": "darkgray", "hidden": False}},                   
             "PDC-P2" : {"lbl_box6" : {"text": "PDC-P2", "color": "darkgray", "hidden": False}},                   
@@ -1669,13 +1671,13 @@ class EnableClamps (QState):
         for key,value in labels.items():
             #Si la key(caja) esta dentro del "self.model.input_data["database"]["modularity"]" entra a la condicion
             if key in self.model.input_data["database"]["modularity"]:
-                print("cajas encontradas en el dic", key)
+                print("Caja encontrada en el diccionario model.input_data[database][modularity]: ", key)
                 
                 #Agregamos el valor de cada key(caja) que vendria siendo cada lbl a la variable command para enviarla a la GUI
                 command = value
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             else:
-                print("No se encontraron las cajas", key)
+                print("********Caja faltante en el diccionario model.input_data[database][modularity]: ", key)
 
         command = {}
         for i in self.model.input_data["database"]["modularity"]:

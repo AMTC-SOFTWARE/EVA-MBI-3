@@ -480,7 +480,37 @@ class Pose(QState):
             ################## O SI LA CAJA NO TENÍA ALTURAS TAMBIÉN LLEGA AQUÍ ###################
             ###Se hace un pop de la tarea de -- self.model.input_data["database"]["modularity"] ###
             print("CAJA TERMINADA, ELIMINANDO TAREA DE MODULARITY: ", box)
+            
+            labels = {
+                "PDC-Dbracket" : {"lbl_box0" : {"text": "", "color": "darkgray", "hidden": True}},
+                "PDC-D" : {"lbl_box1" : {"text": "", "color": "darkgray", "hidden": True}},                    
+                "PDC-P" : {"lbl_box2" : {"text": "", "color": "darkgray", "hidden": True}},
+                "PDC-R" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                  
+                "PDC-RMID" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                    
+                "PDC-S" : {"lbl_box4" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "TBLU" : {"lbl_box5" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "PDC-P2" : {"lbl_box6" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "F96" : {"lbl_box7" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "MFB-P2" : {"lbl_box8" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "MFB-P1" : {"lbl_box9" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "MFB-S" : {"lbl_box10" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "MFB-E" : {"lbl_box11" : {"text": "", "color": "darkgray", "hidden": True}}                   
+            }
+            
 
+            """
+                *** Remover el label de la pantalla cuando termine de inspeccionar la vision y alturas ***
+                
+                1) Hacemos un recorrido de cada caja[key] y su lbl[value].
+                
+                2) Si la caja actual se encuentra dentro del diccionario[key], se manda un hidden:True para que esta se oculte 
+                y ademas se hace pop(remueve) de las tareas.
+            """
+            for key,value in labels.items():
+                if box in key:
+                    command = value
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)       
+                
             command = {
                 "lbl_result" : {"text": "Caja " + box + " Terminada", "color": "green"}
                 }

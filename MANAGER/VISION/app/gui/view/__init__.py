@@ -137,7 +137,9 @@ class MainWindow (QMainWindow):
         
    #Funcion para iniciar la animacion gif
     def start_raffi_animation(self, box):
-        print("Entro a start_raffi_animation")
+        print("EJECUTANDO START_RAFFI_ANIMATION")
+        print(f"ACTIVANDO ANIMACION PARA: {box}")
+        print("*********************************************** \n")
         
         if box == "PDC-Dbracket":
             self.ui.lbl_box0.setIcon(QtGui.QIcon(self.ui.lbl_box_0movie.currentPixmap()))
@@ -179,8 +181,9 @@ class MainWindow (QMainWindow):
         
               
     def stop_raffi_animation(self, box):
-        
-        print("Deteniendo animacion...")
+        print("EJECUTANDO STOP_RAFFI_ANIMATION")
+        print(f"DETENIENDO ANIMACION PARA: {box}")
+        print("*********************************************** \n")
         
         if box == "PDC-Dbracket":
             self.ui.lbl_box0.setIcon(QtGui.QIcon())
@@ -219,14 +222,18 @@ class MainWindow (QMainWindow):
             self.ui.lbl_box11.setIcon(QtGui.QIcon())
             self.ui.lbl_box_11movie.stop()  
         
-        
-              
     def start_robot(self):
-        print("Ejecutando funcion start_robot; command : start")
+        print("EJECUTANDO START_ROBOT")
+        print("ENVIANDO COMMAND:START")
+        print("*********************************************** \n")
+ 
+        #Comando para enviar al topico del Robot
         self.rbt_output.emit({"command": "start"})
             
     def raffi_activation(self, box):
-        print("Ejecutando raffi_activation...")
+        print("\n ***** EJECUTANDO RAFFI_ACTIVATION *****")
+        print(f"CAJA CLICKEADA: {box}")
+        print("*********************************************** \n")
 
         #Primero en una lista guardamos cada texto contenido de los botones que se llenan al momento de escanear el ARNES
         text_buttons = [self.ui.lbl_box0.text(),self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
@@ -235,6 +242,8 @@ class MainWindow (QMainWindow):
                         self.ui.lbl_box7.text(), self.ui.lbl_box8.text(),
                         self.ui.lbl_box9.text(), self.ui.lbl_box10.text(),
                         self.ui.lbl_box11.text()]
+        
+        print("Texto actual de los lbl ",text_buttons," \n")
  
         #Hacemos un recorrido de cada texto en la lista text_buttons
         flag = False
@@ -242,20 +251,31 @@ class MainWindow (QMainWindow):
         for i in text_buttons:
             if box in i:
                 if "correcto" in i:
-                    print("Correcto en", box)
-                
+                    print("Correcto en: ",box)
+                    
+                    #Iniciamos la animacion de carga
                     self.start_raffi_animation(box)
 
                     #Si el robot no esta en HOME se envia el comando para enviarlo antes de desclampear una caja.
                     if self.rbt_home == False:
-                        print("Enviando stop a robot: command : stop")
+                        print("rbt_home == False")
+                        print("Enviando stop a robot: command:stop")
                         self.rbt_output.emit({"command":"stop"})
                         Timer(0.5, self.start_robot).start()
+                        print("*********************************************** \n")
                     
                     #En model.cajas_raffi se van agregando las cajas que queremos desclampear
                     if box in self.model.cajas_raffi:
+                        print(f"la caja: {box} se encuentra agregada a la lista para desclampear \n")
+                        
                         #Si el Robot esta en Home, entra y si no, no desclampea la caja
                         if self.rbt_home == True:
+                            print("***********************************************")
+                            print("rbt_home == True \n")
+                            
+                            print("***********************************************")
+                            print(f"Caja: {box} fue removida de la lista para desclampear")
+                            
                             #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
                             indx_pdcd = self.model.cajas_raffi.index(box)
 
@@ -271,7 +291,7 @@ class MainWindow (QMainWindow):
                                 box_pdcrs = True
                                 box = "PDC-RMID" #esto es solamente para habilitar el nido
 
-                            print(f"Enviando señal {box}:False a PLC")
+                            print(f"Enviando señal {box}:False a PLC \n")
                             self.plc_output.emit({box:False})
 
                             if box_pdcrs == True:
@@ -280,22 +300,24 @@ class MainWindow (QMainWindow):
                                 box = "PDC-RS"
 
                             if box in self.model.input_data["plc"]["clamps"]:
+                                print(f"Removiendo {box} de model.input_data[plc][clamps] \n")
+                                
                                 self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
-                                print("LISTA ACTUALIZADA DESPUES DEL POP",self.model.input_data["plc"]["clamps"])
+                                print("Lista actualizada despues de remover la caja... ",self.model.input_data["plc"]["clamps"])
                             else:
-                                print("la caja " + box + " ya no estaba en la lista")
+                                print("la caja " + box + " no se encuentra dentro de model.input_data[plc][clamps]")
                                 
                             if box == "PDC-Dbracket":
                                 self.ui.lbl_box0.setText("PDC-Dbracket:\n Habilitar") #tiene que decir Habilitar para su funcionamiento
                                 self.ui.lbl_box0.setStyleSheet("color: red;")
 
                             if len(self.model.input_data["plc"]["clamps"]) > 0:
-                                print("hay cajas en los nidos")
+                                print("Aun hay cajas puestas en los nidos: ",self.model.input_data["plc"]["clamps"])
                                 self.ui.lbl_steps.setText("Presiona START o REINTENTO para comenzar")
                                 self.ui.lbl_steps.setStyleSheet("color: green;")
                                 
                             else:
-                                print("NO HAY CAJAS, CAMBIANDO MENSAJE EN LA GUI...")
+                                print("¡No hay ninguna caja puesta en los nidos! \n")
                                 self.ui.lbl_steps.setText("Coloca las cajas en los nidos para continuar")
                                 self.ui.lbl_steps.setStyleSheet("color: navy;")
                             
@@ -307,7 +329,7 @@ class MainWindow (QMainWindow):
                     else:
                         #Se agrega una vez a la lista
                         self.model.cajas_raffi.append(box) 
-                        print(self.model.cajas_raffi)
+                        print("Caja agregada a la lista para desclampear: ",self.model.cajas_raffi)
                         
                     flag = True
                         
@@ -655,14 +677,14 @@ class MainWindow (QMainWindow):
             #Respuesta del Robot
             if "response" in message:
                 if "home_reached" in message["response"]:
-                    print("*********Llego un HOME REACHED********")
+                    print("########## ROBOT : HOME REACHED ##########")
                     
                     #Verificamos si hay alguna caja en la lista
                     if len(self.model.cajas_raffi) > 0:
-                        print("Lista de cajas", self.model.cajas_raffi)
+                        print("Caja dentro de model.cajas_raffi: ",self.model.cajas_raffi)
                         
                         #Se hace true la variable en caso de que si hay cajas dentro de la lista
-                        print("rbt_home = True")
+                        print("Cambiando valor de rbt_home a True \n")
                         self.rbt_home = True
                         
                         if "PDC-Dbracket" in self.model.cajas_raffi:
