@@ -400,7 +400,7 @@ class MqttClient (QObject):
                                 self.color_PDCP = "green"
                             else:
                                 self.nido_PDCP = "PDC-P:\n Habilitar"
-                                self.nido_PDCP = "red"
+                                self.color_PDCP = "red"
 
                         command = {
                                     "lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}", "hidden" : False}
@@ -439,16 +439,16 @@ class MqttClient (QObject):
                         #no importa si es PDC-R o PDC-RMID los mensajes de ERROR y clamp no cambian (siempre se manda así desde GDI)
                         if "PDC-R_ERROR" in payload:
                                 if payload["PDC-R_ERROR"] == True:
-                                    self.color_PDCR = "red"
                                     self.nido_PDCR = f"{PDCR}:\n clamp incorrecto"
-
+                                    self.color_PDCR = "red"
+                                    
                         if "clamp_PDC-R" in payload:
                             if payload["clamp_PDC-R"] == True:
-                                self.color_PDCR = "green"
                                 self.nido_PDCR = f" {PDCR}:\n clamp correcto"
+                                self.color_PDCR = "green"
                             else:
                                 self.nido_PDCR = f"{PDCR}:\n Habilitar"
-                                self.nido_PDCR = "red"
+                                self.color_PDCR = "red"
                                                    
 
                         if "PDC-R" in payload or "PDC-RS" in payload or PDCR in payload:
@@ -467,7 +467,7 @@ class MqttClient (QObject):
                                 self.color_PDCR = "red"
  
                         command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : False}}
-                        print("COMMAN",command)
+                        print("COMMANDO PDCR",command)
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "PDC-S" in payload_str:
