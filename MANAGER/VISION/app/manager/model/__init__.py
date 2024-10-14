@@ -121,6 +121,8 @@ class Model (object):
         self.BRACKET_PDCD_clampeado=False
         self.PDCD_bracket_pendiente=False
         self.PDCD_bracket_terminado=False
+        #Variable declarada en false para indicar que el boton a presionar es START, en caso True se debe presionar el boton reintentar.
+        self.retry_btn_status = False
 
         self.tries = {
             "VISION": {},

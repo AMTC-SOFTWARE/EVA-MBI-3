@@ -310,14 +310,17 @@ class MainWindow (QMainWindow):
                             if box == "PDC-Dbracket":
                                 self.ui.lbl_box0.setText("PDC-Dbracket:\n Habilitar") #tiene que decir Habilitar para su funcionamiento
                                 self.ui.lbl_box0.setStyleSheet("color: red;")
-
-                            if len(self.model.input_data["plc"]["clamps"]) > 0:
-                                print("Aun hay cajas puestas en los nidos: ",self.model.input_data["plc"]["clamps"])
-                                self.ui.lbl_steps.setText("Presiona START o REINTENTO para comenzar")
-                                self.ui.lbl_steps.setStyleSheet("color: green;")
                                 
+                            if len(self.model.input_data["plc"]["clamps"]) > 0:
+                                print("revisión de cajas restantes desde comm.py, aún hay cajas puestas en input_data[PLC][clamps]")
+                                
+                                if self.model.retry_btn_status == False:
+                                    self.ui.lbl_steps.setText("Presiona START para comenzar")
+                                    self.ui.lbl_steps.setStyleSheet("color: green;")
+                                else:
+                                    self.ui.lbl_steps.setText("Presiona el boton de reintento")
+                                    self.ui.lbl_steps.setStyleSheet("color: black;")
                             else:
-                                print("¡No hay ninguna caja puesta en los nidos! \n")
                                 self.ui.lbl_steps.setText("Coloca las cajas en los nidos para continuar")
                                 self.ui.lbl_steps.setStyleSheet("color: navy;")
                             
@@ -747,7 +750,7 @@ class MainWindow (QMainWindow):
                             self.raffi_activation("MFB-E")    
                             self.stop_raffi_animation("MFB-E")    
                     else:
-                        print("No hay cajas en la lista ...")
+                        print("No hay cajas en la lista para desclampear...")
                         print("rbt_home = False")
                         self.rbt_home = False
                     

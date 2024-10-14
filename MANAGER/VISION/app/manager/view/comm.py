@@ -173,19 +173,28 @@ class MqttClient (QObject):
 
                                 self.clamp.emit() 
                         else:
+                            #Si clamp_box == False
                             if box in self.model.input_data["plc"]["clamps"]:
                                 self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
-                        
-                        #revisión y actualización de mensaje para colocar cajas, solamente si hay TAREAS, osea, un ciclo iniciado...
+                                
                         if len(self.model.input_data["database"]["modularity"]) > 0:
+                            
+                            print("Cajas con TAREAS pendientes",self.model.input_data["database"]["modularity"])
+                            
                             if len(self.model.input_data["plc"]["clamps"]) > 0:
                                 print("revisión de cajas restantes desde comm.py, aún hay cajas puestas en input_data[PLC][clamps]")
-                                command = { "lbl_steps" : {"text": "Presiona START o REINTENTO para comenzar", "color": "green"}}
-                                self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                                
+                                if self.model.retry_btn_status == False:
+                                    command = { "lbl_steps" : {"text": "Presiona START para comenzar", "color": "green"}}
+                                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                                else:
+                                    command = { "lbl_steps" : {"text": "Presiona el boton de reintento", "color": "black"}}
+                                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                             else:
                                 print("revisión de cajas restantes desde comm.py, NO hay cajas puestas en input_data[PLC][clamps]")
                                 command = { "lbl_steps" : {"text": "Coloca las cajas en los nidos para continuar", "color": "navy"}}
                                 self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                               
 
                 if "Candado_PDCS" in payload:
                     if payload["Candado_PDCS"] == True:

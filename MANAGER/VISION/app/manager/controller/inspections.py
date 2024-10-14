@@ -86,6 +86,8 @@ class WaitStart(QState):
     def onEntry(self, QEvent):
 
         print("############################## ESTADO: WaitStart INSPECTIONS ############################")
+        
+        self.model.retry_btn_status = False
 
         if self.model.PDCD_bracket_pendiente and self.model.PDCD_bracket_terminado==False:
 
@@ -111,6 +113,8 @@ class SetRobot(QState):
     def onEntry(self, QEvent):
 
         print("############################## ESTADO: SetRobot INSPECTIONS ############################")
+        
+        self.model.retry_btn_status = True
 
         command = {
             "lbl_result" : {"text": "Reiniciando robot", "color": "green"},
