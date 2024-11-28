@@ -470,10 +470,18 @@ class Pose(QState):
             clamps = self.model.input_data["plc"]["clamps"]
              #se elimina de las cajas clampeadas actualmente
             clamps.pop(clamps.index(box))
-            
+            #se elimina de todas las tareas
+            self.model.input_data["database"]["modularity"].pop(box)
+            self.model.height_data[self.module]["box"] = ""
             #se guardan las cajas terminadas actuales en una variable para posteriormente desclampearlas cuando el robot esté en home
             self.model.cajas_a_desclampear.append(box)
-
+            if len(clamps)>=1:
+                print("clamps si hay mas de 1",clamps)
+                for boxextra in clamps:
+                    if boxextra not in self.model.input_data["database"]["modularity"]:
+                        clamps.pop(clamps.index(boxextra))
+                        print("habia un boxextra",boxextra)
+                        
             if "PDC-D" in self.model.cajas_a_desclampear and len(clamps)<1:
                 self.model.PDCD_bracket_pendiente=True
 
@@ -484,9 +492,7 @@ class Pose(QState):
             if len(clamps) == 0:
                 self.model.desclampear_ready = True
 
-            #se elimina de todas las tareas
-            self.model.input_data["database"]["modularity"].pop(box)
-            self.model.height_data[self.module]["box"] = ""
+            
             self.model.F96_pendiente=False
             if len(self.model.input_data["database"]["modularity"])<=1 and "F96" in self.model.input_data["database"]["modularity"]:
                 self.model.F96_pendiente=True
