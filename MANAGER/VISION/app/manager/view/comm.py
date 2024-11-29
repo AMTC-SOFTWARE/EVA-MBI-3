@@ -138,7 +138,7 @@ class MqttClient (QObject):
                     if payload["emergency"] == False:
                         self.emergency.emit()
                         command = {
-                            "popOut":"Paro de emergencia activado"
+                            "popOut":"PARO DE EMERGENCIA ACTIVADO"
                             }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                         self.client.publish(self.model.pub_topics["plc"], json.dumps({"Flash": False}), qos = 2)

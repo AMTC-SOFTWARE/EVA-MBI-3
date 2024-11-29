@@ -605,7 +605,8 @@ class Pose(QState):
 
         # self.model.vision_data Sale listo y recién horneado de aquí (AQUI ES DONDE VAMOS-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**)
         # Ejemplo de current_trig : "PDC_R_pv1"
-        self.model.robot.setPose(current_trig)
+        if len(self.model.vision_data[self.module]["queue"])<2:
+            self.model.robot.setPose(current_trig)
 
 class Reintento (QState):
     ok      = pyqtSignal()

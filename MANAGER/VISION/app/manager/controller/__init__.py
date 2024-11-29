@@ -1356,7 +1356,7 @@ class CheckQr (QState):
             print("::::::::::::::::::::::::::::::: RESULTADOS TORQUES :::::::::::::::::::::::::::::::::")
             print(response)
 
-            if ("exception" in response) or ("items" in response):
+            if ("exception" in response):
                 print("No se encontraron valores en el arnés por lo tanto no se podrán generar las cajas que lleva desde aquí...")
                 self.model.valores_torques_red = False
             else:
@@ -1624,14 +1624,21 @@ class CheckPDCR (QState):
 
             else:
                 #se agrega uno al contador de intentos
-                self.model.contador_scan_pdcr += 1
-                command = {
+                if "HM" in qr_leido or "EL." in qr_leido:
+                    command = {
                     "lbl_result" : {"text": "Qr Incorrecto, Esperado: A" + self.model.qr_esperado, "color": "red"},
                     "lbl_steps" : {"text": "Intento " + str(self.model.contador_scan_pdcr) + " de " + str(self.model.max_pdcr_try), "color": "orange"},
                     }
-                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-                print("Qr Incorrecto, se espera: ",self.model.qr_esperado)
-                Timer(2.4,self.nok.emit).start()
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                else:
+                    self.model.contador_scan_pdcr += 1
+                    command = {
+                        "lbl_result" : {"text": "Qr Incorrecto, Esperado: A" + self.model.qr_esperado, "color": "red"},
+                        "lbl_steps" : {"text": "Intento " + str(self.model.contador_scan_pdcr) + " de " + str(self.model.max_pdcr_try), "color": "orange"},
+                        }
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                    print("Qr Incorrecto, se espera: ",self.model.qr_esperado)
+                    Timer(2.4,self.nok.emit).start()
 
 
     def onExit(self, QEvent):
