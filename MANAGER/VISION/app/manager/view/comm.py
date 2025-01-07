@@ -165,13 +165,23 @@ class MqttClient (QObject):
                         ########################################################## PDC-RS
                         if payload[i] == True:
                             if not(box in self.model.input_data["plc"]["clamps"]):
-                                self.model.input_data["plc"]["clamps"].append(box)
+                                print("box: ",box)
+                                modularity = self.model.input_data["database"]["modularity"]
 
+                                #si el mensaje de la caja clampeada aparece en las cajas de tareas pendientes del arnés (modularity), se agrega a clamps
+                                if box in modularity:
 
-                                # AGREGAR CODIGO PARA ORDENAR CAJAS CLAMPEADAS, primero PDCR, luego PDCS, luego TBLU, luego PDCD, y PDCP al final
-                                # si es que las lleva en ese momento (de lo que se ha clampeado antes de dar start)
+                                    self.model.input_data["plc"]["clamps"].append(box)
 
-                                self.clamp.emit() 
+                                    # AGREGAR CODIGO PARA ORDENAR CAJAS CLAMPEADAS, primero PDCR, luego PDCS, luego TBLU, luego PDCD, y PDCP al final
+                                    # si es que las lleva en ese momento (de lo que se ha clampeado antes de dar start)
+                                    
+                                    print("se agrega box a clamps, self.clamp.emit")
+                                    self.clamp.emit()
+
+                                else:
+                                    print("box ya no está en modularity, no se agrega a clamps")
+                                    print("modularity: ", modularity)
                         else:
                             #Si clamp_box == False
                             if box in self.model.input_data["plc"]["clamps"]:

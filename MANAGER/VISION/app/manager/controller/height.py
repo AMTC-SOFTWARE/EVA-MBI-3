@@ -516,25 +516,28 @@ class Pose(QState):
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             clamps = self.model.input_data["plc"]["clamps"]
-             #se elimina de las cajas clampeadas actualmente
+            #se elimina de las cajas clampeadas actualmente
             clamps.pop(clamps.index(box))
             
-            #se elimina de todas las tareas
-            self.model.input_data["database"]["modularity"].pop(box)
-            self.model.height_data[self.module]["box"] = ""
-
             #se guardan las cajas terminadas actuales en una variable para posteriormente desclampearlas cuando el robot esté en home
             self.model.cajas_a_desclampear.append(box)
 
-            #se eliminan todas las cajas agregadas a clamps que no estén en las cajas pendientes por inspeccionar (en modularity)
-            #por ejemplo si llegó un mensaje clamp_PDC-P2 y la PDC-P2 ya había terminado su inspección, o alguna diferente clamp_cajaexterna
+            #se elimina de las tareas de modularity
+            self.model.input_data["database"]["modularity"].pop(box)
+            self.model.height_data[self.module]["box"] = ""
+
+            #se asegura que la condición clamps no afecte cuando len(clamps)<1 al momento de desclampear la PDC-D
+            #se eliminan los boxextra detectados, en caso contrario a len(clamps)>=1 significa que aún hay cajas clampeadas por inspeccionar
             if len(clamps)>=1:
-                print("clamps si hay mas de 1",clamps)
+                print("clamps, si hay más de 1",clamps)
+                #se eliminan todas las cajas agregadas a clamps que no estén en las cajas pendientes por inspeccionar (en modularity)
+                #por ejemplo si llegó un mensaje clamp_PDC-P2 y la PDC-P2 ya había terminado su inspección, o alguna diferente clamp_cajaexterna
                 for boxextra in clamps:
                     if boxextra not in self.model.input_data["database"]["modularity"]:
                         clamps.pop(clamps.index(boxextra))
-                        print("habia un boxextra",boxextra)
+                        print("había un boxextra",boxextra)
 
+            #(también se condiciona esto mismo desde comm.py para no permitir agregar cajas que no aparezcan ya en modularity -> if box in modularity: self.model.input_data["plc"]["clamps"].append(box))
             if "PDC-D" in self.model.cajas_a_desclampear and len(clamps)<1:
                 self.model.PDCD_bracket_pendiente=True
 
