@@ -154,8 +154,12 @@ class LiberarCajas(QState):
         self.model = model
 
     def onEntry(self, QEvent):
+        print("############################## ESTADO: LiberarCajas INSPECTIONS ############################")
+
         if self.model.PDCD_bracket_terminado or self.model.PDCD_bracket_pendiente==False:
-            print("pdcd y bracket terminado")
+            print("liberando cajas, enviando señal a plc")
+            print("self.model.cajas_a_desclampear: ", self.model.cajas_a_desclampear)
+
             for box in self.model.cajas_a_desclampear:
                 publish.single(self.model.pub_topics["plc"],json.dumps({box : False}),hostname='127.0.0.1', qos = 2)
 
@@ -164,7 +168,7 @@ class LiberarCajas(QState):
             self.model.desclampear_ready = False
             self.ok.emit()
         else:
-            print("bracket no terminado")
+            print("bracket no terminado, no se liberan cajas")
             self.model.desclampear_ready = False
             self.ok.emit()
 

@@ -735,6 +735,12 @@ class CheckQr (QState):
                 else:
                     print("se generan los torques que llevará el arnés a partir de la tabla seghm_valores en servidor donde se guardaron resultados")
                     self.build_contenido_torques_from_results()
+
+                    #Si el diccionario generado está vacío se re-evalúa usando la base de datos local para corroborar
+                    if self.model.input_data["database"]["modularity_nuts"] == {}:
+                        print("contenido generado desde resultados está vacío = {}, se generará a partir de base de datos local pasa asegurar!!!!")
+                        self.build_contenido_torques()
+
             else:
                 print("no hay inspecciones de tuercas habilitadas")
             
@@ -1338,188 +1344,36 @@ class CheckQr (QState):
             return
 
     def ETIQUETA(self, ID):
-        #Función para buscar el HM obtenido de la etiqueta (Consulta para saber si tiene historial de torque, y jalar sus resultados)
+        #Función para buscar el historial de Torque de un HM, y con esto agregar los datos a la etiqueta final,
+        #Además, se decide si se generarán los torques a inspeccionar desde su historial de torques o si se generarán desde la base de datos local
 
-        print("self.ETIQUETA()")
+        print("|||||||||||||| self.ETIQUETA() ||||||||||||||")
         command = {
                 "lbl_result" : {"text": "Buscando Historial para Etiqueta", "color": "green"},
                 "lbl_steps" : {"text": "Incluir en Etiqueta Final", "color": "black"}
                 }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
-        #Si la Trazabilida está ACTIVADA, busca los resultados de torque en el servidor de FAMX2
-        print("BUSCANDO RESULTADOS DE TORQUE EN |||SISTEMA DE TRAZABILIDAD|||")
         try:
-            endpoint = "http://{}/server_famx2/get/seghm_valores/HM/=/{}/RESULTADO/=/1".format(self.model.server, ID)
-            response = requests.get(endpoint).json()
 
-            print("::::::::::::::::::::::::::::::: RESULTADOS TORQUES :::::::::::::::::::::::::::::::::")
-            print(response)
-
-            if ("exception" in response):
-                print("No se encontraron valores en el arnés por lo tanto no se podrán generar las cajas que lleva desde aquí...")
-                self.model.valores_torques_red = False
-            else:
-                print("Sí se encontraros valores en el arnés, se generarán las cajas desde estos valores de torque del servidor")
-                self.model.valores_torques_red = True
-
-            print("Respuesta de Etiqueta a Trazabilidad: \n",response)
             qr_codes = {}
-            #Si la API NO tiene conexión a la red, regresa una excepción
-            if "exception" in response:
-                #Si la Trazabilidad está ACTIVADA, mostrará un mensaje de error en pantalla evitando así que continúe el ciclo.
-                if self.model.config_data["trazabilidad"]:
-                    command = {
-                    "lbl_result" : {"text": "Error de Conexión a Sistema de Trazabilidad", "color": "red"},
-                    "lbl_steps" : {"text": "Compruebe su conexión a la red", "color": "black"},
-                    }
-                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-                    sleep(3)
-                    return False
+
+            #Si la Trazabilidad está DESACTIVADA...
+            if self.model.config_data["trazabilidad"] == False:
+
+                print("GENERANDO RESULTADOS VACÍOS PARA ETIQUETA FINAL")
+                print("TRAZABILIDAD DESHABILITADA, generando valores de torque a inspeccionar desde base de datos local... valores_torque_red = False")
+                self.model.valores_torques_red = False
+
                 #Si la Trazabilidad está DESACTIVADA, permitirá continuar con el ciclo pero al imprimir la etiqueta, los valores de los torques dirán "NoResults"
-                else:
-                    results = ["PDC-R","PDC-D","PDC-P","BATTERY","BATTERY-2","MFB-P1","MFB-P2"]
-                    print("Results predeterminados por ausencia de resultados: ",results)
-                    lbl = {}
-                    for i in results:
-                        print("i: ",i)
-
-                        #variable para dar formato de etiquetas
-                        lbl[i] = ['No Results']
-
-                        #para el formato de etiqueta se pide que el inicio siempre sea _PDC-R_
-                        #por ejemplo: _PDC-R_:"PDC-RMID:[16.6]"
-                        key = "_" + i + "_"
-                        if "PDC-RMID" in key:
-                            #si el key que tiene valor es PDC-RMID, se cambia la palabra para que quede _PDC-R_
-                            key = key.replace("PDC-RMID", "PDC-R")
-                        elif "PDC-RS" in key:
-                            #si el key que tiene valor es PDC-RS, se cambia la palabra para que quede _PDC-R_
-                            key = key.replace("PDC-RS", "PDC-R")
-
-                        value = i + ": " + str(lbl[i]).replace(' ', '')
-
-                        #ejemplo de un key:  '_MFB-P1_': "MFB-P1: [16.2,8.2,8.1,'-','-',16.2,'-']"
-                        self.model.t_results_lbl[key] = value
-
-                        #finalmente queda todo el formato de valores de torque en la etiqueta acomodado
-                        # en self.model.t_results_lbl
-
-                    print("self.model.t_results_lbl FINAL: \n")
-                    print(self.model.t_results_lbl)
-                    command = {
-                        "lbl_result" : {"text": "Arnés sin Trazabilidad", "color": "red"},
-                        "lbl_steps" : {"text": "La etiqueta final no incluirá torques", "color": "black"}
-                        }
-                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-                    sleep(3)
-                    return True
-
-            #Si la api SI tiene conexión a la red continúa el proceso y regresa un valor True
-            else:
-                #Si la respuesta contiene "items" y el valor de esa llave es 0 ó False, significa que no halló ninguna coincidencia, permitirá continuar con el ciclo pero al imprimir la etiqueta, los valores de los torques dirán "NoResults"
-                if ("items" in response and not(response["items"])):
-                    results = ["PDC-R","PDC-D","PDC-P","BATTERY","BATTERY-2","MFB-P1","MFB-P2"]
-                    print("Results predeterminados por ausencia de resultados: ",results)
-                    lbl = {}
-                    for i in results:
-                        print("i: ",i)
-
-                        #variable para dar formato de etiquetas
-                        lbl[i] = ['No Results']
-
-                        #para el formato de etiqueta se pide que el inicio siempre sea _PDC-R_
-                        #por ejemplo: _PDC-R_:"PDC-RMID:[16.6]"
-                        key = "_" + i + "_"
-                        if "PDC-RMID" in key:
-                            #si el key que tiene valor es PDC-RMID, se cambia la palabra para que quede _PDC-R_
-                            key = key.replace("PDC-RMID", "PDC-R")
-                        elif "PDC-RS" in key:
-                            #si el key que tiene valor es PDC-RS, se cambia la palabra para que quede _PDC-R_
-                            key = key.replace("PDC-RS", "PDC-R")
-
-                        value = i + ": " + str(lbl[i]).replace(' ', '')
-
-                        #ejemplo de un key:  '_MFB-P1_': "MFB-P1: [16.2,8.2,8.1,'-','-',16.2,'-']"
-                        self.model.t_results_lbl[key] = value
-
-                        #finalmente queda todo el formato de valores de torque en la etiqueta acomodado
-                        # en self.model.t_results_lbl
-
-                    print("self.model.t_results_lbl FINAL: \n")
-                    print(self.model.t_results_lbl)
-                    command = {
-                        "lbl_result" : {"text": "Arnés sin historial de torque", "color": "red"},
-                        "lbl_steps" : {"text": "La etiqueta final no incluirá torques", "color": "black"}
-                        }
-                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-                    sleep(3)
-                    return True
-                #Si existen más de una coincidencia, utiliza la información del último registro
-                if type(response["ID"]) == list:
-                    index = response["ID"].index(max(response["ID"]))
-                    results = json.loads(response["TORQUE"][index])
-                    resultsAngle = json.loads(response["ANGULO"][index])
-                    self.model.t_tries.update(json.loads(response["INTENTOS_T"][index]))
-                    self.model.t_scrap.update(json.loads(response["SCRAP"][index]))
-                    qr_codes.update(json.loads(response["SERIALES"][index]))
-                #Si encuentra una sola coincidencia, utiliza la información de ese registro
-                else:
-                    results = json.loads(response["TORQUE"])
-                    resultsAngle = json.loads(response["ANGULO"])
-                    self.model.t_tries.update(json.loads(response["INTENTOS_T"]))
-                    self.model.t_scrap.update(json.loads(response["SCRAP"]))
-                    qr_codes.update(json.loads(response["SERIALES"]))
-
-                for i in qr_codes:
-                    if i in self.model.qr_codes:
-                        pass
-                    else:
-                        self.model.qr_codes[i] = qr_codes[i]
- 
-                r_temp = copy(results)
-                a_temp = copy(resultsAngle)
-                self.model.t_result.update(r_temp)
-                self.model.t_resultAngle.update(a_temp)
+                results = ["PDC-R","PDC-D","PDC-P","BATTERY","BATTERY-2","MFB-P1","MFB-P2"]
+                print("Results predeterminados por ausencia de resultados: ",results)
                 lbl = {}
-
-                #se quita de results los que valgan None, ya que no lleva esa caja
-                try:
-                    if results["PDC-R"]["E1"] == None:
-                        results.pop("PDC-R", None)
-                    if results["PDC-RMID"]["E1"] == None:
-                        results.pop("PDC-RMID", None)
-                    if results["PDC-RS"]["E1"] == None:
-                        results.pop("PDC-RS", None)
-                except Exception as ex:
-                    print("Label exception: ", ex)
-
-                print("results de Torques (solo debe estar caja correspondiente): \n")
-                print(results)
-                print("###########################################################\n")
-        
                 for i in results:
-                    print("i: ",i)
-                    #temp es el resultado de los valores de la caja actual (pueden ser varios por ejemplo: 'MFB-P1': {'A47': None, 'A46': 16.23, 'A45': None, 'A44': None, 'A43': 8.14, 'A41': 16.2, 'A42': 8.2}
-                    temp = results[i]
-                    #temp2 es una lista de las llaves de la caja actual
-                    temp2 = list(temp)
-                    #se ordena la lista de llaves
-                    temp2.sort()
-
-                    if "_" in i:
-                        print("#############entró aquí _ , -")
-                        i = i.replace("_","-")
+                    #print("i: ",i)
 
                     #variable para dar formato de etiquetas
-                    lbl[i] = []
-                    for j in temp2: 
-                        #cuando el valor sea None, se guarda en lbl[i] un '-' para el formato requerido de las etiquetas
-                        if temp[j] == None:
-                            lbl[i].append('-')
-                        #si hay un valor para esa llave, se redondea el resultado y se guarda en lbl[i] a 1 decimal
-                        else:
-                            lbl[i].append(round(temp[j],1))
+                    lbl[i] = ['No Results']
 
                     #para el formato de etiqueta se pide que el inicio siempre sea _PDC-R_
                     #por ejemplo: _PDC-R_:"PDC-RMID:[16.6]"
@@ -1541,7 +1395,181 @@ class CheckQr (QState):
 
                 print("self.model.t_results_lbl FINAL: \n")
                 print(self.model.t_results_lbl)
+                command = {
+                    "lbl_result" : {"text": "Arnés sin Trazabilidad", "color": "red"},
+                    "lbl_steps" : {"text": "La etiqueta final no incluirá torques", "color": "black"}
+                    }
+                publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                sleep(2)
                 return True
+
+            #Si la Trazabilidad está ACTIVADA
+            else:
+
+                print("BUSCANDO RESULTADOS DE HISTORIAL DE TORQUES EN |||SERVIDOR|||")
+                print("Haciendo consulta a seghm_valores: http://{}/server_famx2/get/seghm_valores/HM/=/{}/RESULTADO/=/1")
+
+                endpoint = "http://{}/server_famx2/get/seghm_valores/HM/=/{}/RESULTADO/=/1".format(self.model.server, ID)
+                response = requests.get(endpoint).json()
+
+                print("::::::::::::::::::::::::::::::: RESULTADOS TORQUES :::::::::::::::::::::::::::::::::")
+                print(response)
+
+                # si el resultado da exception mostrará un mensaje de error en pantalla evitando así que continúe el ciclo.
+                if ("exception" in response):
+                    
+                    command = {
+                        "lbl_result" : {"text": "Error de Conexión a Sistema de Trazabilidad", "color": "red"},
+                        "lbl_steps" : {"text": "Compruebe su conexión a la red", "color": "black"},
+                    }
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                    sleep(3)
+                    return False
+
+                # si el resultado NO dio EXCEPTION en la consulta al SERVIDOR
+                else:
+
+                    ##################### NO DIO EXCEPTION PERO... NO CONTIENE INFORMACIÓN DE RESULTADOS DE ETIQUETA #######################
+
+                    #Si la respuesta contiene "items" y el valor de esa llave es 0 ó False, significa que no halló ninguna coincidencia, permitirá continuar con el ciclo pero al imprimir la etiqueta, los valores de los torques dirán "NoResults"
+                    if ("items" in response and not(response["items"])):
+
+                        print("No se encontraron valores en el arnés por lo tanto, se generarán los torques a inspeccionar desde db local, self.model.valores_torques_red = False")
+                        self.model.valores_torques_red = False
+
+                        results = ["PDC-R","PDC-D","PDC-P","BATTERY","BATTERY-2","MFB-P1","MFB-P2"]
+                        print("Results predeterminados por ausencia de resultados: ",results)
+                        lbl = {}
+                        for i in results:
+                            print("i: ",i)
+
+                            #variable para dar formato de etiquetas
+                            lbl[i] = ['No Results']
+
+                            #para el formato de etiqueta se pide que el inicio siempre sea _PDC-R_
+                            #por ejemplo: _PDC-R_:"PDC-RMID:[16.6]"
+                            key = "_" + i + "_"
+                            if "PDC-RMID" in key:
+                                #si el key que tiene valor es PDC-RMID, se cambia la palabra para que quede _PDC-R_
+                                key = key.replace("PDC-RMID", "PDC-R")
+                            elif "PDC-RS" in key:
+                                #si el key que tiene valor es PDC-RS, se cambia la palabra para que quede _PDC-R_
+                                key = key.replace("PDC-RS", "PDC-R")
+
+                            value = i + ": " + str(lbl[i]).replace(' ', '')
+
+                            #ejemplo de un key:  '_MFB-P1_': "MFB-P1: [16.2,8.2,8.1,'-','-',16.2,'-']"
+                            self.model.t_results_lbl[key] = value
+
+                            #finalmente queda todo el formato de valores de torque en la etiqueta acomodado
+                            # en self.model.t_results_lbl
+
+                        print("self.model.t_results_lbl FINAL: \n")
+                        print(self.model.t_results_lbl)
+                        command = {
+                            "lbl_result" : {"text": "Arnés sin historial de torque", "color": "red"},
+                            "lbl_steps" : {"text": "La etiqueta final no incluirá torques", "color": "black"}
+                            }
+                        publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+                        sleep(2)
+                        return True
+
+                    ################################### SE GENERA ETIQUETA DESDE RESULTADOS ENCONTRADOS #################################
+
+                    else:
+                        #si existe self.model.t_result, por lo tanto se pueden generar los valores de torque usando los resultados del arnés...
+                        print("Sí se encontraros valores en el arnés self.model.t_result, se generarán las cajas desde estos valores de torque del servidor")
+                        self.model.valores_torques_red = True
+
+                        #Si existen más de una coincidencia, utiliza la información del último registro
+                        if type(response["ID"]) == list:
+                            index = response["ID"].index(max(response["ID"]))
+                            results = json.loads(response["TORQUE"][index])
+                            resultsAngle = json.loads(response["ANGULO"][index])
+                            self.model.t_tries.update(json.loads(response["INTENTOS_T"][index]))
+                            self.model.t_scrap.update(json.loads(response["SCRAP"][index]))
+                            qr_codes.update(json.loads(response["SERIALES"][index]))
+                        #Si encuentra una sola coincidencia, utiliza la información de ese registro
+                        else:
+                            results = json.loads(response["TORQUE"])
+                            resultsAngle = json.loads(response["ANGULO"])
+                            self.model.t_tries.update(json.loads(response["INTENTOS_T"]))
+                            self.model.t_scrap.update(json.loads(response["SCRAP"]))
+                            qr_codes.update(json.loads(response["SERIALES"]))
+
+                        for i in qr_codes:
+                            if i in self.model.qr_codes:
+                                pass
+                            else:
+                                self.model.qr_codes[i] = qr_codes[i]
+ 
+                        r_temp = copy(results)
+                        a_temp = copy(resultsAngle)
+                        self.model.t_result.update(r_temp)
+                        self.model.t_resultAngle.update(a_temp)
+                        lbl = {}
+
+                        #se quita de results los que valgan None, ya que no lleva esa caja
+                        try:
+                            if results["PDC-R"]["E1"] == None:
+                                results.pop("PDC-R", None)
+                            if results["PDC-RMID"]["E1"] == None:
+                                results.pop("PDC-RMID", None)
+                            if results["PDC-RS"]["E1"] == None:
+                                results.pop("PDC-RS", None)
+                        except Exception as ex:
+                            print("Label exception: ", ex)
+
+                        print("results de Torques (solo debe estar caja correspondiente): \n")
+                        print(results)
+                        print("###########################################################\n")
+        
+                        for i in results:
+                            print("i: ",i)
+                            #temp es el resultado de los valores de la caja actual (pueden ser varios por ejemplo: 'MFB-P1': {'A47': None, 'A46': 16.23, 'A45': None, 'A44': None, 'A43': 8.14, 'A41': 16.2, 'A42': 8.2}
+                            temp = results[i]
+                            #temp2 es una lista de las llaves de la caja actual
+                            temp2 = list(temp)
+                            #se ordena la lista de llaves
+                            temp2.sort()
+
+                            if "_" in i:
+                                i = i.replace("_","-")
+
+                            #variable para dar formato de etiquetas
+                            lbl[i] = []
+                            for j in temp2: 
+                                #cuando el valor sea None, se guarda en lbl[i] un '-' para el formato requerido de las etiquetas
+                                if temp[j] == None:
+                                    lbl[i].append('-')
+                                #si hay un valor para esa llave, se redondea el resultado y se guarda en lbl[i] a 1 decimal
+                                else:
+                                    lbl[i].append(round(temp[j],1))
+
+                            #para el formato de etiqueta se pide que el inicio siempre sea _PDC-R_
+                            #por ejemplo: _PDC-R_:"PDC-RMID:[16.6]"
+                            key = "_" + i + "_"
+                            if "PDC-RMID" in key:
+                                #si el key que tiene valor es PDC-RMID, se cambia la palabra para que quede _PDC-R_
+                                key = key.replace("PDC-RMID", "PDC-R")
+                            elif "PDC-RS" in key:
+                                #si el key que tiene valor es PDC-RS, se cambia la palabra para que quede _PDC-R_
+                                key = key.replace("PDC-RS", "PDC-R")
+
+                            value = i + ": " + str(lbl[i]).replace(' ', '')
+
+                            #ejemplo de un key:  '_MFB-P1_': "MFB-P1: [16.2,8.2,8.1,'-','-',16.2,'-']"
+                            self.model.t_results_lbl[key] = value
+
+                            #finalmente queda todo el formato de valores de torque en la etiqueta acomodado
+                            # en self.model.t_results_lbl
+
+                        print("self.model.t_results_lbl FINAL: \n")
+                        print(self.model.t_results_lbl)
+                        return True
+
+                    #######################################################################################################################
+                
         except Exception as ex:
             print("Etiqueta Trazabilidad: ", ex)
             return False

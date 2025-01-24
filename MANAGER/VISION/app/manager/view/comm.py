@@ -40,8 +40,8 @@ class MqttClient (QObject):
     nido_PDCR = ""
     nido_PDCS = ""
     nido_TBLU = ""
-    nido_PDCP2= ""
-    nido_F96= ""
+    nido_PDCP2 = ""
+    nido_F96 = ""
     nido_MFBP2 = ""
     nido_MFBP1 = ""
     nido_MFBS = ""
@@ -133,6 +133,7 @@ class MqttClient (QObject):
             print ("   " + message.topic + " ", payload) 
 
             if message.topic == self.model.sub_topics["plc"]:
+
                 if "emergency" in payload:
                     self.model.input_data["plc"]["emergency"] = payload["emergency"]
                     if payload["emergency"] == False:
@@ -205,7 +206,6 @@ class MqttClient (QObject):
                                 command = { "lbl_steps" : {"text": "Coloca las cajas en los nidos para continuar", "color": "navy"}}
                                 self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                                
-
                 if "Candado_PDCS" in payload:
                     if payload["Candado_PDCS"] == True:
                         command = {
@@ -372,6 +372,7 @@ class MqttClient (QObject):
                             if payload["PDC-P2_ERROR"] == True:
                                 self.nido_PDCP2 = "PDC-P2:\n clamp incorrecto"
                                 self.color_PDCP2 = "red"
+
                         if "clamp_PDC-P2" in payload:
                             if payload["clamp_PDC-P2"] == True:
                                 self.nido_PDCP2 = " PDC-P2:\n clamp correcto"

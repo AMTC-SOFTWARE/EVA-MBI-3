@@ -171,7 +171,7 @@ class Triggers (QState):
 
             if fuse in results[box]:
                 self.model.history_fuses.append(fuse) #Variable que va guardando cada fusible que llega en "results"
-                #print(fuse, " ", results[box][fuse], " -- ", self.model.modularity_fuses[box][fuse])
+                print(fuse, " ", results[box][fuse], " -- ", self.model.modularity_fuses[box][fuse])
                 #revisar color "i" en box, fuse de los resultados de visión
                 for i in results[box][fuse]:
                     #si el color leído es igual al esperado (de la modularidad del arnés)
