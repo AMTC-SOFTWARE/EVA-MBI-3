@@ -27,6 +27,8 @@ if __name__ == "__main__":
     from time import sleep
     import sys
 
+    sys.stdout.reconfigure(line_buffering=True)
+
     app     = QApplication(sys.argv)
     gui     = MainWindow(name = "EVA-MBI-3", topic = "gui")
     manager = Controller(gui,gui.model)
