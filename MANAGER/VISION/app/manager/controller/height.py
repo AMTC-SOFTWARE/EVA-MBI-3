@@ -68,6 +68,7 @@ class Process (QState):
 
         self.triggers.nok.connect(self.nok)
         self.pose.nok.connect(self.nok)
+
         self.pose.finished.connect(self.finished.emit)
         self.setInitialState(self.pose)    
 
@@ -402,6 +403,9 @@ class Error (QState):
         print("############################## ESTADO: Error HEIGHT ############################")
 
         box = self.model.height_data[self.module]["box"]
+
+        self.model.raffi_disponible = True
+
         if len(self.model.missing_fuses) > 0:
             command = {
                 "lbl_info1" : {"text": f"{self.model.missing_fuses}", "color": "blue"},
@@ -417,6 +421,7 @@ class Error (QState):
                  }
 
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
         self.model.height_data[self.module]["box"] = ""
         self.model.height_data[self.module]["queue"].clear()
         self.model.height_data[self.module]["current_trig"] = None
@@ -426,6 +431,9 @@ class Error (QState):
         self.model.robot.home()
 
     def onExit(self, QEvent):
+
+        self.model.raffi_disponible = False
+
         command = {
             "lbl_result" : {"text": "Reintentando inspección de alturas", "color": "green"},
             "lbl_steps" : {"text": "Espera el resultado", "color": "black"},
@@ -497,7 +505,6 @@ class Pose(QState):
                 "MFB-E" : {"lbl_box11" : {"text": "", "color": "darkgray", "hidden": True}}                   
             }
             
-
             """
                 *** Remover el label de la pantalla cuando termine de inspeccionar la vision y alturas ***
                 
@@ -507,7 +514,7 @@ class Pose(QState):
                 y ademas se hace pop(remueve) de las tareas.
             """
             for key,value in labels.items():
-                if box in key:
+                if box == key:  # Comparación exacta para evitar que por ejemplo "PDC-P" elimine a "PDC-P2"
                     command = value
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)       
                 
@@ -515,6 +522,7 @@ class Pose(QState):
                 "lbl_result" : {"text": "Caja " + box + " Terminada", "color": "green"}
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
             clamps = self.model.input_data["plc"]["clamps"]
             #se elimina de las cajas clampeadas actualmente
             clamps.pop(clamps.index(box))
@@ -543,6 +551,11 @@ class Pose(QState):
 
             if "PDC-Dbracket" in self.model.cajas_a_desclampear:
                 self.model.PDCD_bracket_terminado=True
+                command = {
+                    "lbl_box0" : {"text": "", "color": "green", "hidden" : True}
+                    }
+                publish.single(self.model.pub_topics["gui"], json.dumps(command), hostname='127.0.0.1', qos = 2)
+
 
             #si ya no le quedan cajas por inspeccionar de las que se clampearon
             if len(clamps) == 0:

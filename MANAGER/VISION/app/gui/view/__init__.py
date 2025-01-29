@@ -48,7 +48,7 @@ class MainWindow (QMainWindow):
         self.qw_Tabla_horas = Tabla_hora_w(parent = self)
 
         self.client = MqttClient(self.model, self)
-        self.client.subscribe.connect(self.input)        
+        self.client.subscribe.connect(self.input) #suscrito a gui y al robot
         self.output.connect(self.client.publish)
         self.plc_output.connect(self.client.plc_publish)
         self.rbt_output.connect(self.client.rbt_publish)
@@ -135,7 +135,7 @@ class MainWindow (QMainWindow):
         self.rbt_home           = False
 
         
-   #Funcion para iniciar la animacion gif
+   #Función para iniciar la animación gif
     def start_raffi_animation(self, box):
         print("EJECUTANDO START_RAFFI_ANIMATION")
         print(f"ACTIVANDO ANIMACION PARA: {box}")
@@ -177,9 +177,8 @@ class MainWindow (QMainWindow):
         elif box == "MFB-E":
             self.ui.lbl_box11.setIcon(QtGui.QIcon(self.ui.lbl_box_11movie.currentPixmap()))
             self.ui.lbl_box_11movie.start()      
-        
-        
-              
+           
+    #Función para detener la animación del gif
     def stop_raffi_animation(self, box):
         print("EJECUTANDO STOP_RAFFI_ANIMATION")
         print(f"DETENIENDO ANIMACION PARA: {box}")
@@ -223,64 +222,101 @@ class MainWindow (QMainWindow):
             self.ui.lbl_box_11movie.stop()  
         
     def start_robot(self):
-        print("EJECUTANDO START_ROBOT")
+        print("EJECUTANDO START_ROBOT DESDE GUI.VIEW")
         print("ENVIANDO COMMAND:START")
         print("*********************************************** \n")
  
         #Comando para enviar al topico del Robot
         self.rbt_output.emit({"command": "start"})
             
+    def pause_robot(self):
+        print("EJECUTANDO PAUSE_ROBOT DESDE GUI.VIEW")
+        print("ENVIANDO COMMAND:PAUSE")
+        print("*********************************************** \n")
+ 
+        #Comando para enviar al topico del Robot
+        self.rbt_output.emit({"command": "pause"})
+
+    def continue_robot(self):
+        print("EJECUTANDO CONTINUE_ROBOT DESDE GUI.VIEW")
+        print("ENVIANDO COMMAND:CONTINUE")
+        print("*********************************************** \n")
+ 
+        #Comando para enviar al topico del Robot
+        self.rbt_output.emit({"command": "continue"})
+
+    def HOME_robot(self):
+        print("EJECUTANDO HOME_ROBOT DESDE GUI.VIEW")
+        print("ENVIANDO TRIGGER:HOME")
+        print("*********************************************** \n")
+ 
+        #Comando para enviar al topico del Robot
+        self.rbt_output.emit({"trigger": "HOME"})
+
     def raffi_activation(self, box):
         print("\n ***** EJECUTANDO RAFFI_ACTIVATION *****")
         print(f"CAJA CLICKEADA: {box}")
         print("*********************************************** \n")
 
-        #Primero en una lista guardamos cada texto contenido de los botones que se llenan al momento de escanear el ARNES
-        text_buttons = [self.ui.lbl_box0.text(),self.ui.lbl_box1.text(), self.ui.lbl_box2.text(),
-                        self.ui.lbl_box3.text(), self.ui.lbl_box4.text(),
-                        self.ui.lbl_box5.text(), self.ui.lbl_box6.text(),
-                        self.ui.lbl_box7.text(), self.ui.lbl_box8.text(),
-                        self.ui.lbl_box9.text(), self.ui.lbl_box10.text(),
-                        self.ui.lbl_box11.text()]
+        if self.model.raffi_disponible == True:
+            print("self.model.raffi_disponible == True, continuando con RAFFI_ACTIVATION")
+        else:
+            print("self.model.raffi_disponible == False, no se ingresa a RAFFI_ACTIVATION")
+            return
+
+        #Se guarda una lista con cada texto contenido de los botones que se llenan al momento de escanear el ARNÉS
+        text_buttons = [self.ui.lbl_box0.text(), self.ui.lbl_box1.text(), 
+                        self.ui.lbl_box2.text(), self.ui.lbl_box3.text(), 
+                        self.ui.lbl_box4.text(), self.ui.lbl_box5.text(),
+                        self.ui.lbl_box6.text(), self.ui.lbl_box7.text(), 
+                        self.ui.lbl_box8.text(), self.ui.lbl_box9.text(), 
+                        self.ui.lbl_box10.text(), self.ui.lbl_box11.text()]
         
-        print("Texto actual de los lbl ",text_buttons," \n")
+        print("Texto actual de los lbl:\n",text_buttons," \n")
  
-        #Hacemos un recorrido de cada texto en la lista text_buttons
+        #Se hace un recorrido de cada texto en la lista text_buttons
         flag = False
         
         for i in text_buttons:
+            
             if box in i:
+                
+                #si la caja está clampeada correctamente (dice correcto en su texto de label)
                 if "correcto" in i:
+
                     print("Correcto en: ",box)
                     
+                    ###self.model.raffi_activated.emit()
+                    ###print("self.model.raffi_activated.emit()")
+
                     #Iniciamos la animacion de carga
                     self.start_raffi_animation(box)
 
-                    #Si el robot no esta en HOME se envia el comando para enviarlo antes de desclampear una caja.
-                    if self.rbt_home == False:
-                        print("rbt_home == False")
-                        print("Enviando stop a robot: command:stop")
-                        self.rbt_output.emit({"command":"stop"})
-                        Timer(0.5, self.start_robot).start()
-                        print("*********************************************** \n")
+                    #HOME se envia el comando para enviarlo antes de desclampear una caja, independientemente de si ya está en HOME, para actualizar variable self.rbt_home
+                    print("//////////Enviando robot a Home")
+                    print("//////////self.model.waiting_raffi_home = True")
+                    #con la variable waiting_raffi_home si el robot no llega a home, al presionar reset se vuelve a mandar un intento de enviar a home
+                    self.model.waiting_raffi_home = True
+                    self.HOME_robot()
+                    print("*********************************************** \n")
                     
                     #En model.cajas_raffi se van agregando las cajas que queremos desclampear
                     if box in self.model.cajas_raffi:
                         print(f"la caja: {box} se encuentra agregada a la lista para desclampear \n")
                         
-                        #Si el Robot esta en Home, entra y si no, no desclampea la caja
+                        #Si el Robot está en Home, entra y si no, no desclampea la caja
                         if self.rbt_home == True:
+                            
                             print("***********************************************")
                             print("rbt_home == True \n")
-                            
+
+                            #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
+                            indx_box = self.model.cajas_raffi.index(box)
+
+                            #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el botón
+                            self.model.cajas_raffi.pop(indx_box)
                             print("***********************************************")
                             print(f"Caja: {box} fue removida de la lista para desclampear")
-                            
-                            #Como no sabemos que indice tiene la caja X, guardamos en una variable el valor del indice enviandole el string de la caja
-                            indx_pdcd = self.model.cajas_raffi.index(box)
-
-                            #Le hacemos un pop con el indice obtenido para removerla y evitar multiples agregados cada vez que presionan el boton
-                            self.model.cajas_raffi.pop(indx_pdcd)
                             
                             box_pdcrs = False
                             #Se hace una condicion para la caja R y habilitar el nido correcto
@@ -291,8 +327,12 @@ class MainWindow (QMainWindow):
                                 box_pdcrs = True
                                 box = "PDC-RMID" #esto es solamente para habilitar el nido
 
-                            print(f"Enviando señal {box}:False a PLC \n")
+                            print("***********************************************")
+                            print(f"Enviando señal {box}:False a PLC para desclampear\n")
                             self.plc_output.emit({box:False})
+
+                            #Detenemos la animacion de carga
+                            self.stop_raffi_animation(box)
 
                             if box_pdcrs == True:
                                 box_pdcrs = False
@@ -300,42 +340,33 @@ class MainWindow (QMainWindow):
                                 box = "PDC-RS"
 
                             if box in self.model.input_data["plc"]["clamps"]:
+                                print("***********************************************")
                                 print(f"Removiendo {box} de model.input_data[plc][clamps] \n")
                                 
                                 self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
-                                print("Lista actualizada despues de remover la caja... ",self.model.input_data["plc"]["clamps"])
+                                print("Lista actualizada despues de remover la caja...\n",self.model.input_data["plc"]["clamps"])
                             else:
                                 print("la caja " + box + " no se encuentra dentro de model.input_data[plc][clamps]")
                                 
                             if box == "PDC-Dbracket":
                                 self.ui.lbl_box0.setText("PDC-Dbracket:\n Habilitar") #tiene que decir Habilitar para su funcionamiento
                                 self.ui.lbl_box0.setStyleSheet("color: red;")
-                                
-                            if len(self.model.input_data["plc"]["clamps"]) > 0:
-                                print("revisión de cajas restantes desde comm.py, aún hay cajas puestas en input_data[PLC][clamps]")
-                                
-                                if self.model.retry_btn_status == False:
-                                    self.ui.lbl_steps.setText("Presiona START para comenzar")
-                                    self.ui.lbl_steps.setStyleSheet("color: green;")
-                                else:
-                                    self.ui.lbl_steps.setText("Presiona el boton de reintento")
-                                    self.ui.lbl_steps.setStyleSheet("color: black;")
-                            else:
-                                self.ui.lbl_steps.setText("Coloca las cajas en los nidos para continuar")
-                                self.ui.lbl_steps.setStyleSheet("color: navy;")
                             
                             #Si ya no quedan mas cajas en la lista, se manda a false la variable rbt_home
                             if len(self.model.cajas_raffi) > 0:
-                                print("Aun quedan cajas:", self.model.cajas_raffi)
+                                print("Aún quedan cajas por desclampear:", self.model.cajas_raffi)
                             else:
+                                print("regresando self.rbt_home = False")
                                 self.rbt_home = False
+
+                        else:
+                            print("Robot aún no está en Home, no se puede desclampear caja...")
                     else:
-                        #Se agrega una vez a la lista
+                        #Se agrega una vez a la lista (solamente si no está ya, y si su lbl dice clamp_correcto
                         self.model.cajas_raffi.append(box) 
                         print("Caja agregada a la lista para desclampear: ",self.model.cajas_raffi)
                         
-                    flag = True
-                        
+                #si el nido está desclampeado pero listo para Habilitar
                 elif box in i and "Habilitar" in i:
     
                     if box == "PDC-Dbracket" and box not in self.model.input_data["plc"]["clamps"]:
@@ -355,10 +386,11 @@ class MainWindow (QMainWindow):
                     print(f"entró a Habilitar de {box}, enviando señal {box}:True a PLC")      
                     self.plc_output.emit({box:True})
                     
-                    flag = True
-                    
-        if flag == False:
-            print("No se envio ninguna accion")
+                #cualquier otro texto en el label no tiene acción para esta función
+                else:
+                    print("La caja seleccionada no está clampeada ni fue deshabilitada por Raffi (no dice clamp_correcto ni Habilitar)")
+                    print("No se envió ninguna acción")
+
                 
     def horaxhora(self):
         #self.qw_Tabla_horas.show()
@@ -677,84 +709,68 @@ class MainWindow (QMainWindow):
     @pyqtSlot(dict)
     def input(self, message):
         try:
+            #print(message)
+
             #Respuesta del Robot
             if "response" in message:
                 if "home_reached" in message["response"]:
                     print("########## ROBOT : HOME REACHED ##########")
-                    
-                    #Verificamos si hay alguna caja en la lista
+                    print("El robot está en Home: rbt_home = True")
+                    self.rbt_home = True
+
+                    #Verificamos si hay alguna caja en la lista de cajas a desclampear
                     if len(self.model.cajas_raffi) > 0:
-                        print("Caja dentro de model.cajas_raffi: ",self.model.cajas_raffi)
-                        
-                        #Se hace true la variable en caso de que si hay cajas dentro de la lista
-                        print("Cambiando valor de rbt_home a True \n")
-                        self.rbt_home = True
+                        print("Cajas dentro de self.model.cajas_raffi:\n",self.model.cajas_raffi)
                         
                         if "PDC-Dbracket" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("PDC-Dbracket")
-                            self.stop_raffi_animation("PDC-Dbracket")
                             
                         if "PDC-D" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("PDC-D")
-                            self.stop_raffi_animation("PDC-D")
-                            
+
+                        elif "PDC-P2" in self.model.cajas_raffi:
+                            print("Llamando a la funcion raffi_activation para desclampear caja...")
+                            self.raffi_activation("PDC-P2")
+
                         elif "PDC-P" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("PDC-P")
-                            self.stop_raffi_animation("PDC-P")
 
                         elif "PDC-R" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("PDC-R")
-                            self.stop_raffi_animation("PDC-R")
                             
                         elif "PDC-S" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("PDC-S")
-                            self.stop_raffi_animation("PDC-S")
                             
                         elif "TBLU" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("TBLU")
-                            self.stop_raffi_animation("TBLU")
-                            
-                        elif "PDC-P2" in self.model.cajas_raffi:
-                            print("Llamando a la funcion raffi_activation para desclampear caja...")
-                            self.raffi_activation("PDC-P2")
-                            self.stop_raffi_animation("PDC-P2")
 
                         elif "F96" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("F96")
-                            self.stop_raffi_animation("F96")
                             
                         elif "MFB-P2" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("MFB-P2")
-                            self.stop_raffi_animation("MFB-P2")
                             
                         elif "MFB-P1" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("MFB-P1")
-                            self.stop_raffi_animation("MFB-P1")
                             
                         elif "MFB-S" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("MFB-S")
-                            self.stop_raffi_animation("MFB-S")
                             
                         elif "MFB-E" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("MFB-E")    
-                            self.stop_raffi_animation("MFB-E")    
-                    else:
-                        print("No hay cajas en la lista para desclampear...")
-                        print("rbt_home = False")
-                        self.rbt_home = False
+
                     
-            #print(message)
             if "shutdown" in message:
                 if message["shutdown"] == True:
                     self.shutdown = True
@@ -790,18 +806,15 @@ class MainWindow (QMainWindow):
                     self.ui.lbl_info4.setStyleSheet("color: " + message["lbl_info4"]["color"])
                 if "ancho" in message["lbl_info4"]:
                     if "alto" in message["lbl_info4"]:
-
                         ancho = int(message["lbl_info4"]["ancho"])
                         alto = int(message["lbl_info4"]["alto"])
-
                         #self.ui.lbl_info4.setMinimumSize(QSize(ancho, alto))
                         #self.ui.lbl_info4.setMaximumSize(QSize(ancho, alto))
-
+                        print("función ancho y alto en lbl_info4 deshabilitada")
             if "lbl_nuts" in message:
                 self.ui.lbl_nuts.setText(message["lbl_nuts"]["text"])
                 if "color" in message["lbl_nuts"]:
                     self.ui.lbl_nuts.setStyleSheet("color: " + message["lbl_nuts"]["color"])
-
             if "lcdNumber" in message:
                 if "value" in message["lcdNumber"]:
 
@@ -811,7 +824,6 @@ class MainWindow (QMainWindow):
                     #### Visualizacion del LCD
                     self.ui.lbl_cant.setVisible(message["lcdNumber"]["visible"])
                     self.ui.lcdNumber.setVisible(message["lcdNumber"]["visible"])
-
             if "lcdNumtiempo" in message:
                 
                 if "label_name" in message["lcdNumtiempo"]:
@@ -825,7 +837,6 @@ class MainWindow (QMainWindow):
                 if "color" in message["lcdNumtiempo"]:
                      color_back=message["lcdNumtiempo"]["color"]
                      self.ui.lbl_cant2.setStyleSheet("color: #214562; font-size:20px;background-color:" + message["lcdNumtiempo"]["color"]+ "; border-radius:20px; margin-bottom: 5px")
-
             if "lcdcronometro" in message:
                 
                 if "label_name" in message["lcdcronometro"]:
@@ -840,96 +851,78 @@ class MainWindow (QMainWindow):
                      color_back=message["lcdcronometro"]["color"]
                      self.ui.lbl_cant3.setStyleSheet("color: #214562; font-size:20px;background-color:" + message["lcdcronometro"]["color"]+ "; border-radius:20px; margin-bottom: 5px")
             ###########################################################################
-            #Modificacion para PDC-D Bracket         
-            if "lbl_box0" in message:
+            if "lbl_box0" in message: #PDCDbracket
                 self.ui.lbl_box0.setText(message["lbl_box0"]["text"])
                 if "color" in message["lbl_box0"]:
                     self.ui.lbl_box0.setStyleSheet("color: " + message["lbl_box0"]["color"])
                 if "hidden" in message["lbl_box0"]:
                     self.ui.lbl_box0.setHidden(message["lbl_box0"]["hidden"])
-                    
-            if "lbl_box1" in message:
+            if "lbl_box1" in message: #PDCD
                 self.ui.lbl_box1.setText(message["lbl_box1"]["text"])
                 if "color" in message["lbl_box1"]:
                     self.ui.lbl_box1.setStyleSheet("color: " + message["lbl_box1"]["color"])
                 if "hidden" in message["lbl_box1"]:
                     self.ui.lbl_box1.setHidden(message["lbl_box1"]["hidden"])
-                    
-            if "lbl_box2" in message:
+            if "lbl_box2" in message: #PDCP
                 self.ui.lbl_box2.setText(message["lbl_box2"]["text"])
                 if "color" in message["lbl_box2"]:
                     self.ui.lbl_box2.setStyleSheet("color: " + message["lbl_box2"]["color"])
                 if "hidden" in message["lbl_box2"]:
-                    self.ui.lbl_box2.setHidden(message["lbl_box2"]["hidden"])
-                    
-            if "lbl_box3" in message:
+                    self.ui.lbl_box2.setHidden(message["lbl_box2"]["hidden"])    
+            if "lbl_box3" in message: #PDCR
                 self.ui.lbl_box3.setText(message["lbl_box3"]["text"])
                 if "color" in message["lbl_box3"]:
                     self.ui.lbl_box3.setStyleSheet("color: " + message["lbl_box3"]["color"])
                 if "hidden" in message["lbl_box3"]:
                     self.ui.lbl_box3.setHidden(message["lbl_box3"]["hidden"])
-                    
-            if "lbl_box4" in message:
+            if "lbl_box4" in message: #PDCS
                 self.ui.lbl_box4.setText(message["lbl_box4"]["text"])
                 if "color" in message["lbl_box4"]:
                     self.ui.lbl_box4.setStyleSheet("color: " + message["lbl_box4"]["color"])
                 if "hidden" in message["lbl_box4"]:
-                    self.ui.lbl_box4.setHidden(message["lbl_box4"]["hidden"])
-                    
-            if "lbl_box5" in message:
+                    self.ui.lbl_box4.setHidden(message["lbl_box4"]["hidden"])  
+            if "lbl_box5" in message: #TBLU
                 self.ui.lbl_box5.setText(message["lbl_box5"]["text"])
                 if "color" in message["lbl_box5"]:
                     self.ui.lbl_box5.setStyleSheet("color: " + message["lbl_box5"]["color"])
                 if "hidden" in message["lbl_box5"]:
-                    self.ui.lbl_box5.setHidden(message["lbl_box5"]["hidden"])
-                    
-            if "lbl_box6" in message:
+                    self.ui.lbl_box5.setHidden(message["lbl_box5"]["hidden"]) 
+            if "lbl_box6" in message: #PDCP2
                 self.ui.lbl_box6.setText(message["lbl_box6"]["text"])
                 if "color" in message["lbl_box6"]:
                     self.ui.lbl_box6.setStyleSheet("color: " + message["lbl_box6"]["color"])
                 if "hidden" in message["lbl_box6"]:
                     self.ui.lbl_box6.setHidden(message["lbl_box6"]["hidden"])
-                    
-            ######### Modificación para F96 #########
-            if "lbl_box7" in message:
+            if "lbl_box7" in message: #F96
                 self.ui.lbl_box7.setText(message["lbl_box7"]["text"])
                 if "color" in message["lbl_box7"]:
                     self.ui.lbl_box7.setStyleSheet("color: " + message["lbl_box7"]["color"])
                 if "hidden" in message["lbl_box7"]:
-                    self.ui.lbl_box7.setHidden(message["lbl_box7"]["hidden"])
-                    
-            ######### Modificación para F96 #########
-            if "lbl_box8" in message:
+                    self.ui.lbl_box7.setHidden(message["lbl_box7"]["hidden"]) 
+            if "lbl_box8" in message: #MFBP2
                 self.ui.lbl_box8.setText(message["lbl_box8"]["text"])
                 if "color" in message["lbl_box8"]:
                     self.ui.lbl_box8.setStyleSheet("color: " + message["lbl_box8"]["color"])
                 if "hidden" in message["lbl_box8"]:
                     self.ui.lbl_box8.setHidden(message["lbl_box8"]["hidden"])
-                    
-            if "lbl_box9" in message:
+            if "lbl_box9" in message: #MFBP1
                 self.ui.lbl_box9.setText(message["lbl_box9"]["text"])
                 if "color" in message["lbl_box9"]:
                     self.ui.lbl_box9.setStyleSheet("color: " + message["lbl_box9"]["color"])
                 if "hidden" in message["lbl_box9"]:
                     self.ui.lbl_box9.setHidden(message["lbl_box9"]["hidden"])
-
-                    
-            if "lbl_box10" in message:
+            if "lbl_box10" in message: #MFBS
                 self.ui.lbl_box10.setText(message["lbl_box10"]["text"])
                 if "color" in message["lbl_box10"]:
                     self.ui.lbl_box10.setStyleSheet("color: " + message["lbl_box10"]["color"])
                 if "hidden" in message["lbl_box10"]:
                     self.ui.lbl_box10.setHidden(message["lbl_box10"]["hidden"])
-
-                    
-            if "lbl_box11" in message:
+            if "lbl_box11" in message: #MFBE
                 self.ui.lbl_box11.setText(message["lbl_box11"]["text"])
                 if "color" in message["lbl_box11"]:
                     self.ui.lbl_box11.setStyleSheet("color: " + message["lbl_box11"]["color"])
                 if "hidden" in message["lbl_box11"]:
                     self.ui.lbl_box11.setHidden(message["lbl_box11"]["hidden"])
-
-                    
             ###########################################################################
             if "lbl_result" in message:
                 self.ui.lbl_result.setText(message["lbl_result"]["text"])

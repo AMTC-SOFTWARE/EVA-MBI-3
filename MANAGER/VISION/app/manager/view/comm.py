@@ -118,12 +118,11 @@ class MqttClient (QObject):
         except Exception as ex:
             print("Manager MQTT client connection fail. Exception: ", ex)
             self.conn_nok.emit()
-
-
+        
     def start_robot(self):
 
         self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "start"}), qos = 2)
-
+        
     def on_message(self, client, userdata, message):
         try:
             payload = json.loads(message.payload)
@@ -164,6 +163,8 @@ class MqttClient (QObject):
                         elif box == "PDC-R" and "PDC-RS" in self.model.input_data["database"]["modularity"]:
                             box = "PDC-RS"
                         ########################################################## PDC-RS
+
+                        #si clamp_box == True
                         if payload[i] == True:
                             if not(box in self.model.input_data["plc"]["clamps"]):
                                 print("box: ",box)
@@ -183,28 +184,31 @@ class MqttClient (QObject):
                                 else:
                                     print("box ya no está en modularity, no se agrega a clamps")
                                     print("modularity: ", modularity)
+                        #Si clamp_box == False
                         else:
-                            #Si clamp_box == False
                             if box in self.model.input_data["plc"]["clamps"]:
                                 self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
-                                
+
+                        #sihay inspecciones pendientes en las tareas del arnés (modularity), de lo contrario es fuera de ciclo y no se muestran mensajes
                         if len(self.model.input_data["database"]["modularity"]) > 0:
-                            
-                            print("Cajas con TAREAS pendientes",self.model.input_data["database"]["modularity"])
-                            
+                            print("Cajas con TAREAS pendientes:\n",self.model.input_data["database"]["modularity"])
+                            #si hay cajas clampeadas en este momento...
                             if len(self.model.input_data["plc"]["clamps"]) > 0:
                                 print("revisión de cajas restantes desde comm.py, aún hay cajas puestas en input_data[PLC][clamps]")
                                 
-                                if self.model.retry_btn_status == False:
+                                if self.model.start_btn_status == True:
                                     command = { "lbl_steps" : {"text": "Presiona START para comenzar", "color": "green"}}
                                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                                 else:
-                                    command = { "lbl_steps" : {"text": "Presiona el boton de reintento", "color": "black"}}
+                                    command = { "lbl_steps" : {"text": "Presiona el botón de reintento", "color": "black"}}
                                     self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                            #no hay cajas clampeadas, pero faltan inspecciones por hacer
                             else:
-                                print("revisión de cajas restantes desde comm.py, NO hay cajas puestas en input_data[PLC][clamps]")
+                                print("revisión de cajas restantes desde comm.py, NO hay cajas puestas en input_data[PLC][clamps] pero faltan inspecciones")
                                 command = { "lbl_steps" : {"text": "Coloca las cajas en los nidos para continuar", "color": "navy"}}
                                 self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                                
                                
                 if "Candado_PDCS" in payload:
                     if payload["Candado_PDCS"] == True:
@@ -238,13 +242,20 @@ class MqttClient (QObject):
                 if "retry_btn" in payload:
                     self.model.input_data["plc"]["retry_btn"] = bool(payload["retry_btn"])
                     if payload["retry_btn"] == True:
-                         
-                        if self.model.waiting_home == True:
-                            print("reenviando a home por self.model.waiting_home = True")
-                            self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "stop"}), qos = 2)
-                            Timer(0.8, self.start_robot).start()
                         
-                        self.retry_btn.emit()
+                        #en este no se manda señal retry_btn
+                        if self.model.waiting_raffi_home == True:
+                            print("reenviando a home por self.model.waiting_raffi_home = True")
+                            self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "stop"}), qos = 2)
+                            Timer(0.5, self.start_robot).start()
+                        else:
+                            #aquí sí se manda señal retry_btn
+                            if self.model.waiting_home == True:
+                                print("reenviando a home por self.model.waiting_home = True")
+                                self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "stop"}), qos = 2)
+                                Timer(0.8, self.start_robot).start()
+                        
+                            self.retry_btn.emit()
 
                 if "Rbt-EStop" in payload:
                     if payload["Rbt-EStop"]:
@@ -298,7 +309,7 @@ class MqttClient (QObject):
 
                         if "clamp_PDC-Dbracket" in payload:
                             if payload["clamp_PDC-Dbracket"] == True:
-                                self.nido_PDCDB = " PDC-Dbracket:\n clamp correcto"
+                                self.nido_PDCDB = "PDC-Dbracket:\n clamp correcto"
                                 self.color_PDCDB = "green"
 
                         command = {
@@ -336,7 +347,7 @@ class MqttClient (QObject):
 
                         if "clamp_PDC-D" in payload:
                             if payload["clamp_PDC-D"] == True:
-                                self.nido_PDCD = " PDC-D:\n clamp correcto"
+                                self.nido_PDCD = "PDC-D:\n clamp correcto"
                                 self.color_PDCD = "green"
                             else:
                                 self.nido_PDCD = "PDC-D:\n Habilitar"
@@ -356,6 +367,8 @@ class MqttClient (QObject):
 
                 if "PDC-P2" in payload_str:
                     
+                    print("PDC-P2 en payload_str")
+
                     #dependiendo del arnés cargado
                     if "PDC-P2" in self.model.input_data["database"]["modularity"]:
                         
@@ -375,7 +388,7 @@ class MqttClient (QObject):
 
                         if "clamp_PDC-P2" in payload:
                             if payload["clamp_PDC-P2"] == True:
-                                self.nido_PDCP2 = " PDC-P2:\n clamp correcto"
+                                self.nido_PDCP2 = "PDC-P2:\n clamp correcto"
                                 self.color_PDCP2 = "green"
                             else:
                                 self.nido_PDCP2 = "PDC-P2:\n Habilitar"
@@ -397,6 +410,8 @@ class MqttClient (QObject):
 
                 if "PDC-P" in payload_str:
                     
+                    print("PDC-P in payload_str")
+
                     #dependiendo del arnés cargado
                     if "PDC-P" in self.model.input_data["database"]["modularity"]:
 
@@ -416,7 +431,7 @@ class MqttClient (QObject):
                     
                         if "clamp_PDC-P" in payload:
                             if payload["clamp_PDC-P"] == True:
-                                self.nido_PDCP = " PDC-P:\n clamp correcto"
+                                self.nido_PDCP = "PDC-P:\n clamp correcto"
                                 self.color_PDCP = "green"
                             else:
                                 self.nido_PDCP = "PDC-P:\n Habilitar"
@@ -506,7 +521,7 @@ class MqttClient (QObject):
 
                         if "clamp_PDC-S" in payload:
                             if payload["clamp_PDC-S"] == True:
-                                self.nido_PDCS = " PDC-S:\n clamp correcto"
+                                self.nido_PDCS = "PDC-S:\n clamp correcto"
                                 self.color_PDCS = "green"
                                             
                         if "clamp_PDC-S" in payload:
@@ -846,6 +861,10 @@ class MqttClient (QObject):
                     #    self.error_cortina.emit()
 
                     if "home_reached" in payload["response"]:
+                        print("self.model.waiting_home = False")
+                        print("self.model.waiting_raffi_home = False")
+                        self.model.waiting_home = False
+                        self.model.waiting_raffi_home = False
                         self.rbt_home.emit()
 
             #variable para guardar los resultados obtenidos al hacer una inspección con visycam desde la GDI

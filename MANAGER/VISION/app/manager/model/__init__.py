@@ -12,10 +12,12 @@ from paho.mqtt import publish
 from threading import Timer
 
 
-class Model (object):
+class Model (QObject):
+
+    raffi_activated = pyqtSignal()
 
     def __init__(self, parent = None):
-
+        super().__init__(parent)
         self.name = "GUI"
         self.imgsPath = "data/imgs/"
         self.img_fuse = ""
@@ -39,6 +41,8 @@ class Model (object):
             }
 
 
+        #variable para indicar que se pueden utilizar los raffi
+        self.raffi_disponible = False
 
         self.shutdown = False
         self.main_window = None
@@ -88,6 +92,9 @@ class Model (object):
         #variable para saber cuando se está en el estado WaitingHome
         self.waiting_home = False
 
+        #variable para volver a mandar a home con retry para un raffi activado
+        self.waiting_raffi_home = False
+
         #variable para saber si se ignoran las inspecciones de alturas de fusibles externos de PDC-R, solamente si todos son vacíos
         self.eliminar_inspeccion_externos = False
 
@@ -124,8 +131,9 @@ class Model (object):
         self.BRACKET_PDCD_clampeado=False
         self.PDCD_bracket_pendiente=False
         self.PDCD_bracket_terminado=False
-        #Variable declarada en false para indicar que el boton a presionar es START, en caso True se debe presionar el boton reintentar.
-        self.retry_btn_status = False
+
+        #Variable declarada en True para indicar que el boton a presionar es START, en caso False se debe presionar el boton reintentar.
+        self.start_btn_status = False
 
         self.tries = {
             "VISION": {},
@@ -496,6 +504,7 @@ class Model (object):
 
     def reset (self):
         self.waiting_home = False
+        self.waiting_raffi_home = False
         self.valores_torques_red = False
         self.revisando_resultado_height = False
         self.revisando_resultado = False
@@ -507,6 +516,9 @@ class Model (object):
         self.cajas_a_desclampear = []
         self.datetime = None
         
+        self.raffi_disponible = False
+        self.start_btn_status = False
+
         #for i in self.result:
         #    for j in self.result[i]:
         #        self.result[i][j] = None

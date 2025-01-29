@@ -66,6 +66,7 @@ class Process (QState):
         
         self.triggers.nok.connect(self.nok)
         self.pose.nok.connect(self.nok)
+
         self.pose.finished.connect(self.finished.emit)
         self.setInitialState(self.pose)   
 
@@ -475,6 +476,9 @@ class Error (QState):
 
         box = self.model.vision_data[self.module]["box"]
 
+        #solamente se pueden usar los botones de raffi cuando raffi_disponible sea True
+        self.model.raffi_disponible = True
+
         if len(self.model.missing_fuses) > 0:
             command = {
                 "lbl_info1" : {"text": f"{self.model.missing_fuses}", "color": "blue"},
@@ -486,7 +490,7 @@ class Error (QState):
             command = {
                 "lbl_info1" : {"text": f"{self.model.expected_fuses}", "color": "blue"},
                  "lbl_result" : {"text": f"{box} vision NOK", "color": "red"},
-                 "lbl_steps" : {"text": "Presiona el boton de reintento", "color": "black"}
+                 "lbl_steps" : {"text": "Presiona el botón de Reintento", "color": "black"}
                  }
 
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
@@ -501,6 +505,8 @@ class Error (QState):
         self.model.robot.home()
         
     def onExit(self, QEvent):
+
+        self.model.raffi_disponible = False
 
         command = {
             "lbl_info1" : {"text": "", "color": "black"},

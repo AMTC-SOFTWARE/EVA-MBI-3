@@ -24,7 +24,7 @@ class Inspections(QState):
         self.vision             = vision.Vision(module = self.v_module, model = self.model, parent = self)
         self.height             = height.Height(module = self.h_module, model = self.model, parent = self)
         self.wait_start         = WaitStart(model = self.model, parent = self)
-        self.standby            = QState(parent = self)
+        self.standby            = Standby(model = self.model, parent = self)
         self.stop               = Stop(model = self.model, parent = self)
 
         #Estado inicial para esperar boton de start en la inspección
@@ -87,7 +87,11 @@ class WaitStart(QState):
 
         print("############################## ESTADO: WaitStart INSPECTIONS ############################")
         
-        self.model.retry_btn_status = False
+        #solamente se pueden usar los botones de raffi cuando raffi_disponible sea True
+        self.model.raffi_disponible = True
+
+        #variable para indicar que está en el mensaje que pide presionar START
+        self.model.start_btn_status = True
 
         if self.model.PDCD_bracket_pendiente and self.model.PDCD_bracket_terminado==False:
 
@@ -104,6 +108,12 @@ class WaitStart(QState):
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
+    def onExit(self, QEvent):
+
+        print("saliendo de WaitStart, self.model.start_btn_status = False, self.model.raffi_disponible = False")
+        self.model.start_btn_status = False
+        self.model.raffi_disponible = False
+
 
 class SetRobot(QState):
     ok     =   pyqtSignal()
@@ -113,8 +123,6 @@ class SetRobot(QState):
     def onEntry(self, QEvent):
 
         print("############################## ESTADO: SetRobot INSPECTIONS ############################")
-        
-        self.model.retry_btn_status = True
 
         command = {
             "lbl_result" : {"text": "Reiniciando robot", "color": "green"},
@@ -143,8 +151,8 @@ class WaitingHome(QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         
     def onExit(self, QEvent):
+        #self.model.waiting_home = False, desde comm.py cuando robot manda mensaje de home_reached
         print("saliendo de WaitingHome")
-        self.model.waiting_home = False
 
 
 class LiberarCajas(QState):
@@ -187,6 +195,7 @@ class UpdateTriggers(QState):
     def onEntry(self, QEvent):
 
         print("############################## ESTADO: UpdateTriggers INSPECTIONS ############################")
+
         if self.model.desclampear_ready == True:
             command = {"trigger": "HOME"}
             publish.single(self.model.pub_topics["robot"], json.dumps(command), hostname='127.0.0.1', qos = 2)
@@ -194,7 +203,14 @@ class UpdateTriggers(QState):
             return
         if self.model.PDCD_bracket_pendiente and self.model.BRACKET_PDCD_clampeado==False:
             self.model.BRACKET_PDCD_clampeado=True
+
+            #se agrega caja a clamps simulando la acción de clamp_PDC-Dbracket
             self.model.input_data["plc"]["clamps"].append("PDC-Dbracket")
+            command = {
+                "lbl_box0" : {"text": "PDC-Dbracket:\n clamp correcto", "color": "green", "hidden" : False}
+                }
+            publish.single(self.model.pub_topics["gui"], json.dumps(command), hostname='127.0.0.1', qos = 2)
+
             self.BRACKET_PDCD.emit()
             print("va a return de update triggers por pdc dbracket")
             return
@@ -307,3 +323,22 @@ class UpdateTriggers(QState):
             Timer(0.05, self.model.robot.home).start()
             self.nok.emit()
 
+    def onExit(self, QEvent):
+        print("Saliendo de UpdateTriggers (inspections.py)")
+
+class Standby(QState):
+    def __init__(self, model = None, parent = None):
+        super().__init__(parent)
+        self.model = model
+
+    def onEntry(self, QEvent):
+        print("############################## ESTADO: Standby INSPECTIONS ############################")
+        
+        print("self.model.raffi_disponible = True")
+        #solamente se pueden usar los botones de raffi cuando raffi_disponible sea True
+        self.model.raffi_disponible = True
+
+    def onExit(self, QEvent):
+        print("saliendo de Standby, self.model.raffi_disponible = False")
+        #solamente se pueden usar los botones de raffi cuando raffi_disponible sea True
+        self.model.raffi_disponible = False

@@ -173,7 +173,7 @@ class Startup(QState):
         except OSError as error:
             print("ERROR AL CREAR CARPETA:::\n",error)
         
-        #QTimer.singleShot(15, self.kioskMode)
+        QTimer.singleShot(15, self.kioskMode)
         self.model.robot.stop()
         self.ok.emit()
 
@@ -1705,7 +1705,7 @@ class EnableClamps (QState):
         #Iteramnos la key que en este caso es la caja y el valor que seria los lbl
         for key,value in labels.items():
             #Si la key(caja) esta dentro del "self.model.input_data["database"]["modularity"]" entra a la condicion
-            if key in self.model.input_data["database"]["modularity"]:
+            if key == self.model.input_data["database"]["modularity"]:
                 print("Caja encontrada en el diccionario model.input_data[database][modularity]: ", key)
                 
                 #Agregamos el valor de cada key(caja) que vendria siendo cada lbl a la variable command para enviarla a la GUI
@@ -1723,8 +1723,6 @@ class EnableClamps (QState):
         command = {
             "lbl_result" : {"text": "Información de Arnés Validada", "color": "green"},
             "lbl_steps" : {"text": "Coloca las cajas en los nidos para continuar", "color": "navy"},
-            
-
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 

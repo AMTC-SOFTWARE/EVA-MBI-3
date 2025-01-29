@@ -40,7 +40,7 @@ class MqttClient (QObject):
 
     def on_connect(self, client, userdata, flags, rc):
         try:
-            #Generamos una lista con los topicos a los que nos vamos a subscribir
+            #Generamos una lista con los topicos a los que nos vamos a subscribir (gui y robot)
             topics = [self.model.setTopic, self.model.statusrbtTopic]
             
             #Generamos un for para recorrar cada topico y asi el cliente pueda subscribirse individualmente a cada uno.
