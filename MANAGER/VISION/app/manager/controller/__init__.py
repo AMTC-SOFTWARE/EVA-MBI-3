@@ -1941,18 +1941,18 @@ class Finish (QState):
                 
                 resp = requests.post(endpoint, data=json.dumps(trazabilidad))
                 resp = resp.json()
-                sleep(0.1)
-                resp = requests.post(endpoint, data=json.dumps(trazabilidad))
-                resp = resp.json()
-                sleep(0.1)
-                resp = requests.post(endpoint, data=json.dumps(trazabilidad))
-                resp = resp.json()
+                if "exception" in respTrazabilidad:
+                    sleep(0.1)
+                    resp = requests.post(endpoint, data=json.dumps(trazabilidad))
+                    resp = resp.json()
 
-
-
-
+                    if "exception" in respTrazabilidad:
+                        sleep(0.1)
+                        resp = requests.post(endpoint, data=json.dumps(trazabilidad))
+                        resp = resp.json()
 
                 print("Resp de Update Trazabilidad: ",resp)
+
             except Exception as ex:
                 print("Conexión con FAMX2 exception: ", ex)
                 command = {
