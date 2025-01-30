@@ -337,79 +337,128 @@ class Ui_main(object):
         font.setPointSize(16)
         font.setBold(True)
         font.setWeight(75)
-
-
-        self.lbl_box1 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box2 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box3 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box4 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box5 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box6 = QtWidgets.QLabel(self.splitter_3)
-        self.lbl_box7 = QtWidgets.QLabel(self.splitter_3) ######### Modificación para F96 #########
-
+        
+        #Boton para PDC-D
+        #Gif para PDC-D
+        self.lbl_box_1movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_1movie.setScaledSize(QtCore.QSize(30, 30))
+        
+        self.lbl_box1 = QtWidgets.QPushButton(self.splitter_3)
         sizePolicy.setHeightForWidth(self.lbl_box1.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box2.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box3.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box4.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box5.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box6.sizePolicy().hasHeightForWidth())
-        sizePolicy.setHeightForWidth(self.lbl_box7.sizePolicy().hasHeightForWidth()) ######### Modificación para F96 #########
-
         self.lbl_box1.setSizePolicy(sizePolicy)
-        self.lbl_box1.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box1.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box2.setSizePolicy(sizePolicy)
-        self.lbl_box2.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box2.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box3.setSizePolicy(sizePolicy)
-        self.lbl_box3.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box3.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box4.setSizePolicy(sizePolicy)
-        self.lbl_box4.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box4.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box5.setSizePolicy(sizePolicy)
-        self.lbl_box5.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box5.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box6.setSizePolicy(sizePolicy)
-        self.lbl_box6.setMinimumSize(QtCore.QSize(250, 70))
-        self.lbl_box6.setMaximumSize(QtCore.QSize(250, 70))
-
-        self.lbl_box7.setSizePolicy(sizePolicy) ######### Modificación para F96 #########
-        self.lbl_box7.setMinimumSize(QtCore.QSize(250, 70)) ######### Modificación para F96 #########
-        self.lbl_box7.setMaximumSize(QtCore.QSize(250, 70)) ######### Modificación para F96 #########
-
+        self.lbl_box1.setMinimumSize(QtCore.QSize(230, 60))
+        self.lbl_box1.setMaximumSize(QtCore.QSize(230, 60))
         self.lbl_box1.setFont(font)
-        self.lbl_box1.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.lbl_box1.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box1.setLayoutDirection(QtCore.Qt.LeftToRight)                     
         self.lbl_box1.setObjectName("lbl_box1")
-
+        self.lbl_box_1movie.frameChanged.connect(lambda: self.lbl_box1.setIcon(QtGui.QIcon(self.lbl_box_1movie.currentPixmap())))
+        
+        #Boton para PDC-P
+        #Gif para PDC-P
+        self.lbl_box_2movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_2movie.setScaledSize(QtCore.QSize(30, 30))
+        
+        self.lbl_box2 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box2.sizePolicy().hasHeightForWidth())
+        self.lbl_box2.setSizePolicy(sizePolicy)
+        self.lbl_box2.setMinimumSize(QtCore.QSize(230, 60))
+        self.lbl_box2.setMaximumSize(QtCore.QSize(230, 60))
         self.lbl_box2.setFont(font)
-        self.lbl_box2.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.lbl_box2.setObjectName("lbl_box2")
+        self.lbl_box2.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box2.setLayoutDirection(QtCore.Qt.LeftToRight)      
+        self.lbl_box_2movie.frameChanged.connect(lambda: self.lbl_box2.setIcon(QtGui.QIcon(self.lbl_box_2movie.currentPixmap())))
 
+        
+
+        #Boton para PDC-RS O RMID
+        #Gif para PDC-R
+        self.lbl_box_3movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_3movie.setScaledSize(QtCore.QSize(30, 30))
+        
+        self.lbl_box3 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box3.sizePolicy().hasHeightForWidth())
+        self.lbl_box3.setSizePolicy(sizePolicy)
+        self.lbl_box3.setMinimumSize(QtCore.QSize(230, 60))
+        self.lbl_box3.setMaximumSize(QtCore.QSize(230, 60))
         self.lbl_box3.setFont(font)
-        self.lbl_box3.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.lbl_box3.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box3.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.lbl_box3.setObjectName("lbl_box3")
+        self.lbl_box_3movie.frameChanged.connect(lambda: self.lbl_box3.setIcon(QtGui.QIcon(self.lbl_box_3movie.currentPixmap())))
 
+        
+
+        #Boton para PDC-S
+        #Gif para PDC-S
+        self.lbl_box_4movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_4movie.setScaledSize(QtCore.QSize(30, 30))
+
+        self.lbl_box4 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box4.sizePolicy().hasHeightForWidth())
+        self.lbl_box4.setSizePolicy(sizePolicy)
+        self.lbl_box4.setMinimumSize(QtCore.QSize(230, 60))
+        self.lbl_box4.setMaximumSize(QtCore.QSize(230, 60))
         self.lbl_box4.setFont(font)
-        self.lbl_box4.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.lbl_box4.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box4.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.lbl_box4.setObjectName("lbl_box4")
+        self.lbl_box_4movie.frameChanged.connect(lambda: self.lbl_box4.setIcon(QtGui.QIcon(self.lbl_box_4movie.currentPixmap())))      
+        
+        
+        #Boton para TBLU
+        #Gif para TBLU
+        self.lbl_box_5movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_5movie.setScaledSize(QtCore.QSize(30, 30))
 
+        self.lbl_box5 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box5.sizePolicy().hasHeightForWidth())
+        self.lbl_box5.setSizePolicy(sizePolicy)
+        self.lbl_box5.setMinimumSize(QtCore.QSize(230, 60))
+        self.lbl_box5.setMaximumSize(QtCore.QSize(230, 60))
         self.lbl_box5.setFont(font)
-        self.lbl_box5.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.lbl_box5.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box5.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.lbl_box5.setObjectName("lbl_box5")
+        self.lbl_box_5movie.frameChanged.connect(lambda: self.lbl_box5.setIcon(QtGui.QIcon(self.lbl_box_5movie.currentPixmap())))
+        
+        
 
+        #Boton para PDC-P2
+        #Gif para PDC-P2
+        self.lbl_box_6movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_6movie.setScaledSize(QtCore.QSize(30, 30))
+
+        self.lbl_box6 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box6.sizePolicy().hasHeightForWidth())
+        self.lbl_box6.setSizePolicy(sizePolicy)
+        self.lbl_box6.setMinimumSize(QtCore.QSize(230, 60))
+        self.lbl_box6.setMaximumSize(QtCore.QSize(230, 60))
         self.lbl_box6.setFont(font)
-        self.lbl_box6.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.lbl_box6.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box6.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.lbl_box6.setObjectName("lbl_box6")
+        self.lbl_box_6movie.frameChanged.connect(lambda: self.lbl_box6.setIcon(QtGui.QIcon(self.lbl_box_6movie.currentPixmap())))
+        
+       
 
-        self.lbl_box7.setFont(font) ######### Modificación para F96 #########
-        self.lbl_box7.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop) ######### Modificación para F96 #########
-        self.lbl_box7.setObjectName("lbl_box7") ######### Modificación para F96 #########
+        #F96
+        #Gif para F96
+        self.lbl_box_7movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_7movie.setScaledSize(QtCore.QSize(30, 30))
+
+        self.lbl_box7 = QtWidgets.QPushButton(self.splitter_3)
+        sizePolicy.setHeightForWidth(self.lbl_box7.sizePolicy().hasHeightForWidth())
+        self.lbl_box7.setSizePolicy(sizePolicy)
+        self.lbl_box7.setMinimumSize(QtCore.QSize(230, 60))
+        self.lbl_box7.setMaximumSize(QtCore.QSize(230, 60))
+        self.lbl_box7.setFont(font)
+        self.lbl_box7.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box7.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lbl_box7.setObjectName("lbl_box7")
+        self.lbl_box_7movie.frameChanged.connect(lambda: self.lbl_box7.setIcon(QtGui.QIcon(self.lbl_box_7movie.currentPixmap())))
+        
         ######################################################################
         self.lbl_info4 = QtWidgets.QLabel(self.splitter_3)
         self.lbl_info4.setMinimumSize(QtCore.QSize(450, 0))
@@ -541,30 +590,73 @@ class Ui_main(object):
         font.setBold(True)
         font.setWeight(75)
 
-        self.lbl_box8 = QtWidgets.QLabel(main)
-        self.lbl_box8.setGeometry(QtCore.QRect(1700, 200, 250, 50))
-        self.lbl_box8.setFont(font)
-        self.lbl_box8.setObjectName("lbl_box8")
-        self.lbl_box8.setText("")
-        
-        self.lbl_box9 = QtWidgets.QLabel(main)
-        self.lbl_box9.setGeometry(QtCore.QRect(1700, 300, 250, 50))
-        self.lbl_box9.setFont(font)
-        self.lbl_box9.setObjectName("lbl_box9")
-        self.lbl_box9.setText("")
-        
-        self.lbl_box10 = QtWidgets.QLabel(main)
-        self.lbl_box10.setGeometry(QtCore.QRect(1700, 400, 250, 50))
-        self.lbl_box10.setFont(font)
-        self.lbl_box10.setObjectName("lbl_box10")
-        self.lbl_box10.setText("")
-        
-        self.lbl_box11 = QtWidgets.QLabel(main)
-        self.lbl_box11.setGeometry(QtCore.QRect(1700, 500, 250, 50))
-        self.lbl_box11.setFont(font)
-        self.lbl_box11.setObjectName("lbl_box11")
-        self.lbl_box11.setText("")
 
+        #PDC-D BRACKET
+        #Gif para PDC-D BRACKET
+        self.lbl_box_0movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_0movie.setScaledSize(QtCore.QSize(30, 30))
+
+        self.lbl_box0 = QtWidgets.QPushButton(main)
+        self.lbl_box0.setGeometry(QtCore.QRect(1700, 165, 230, 60))
+        self.lbl_box0.setFont(font)
+        self.lbl_box0.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box0.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lbl_box0.setObjectName("lbl_box0")
+        self.lbl_box_0movie.frameChanged.connect(lambda: self.lbl_box0.setIcon(QtGui.QIcon(self.lbl_box_0movie.currentPixmap())))
+        
+        #MFB-P2
+        #Gif para MFB-P2
+        self.lbl_box_8movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_8movie.setScaledSize(QtCore.QSize(30, 30))
+
+        self.lbl_box8 = QtWidgets.QPushButton(main)
+        self.lbl_box8.setGeometry(QtCore.QRect(1700, 240, 230, 60))
+        self.lbl_box8.setFont(font)
+        self.lbl_box8.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box8.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lbl_box8.setObjectName("lbl_box8")
+        self.lbl_box_8movie.frameChanged.connect(lambda: self.lbl_box8.setIcon(QtGui.QIcon(self.lbl_box_8movie.currentPixmap())))
+        
+        #MFB-P1
+        #Gif para MFB-P1
+        self.lbl_box_9movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_9movie.setScaledSize(QtCore.QSize(30, 30))
+
+        self.lbl_box9 = QtWidgets.QPushButton(main)
+        self.lbl_box9.setGeometry(QtCore.QRect(1700, 315, 230, 60))
+        self.lbl_box9.setFont(font)
+        self.lbl_box9.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box9.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lbl_box9.setObjectName("lbl_box9")
+        self.lbl_box_9movie.frameChanged.connect(lambda: self.lbl_box9.setIcon(QtGui.QIcon(self.lbl_box_9movie.currentPixmap())))
+        
+        #MFB-S
+        #Gif para MFB-S
+        self.lbl_box_10movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_10movie.setScaledSize(QtCore.QSize(30, 30))
+        
+        self.lbl_box10 = QtWidgets.QPushButton(main)
+        self.lbl_box10.setGeometry(QtCore.QRect(1700, 390, 230, 60))
+        self.lbl_box10.setFont(font)
+        self.lbl_box10.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box10.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lbl_box10.setObjectName("lbl_box10")
+        self.lbl_box_10movie.frameChanged.connect(lambda: self.lbl_box10.setIcon(QtGui.QIcon(self.lbl_box_10movie.currentPixmap())))
+        
+        #MFB-E
+        #Gif para MFB-E
+        self.lbl_box_11movie = QtGui.QMovie("data/imgs/gif-relojarena.gif") 
+        self.lbl_box_11movie.setScaledSize(QtCore.QSize(30, 30))
+        
+        self.lbl_box11 = QtWidgets.QPushButton(main)
+        self.lbl_box11.setGeometry(QtCore.QRect(1700, 465, 230, 60))
+        self.lbl_box11.setFont(font)
+        self.lbl_box11.setIconSize(QtCore.QSize(30, 30))
+        self.lbl_box11.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lbl_box11.setObjectName("lbl_box11")
+        self.lbl_box_11movie.frameChanged.connect(lambda: self.lbl_box11.setIcon(QtGui.QIcon(self.lbl_box_11movie.currentPixmap())))
+        
+        
         self.retranslateUi(main)
         QtCore.QMetaObject.connectSlotsByName(main)
 

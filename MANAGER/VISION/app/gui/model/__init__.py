@@ -12,9 +12,13 @@ class Model (object):
         self.user = {"type":"", "pass":"", "user":""}
         self.setTopic = "gui/set"
         self.statusTopic = "gui/status"
+        self.plcTopic = "PLC/1"
+        self.rbtTopic = "RobotEpson/2"
+        self.statusrbtTopic = "RobotEpson/2/status"
         self.inBuffer = {}
         self.server = "127.0.0.1:5000" #para correr localmente
         self.mejor_tiempo=1000
+        self.cajas_raffi = [] #Lista para evaluar cajas a desclampear
         self.status = {
             "visible": {
                 "gui": False, 

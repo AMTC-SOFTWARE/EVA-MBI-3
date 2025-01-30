@@ -68,6 +68,7 @@ class Process (QState):
 
         self.triggers.nok.connect(self.nok)
         self.pose.nok.connect(self.nok)
+
         self.pose.finished.connect(self.finished.emit)
         self.setInitialState(self.pose)    
 
@@ -174,6 +175,12 @@ class Triggers (QState):
         #copia de la caja que se está inspeccionando
         box = self.model.height_data[self.module]["box"]
 
+        print("current_trig: ",current_trig)
+        print("self.model.robot_data[h_queue][box]: ",self.model.robot_data["h_queue"][box])
+        print("len(self.model.robot_data[h_queue][box]): ",len(self.model.robot_data["h_queue"][box]))
+
+        ################################## SE REVISA QUE LOS FUSIBLES LEÍDOS CORRESPONDAN A LOS ESPERADOS #####################################
+
         if box in self.model.modularity_fuses:
             for fuse in self.model.modularity_fuses[box]:
                 #height_d es una copia elemento a elemento de la base de datos que te indica si hay fusible o no
@@ -228,19 +235,24 @@ class Triggers (QState):
                                 self.model.tries["ALTURA"][box][fuse] = 1
                             print("Modelo Final: ",self.model.tries)
 
-                #Aseguramiento de inspecciones de alturas 
-                BB = [box, fuse]
-                if current_trig == self.model.h_triggers[box][-1]: #Cuando el trigger actual es igual al ultimo h_trigger de la caja actual[box]
+                ############################################# EN EL ÚLTIMO TRIGGER DE LA CAJA ########################################################
+                ################################# SE REVISA QUE SE HAYAN INSPECCIONADO TODOS LOS FUSIBLES DE LA CAJA ##################################
+                if len(self.model.robot_data["h_queue"][box]) == 1: #cuando sea el último trigger solo queda este en robot_data
                     #Si el fuse no estra dentro de model.history_fuses, se emite un error = True y se muestra en pantalla las cavidades faltantes por inspeccionar
                     if fuse not in self.model.history_fuses:
                         #SOLAMENTE SE EXCLUYEN DE ALTURAS DE FUSIBELS EXTERNOS DE PDC-R, SIEMPRE Y CUANDO TODOS SEAN VACIOS
                         if (fuse not in self.model.external_fuses) or (self.model.eliminar_inspeccion_externos == False): #se excluyen los fusibles ya que pueden faltar de inspeccionar si se requiere (PDC-R fusibles externos de caja grande)
                             error = True
+                            BB = [box, fuse]
                             img = self.model.drawBB(img = img, BB = BB, color = (0, 0, 255))
                             print("||||||||||Alturas faltantes en: ",fuse, " Caja: ",box)
 
                             self.model.missing_fuses += "Inspección de alturas faltante: " + str(fuse) + "\n"
 
+        print("Finalizó inspección de trigger...")
+        ###################################################################################
+
+        #guardando imagen generada final en imgs_path + module + .jpg
         imwrite(self.model.imgs_path + self.module + ".jpg", img)
 
 
@@ -391,6 +403,9 @@ class Error (QState):
         print("############################## ESTADO: Error HEIGHT ############################")
 
         box = self.model.height_data[self.module]["box"]
+
+        self.model.raffi_disponible = True
+
         if len(self.model.missing_fuses) > 0:
             command = {
                 "lbl_info1" : {"text": f"{self.model.missing_fuses}", "color": "blue"},
@@ -406,6 +421,7 @@ class Error (QState):
                  }
 
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
         self.model.height_data[self.module]["box"] = ""
         self.model.height_data[self.module]["queue"].clear()
         self.model.height_data[self.module]["current_trig"] = None
@@ -415,6 +431,9 @@ class Error (QState):
         self.model.robot.home()
 
     def onExit(self, QEvent):
+
+        self.model.raffi_disponible = False
+
         command = {
             "lbl_result" : {"text": "Reintentando inspección de alturas", "color": "green"},
             "lbl_steps" : {"text": "Espera el resultado", "color": "black"},
@@ -463,36 +482,86 @@ class Pose(QState):
             self.model.height_data[self.module]["box"] = box
             self.model.height_data[self.module]["queue"].append(self.model.h_triggers[box][self.model.rh_triggers[box].index(current_trig)])
         else:
+
+            #######################################################################################
+            ################## INSPECCIÓN DE CAJAS SIEMPRE LLEGA AQUÍ AL TERMINAR ALTURAS #########
+            ################## O SI LA CAJA NO TENÍA ALTURAS TAMBIÉN LLEGA AQUÍ ###################
+            ###Se hace un pop de la tarea de -- self.model.input_data["database"]["modularity"] ###
+            print("CAJA TERMINADA, ELIMINANDO TAREA DE MODULARITY: ", box)
+            
+            labels = {
+                "PDC-Dbracket" : {"lbl_box0" : {"text": "", "color": "darkgray", "hidden": True}},
+                "PDC-D" : {"lbl_box1" : {"text": "", "color": "darkgray", "hidden": True}},                    
+                "PDC-P" : {"lbl_box2" : {"text": "", "color": "darkgray", "hidden": True}},
+                "PDC-R" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                  
+                "PDC-RMID" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                    
+                "PDC-S" : {"lbl_box4" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "TBLU" : {"lbl_box5" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "PDC-P2" : {"lbl_box6" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "F96" : {"lbl_box7" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "MFB-P2" : {"lbl_box8" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "MFB-P1" : {"lbl_box9" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "MFB-S" : {"lbl_box10" : {"text": "", "color": "darkgray", "hidden": True}},                   
+                "MFB-E" : {"lbl_box11" : {"text": "", "color": "darkgray", "hidden": True}}                   
+            }
+            
+            """
+                *** Remover el label de la pantalla cuando termine de inspeccionar la vision y alturas ***
+                
+                1) Hacemos un recorrido de cada caja[key] y su lbl[value].
+                
+                2) Si la caja actual se encuentra dentro del diccionario[key], se manda un hidden:True para que esta se oculte 
+                y ademas se hace pop(remueve) de las tareas.
+            """
+            for key,value in labels.items():
+                if box == key:  # Comparación exacta para evitar que por ejemplo "PDC-P" elimine a "PDC-P2"
+                    command = value
+                    publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)       
+                
             command = {
                 "lbl_result" : {"text": "Caja " + box + " Terminada", "color": "green"}
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
+
             clamps = self.model.input_data["plc"]["clamps"]
-             #se elimina de las cajas clampeadas actualmente
+            #se elimina de las cajas clampeadas actualmente
             clamps.pop(clamps.index(box))
-            #se elimina de todas las tareas
-            self.model.input_data["database"]["modularity"].pop(box)
-            self.model.height_data[self.module]["box"] = ""
+            
             #se guardan las cajas terminadas actuales en una variable para posteriormente desclampearlas cuando el robot esté en home
             self.model.cajas_a_desclampear.append(box)
+
+            #se elimina de las tareas de modularity
+            self.model.input_data["database"]["modularity"].pop(box)
+            self.model.height_data[self.module]["box"] = ""
+
+            #se asegura que la condición clamps no afecte cuando len(clamps)<1 al momento de desclampear la PDC-D
+            #se eliminan los boxextra detectados, en caso contrario a len(clamps)>=1 significa que aún hay cajas clampeadas por inspeccionar
             if len(clamps)>=1:
-                print("clamps si hay mas de 1",clamps)
+                print("clamps, si hay más de 1",clamps)
+                #se eliminan todas las cajas agregadas a clamps que no estén en las cajas pendientes por inspeccionar (en modularity)
+                #por ejemplo si llegó un mensaje clamp_PDC-P2 y la PDC-P2 ya había terminado su inspección, o alguna diferente clamp_cajaexterna
                 for boxextra in clamps:
                     if boxextra not in self.model.input_data["database"]["modularity"]:
                         clamps.pop(clamps.index(boxextra))
-                        print("habia un boxextra",boxextra)
-                        
+                        print("había un boxextra",boxextra)
+
+            #(también se condiciona esto mismo desde comm.py para no permitir agregar cajas que no aparezcan ya en modularity -> if box in modularity: self.model.input_data["plc"]["clamps"].append(box))
             if "PDC-D" in self.model.cajas_a_desclampear and len(clamps)<1:
                 self.model.PDCD_bracket_pendiente=True
 
             if "PDC-Dbracket" in self.model.cajas_a_desclampear:
                 self.model.PDCD_bracket_terminado=True
+                command = {
+                    "lbl_box0" : {"text": "", "color": "green", "hidden" : True}
+                    }
+                publish.single(self.model.pub_topics["gui"], json.dumps(command), hostname='127.0.0.1', qos = 2)
+
 
             #si ya no le quedan cajas por inspeccionar de las que se clampearon
             if len(clamps) == 0:
                 self.model.desclampear_ready = True
 
-            
+
             self.model.F96_pendiente=False
             if len(self.model.input_data["database"]["modularity"])<=1 and "F96" in self.model.input_data["database"]["modularity"]:
                 self.model.F96_pendiente=True

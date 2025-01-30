@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>api</Name>
     <RootNamespace>api</RootNamespace>
-    <InterpreterId>Global|VisualStudio|Main Environment</InterpreterId>
+    <InterpreterId>Global|VisualStudio|mainenv</InterpreterId>
     <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|VisualStudio|Main Environment" />
+    <InterpreterReference Include="Global|VisualStudio|mainenv" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

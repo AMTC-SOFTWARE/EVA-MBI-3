@@ -12,9 +12,37 @@ from paho.mqtt import publish
 from threading import Timer
 
 
-class Model (object):
+class Model (QObject):
+
+    raffi_activated = pyqtSignal()
 
     def __init__(self, parent = None):
+        super().__init__(parent)
+        self.name = "GUI"
+        self.imgsPath = "data/imgs/"
+        self.img_fuse = ""
+        self.centerImage = ":/images/images/blanco.png"
+        self.user = {"type":"", "pass":"", "user":""}
+        self.setTopic = "gui/set"
+        self.statusTopic = "gui/status"
+        self.plcTopic = "PLC/1"
+        self.rbtTopic = "RobotEpson/2"
+        self.statusrbtTopic = "RobotEpson/2/status"
+        self.inBuffer = {}
+        self.mejor_tiempo=1000
+        self.cajas_raffi = [] #Lista para evaluar cajas a desclampear
+        self.status = {
+            "visible": {
+                "gui": False, 
+                "login": False,
+                "scanner": False,
+                "pop_out": False
+                }
+            }
+
+
+        #variable para indicar que se pueden utilizar los raffi
+        self.raffi_disponible = False
 
         self.shutdown = False
         self.main_window = None
@@ -64,6 +92,9 @@ class Model (object):
         #variable para saber cuando se está en el estado WaitingHome
         self.waiting_home = False
 
+        #variable para volver a mandar a home con retry para un raffi activado
+        self.waiting_raffi_home = False
+
         #variable para saber si se ignoran las inspecciones de alturas de fusibles externos de PDC-R, solamente si todos son vacíos
         self.eliminar_inspeccion_externos = False
 
@@ -100,6 +131,9 @@ class Model (object):
         self.BRACKET_PDCD_clampeado=False
         self.PDCD_bracket_pendiente=False
         self.PDCD_bracket_terminado=False
+
+        #Variable declarada en True para indicar que el boton a presionar es START, en caso False se debe presionar el boton reintentar.
+        self.start_btn_status = False
 
         self.tries = {
             "VISION": {},
@@ -401,6 +435,9 @@ class Model (object):
             #"PDC-Dbracket": ["PDCDbracket_pa1"]
             }
 
+        #trigger sin inspecciones de alturas en cavidades externas de caja grande PDCR
+        self.rh_trigger_pdcr = {"PDC-R": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"]}
+
         print("v_triggers:\n",self.v_triggers)
         print("rv_triggers:\n",self.rv_triggers)
         print("h_triggers:\n",self.h_triggers)
@@ -467,6 +504,7 @@ class Model (object):
 
     def reset (self):
         self.waiting_home = False
+        self.waiting_raffi_home = False
         self.valores_torques_red = False
         self.revisando_resultado_height = False
         self.revisando_resultado = False
@@ -478,6 +516,9 @@ class Model (object):
         self.cajas_a_desclampear = []
         self.datetime = None
         
+        self.raffi_disponible = False
+        self.start_btn_status = False
+
         #for i in self.result:
         #    for j in self.result[i]:
         #        self.result[i][j] = None
@@ -680,7 +721,7 @@ class Model (object):
         fecha_actuaal = None
         try:
             endpoint = "http://{}/server_famx/hora_servidor".format(self.server) #self.model.server
-            respuesta_hora = requests.get(endpoint).json()
+            respuesta_hora = requests.get(endpoint, timeout=2).json()
             if "exception" in respuesta_hora:
                 fecha_actuaal = datetime.now() #se toma la hora local de la PC
                 print("////////// fecha_local")

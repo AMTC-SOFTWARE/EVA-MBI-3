@@ -34,18 +34,20 @@ class MqttClient (QObject):
     
     #error_cortina   =   pyqtSignal()
 
+    nido_PDCDB = ""
     nido_PDCD = ""
     nido_PDCP = ""
     nido_PDCR = ""
     nido_PDCS = ""
     nido_TBLU = ""
-    nido_PDCP2= ""
-    nido_F96= ""
+    nido_PDCP2 = ""
+    nido_F96 = ""
     nido_MFBP2 = ""
     nido_MFBP1 = ""
     nido_MFBS = ""
     nido_MFBE = ""
 
+    color_PDCDB = "blue"
     color_PDCD = "blue"
     color_PDCP = "blue"
     color_PDCR = "blue"
@@ -116,12 +118,11 @@ class MqttClient (QObject):
         except Exception as ex:
             print("Manager MQTT client connection fail. Exception: ", ex)
             self.conn_nok.emit()
-
-
+        
     def start_robot(self):
 
         self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "start"}), qos = 2)
-
+        
     def on_message(self, client, userdata, message):
         try:
             payload = json.loads(message.payload)
@@ -131,6 +132,7 @@ class MqttClient (QObject):
             print ("   " + message.topic + " ", payload) 
 
             if message.topic == self.model.sub_topics["plc"]:
+
                 if "emergency" in payload:
                     self.model.input_data["plc"]["emergency"] = payload["emergency"]
                     if payload["emergency"] == False:
@@ -161,18 +163,53 @@ class MqttClient (QObject):
                         elif box == "PDC-R" and "PDC-RS" in self.model.input_data["database"]["modularity"]:
                             box = "PDC-RS"
                         ########################################################## PDC-RS
+
+                        #si clamp_box == True
                         if payload[i] == True:
                             if not(box in self.model.input_data["plc"]["clamps"]):
-                                self.model.input_data["plc"]["clamps"].append(box)
+                                print("box: ",box)
+                                modularity = self.model.input_data["database"]["modularity"]
 
-                                # AGREGAR CODIGO PARA ORDENAR CAJAS CLAMPEADAS, primero PDCR, luego PDCS, luego TBLU, luego PDCD, y PDCP al final
-                                # si es que las lleva en ese momento (de lo que se ha clampeado antes de dar start)
+                                #si el mensaje de la caja clampeada aparece en las cajas de tareas pendientes del arnés (modularity), se agrega a clamps
+                                if box in modularity:
 
-                                self.clamp.emit() 
+                                    self.model.input_data["plc"]["clamps"].append(box)
+
+                                    # AGREGAR CODIGO PARA ORDENAR CAJAS CLAMPEADAS, primero PDCR, luego PDCS, luego TBLU, luego PDCD, y PDCP al final
+                                    # si es que las lleva en ese momento (de lo que se ha clampeado antes de dar start)
+                                    
+                                    print("se agrega box a clamps, self.clamp.emit")
+                                    self.clamp.emit()
+
+                                else:
+                                    print("box ya no está en modularity, no se agrega a clamps")
+                                    print("modularity: ", modularity)
+                        #Si clamp_box == False
                         else:
                             if box in self.model.input_data["plc"]["clamps"]:
                                 self.model.input_data["plc"]["clamps"].pop(self.model.input_data["plc"]["clamps"].index(box))
 
+                        #sihay inspecciones pendientes en las tareas del arnés (modularity), de lo contrario es fuera de ciclo y no se muestran mensajes
+                        if len(self.model.input_data["database"]["modularity"]) > 0:
+                            print("Cajas con TAREAS pendientes:\n",self.model.input_data["database"]["modularity"])
+                            #si hay cajas clampeadas en este momento...
+                            if len(self.model.input_data["plc"]["clamps"]) > 0:
+                                print("revisión de cajas restantes desde comm.py, aún hay cajas puestas en input_data[PLC][clamps]")
+                                
+                                if self.model.start_btn_status == True:
+                                    command = { "lbl_steps" : {"text": "Presiona START para comenzar", "color": "green"}}
+                                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                                else:
+                                    command = { "lbl_steps" : {"text": "Presiona el botón de reintento", "color": "black"}}
+                                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                            #no hay cajas clampeadas, pero faltan inspecciones por hacer
+                            else:
+                                print("revisión de cajas restantes desde comm.py, NO hay cajas puestas en input_data[PLC][clamps] pero faltan inspecciones")
+                                command = { "lbl_steps" : {"text": "Coloca las cajas en los nidos para continuar", "color": "navy"}}
+                                self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                                
+                               
                 if "Candado_PDCS" in payload:
                     if payload["Candado_PDCS"] == True:
                         command = {
@@ -205,12 +242,20 @@ class MqttClient (QObject):
                 if "retry_btn" in payload:
                     self.model.input_data["plc"]["retry_btn"] = bool(payload["retry_btn"])
                     if payload["retry_btn"] == True:
-                        if self.model.waiting_home == True:
-                            print("reenviando a home por self.model.waiting_home = True")
-                            self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "stop"}), qos = 2)
-                            Timer(0.8, self.start_robot).start()
                         
-                        self.retry_btn.emit()
+                        #en este no se manda señal retry_btn
+                        if self.model.waiting_raffi_home == True:
+                            print("reenviando a home por self.model.waiting_raffi_home = True")
+                            self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "stop"}), qos = 2)
+                            Timer(0.5, self.start_robot).start()
+                        else:
+                            #aquí sí se manda señal retry_btn
+                            if self.model.waiting_home == True:
+                                print("reenviando a home por self.model.waiting_home = True")
+                                self.client.publish(self.model.pub_topics["robot"], json.dumps({"command": "stop"}), qos = 2)
+                                Timer(0.8, self.start_robot).start()
+                        
+                            self.retry_btn.emit()
 
                 if "Rbt-EStop" in payload:
                     if payload["Rbt-EStop"]:
@@ -244,344 +289,503 @@ class MqttClient (QObject):
                 print("payload_str: ",payload_str)
                 
                 if "PDC-Dbracket" in payload_str: #busca en el string PDC-D
-                    #if "PDC-Dbracket" in payload:
-                    #    if payload["PDC-Dbracket"] == True:
-                    #        self.nido_PDCD = "PDC-Dbracket:\n Habilitada"
-                    #        self.color_PDCD = "blue"
-                    #
-                    #    if payload["PDC-Dbracket"] == False:
-                    #        self.nido_PDCD = ""
-                    #        self.color_PDCD = "blue"
-                    #
-                    if "PDC-Dbracket_ERROR" in payload:
-                        if payload["PDC-D_ERROR"] == True:
-                            self.nido_PDCD = "PDC-Dbracket:\n clampeo incorrecto"
-                            self.color_PDCD = "red"
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-Dbracket" in self.model.input_data["database"]["modularity"]:
 
-                    if "clamp_PDC-Dbracket" in payload:
-                        if payload["clamp_PDC-Dbracket"] == True:
-                            self.nido_PDCD = "PDC-Dbracket:\n clampeo correcto"
-                            self.color_PDCD = "green"
+                        if "PDC-Dbracket" in payload:
+                            if payload["PDC-Dbracket"] == True:
+                                self.nido_PDCDB = "PDC-Dbracket:\n Habilitada"
+                                self.color_PDCDB = "blue"
+                                
+                            if payload["PDC-Dbracket"] == False:
+                                self.nido_PDCDB = "PDC-Dbracket:\n Habilitar"
+                                self.color_PDCDB = "red"
+                    
+                        if "PDC-Dbracket_ERROR" in payload:
+                            if payload["PDC-D_ERROR"] == True:
+                                self.nido_PDCDB = "PDC-Dbracket:\n clamp incorrecto"
+                                self.color_PDCDB = "red"
 
-                    command = {
-                        "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}
-                        }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        if "clamp_PDC-Dbracket" in payload:
+                            if payload["clamp_PDC-Dbracket"] == True:
+                                self.nido_PDCDB = "PDC-Dbracket:\n clamp correcto"
+                                self.color_PDCDB = "green"
+
+                        command = {
+                            "lbl_box0" : {"text": f"{self.nido_PDCDB}", "color": f"{self.color_PDCDB}", "hidden" : False}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
+                    else:
+                        self.nido_PDCDB = ""
+                        self.color_PDCDB = ""
+                        command = {
+                            "lbl_box0" : {"text": f"{self.nido_PDCDB}", "color": f"{self.color_PDCDB}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "PDC-D" in payload_str: #busca en el string PDC-D
-                    if "PDC-D" in payload:
-                        if payload["PDC-D"] == True:
-                            self.nido_PDCD = "PDC-D:\n Habilitada"
-                            self.color_PDCD = "blue"
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-D" in self.model.input_data["database"]["modularity"]:
+                        
+                        if "PDC-D" in payload:
+                            if payload["PDC-D"] == True:
+                                self.nido_PDCD = "PDC-D:\n Habilitada"
+                                self.color_PDCD = "blue"
+                           
+                            if payload["PDC-D"] == False:
+                                self.nido_PDCD = "PDC-D:\n Habilitar"
+                                self.color_PDCD = "red"
+                          
 
-                        if payload["PDC-D"] == False:
-                            self.nido_PDCD = ""
-                            self.color_PDCD = "blue"
+                        if "PDC-D_ERROR" in payload:
+                            if payload["PDC-D_ERROR"] == True:
+                                self.nido_PDCD = "PDC-D:\n clamp incorrecto"
+                                self.color_PDCD = "red"
 
-                    if "PDC-D_ERROR" in payload:
-                        if payload["PDC-D_ERROR"] == True:
-                            self.nido_PDCD = "PDC-D:\n clampeo incorrecto"
-                            self.color_PDCD = "red"
+                        if "clamp_PDC-D" in payload:
+                            if payload["clamp_PDC-D"] == True:
+                                self.nido_PDCD = "PDC-D:\n clamp correcto"
+                                self.color_PDCD = "green"
+                            else:
+                                self.nido_PDCD = "PDC-D:\n Habilitar"
+                                self.color_PDCD = "red"
 
-                    if "clamp_PDC-D" in payload:
-                        if payload["clamp_PDC-D"] == True:
-                            self.nido_PDCD = "PDC-D:\n clampeo correcto"
-                            self.color_PDCD = "green"
+                        command = {
+                            "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}", "hidden" : False}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_PDCD = ""
+                        self.color_PDCD = ""
+                        command = {
+                            "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
-                    command = {
-                        "lbl_box1" : {"text": f"{self.nido_PDCD}", "color": f"{self.color_PDCD}"}
-                        }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-
-                if "PDC-P" in payload_str:
-                    if "PDC-P" in payload:
-                        if payload["PDC-P"] == True:
-                            self.nido_PDCP = "PDC-P:\n Habilitada"
-                            self.color_PDCP = "blue"
-
-                        if payload["PDC-P"] == False:
-                            self.nido_PDCP = ""
-                            self.color_PDCP = "blue"
-
-                    if "PDC-P_ERROR" in payload:
-                        if payload["PDC-P_ERROR"] == True:
-                            self.nido_PDCP = "PDC-P:\n clampeo incorrecto"
-                            self.color_PDCP = "red"
-                    if "clamp_PDC-P" in payload:
-                        if payload["clamp_PDC-P"] == True:
-                            self.nido_PDCP = "PDC-P:\n clampeo correcto"
-                            self.color_PDCP = "green"
-
-                    command = {
-                                "lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                
-                if "PDC-R" in payload_str:
-
-                    PDCR = "PDC-R"
-
-                    #dependiendo del mensaje que le llegue desde la GDI
-                    if "PDC-RMID" in payload_str:
-                        PDCR = "PDC-RMID"
-                    if "PDC-RS" in payload_str:
-                        PDCR = "PDC-RS"
+                if "PDC-P2" in payload_str:
+                    
+                    print("PDC-P2 en payload_str")
 
                     #dependiendo del arnés cargado
-                    if "PDC-RS" in self.model.input_data["database"]["modularity"]:
-                        PDCR = "PDC-RS"
-                    if "PDC-RMID" in self.model.input_data["database"]["modularity"]:
-                        PDCR = "PDC-RMID"
+                    if "PDC-P2" in self.model.input_data["database"]["modularity"]:
+                        
+                        if "PDC-P2" in payload:
+                            if payload["PDC-P2"] == True:
+                                self.nido_PDCP2 = "PDC-P2:\n Habilitada"
+                                self.color_PDCP2 = "blue"
 
-                    if PDCR in payload:
+                            if payload["PDC-P2"] == False:
+                                self.nido_PDCP2 = "PDC-P2:\n Habilitar"
+                                self.color_PDCP2 = "red"
 
-                        if payload[PDCR] == True:
-                            self.nido_PDCR = f"{PDCR}:\n Habilitada"
-                            self.color_PDCR = "blue"
+                        if "PDC-P2_ERROR" in payload:
+                            if payload["PDC-P2_ERROR"] == True:
+                                self.nido_PDCP2 = "PDC-P2:\n clamp incorrecto"
+                                self.color_PDCP2 = "red"
 
-                        if payload[PDCR] == False:
-                            self.nido_PDCR = ""
-                            self.color_PDCR = "blue"
+                        if "clamp_PDC-P2" in payload:
+                            if payload["clamp_PDC-P2"] == True:
+                                self.nido_PDCP2 = "PDC-P2:\n clamp correcto"
+                                self.color_PDCP2 = "green"
+                            else:
+                                self.nido_PDCP2 = "PDC-P2:\n Habilitar"
+                                self.color_PDCP2 = "red"
 
-                    if "PDC-R_ERROR" in payload:
-                        if payload["PDC-R_ERROR"] == True:
-                            self.color_PDCR = "red"
-                            self.nido_PDCR = f"{PDCR}:\n clampeo incorrecto"
 
-                    if "clamp_PDC-R" in payload:
-                        if payload["clamp_PDC-R"] == True:
-                            self.color_PDCR = "green"
-                            self.nido_PDCR = f"{PDCR}:\n clampeo correcto"
-                    
-                    command = {
-                            "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"}
+                        command = {
+                                    "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                    else:
+                        self.nido_PDCP2 = ""
+                        self.color_PDCP2 = ""
+                        command = {
+                            "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}", "hidden" : True}
                             }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
-                    ##recorrer las cajas de la colección buscando que exista una cavidad F96 en el arnés
-                    #for caja in self.model.input_data["database"]["modularity"]:
-                    #    if "F96" in caja:
-                    #        command = {
-                    #            "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}"},
-                    #            "lbl_box7" : {"text": "F96: Si Aplica", "color": "purple"}
-                    #            }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                if "PDC-P" in payload_str:
+                    
+                    print("PDC-P in payload_str")
+
+                    #dependiendo del arnés cargado
+                    if "PDC-P" in self.model.input_data["database"]["modularity"]:
+
+                        if "PDC-P" in payload:
+                            if payload["PDC-P"] == True:
+                                self.nido_PDCP = "PDC-P:\n Habilitada"
+                                self.color_PDCP = "blue"
+
+                            if payload["PDC-P"] == False:
+                                self.nido_PDCP = "PDC-P:\n Habilitar"
+                                self.color_PDCP = "red"
+
+                        if "PDC-P_ERROR" in payload:
+                            if payload["PDC-P_ERROR"] == True:
+                                self.nido_PDCP = "PDC-P:\n clamp incorrecto"
+                                self.color_PDCP = "red"
+                    
+                        if "clamp_PDC-P" in payload:
+                            if payload["clamp_PDC-P"] == True:
+                                self.nido_PDCP = "PDC-P:\n clamp correcto"
+                                self.color_PDCP = "green"
+                            else:
+                                self.nido_PDCP = "PDC-P:\n Habilitar"
+                                self.color_PDCP = "red"
+
+                        command = {
+                                    "lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
+                    else:
+                        self.nido_PDCP = ""
+                        self.color_PDCP = ""
+                        command = {
+                            "lbl_box2" : {"text": f"{self.nido_PDCP}", "color": f"{self.color_PDCP}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                if "PDC-R" in payload_str:
+                    PDCR = ""
+                    #detectar qué caja de PDC-R lleva el arnés
+                    if "PDC-R" in self.model.input_data["database"]["modularity"].keys():
+                        PDCR = "PDC-R"
+                    elif "PDC-RMID" in self.model.input_data["database"]["modularity"].keys():
+                        PDCR = "PDC-RMID"
+                    elif "PDC-RS" in self.model.input_data["database"]["modularity"].keys():
+                        print("En realidad es una PDC-RS pero se cambia a PDC-RMID para GDI ya que es mismo nido")
+                        PDCR = "PDC-RMID"
+                    else: #si no hay ninguna caja PDCR en el contenido del arnés...
+                        self.nido_PDCR = ""
+                        self.color_PDCR = ""
+                        command = {
+                            "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    
+                    
+                    #si se encontró cualquier caja PDCR en el contenido del arnés...
+                    if PDCR != "":
+                        #no importa si es PDC-R o PDC-RMID los mensajes de ERROR y clamp no cambian (siempre se manda así desde GDI)
+                        if "PDC-R_ERROR" in payload:
+                                if payload["PDC-R_ERROR"] == True:
+                                    self.nido_PDCR = f"{PDCR}:\n clamp incorrecto"
+                                    self.color_PDCR = "red"
+                                    
+                        if "clamp_PDC-R" in payload:
+                            if payload["clamp_PDC-R"] == True:
+                                self.nido_PDCR = f" {PDCR}:\n clamp correcto"
+                                self.color_PDCR = "green"
+                            else:
+                                self.nido_PDCR = f"{PDCR}:\n Habilitar"
+                                self.color_PDCR = "red"
+                                                   
+
+                        if "PDC-R" in payload or "PDC-RS" in payload or PDCR in payload:
+                            
+                            if "True" in str(payload):
+                                payload = {PDCR:True}
+                            elif "False" in str(payload):
+                                payload = {PDCR:False}
+                            
+                            if payload[PDCR] == True:
+                                self.nido_PDCR = f"{PDCR}:\n Habilitada"
+                                self.color_PDCR = "blue"
+
+                            if payload[PDCR] == False:
+                                self.nido_PDCR = f"{PDCR}:\n Habilitar"
+                                self.color_PDCR = "red"
+ 
+                        command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : False}}
+                        print("COMMANDO PDCR",command)
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "PDC-S" in payload_str:
-                    if "PDC-S" in payload:
-                        if payload["PDC-S"] == True:
-                            self.nido_PDCS = "PDC-S:\n Habilitada"
-                            self.color_PDCS = "blue"
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-S" in self.model.input_data["database"]["modularity"]:
 
-                        if payload["PDC-S"] == False:
-                            self.nido_PDCS = ""
-                            self.color_PDCS = "blue"
+                        if "PDC-S" in payload:
+                            if payload["PDC-S"] == True:
+                                self.nido_PDCS = "PDC-S:\n Habilitada"
+                                self.color_PDCS = "blue"
 
-                    if "clamp_PDC-S" in payload:
-                        if payload["clamp_PDC-S"] == True:
-                            self.nido_PDCS = "PDC-S:\n clampeo correcto"
-                            self.color_PDCS = "green"
+                            if payload["PDC-S"] == False:
+                                self.nido_PDCS = "PDC-S:\n Habilitar"
+                                self.color_PDCS = "red"
 
-                    if "clamp_PDC-S" in payload:
-                        if payload["clamp_PDC-S"] == False:
-                            self.nido_PDCS = ""
-                            self.color_PDCS = "blue"
+                        if "clamp_PDC-S" in payload:
+                            if payload["clamp_PDC-S"] == True:
+                                self.nido_PDCS = "PDC-S:\n clamp correcto"
+                                self.color_PDCS = "green"
+                                            
+                        if "clamp_PDC-S" in payload:
+                            if payload["clamp_PDC-S"] == False:
+                                self.nido_PDCS = "PDC-S:\n Habilitar"
+                                self.color_PDCS = "red"
 
 
-                    command = {
-                                "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        command = {
+                                    "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_PDCS = ""
+                        self.color_PDCS = ""
+                        command = {
+                            "lbl_box4" : {"text": f"{self.nido_PDCS}", "color": f"{self.color_PDCS}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "TBLU" in payload_str:
-                    if "TBLU" in payload:
-                        if payload["TBLU"] == True:
-                            self.nido_TBLU = "TBLU:\n Habilitada"
-                            self.color_TBLU = "blue"
+                    
+                    #dependiendo del arnés cargado
+                    if "TBLU" in self.model.input_data["database"]["modularity"]:
 
-                        if payload["TBLU"] == False:
-                            self.nido_TBLU = ""
-                            self.color_TBLU = "blue"
+                        if "TBLU" in payload:
+                            if payload["TBLU"] == True:
+                                self.nido_TBLU = "TBLU:\n Habilitada"
+                                self.color_TBLU = "blue"
 
-                    if "TBLU_ERROR" in payload:
-                        if payload["TBLU_ERROR"] == True:
-                            self.nido_TBLU = "TBLU:\n clampeo incorrecto"
-                            self.color_TBLU = "red"
-                    if "clamp_TBLU" in payload:
-                        if payload["clamp_TBLU"] == True:
-                            self.nido_TBLU = "TBLU:\n clampeo correcto"
-                            self.color_TBLU = "green"
+                            if payload["TBLU"] == False:
+                                self.nido_TBLU = "TBLU:\n Habilitar"
+                                self.color_TBLU = "red"
+
+                        if "TBLU_ERROR" in payload:
+                            if payload["TBLU_ERROR"] == True:
+                                self.nido_TBLU = "TBLU:\n clamp incorrecto"
+                                self.color_TBLU = "red"
+
+                        if "clamp_TBLU" in payload:
+                            if payload["clamp_TBLU"] == True:
+                                self.nido_TBLU = " TBLU:\n clamp correcto"
+                                self.color_TBLU = "green"
+                            else:
+                                self.nido_TBLU = "TBLU:\n Habilitar"
+                                self.color_TBLU = "red"
 
 
-                    command = {
-                                "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        command = {
+                                    "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
-                if "PDC-P2" in payload_str:
-                    if "PDC-P2" in payload:
-                        if payload["PDC-P2"] == True:
-                            self.nido_PDCP2 = "PDC-P2:\n Habilitada"
-                            self.color_PDCP2 = "blue"
-
-                        if payload["PDC-P2"] == False:
-                            self.nido_PDCP2 = ""
-                            self.color_PDCP2 = "blue"
-
-                    if "PDC-P2_ERROR" in payload:
-                        if payload["PDC-P2_ERROR"] == True:
-                            self.nido_PDCP2 = "TBLU:\n clampeo incorrecto"
-                            self.color_PDCP2 = "red"
-                    if "clamp_PDC-P2" in payload:
-                        if payload["clamp_PDC-P2"] == True:
-                            self.nido_PDCP2 = "PDC-P2:\n clampeo correcto"
-                            self.color_PDCP2 = "green"
-
-
-                    command = {
-                                "lbl_box6" : {"text": f"{self.nido_PDCP2}", "color": f"{self.color_PDCP2}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_TBLU = ""
+                        self.color_TBLU = ""
+                        command = {
+                            "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
                 
                 if "F96" in payload_str:
-                    if "F96" in payload:
-                        if payload["F96"] == True:
-                            self.nido_F96 = "F96:\n Habilitada"
-                            self.color_F96 = "blue"
+                    
+                    #dependiendo del arnés cargado
+                    if "F96" in self.model.input_data["database"]["modularity"]:
 
-                        if payload["F96"] == False:
-                            self.nido_F96 = ""
-                            self.color_F96 = "blue"
+                        if "F96" in payload:
+                            if payload["F96"] == True:
+                                self.nido_F96 = "F96:\n Habilitada"
+                                self.color_F96 = "blue"
 
-                    if "F96_ERROR" in payload:
-                        if payload["F96_ERROR"] == True:
-                            self.nido_F96 = "F96:\n clampeo incorrecto"
-                            self.color_F96 = "red"
-                    if "clamp_F96" in payload:
-                        if payload["clamp_F96"] == True:
-                            self.nido_F96 = "F96:\n clampeo correcto"
-                            self.color_F96 = "green"
+                            if payload["F96"] == False:
+                                self.nido_F96 = "F96:\n Habilitar"
+                                self.color_F96 = "red"
+
+                        if "F96_ERROR" in payload:
+                            if payload["F96_ERROR"] == True:
+                                self.nido_F96 = "F96:\n clamp incorrecto"
+                                self.color_F96 = "red"
+                        if "clamp_F96" in payload:
+                            if payload["clamp_F96"] == True:
+                                self.nido_F96 = " F96:\n clamp correcto"
+                                self.color_F96 = "green"
+                            else:
+                                self.nido_F96 = "F96:\n Habilitar"
+                                self.color_F96 = "red"
 
 
-                    command = {
-                                "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                
+                        command = {
+                                    "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    else:
+                        self.nido_F96 = ""
+                        self.color_F96 = ""
+                        command = {
+                            "lbl_box7" : {"text": f"{self.nido_F96}", "color": f"{self.color_F96}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "MFB-P2" in payload_str:
-                    if "MFB-P2" in payload:
-                        if payload["MFB-P2"] == True:
-                            self.nido_MFBP2 = "MFB-P2:\n Habilitada"
-                            self.color_MFBP2 = "blue"
+                    
+                    #dependiendo del arnés cargado
+                    if "MFB-P2" in self.model.input_data["database"]["modularity"]:
 
-                        if payload["MFB-P2"] == False:
-                            self.nido_MFBP2 = ""
-                            self.color_MFBP2 = "blue"
+                        if "MFB-P2" in payload:
+                            if payload["MFB-P2"] == True:
+                                self.nido_MFBP2 = "MFB-P2:\n Habilitada"
+                                self.color_MFBP2 = "blue"
 
-                    if "MFB-P2_ERROR" in payload:
-                        if payload["MFB-P2_ERROR"] == True:
-                            self.nido_MFBP2 = "MFB-P2:\n clampeo incorrecto"
-                            self.color_MFBP2 = "red"
+                            if payload["MFB-P2"] == False:
+                                self.nido_MFBP2 = "MFB-P2:\n Habilitar"
+                                self.color_MFBP2 = "red"
 
-                    if "clamp_MFB-P2" in payload:
-                        if payload["clamp_MFB-P2"] == True:
-                            self.nido_MFBP2 = "MFB-P2:\n clampeo correcto"
-                            self.color_MFBP2 = "green"
+                        if "MFB-P2_ERROR" in payload:
+                            if payload["MFB-P2_ERROR"] == True:
+                                self.nido_MFBP2 = "MFB-P2:\n clamp incorrecto"
+                                self.color_MFBP2 = "red"
 
-                    if "clamp_MFB-P2" in payload:
-                        if payload["clamp_MFB-P2"] == False:
-                            self.nido_MFBP2 = ""
-                            self.color_MFBP2 = "blue"
-                    command = {
-                                "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        if "clamp_MFB-P2" in payload:
+                            if payload["clamp_MFB-P2"] == True:
+                                self.nido_MFBP2 = " MFB-P2:\n clamp correcto"
+                                self.color_MFBP2 = "green"
+
+                        if "clamp_MFB-P2" in payload:
+                            if payload["clamp_MFB-P2"] == False:
+                                self.nido_MFBP2 = "MFB-P2:\n Habilitar"
+                                self.color_MFBP2 = "red"
+                        command = {
+                                    "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    
+                    else:
+                        self.nido_MFBP2 = ""
+                        self.color_MFBP2 = ""
+                        command = {
+                            "lbl_box8" : {"text": f"{self.nido_MFBP2}", "color": f"{self.color_MFBP2}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "MFB-P1" in payload_str:
-                    if "MFB-P1" in payload:
-                        if payload["MFB-P1"] == True:
-                            self.nido_MFBP1 = "MFB-P1:\n Habilitada"
-                            self.color_MFBP1 = "blue"
+                    
+                    #dependiendo del arnés cargado
+                    if "MFB-P1" in self.model.input_data["database"]["modularity"]:
 
-                        if payload["MFB-P1"] == False:
-                            self.nido_MFBP1 = ""
-                            self.color_MFBP1 = "blue"
+                        if "MFB-P1" in payload:
+                            if payload["MFB-P1"] == True:
+                                self.nido_MFBP1 = "MFB-P1:\n Habilitada"
+                                self.color_MFBP1 = "blue"
 
-                    if "MFB-P1_ERROR" in payload:
-                        if payload["MFB-P1_ERROR"] == True:
-                            self.nido_MFBP1 = "MFB-P1:\n clampeo incorrecto"
-                            self.color_MFBP1 = "red"
+                            if payload["MFB-P1"] == False:
+                                self.nido_MFBP1 = "MFB-P1:\n Habilitar"
+                                self.color_MFBP1 = "red"
 
-                    if "clamp_MFB-P1" in payload:
-                        if payload["clamp_MFB-P1"] == True:
-                            self.nido_MFBP1 = "MFB-P1:\n clampeo correcto"
-                            self.color_MFBP1 = "green"
+                        if "MFB-P1_ERROR" in payload:
+                            if payload["MFB-P1_ERROR"] == True:
+                                self.nido_MFBP1 = "MFB-P1:\n clamp incorrecto"
+                                self.color_MFBP1 = "red"
 
-                    if "clamp_MFB-P1" in payload:
-                        if payload["clamp_MFB-P1"] == False:
-                            self.nido_MFBP1 = ""
-                            self.color_MFBP1 = "blue"
-                    command = {
-                                "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        if "clamp_MFB-P1" in payload:
+                            if payload["clamp_MFB-P1"] == True:
+                                self.nido_MFBP1 = " MFB-P1:\n clamp correcto"
+                                self.color_MFBP1 = "green"
+
+                        if "clamp_MFB-P1" in payload:
+                            if payload["clamp_MFB-P1"] == False:
+                                self.nido_MFBP1 = "MFB-P1:\n Habilitar"
+                                self.color_MFBP1 = "red"
+                        command = {
+                                    "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                    else:
+                        self.nido_MFBP1 = ""
+                        self.color_MFBP1 = ""
+                        command = {
+                            "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "MFB-S" in payload_str:
-                    if "MFB-S" in payload:
-                        if payload["MFB-S"] == True:
-                            self.nido_MFBS = "MFB-S:\n Habilitada"
-                            self.color_MFBS = "blue"
+                    
+                    #dependiendo del arnés cargado
+                    if "MFB-S" in self.model.input_data["database"]["modularity"]:
 
-                        if payload["MFB-S"] == False:
-                            self.nido_MFBS = ""
-                            self.color_MFBS = "blue"
+                        if "MFB-S" in payload:
+                            if payload["MFB-S"] == True:
+                                self.nido_MFBS = "MFB-S:\n Habilitada"
+                                self.color_MFBS = "blue"
 
-                    if "MFB-S_ERROR" in payload:
-                        if payload["MFB-S_ERROR"] == True:
-                            self.nido_MFBS = "MFB-S:\n clampeo incorrecto"
-                            self.color_MFBS = "red"
+                            if payload["MFB-S"] == False:
+                                self.nido_MFBS = "MFB-S:\n Habilitar"
+                                self.color_MFBS = "red"
 
-                    if "clamp_MFB-S" in payload:
-                        if payload["clamp_MFB-S"] == True:
-                            self.nido_MFBS = "MFB-S:\n clampeo correcto"
-                            self.color_MFBS = "green"
+                        if "MFB-S_ERROR" in payload:
+                            if payload["MFB-S_ERROR"] == True:
+                                self.nido_MFBS = "MFB-S:\n clamp incorrecto"
+                                self.color_MFBS = "red"
 
-                    if "clamp_MFB-S" in payload:
-                        if payload["clamp_MFB-S"] == False:
-                            self.nido_MFBS = ""
-                            self.color_MFBS = "blue"
-                    command = {
-                                "lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        if "clamp_MFB-S" in payload:
+                            if payload["clamp_MFB-S"] == True:
+                                self.nido_MFBS = " MFB-S:\n clamp correcto"
+                                self.color_MFBS = "green"
+
+                        if "clamp_MFB-S" in payload:
+                            if payload["clamp_MFB-S"] == False:
+                                self.nido_MFBS = "MFB-S:\n Habilitar"
+                                self.color_MFBS = "red"
+                        command = {
+                                    "lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                    else:
+                        self.nido_MFBS = ""
+                        self.color_MFBS = ""
+                        command = {
+                            "lbl_box10" : {"text": f"{self.nido_MFBS}", "color": f"{self.color_MFBS}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "MFB-E" in payload_str:
-                    if "MFB-E" in payload:
-                        if payload["MFB-E"] == True:
-                            self.nido_MFBE = "MFB-E:\n Habilitada"
-                            self.color_MFBE = "blue"
+                    
+                    #dependiendo del arnés cargado
+                    if "MFB-E" in self.model.input_data["database"]["modularity"]:
 
-                        if payload["MFB-E"] == False:
-                            self.nido_MFBE = ""
-                            self.color_MFBE = "blue"
+                        if "MFB-E" in payload:
+                            if payload["MFB-E"] == True:
+                                self.nido_MFBE = "MFB-E:\n Habilitada"
+                                self.color_MFBE = "blue"
 
-                    if "MFB-E_ERROR" in payload:
-                        if payload["MFB-E_ERROR"] == True:
-                            self.nido_MFBE = "MFB-E:\n clampeo incorrecto"
-                            self.color_MFBE = "red"
+                            if payload["MFB-E"] == False:
+                                self.nido_MFBE = "MFB-E:\n Habilitar"
+                                self.color_MFBE = "red"
 
-                    if "clamp_MFB-E" in payload:
-                        if payload["clamp_MFB-E"] == True:
-                            self.nido_MFBE = "MFB-E:\n clampeo correcto"
-                            self.color_MFBE = "green"
+                        if "MFB-E_ERROR" in payload:
+                            if payload["MFB-E_ERROR"] == True:
+                                self.nido_MFBE = "MFB-E:\n clamp incorrecto"
+                                self.color_MFBE = "red"
 
-                    if "clamp_MFB-E" in payload:
-                        if payload["clamp_MFB-E"] == False:
-                            self.nido_MFBE = ""
-                            self.color_MFBE = "blue"
-                    command = {
-                                "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}"}
-                              }
-                    self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        if "clamp_MFB-E" in payload:
+                            if payload["clamp_MFB-E"] == True:
+                                self.nido_MFBE = " MFB-E:\n clamp correcto"
+                                self.color_MFBE = "green"
+
+                        if "clamp_MFB-E" in payload:
+                            if payload["clamp_MFB-E"] == False:
+                                self.nido_MFBE = "MFB-E:\n Habilitar"
+                                self.color_MFBE = "red"
+                        command = {
+                                    "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                    else:
+                        self.nido_MFBE = ""
+                        self.color_MFBE = ""
+                        command = {
+                            "lbl_box11" : {"text": f"{self.nido_MFBE}", "color": f"{self.color_MFBE}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
                         if payload["ERROR_cortina"] == True:
@@ -652,12 +856,17 @@ class MqttClient (QObject):
                     if "position_reached" in payload["response"]:
                         self.rbt_pose.emit()
 
-                    if "home_reached" in payload["response"]:
-                        self.rbt_home.emit()
-
                     #if "Error, is Safety OK?" in payload["response"]:
                     #    print("cortina interrumpida signal")
                     #    self.error_cortina.emit()
+
+                    if "home_reached" in payload["response"]:
+                        print("self.model.waiting_home = False")
+                        print("self.model.waiting_raffi_home = False")
+                        self.model.waiting_home = False
+                        self.model.waiting_raffi_home = False
+                        self.rbt_home.emit()
+
             #variable para guardar los resultados obtenidos al hacer una inspección con visycam desde la GDI
             if message.topic == self.model.sub_topics["vision"]:
 

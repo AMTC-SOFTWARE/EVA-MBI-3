@@ -12,9 +12,23 @@ import json
 from toolkit.admin.view import admin
 from toolkit.admin.model import Model
 
-from gui.view import PopOut
+from PyQt5.QtWidgets import QDialog, QMainWindow, QPushButton, QMessageBox, QLineEdit, QAction, QTableWidgetItem
 
 #from toolkit.plugins.rework import Rework
+
+class PopOut (QMessageBox):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setIcon(QMessageBox.Information)
+        self.setStandardButtons(QMessageBox.Ok)
+        self.button(QMessageBox.Ok).setVisible(False)
+
+    def closeEvent(self, event):
+        event.ignore() 
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            print("Escape key was pressed")
 
 
 class Admin (QDialog):
