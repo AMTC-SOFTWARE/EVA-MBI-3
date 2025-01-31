@@ -123,6 +123,12 @@ class MainWindow (QMainWindow):
         self.ui.lbl_box9.clicked.connect(lambda: self.raffi_activation("MFB-P1"))
         self.ui.lbl_box10.clicked.connect(lambda: self.raffi_activation("MFB-S"))
         self.ui.lbl_box11.clicked.connect(lambda: self.raffi_activation("MFB-E"))
+        self.ui.lbl_box12.clicked.connect(lambda: self.raffi_activation("PDC-S9"))
+        self.ui.lbl_box13.clicked.connect(lambda: self.raffi_activation("PDC-S19"))
+        self.ui.lbl_box14.clicked.connect(lambda: self.raffi_activation("PDC-S20"))
+        self.ui.lbl_box15.clicked.connect(lambda: self.raffi_activation("PDC-S17"))
+        self.ui.lbl_box16.clicked.connect(lambda: self.raffi_activation("PDC-S21"))
+        self.ui.lbl_box17.clicked.connect(lambda: self.raffi_activation("F96-1"))
         
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.status)
@@ -158,25 +164,43 @@ class MainWindow (QMainWindow):
             self.ui.lbl_box_4movie.start()
         elif box == "TBLU":
             self.ui.lbl_box5.setIcon(QtGui.QIcon(self.ui.lbl_box_5movie.currentPixmap()))
-            self.ui.lbl_box_5movie.start()  
+            self.ui.lbl_box_5movie.start()
         elif box == "PDC-P2":
             self.ui.lbl_box6.setIcon(QtGui.QIcon(self.ui.lbl_box_6movie.currentPixmap()))
-            self.ui.lbl_box_6movie.start() 
+            self.ui.lbl_box_6movie.start()
+        elif box == "F96-1":
+            self.ui.lbl_box17.setIcon(QtGui.QIcon(self.ui.lbl_box_17movie.currentPixmap()))
+            self.ui.lbl_box_17movie.start()
         elif box == "F96":
             self.ui.lbl_box7.setIcon(QtGui.QIcon(self.ui.lbl_box_7movie.currentPixmap()))
-            self.ui.lbl_box_7movie.start() 
+            self.ui.lbl_box_7movie.start()
         elif box == "MFB-P2":
             self.ui.lbl_box8.setIcon(QtGui.QIcon(self.ui.lbl_box_8movie.currentPixmap()))
             self.ui.lbl_box_8movie.start()
         elif box == "MFB-P1":
             self.ui.lbl_box9.setIcon(QtGui.QIcon(self.ui.lbl_box_9movie.currentPixmap()))
-            self.ui.lbl_box_9movie.start() 
+            self.ui.lbl_box_9movie.start()
         elif box == "MFB-S":
             self.ui.lbl_box10.setIcon(QtGui.QIcon(self.ui.lbl_box_10movie.currentPixmap()))
-            self.ui.lbl_box_10movie.start() 
+            self.ui.lbl_box_10movie.start()
         elif box == "MFB-E":
             self.ui.lbl_box11.setIcon(QtGui.QIcon(self.ui.lbl_box_11movie.currentPixmap()))
-            self.ui.lbl_box_11movie.start()      
+            self.ui.lbl_box_11movie.start()
+        elif box == "PDC-S9":
+            self.ui.lbl_box12.setIcon(QtGui.QIcon(self.ui.lbl_box_12movie.currentPixmap()))
+            self.ui.lbl_box_12movie.start()
+        elif box == "PDC-S19":
+            self.ui.lbl_box13.setIcon(QtGui.QIcon(self.ui.lbl_box_13movie.currentPixmap()))
+            self.ui.lbl_box_13movie.start()
+        elif box == "PDC-S20":
+            self.ui.lbl_box14.setIcon(QtGui.QIcon(self.ui.lbl_box_14movie.currentPixmap()))
+            self.ui.lbl_box_14movie.start()
+        elif box == "PDC-S17":
+            self.ui.lbl_box15.setIcon(QtGui.QIcon(self.ui.lbl_box_15movie.currentPixmap()))
+            self.ui.lbl_box_15movie.start()
+        elif box == "PDC-S21":
+            self.ui.lbl_box16.setIcon(QtGui.QIcon(self.ui.lbl_box_16movie.currentPixmap()))
+            self.ui.lbl_box_16movie.start()
            
     #Función para detener la animación del gif
     def stop_raffi_animation(self, box):
@@ -201,25 +225,43 @@ class MainWindow (QMainWindow):
             self.ui.lbl_box_4movie.stop()
         elif box == "TBLU":
             self.ui.lbl_box5.setIcon(QtGui.QIcon())
-            self.ui.lbl_box_5movie.stop()  
+            self.ui.lbl_box_5movie.stop()
         elif box == "PDC-P2":
             self.ui.lbl_box6.setIcon(QtGui.QIcon())
-            self.ui.lbl_box_6movie.stop() 
+            self.ui.lbl_box_6movie.stop()
+        elif box == "F96-1":
+            self.ui.lbl_box17.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_17movie.stop()
         elif box == "F96":
             self.ui.lbl_box7.setIcon(QtGui.QIcon())
-            self.ui.lbl_box_7movie.stop() 
+            self.ui.lbl_box_7movie.stop()
         elif box == "MFB-P2":
             self.ui.lbl_box8.setIcon(QtGui.QIcon())
             self.ui.lbl_box_8movie.stop()
         elif box == "MFB-P1":
             self.ui.lbl_box9.setIcon(QtGui.QIcon())
-            self.ui.lbl_box_9movie.stop() 
+            self.ui.lbl_box_9movie.stop()
         elif box == "MFB-S":
             self.ui.lbl_box10.setIcon(QtGui.QIcon())
-            self.ui.lbl_box_10movie.stop() 
+            self.ui.lbl_box_10movie.stop()
         elif box == "MFB-E":
             self.ui.lbl_box11.setIcon(QtGui.QIcon())
-            self.ui.lbl_box_11movie.stop()  
+            self.ui.lbl_box_11movie.stop()
+        elif box == "PDC-S9":
+            self.ui.lbl_box12.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_12movie.stop()
+        elif box == "PDC-S19":
+            self.ui.lbl_box13.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_13movie.stop()
+        elif box == "PDC-S20":
+            self.ui.lbl_box14.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_14movie.stop()
+        elif box == "PDC-S17":
+            self.ui.lbl_box15.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_15movie.stop()
+        elif box == "PDC-S21":
+            self.ui.lbl_box16.setIcon(QtGui.QIcon())
+            self.ui.lbl_box_16movie.stop()
         
     def start_robot(self):
         print("EJECUTANDO START_ROBOT DESDE GUI.VIEW")
@@ -265,12 +307,15 @@ class MainWindow (QMainWindow):
             return
 
         #Se guarda una lista con cada texto contenido de los botones que se llenan al momento de escanear el ARNÉS
-        text_buttons = [self.ui.lbl_box0.text(), self.ui.lbl_box1.text(), 
-                        self.ui.lbl_box2.text(), self.ui.lbl_box3.text(), 
-                        self.ui.lbl_box4.text(), self.ui.lbl_box5.text(),
-                        self.ui.lbl_box6.text(), self.ui.lbl_box7.text(), 
-                        self.ui.lbl_box8.text(), self.ui.lbl_box9.text(), 
-                        self.ui.lbl_box10.text(), self.ui.lbl_box11.text()]
+        text_buttons = [self.ui.lbl_box0.text(),  self.ui.lbl_box8.text(),
+                        self.ui.lbl_box1.text(),  self.ui.lbl_box9.text(),
+                        self.ui.lbl_box2.text(),  self.ui.lbl_box10.text(),
+                        self.ui.lbl_box3.text(),  self.ui.lbl_box11.text(),
+                        self.ui.lbl_box4.text(),  self.ui.lbl_box12.text(),
+                        self.ui.lbl_box5.text(),  self.ui.lbl_box13.text(),
+                        self.ui.lbl_box6.text(),  self.ui.lbl_box14.text(),
+                        self.ui.lbl_box7.text(),  self.ui.lbl_box15.text(),
+                        self.ui.lbl_box17.text(), self.ui.lbl_box16.text()]
         
         print("Texto actual de los lbl:\n",text_buttons," \n")
  
@@ -750,6 +795,10 @@ class MainWindow (QMainWindow):
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("TBLU")
 
+                        elif "F96-1" in self.model.cajas_raffi:
+                            print("Llamando a la funcion raffi_activation para desclampear caja...")
+                            self.raffi_activation("F96-1")
+
                         elif "F96" in self.model.cajas_raffi:
                             print("Llamando a la funcion raffi_activation para desclampear caja...")
                             self.raffi_activation("F96")
@@ -802,15 +851,23 @@ class MainWindow (QMainWindow):
                     self.ui.lbl_info3.setStyleSheet("color: " + message["lbl_info3"]["color"])
             if "lbl_info4" in message:
                 self.ui.lbl_info4.setText(message["lbl_info4"]["text"])
+                styles = []
                 if "color" in message["lbl_info4"]:
-                    self.ui.lbl_info4.setStyleSheet("color: " + message["lbl_info4"]["color"])
+                    styles.append("color: " + message["lbl_info4"]["color"])
+                if "background-color" in message["lbl_info4"]:
+                    styles.append("background-color: " + message["lbl_info4"]["background-color"])
+                if "border-radius" in message["lbl_info4"]:
+                    styles.append("border-radius: " + message["lbl_info4"]["border-radius"] + "px")
+                self.ui.lbl_info4.setStyleSheet("; ".join(styles))
+
                 if "ancho" in message["lbl_info4"]:
                     if "alto" in message["lbl_info4"]:
+
                         ancho = int(message["lbl_info4"]["ancho"])
                         alto = int(message["lbl_info4"]["alto"])
-                        #self.ui.lbl_info4.setMinimumSize(QSize(ancho, alto))
+
                         #self.ui.lbl_info4.setMaximumSize(QSize(ancho, alto))
-                        print("función ancho y alto en lbl_info4 deshabilitada")
+                        self.ui.lbl_info4.setMinimumSize(QSize(ancho, alto))
             if "lbl_nuts" in message:
                 self.ui.lbl_nuts.setText(message["lbl_nuts"]["text"])
                 if "color" in message["lbl_nuts"]:
@@ -923,6 +980,48 @@ class MainWindow (QMainWindow):
                     self.ui.lbl_box11.setStyleSheet("color: " + message["lbl_box11"]["color"])
                 if "hidden" in message["lbl_box11"]:
                     self.ui.lbl_box11.setHidden(message["lbl_box11"]["hidden"])
+            if "lbl_box12" in message: #PDCS9
+                self.ui.lbl_box12.setText(message["lbl_box12"]["text"])
+                if "color" in message["lbl_box12"]:
+                    self.ui.lbl_box12.setStyleSheet("color: " + message["lbl_box12"]["color"])
+                if "hidden" in message["lbl_box12"]:
+                    self.ui.lbl_box12.setHidden(message["lbl_box12"]["hidden"])    
+            if "lbl_box13" in message: #PDCS19
+                self.ui.lbl_box13.setText(message["lbl_box13"]["text"])
+                if "color" in message["lbl_box13"]:
+                    self.ui.lbl_box13.setStyleSheet("color: " + message["lbl_box13"]["color"])
+                if "hidden" in message["lbl_box13"]:
+                    self.ui.lbl_box13.setHidden(message["lbl_box13"]["hidden"])
+            if "lbl_box14" in message: #PDCS20
+                self.ui.lbl_box14.setText(message["lbl_box14"]["text"])
+                if "color" in message["lbl_box14"]:
+                    self.ui.lbl_box14.setStyleSheet("color: " + message["lbl_box14"]["color"])
+                if "hidden" in message["lbl_box14"]:
+                    self.ui.lbl_box14.setHidden(message["lbl_box14"]["hidden"])  
+            if "lbl_box15" in message: #PDCS17
+                self.ui.lbl_box15.setText(message["lbl_box15"]["text"])
+                if "color" in message["lbl_box15"]:
+                    self.ui.lbl_box15.setStyleSheet("color: " + message["lbl_box15"]["color"])
+                if "hidden" in message["lbl_box15"]:
+                    self.ui.lbl_box15.setHidden(message["lbl_box15"]["hidden"]) 
+            if "lbl_box16" in message: #PDCS21
+                self.ui.lbl_box16.setText(message["lbl_box16"]["text"])
+                if "color" in message["lbl_box16"]:
+                    self.ui.lbl_box16.setStyleSheet("color: " + message["lbl_box16"]["color"])
+                if "hidden" in message["lbl_box16"]:
+                    self.ui.lbl_box16.setHidden(message["lbl_box16"]["hidden"])
+            if "lbl_box17" in message: #F961
+                self.ui.lbl_box17.setText(message["lbl_box17"]["text"])
+                if "color" in message["lbl_box17"]:
+                    self.ui.lbl_box17.setStyleSheet("color: " + message["lbl_box17"]["color"])
+                if "hidden" in message["lbl_box17"]:
+                    self.ui.lbl_box17.setHidden(message["lbl_box17"]["hidden"]) 
+            if "lbl_box18" in message: #LIBRE
+                self.ui.lbl_box18.setText(message["lbl_box18"]["text"])
+                if "color" in message["lbl_box18"]:
+                    self.ui.lbl_box18.setStyleSheet("color: " + message["lbl_box18"]["color"])
+                if "hidden" in message["lbl_box18"]:
+                    self.ui.lbl_box18.setHidden(message["lbl_box18"]["hidden"])
             ###########################################################################
             if "lbl_result" in message:
                 self.ui.lbl_result.setText(message["lbl_result"]["text"])
@@ -1177,11 +1276,6 @@ class PopOut (QMessageBox):
         self.setStandardButtons(QMessageBox.Ok)
         self.button(QMessageBox.Ok).setVisible(False)
         
-        self.setStyleSheet("QPushButton { font-size: 20px; }"
-                           "QLabel { color : red; font-size: 40px; font-weight: bold; }"
-                           )
-        
-
         self.setStyleSheet("QPushButton { font-size: 20px; }"
                            "QLabel { color : red; font-size: 40px; font-weight: bold; }"
                            )

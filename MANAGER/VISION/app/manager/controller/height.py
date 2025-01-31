@@ -490,20 +490,27 @@ class Pose(QState):
             print("CAJA TERMINADA, ELIMINANDO TAREA DE MODULARITY: ", box)
             
             labels = {
-                "PDC-Dbracket" : {"lbl_box0" : {"text": "", "color": "darkgray", "hidden": True}},
-                "PDC-D" : {"lbl_box1" : {"text": "", "color": "darkgray", "hidden": True}},                    
-                "PDC-P" : {"lbl_box2" : {"text": "", "color": "darkgray", "hidden": True}},
-                "PDC-R" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                  
-                "PDC-RMID" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                    
-                "PDC-S" : {"lbl_box4" : {"text": "", "color": "darkgray", "hidden": True}},                   
-                "TBLU" : {"lbl_box5" : {"text": "", "color": "darkgray", "hidden": True}},                   
-                "PDC-P2" : {"lbl_box6" : {"text": "", "color": "darkgray", "hidden": True}},                   
-                "F96" : {"lbl_box7" : {"text": "", "color": "darkgray", "hidden": True}},                   
-                "MFB-P2" : {"lbl_box8" : {"text": "", "color": "darkgray", "hidden": True}},                   
-                "MFB-P1" : {"lbl_box9" : {"text": "", "color": "darkgray", "hidden": True}},                   
-                "MFB-S" : {"lbl_box10" : {"text": "", "color": "darkgray", "hidden": True}},                   
-                "MFB-E" : {"lbl_box11" : {"text": "", "color": "darkgray", "hidden": True}}                   
-            }
+            "PDC-Dbracket" : {"lbl_box0" : {"text": "", "color": "darkgray", "hidden": True}},
+            "PDC-D" : {"lbl_box1" : {"text": "", "color": "darkgray", "hidden": True}},                    
+            "PDC-P" : {"lbl_box2" : {"text": "", "color": "darkgray", "hidden": True}},                    
+            "PDC-RMID" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "PDC-RS" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "PDC-R" : {"lbl_box3" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "PDC-S" : {"lbl_box4" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "TBLU" : {"lbl_box5" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "PDC-P2" : {"lbl_box6" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "F96" : {"lbl_box7" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "F96-1" : {"lbl_box17" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "MFB-P2" : {"lbl_box8" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "MFB-P1" : {"lbl_box9" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "MFB-S" : {"lbl_box10" : {"text": "", "color": "darkgray", "hidden": True}},                   
+            "MFB-E" : {"lbl_box11" : {"text": "", "color": "darkgray", "hidden": True}},
+            "PDC-S9" : {"lbl_box12" : {"text": "", "color": "darkgray", "hidden": True}},
+            "PDC-S19" : {"lbl_box13" : {"text": "", "color": "darkgray", "hidden": True}},
+            "PDC-S20" : {"lbl_box14" : {"text": "", "color": "darkgray", "hidden": True}},
+            "PDC-S17" : {"lbl_box15" : {"text": "", "color": "darkgray", "hidden": True}},
+            "PDC-S21" : {"lbl_box16" : {"text": "", "color": "darkgray", "hidden": True}},
+        }
             
             """
                 *** Remover el label de la pantalla cuando termine de inspeccionar la vision y alturas ***

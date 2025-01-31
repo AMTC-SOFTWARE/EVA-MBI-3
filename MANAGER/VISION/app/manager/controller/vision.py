@@ -576,11 +576,11 @@ class Pose(QState):
 
 
             if current_trig == self.model.rv_F96_trigger:
-                    self.model.vision_data["img"] = imread(self.model.imgs_path + "boxes/" + "F96_box" + ".jpg")
+                    self.model.vision_data["img"] = imread(self.model.imgs_path + "boxes/" + "F96" + ".jpg")
                     command = {
                         "lbl_result" : {"text": "Procesando vision en " +box, "color": "green"},
                         "lbl_steps" : {"text": "Por favor espere", "color": "black"},
-                        "img_center" : "boxes/" + "F96_box" + ".jpg"
+                        "img_center" : "boxes/" + "F96" + ".jpg"
                     }
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             

@@ -134,18 +134,25 @@ class Startup(QState):
             "lbl_info4" : {"text": "", "color": "black"},
             "lbl_nuts"  : {"text": "", "color": "black"},
             ##############################################
-            "lbl_box0"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box1"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box2"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box3"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box4"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box5"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box6"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box7"  : {"text": "", "color": "black", "hidden": True}, ######### Modificación para F96 #########
-            "lbl_box8"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box9"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box10"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box11"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box0"  : {"text": "PDC-Dbracket", "color": "black", "hidden": True},
+            "lbl_box1"  : {"text": "PDC-D", "color": "black", "hidden": True},
+            "lbl_box2"  : {"text": "PDC-P", "color": "black", "hidden": True},
+            "lbl_box3"  : {"text": "PDC-R", "color": "black", "hidden": True},
+            "lbl_box4"  : {"text": "PDC-S", "color": "black", "hidden": True},
+            "lbl_box5"  : {"text": "TBLU", "color": "black", "hidden": True},
+            "lbl_box6"  : {"text": "PDC-P2", "color": "black", "hidden": True},
+            "lbl_box7"  : {"text": "F96", "color": "black", "hidden": True},
+            "lbl_box8"  : {"text": "MFB-P2", "color": "black", "hidden": True},
+            "lbl_box9"  : {"text": "MFB-P1", "color": "black", "hidden": True},
+            "lbl_box10"  : {"text": "MFB-S", "color": "black", "hidden": True},
+            "lbl_box11"  : {"text": "MFB-E", "color": "black", "hidden": True},
+            "lbl_box12"  : {"text": "PDC-S9", "color": "black", "hidden": True},
+            "lbl_box13"  : {"text": "PDC-S19", "color": "black", "hidden": True},
+            "lbl_box14"  : {"text": "PDC-S20", "color": "black", "hidden": True},
+            "lbl_box15"  : {"text": "PDC-S17", "color": "black", "hidden": True},
+            "lbl_box16"  : {"text": "PDC-S21", "color": "black", "hidden": True},
+            "lbl_box17"  : {"text": "F96-1", "color": "black", "hidden": True},
+            "lbl_box18"  : {"text": "", "color": "black","hidden": True},
             ##############################################
             "lbl_result" : {"text": "Se requiere un login para continuar", "color": "green"},
             "lbl_steps" : {"text": "Ingresa tu código de acceso", "color": "black"},
@@ -296,11 +303,18 @@ class StartCycle (QState):
             "lbl_box4"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box5"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box6"  : {"text": "", "color": "black", "hidden": True},
-            "lbl_box7"  : {"text": "", "color": "black", "hidden": True}, ######### Modificación para F96 #########
+            "lbl_box7"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box8"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box9"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box10"  : {"text": "", "color": "black", "hidden": True},
             "lbl_box11"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box12"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box13"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box14"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box15"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box16"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box17"  : {"text": "", "color": "black", "hidden": True},
+            "lbl_box18"  : {"text": "", "color": "black", "hidden": True},
             #############################################
             "lbl_result" : {"text": "Nuevo ciclo iniciado", "color": "green"},
             "lbl_steps" : {"text": "Escanea el numero HM", "color": "black"},
@@ -1366,7 +1380,7 @@ class CheckQr (QState):
                 self.model.valores_torques_red = False
 
                 #Si la Trazabilidad está DESACTIVADA, permitirá continuar con el ciclo pero al imprimir la etiqueta, los valores de los torques dirán "NoResults"
-                results = ["PDC-R","PDC-D","PDC-P","BATTERY","BATTERY-2","MFB-P1","MFB-P2"]
+                results = ["PDC-R","PDC-D","PDC-P","BATTERY","BATTERY-2","MFB-P1","MFB-P2","MFB-S2"]
                 print("Results predeterminados por ausencia de resultados: ",results)
                 lbl = {}
                 for i in results:
@@ -1437,7 +1451,7 @@ class CheckQr (QState):
                         print("No se encontraron valores en el arnés por lo tanto, se generarán los torques a inspeccionar desde db local, self.model.valores_torques_red = False")
                         self.model.valores_torques_red = False
 
-                        results = ["PDC-R","PDC-D","PDC-P","BATTERY","BATTERY-2","MFB-P1","MFB-P2"]
+                        results = ["PDC-R","PDC-D","PDC-P","BATTERY","BATTERY-2","MFB-P1","MFB-P2","MFB-S2"]
                         print("Results predeterminados por ausencia de resultados: ",results)
                         lbl = {}
                         for i in results:
@@ -1696,10 +1710,16 @@ class EnableClamps (QState):
             "TBLU" : {"lbl_box5" : {"text": "TBLU", "color": "darkgray", "hidden": False}},                   
             "PDC-P2" : {"lbl_box6" : {"text": "PDC-P2", "color": "darkgray", "hidden": False}},                   
             "F96" : {"lbl_box7" : {"text": "F96", "color": "darkgray", "hidden": False}},                   
+            "F96-1" : {"lbl_box17" : {"text": "F96-1", "color": "darkgray", "hidden": False}},                   
             "MFB-P2" : {"lbl_box8" : {"text": "MFB-P2", "color": "darkgray", "hidden": False}},                   
             "MFB-P1" : {"lbl_box9" : {"text": "MFB-P1", "color": "darkgray", "hidden": False}},                   
             "MFB-S" : {"lbl_box10" : {"text": "MFB-S", "color": "darkgray", "hidden": False}},                   
-            "MFB-E" : {"lbl_box11" : {"text": "MFB-E", "color": "darkgray", "hidden": False}}                   
+            "MFB-E" : {"lbl_box11" : {"text": "MFB-E", "color": "darkgray", "hidden": False}},
+            "PDC-S9" : {"lbl_box12" : {"text": "PDC-S9", "color": "darkgray", "hidden": False}},
+            "PDC-S19" : {"lbl_box13" : {"text": "PDC-S19", "color": "darkgray", "hidden": False}},
+            "PDC-S20" : {"lbl_box14" : {"text": "PDC-S20", "color": "darkgray", "hidden": False}},
+            "PDC-S17" : {"lbl_box15" : {"text": "PDC-S17", "color": "darkgray", "hidden": False}},
+            "PDC-S21" : {"lbl_box16" : {"text": "PDC-S21", "color": "darkgray", "hidden": False}},
         }
         
         #Iteramnos la key que en este caso es la caja y el valor que seria los lbl
