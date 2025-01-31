@@ -34,50 +34,50 @@ class MqttClient (QObject):
     
     #error_cortina   =   pyqtSignal()
 
-    nido_PDCDB = ""
-    nido_PDCD = ""
-    nido_PDCP = ""
-    nido_PDCR = ""
-    nido_PDCS = ""
-    nido_TBLU = ""
-    nido_PDCP2 = ""
-    nido_F96 = ""
-    nido_MFBP2 = ""
-    nido_MFBP1 = ""
-    nido_MFBS = ""
-    nido_MFBE = ""
-
-    color_PDCDB = "blue"
-    color_PDCD = "blue"
-    color_PDCP = "blue"
-    color_PDCR = "blue"
-    color_PDCS = "blue"
-    color_TBLU = "blue"
-    color_PDCP2 = "blue"
-    color_F96 = "blue"
-    color_MFBP2 = "blue"
-    color_MFBP1 = "blue"
-    color_MFBS  = "blue"
-    color_MFBE  = "blue"
-
-    puertaA = ""
-    puertaB = ""
-    puertaC = ""
-
-    cortina = ""
-
-    plural = ""
-    plural2 = ""
-
-    modbusIO = ""
-    modbusRA = ""
-    modbusRB = ""
-
     def __init__(self, model = None, parent = None):
         super().__init__(parent)
         self.model = model
         self.client = Client()
         #QTimer.singleShot(100, self.setup)
+
+        self.nido_PDCDB = ""
+        self.nido_PDCD = ""
+        self.nido_PDCP = ""
+        self.nido_PDCR = ""
+        self.nido_PDCS = ""
+        self.nido_PDCS9 = ""
+        self.nido_PDCS19 = ""
+        self.nido_PDCS20 = ""
+        self.nido_PDCS21 = ""
+        self.nido_PDCS17 = ""
+        self.nido_TBLU = ""
+        self.nido_PDCP2 = ""
+        self.nido_F96 = ""
+        self.nido_F96_1 = ""
+        self.nido_MFBP2 = ""
+        self.nido_MFBP1 = ""
+        self.nido_MFBS = ""
+        self.nido_MFBE = ""
+
+        self.color_PDCDB = "blue"
+        self.color_PDCD = "blue"
+        self.color_PDCP = "blue"
+        self.color_PDCR = "blue"
+        self.color_PDCS = "blue"
+        self.color_PDCS9 = "blue"
+        self.color_PDCS19 = "blue"
+        self.color_PDCS20 = "blue"
+        self.color_PDCS21 = "blue"
+        self.color_PDCS17 = "blue"
+        self.color_TBLU = "blue"
+        self.color_PDCP2 = "blue"
+        self.color_F96 = "blue"
+        self.color_F96_1 = "blue"
+        self.color_MFBP2 = "blue"
+        self.color_MFBP1 = "blue"
+        self.color_MFBS  = "blue"
+        self.color_MFBS2  = "blue"
+        self.color_MFBE  = "blue"
 
     def setup(self):
         try:
@@ -582,7 +582,47 @@ class MqttClient (QObject):
                             "lbl_box5" : {"text": f"{self.nido_TBLU}", "color": f"{self.color_TBLU}", "hidden" : True}
                             }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                
+               
+                if "F96-1" in payload_str:
+                    
+                    #dependiendo del arnés cargado
+                    if "F96-1" in self.model.input_data["database"]["modularity"]:
+
+                        if "F96-1" in payload:
+                            if payload["F96-1"] == True:
+                                self.nido_F96_1 = "F96-1:\n Habilitada"
+                                self.color_F96_1 = "blue"
+
+                            if payload["F96-1"] == False:
+                                self.nido_F96_1 = "F96-1:\n Habilitar"
+                                self.color_F96_1 = "red"
+
+                        if "F96-1_ERROR" in payload:
+                            if payload["F96-1_ERROR"] == True:
+                                self.nido_F96_1 = "F96:\n clamp incorrecto"
+                                self.color_F96_1 = "red"
+                        if "clamp_F96-1" in payload:
+                            if payload["clamp_F96-1"] == True:
+                                self.nido_F96_1 = " F96-1:\n clamp correcto"
+                                self.color_F96_1 = "green"
+                            else:
+                                self.nido_F96_1 = "F96-1:\n Habilitar"
+                                self.color_F96_1 = "red"
+
+
+                        command = {
+                                    "lbl_box17" : {"text": f"{self.nido_F96_1}", "color": f"{self.color_F96_1}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        
+                    else:
+                        self.nido_F96_1 = ""
+                        self.color_F96_1 = ""
+                        command = {
+                            "lbl_box17" : {"text": f"{self.nido_F96_1}", "color": f"{self.color_F96_1}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "F96" in payload_str:
                     
                     #dependiendo del arnés cargado
@@ -705,6 +745,48 @@ class MqttClient (QObject):
                             }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
+                #Un arnés no puede llevar ambas cajas "MFB-P1" y "MFB-S2"
+                if "MFB-S2" in payload_str:
+                    
+                    #dependiendo del arnés cargado
+                    if "MFB-S2" in self.model.input_data["database"]["modularity"]:
+
+                        if "MFB-S2" in payload:
+                            if payload["MFB-S2"] == True:
+                                self.nido_MFBP1 = "MFB-S2:\n Habilitada"
+                                self.color_MFBP1 = "blue"
+
+                            if payload["MFB-S2"] == False:
+                                self.nido_MFBP1 = "MFB-S2:\n Habilitar"
+                                self.color_MFBP1 = "red"
+
+                        if "MFB-S2_ERROR" in payload:
+                            if payload["MFB-S2_ERROR"] == True:
+                                self.nido_MFBP1 = "MFB-S2:\n clamp incorrecto"
+                                self.color_MFBP1 = "red"
+
+                        if "clamp_MFB-S2" in payload:
+                            if payload["clamp_MFB-S2"] == True:
+                                self.nido_MFBP1 = " MFB-S2:\n clamp correcto"
+                                self.color_MFBP1 = "green"
+
+                        if "clamp_MFB-S2" in payload:
+                            if payload["clamp_MFB-S2"] == False:
+                                self.nido_MFBP1 = "MFB-S2:\n Habilitar"
+                                self.color_MFBP1 = "red"
+                        command = {
+                                    "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
+                    else:
+                        self.nido_MFBP1 = ""
+                        self.color_MFBP1 = ""
+                        command = {
+                            "lbl_box9" : {"text": f"{self.nido_MFBP1}", "color": f"{self.color_MFBP1}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+
                 if "MFB-S" in payload_str:
                     
                     #dependiendo del arnés cargado
@@ -787,11 +869,198 @@ class MqttClient (QObject):
                             }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
+                if "PDC-S9" in payload_str:
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-S9" in self.model.input_data["database"]["modularity"]:
+
+                        if "PDC-S9" in payload:
+                            if payload["PDC-S9"] == True:
+                                self.nido_PDCS9 = "PDC-S9:\n Habilitada"
+                                self.color_PDCS9 = "blue"
+
+                            if payload["PDC-S9"] == False:
+                                self.nido_PDCS9 = "PDC-S9:\n Habilitar"
+                                self.color_PDCS9 = "red"
+
+                        if "clamp_PDC-S9" in payload:
+                            if payload["clamp_PDC-S9"] == True:
+                                self.nido_PDCS9 = "PDC-S9:\n clamp correcto"
+                                self.color_PDCS9 = "green"
+                                            
+                        if "clamp_PDC-S9" in payload:
+                            if payload["clamp_PDC-S9"] == False:
+                                self.nido_PDCS9 = "PDC-S9:\n Habilitar"
+                                self.color_PDCS9 = "red"
+
+
+                        command = {
+                                    "lbl_box12" : {"text": f"{self.nido_PDCS9}", "color": f"{self.color_PDCS9}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_PDCS9 = ""
+                        self.color_PDCS9 = ""
+                        command = {
+                            "lbl_box12" : {"text": f"{self.nido_PDCS9}", "color": f"{self.color_PDCS9}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
+                if "PDC-S19" in payload_str:
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-S19" in self.model.input_data["database"]["modularity"]:
+
+                        if "PDC-S19" in payload:
+                            if payload["PDC-S19"] == True:
+                                self.nido_PDCS19 = "PDC-S19:\n Habilitada"
+                                self.color_PDCS19 = "blue"
+
+                            if payload["PDC-S19"] == False:
+                                self.nido_PDCS19 = "PDC-S19:\n Habilitar"
+                                self.color_PDCS19 = "red"
+
+                        if "clamp_PDC-S19" in payload:
+                            if payload["clamp_PDC-S19"] == True:
+                                self.nido_PDCS19 = "PDC-S19:\n clamp correcto"
+                                self.color_PDCS19 = "green"
+                                            
+                        if "clamp_PDC-S19" in payload:
+                            if payload["clamp_PDC-S19"] == False:
+                                self.nido_PDCS19 = "PDC-S19:\n Habilitar"
+                                self.color_PDCS19 = "red"
+
+
+                        command = {
+                                    "lbl_box13" : {"text": f"{self.nido_PDCS19}", "color": f"{self.color_PDCS19}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_PDCS19 = ""
+                        self.color_PDCS19 = ""
+                        command = {
+                            "lbl_box13" : {"text": f"{self.nido_PDCS19}", "color": f"{self.color_PDCS19}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
+                if "PDC-S20" in payload_str:
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-S20" in self.model.input_data["database"]["modularity"]:
+
+                        if "PDC-S20" in payload:
+                            if payload["PDC-S20"] == True:
+                                self.nido_PDCS20 = "PDC-S20:\n Habilitada"
+                                self.color_PDCS20 = "blue"
+
+                            if payload["PDC-S20"] == False:
+                                self.nido_PDCS20 = "PDC-S20:\n Habilitar"
+                                self.color_PDCS20 = "red"
+
+                        if "clamp_PDC-S20" in payload:
+                            if payload["clamp_PDC-S20"] == True:
+                                self.nido_PDCS20 = "PDC-S20:\n clamp correcto"
+                                self.color_PDCS20 = "green"
+                                            
+                        if "clamp_PDC-S20" in payload:
+                            if payload["clamp_PDC-S20"] == False:
+                                self.nido_PDCS20 = "PDC-S20:\n Habilitar"
+                                self.color_PDCS20 = "red"
+
+
+                        command = {
+                                    "lbl_box14" : {"text": f"{self.nido_PDCS20}", "color": f"{self.color_PDCS20}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_PDCS20 = ""
+                        self.color_PDCS20 = ""
+                        command = {
+                            "lbl_box14" : {"text": f"{self.nido_PDCS20}", "color": f"{self.color_PDCS20}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
+                if "PDC-S17" in payload_str:
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-S17" in self.model.input_data["database"]["modularity"]:
+
+                        if "PDC-S17" in payload:
+                            if payload["PDC-S17"] == True:
+                                self.nido_PDCS17 = "PDC-S17:\n Habilitada"
+                                self.color_PDCS17 = "blue"
+
+                            if payload["PDC-S17"] == False:
+                                self.nido_PDCS17 = "PDC-S17:\n Habilitar"
+                                self.color_PDCS17 = "red"
+
+                        if "clamp_PDC-S17" in payload:
+                            if payload["clamp_PDC-S17"] == True:
+                                self.nido_PDCS17 = "PDC-S17:\n clamp correcto"
+                                self.color_PDCS17 = "green"
+                                            
+                        if "clamp_PDC-S17" in payload:
+                            if payload["clamp_PDC-S17"] == False:
+                                self.nido_PDCS17 = "PDC-S17:\n Habilitar"
+                                self.color_PDCS17 = "red"
+
+
+                        command = {
+                                    "lbl_box15" : {"text": f"{self.nido_PDCS17}", "color": f"{self.color_PDCS17}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_PDCS17 = ""
+                        self.color_PDCS17 = ""
+                        command = {
+                            "lbl_box15" : {"text": f"{self.nido_PDCS17}", "color": f"{self.color_PDCS17}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
+                if "PDC-S21" in payload_str:
+                    
+                    #dependiendo del arnés cargado
+                    if "PDC-S21" in self.model.input_data["database"]["modularity"]:
+
+                        if "PDC-S21" in payload:
+                            if payload["PDC-S21"] == True:
+                                self.nido_PDCS21 = "PDC-S21:\n Habilitada"
+                                self.color_PDCS21 = "blue"
+
+                            if payload["PDC-S21"] == False:
+                                self.nido_PDCS21 = "PDC-S21:\n Habilitar"
+                                self.color_PDCS21 = "red"
+
+                        if "clamp_PDC-S21" in payload:
+                            if payload["clamp_PDC-S21"] == True:
+                                self.nido_PDCS21 = "PDC-S21:\n clamp correcto"
+                                self.color_PDCS21 = "green"
+                                            
+                        if "clamp_PDC-S21" in payload:
+                            if payload["clamp_PDC-S21"] == False:
+                                self.nido_PDCS21 = "PDC-S21:\n Habilitar"
+                                self.color_PDCS21 = "red"
+
+
+                        command = {
+                                    "lbl_box16" : {"text": f"{self.nido_PDCS21}", "color": f"{self.color_PDCS21}", "hidden" : False}
+                                  }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                    else:
+                        self.nido_PDCS21 = ""
+                        self.color_PDCS21 = ""
+                        command = {
+                            "lbl_box16" : {"text": f"{self.nido_PDCS21}", "color": f"{self.color_PDCS21}", "hidden" : True}
+                            }
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                
+                
+
                 if "ERROR_cortina" in payload: # para payload, tiene que ser exactamente la llave del diccionario
                         if payload["ERROR_cortina"] == True:
-                            command = {"lbl_info4" : {"text": "Cortina\nInterrumpida", "color": "red", "ancho":400,"alto":400}}  
+                            command = {"lbl_info4" : {"text": "Cortina Interrumpida", "color": "black", "background-color": "rgba(255, 127, 114, 0.9)", "border-radius": "20",  "ancho":800,"alto":100}}  
                         if payload["ERROR_cortina"] == False:
-                            command = {"lbl_info4" : {"text": "", "color": "red", "ancho":10,"alto":10}}  
+                            command = {"lbl_info4" : {"text": "", "color": "red", "background-color": "none", "ancho":1,"alto":1}}  
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "revisando_resultado" in payload:
@@ -959,5 +1228,7 @@ if __name__ == "__main__":
     {"F447": "naranja", "F448": "vacio", "F449": "vacio"}
     F96:
     {"F96": "azul"}
+    S1:
+    {"1": "verde", "2": "vacio", "3": "beige", "4": "vacio", "5": "vacio", "6": "azul"}
 """
 ##################

@@ -77,14 +77,15 @@ class Model (QObject):
                         "MFB-P2":True,
                         "MFB-P1":True,
                         "MFB-S":True,
+                        "MFB-S2":True,
                         "MFB-E":False,
                     }
 
         #variable para buscar contenido de torque solamente en estas cajas
-        self.lista_cajas_torque = ["MFB-P2","MFB-P1","MFB-S","MFB-E"]
+        self.lista_cajas_torque = ["MFB-P2","MFB-P1","MFB-S", "MFB-S2", "MFB-E"]
 
         #variable para buscar contenido de fusibles solamente en estas cajas
-        self.lista_cajas_fusibles = ["PDC-R","PDC-RMID","PDC-RS","PDC-D","PDC-P","PDC-S","TBLU","F96"]
+        self.lista_cajas_fusibles = ["PDC-R","PDC-RMID","PDC-RS","PDC-D","PDC-P","PDC-S","PDC-S9","PDC-S19","PDC-S20","PDC-S17","PDC-S21","TBLU","F96","F96-1"]
 
         #variable para guardar toda la información de la configuración del arnés sin los fusibles vacíos
         self.arnes_data = {}
@@ -214,7 +215,7 @@ class Model (QObject):
                 "encoder_2": {"zone": "0"},
                 "encoder_3": {"zone": "0"},
                 "retry_btn": False,
-                "clamps": ["PDC-P", "PDC-D", "BATTERY", "MFB-P1", "MFB-S", "MFB-P2", "PDC-R"]}, # Debe inicializarce vacío
+                "clamps": []}, #Inicia vacío
             "torque":{
                 "tool1": {},
                 "tool2": {},
@@ -256,6 +257,9 @@ class Model (QObject):
                 'bracket': [(273, 304), (420, 447)]
                 },
             'F96':{
+                'F96': [(253, 337), (483, 425)]
+                },
+            'F96-1':{
                 'F96': [(253, 337), (483, 425)]
                 },
             'PDC-P': {
@@ -337,12 +341,36 @@ class Model (QObject):
                 '1': [(439, 218), (486, 392)], '2': [(494, 218), (540, 389)], '3': [(550, 218), (596, 387)], '4': [(607, 219), (653, 387)], 
                 '5': [(661, 218), (711, 382)], '6': [(719, 218), (763, 380)]
                 },
+            'PDC-S9': {
+                '1': [(439, 218), (486, 392)], '2': [(494, 218), (540, 389)], '3': [(550, 218), (596, 387)], '4': [(607, 219), (653, 387)], 
+                '5': [(661, 218), (711, 382)], '6': [(719, 218), (763, 380)]
+                },
+            'PDC-S19': {
+                '1': [(439, 218), (486, 392)], '2': [(494, 218), (540, 389)], '3': [(550, 218), (596, 387)], '4': [(607, 219), (653, 387)], 
+                '5': [(661, 218), (711, 382)], '6': [(719, 218), (763, 380)]
+                },
+            'PDC-S20': {
+                '1': [(439, 218), (486, 392)], '2': [(494, 218), (540, 389)], '3': [(550, 218), (596, 387)], '4': [(607, 219), (653, 387)], 
+                '5': [(661, 218), (711, 382)], '6': [(719, 218), (763, 380)]
+                },
+            'PDC-S21': {
+                '1': [(439, 218), (486, 392)], '2': [(494, 218), (540, 389)], '3': [(550, 218), (596, 387)], '4': [(607, 219), (653, 387)], 
+                '5': [(661, 218), (711, 382)], '6': [(719, 218), (763, 380)]
+                },
+            'PDC-S17': {
+                '1': [(439, 218), (486, 392)], '2': [(494, 218), (540, 389)], '3': [(550, 218), (596, 387)], '4': [(607, 219), (653, 387)], 
+                '5': [(661, 218), (711, 382)], '6': [(719, 218), (763, 380)]
+                },
             'TBLU': {
                 '9': [(79, 531), (117, 600)], '8': [(125, 532), (159, 599)], '7': [(167, 532), (207, 599)], '6': [(212, 532), (251, 600)], 
                 '5': [(257, 531), (296, 600)], '4': [(300, 530), (338, 601)], '3': [(347, 533), (385, 600)], '2': [(388, 531), (428, 598)], 
                 '1': [(435, 531), (472, 600)]
                 },
             'MFB-P1': {
+                'A41': [(533, 349), (575, 393)], 'A42': [(597, 389), (631, 421)], 'A43': [(479, 352), (513, 389)], 'A44': [(431, 354), (466, 386)], 
+                'A45': [(391, 356), (420, 384)], 'A46': [(334, 349), (373, 384)], 'A47': [(266, 352), (310, 388)]
+                },
+            'MFB-S2': {
                 'A41': [(533, 349), (575, 393)], 'A42': [(597, 389), (631, 421)], 'A43': [(479, 352), (513, 389)], 'A44': [(431, 354), (466, 386)], 
                 'A45': [(391, 356), (420, 384)], 'A46': [(334, 349), (373, 384)], 'A47': [(266, 352), (310, 388)]
                 },
@@ -354,7 +382,7 @@ class Model (QObject):
             'MFB-S': {
                 'A51': [(447, 265), (493, 311)], 'A52': [(315, 402), (357, 442)], 'A53': [(379, 410), (415, 444)], 'A54': [(430, 411), (464, 447)], 
                 'A55': [(478, 410), (513, 443)], 'A56': [(528, 409), (564, 441)]
-                }, 
+                },
             'MFB-E': {
                 'E1': [(1700, 650), (2250, 1250)], 'A1': [(2600, 1700), (3150, 2300)], 'A2': [(750, 1700), (1300, 2300)]
                 }
@@ -381,14 +409,21 @@ class Model (QObject):
             "PDC-P": ["P1"],
             "PDC-D": ["D1","D2"],
             "PDC-S": ["S1"], 
+            "PDC-S9": ["S1"], 
+            "PDC-S19": ["S1"], 
+            "PDC-S20": ["S1"], 
+            "PDC-S21": ["S1"], 
+            "PDC-S17": ["S1"], 
             "TBLU": ["TB1","TB2"],
             "PDC-R": ["R1","R2","R3","R4","R5","R6","R7","R8"],
             "PDC-RMID": ["R1","R2","R3","R4","R5","R6"],
             "PDC-RS": ["R1","R2","R3","R4","R5","R6"],
             "F96": ["F96"],
+            "F96-1": ["F96"],
             "PDC-Dbracket": ["Db1"],
             "MFB-P2":["1MFBP2","2MFBP2","3MFBP2"],
             "MFB-P1":["1MFBP1","2MFBP1"],
+            "MFB-S2":["1MFBP1","2MFBP1"],
             "MFB-S":["1MFBS"],
             "MFB-E":["1MFBE"],
             }
@@ -398,40 +433,59 @@ class Model (QObject):
             "PDC-P": ["PDCP_vision_1"],
             "PDC-D": ["PDCD_vision_1","PDCD_vision_2"],
             "PDC-S": ["PDCS_vision_1"], 
+            "PDC-S9": ["PDCS9_vision_1"], 
+            "PDC-S19": ["PDCS19_vision_1"], 
+            "PDC-S20": ["PDCS20_vision_1"], 
+            "PDC-S21": ["PDCS21_vision_1"], 
+            "PDC-S17": ["PDCS17_vision_1"], 
             "TBLU": ["TBLU_vision_1","TBLU_vision_2"],
             "PDC-R": ["PDCR_vision_1","PDCR_vision_2","PDCR_vision_3","PDCR_vision_4","PDCR_vision_5","PDCR_vision_6","PDCR_vision_7","PDCR_vision_8"],
             "PDC-RMID": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
             "PDC-RS": ["PDCRMID_vision_1","PDCRMID_vision_2","PDCRMID_vision_3","PDCRMID_vision_4","PDCRMID_vision_5","PDCRMID_vision_6"],
             "F96": ["F96_vision_1"],
+            "F96-1": ["F96_1_vision_1"],
             "PDC-Dbracket": ["PDCDbracket_vision_1"],
             "MFB-P2":["MFBP2_vision_1","MFBP2_vision_2","MFBP2_vision_3"],
             "MFB-P1":["MFBP1_vision_1","MFBP1_vision_2"],
+            "MFB-S2":["MFBP1_vision_1","MFBP1_vision_2"],
             "MFB-S":["MFBS_vision_1"],
             "MFB-E":["MFBE_vision_1"],
             }
         #nombre de programas a llamar para inspección de zonas(por bloque) en sensor (altura) en cada punto del robot
         self.h_triggers = {
-            "PDC-P": ["P1","P2","P3"],
-            "PDC-D": ["D1","D2","D3","D4"],
-            "PDC-S": ["S1"], 
-            "TBLU": ["TB1","TB2","TB3"],
-            "PDC-R": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9","R11","R12","R13","R14"],
+            "PDC-P":    ["P1","P2","P3"],
+            "PDC-D":    ["D1","D2","D3","D4"],
+            "PDC-S":    ["S1"], 
+            "PDC-S9":   ["S1"], 
+            "PDC-S19":  ["S1"], 
+            "PDC-S20":  ["S1"], 
+            "PDC-S21":  ["S1"], 
+            "PDC-S17":  ["S1"], 
+            "TBLU":     ["TB1","TB2","TB3"],
+            "PDC-R":    ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9","R11","R12","R13","R14"],
             "PDC-RMID": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
-            "PDC-RS": ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
-            "F96": ["F96"],
+            "PDC-RS":   ["R1","R6","R10","R2","R4","R5","R3","R7","R8","R9"],
+            "F96":      ["F96"],
+            "F96-1":    ["F96"],
             #"PDC-Dbracket": ["Db1"]
             }
         
         #puntos guardados en robot a los que irá para sus inspecciones de alturas
         self.rh_triggers = {
-            "PDC-P": ["PDCP_pa1","PDCP_pa2","PDCP_pa3"],
-            "PDC-D": ["PDCD_pa1","PDCD_pa2","PDCD_pa3","PDCD_pa4"],
-            "PDC-S": ["PDCS_pa1"], 
-            "TBLU": ["TBLU_pa1","TBLU_pa2","TBLU_pa3"],
-            "PDC-R": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9","PDCR_pa11","PDCR_pa12","PDCR_pa13","PDCR_pa14"],
+            "PDC-P":    ["PDCP_pa1","PDCP_pa2","PDCP_pa3"],
+            "PDC-D":    ["PDCD_pa1","PDCD_pa2","PDCD_pa3","PDCD_pa4"],
+            "PDC-S":    ["PDCS_pa1"], 
+            "PDC-S9":   ["PDCS9_pa1"], 
+            "PDC-S19":  ["PDCS19_pa1"], 
+            "PDC-S20":  ["PDCS20_pa1"], 
+            "PDC-S21":  ["PDCS21_pa1"], 
+            "PDC-S17":  ["PDCS17_pa1"], 
+            "TBLU":     ["TBLU_pa1","TBLU_pa2","TBLU_pa3"],
+            "PDC-R":    ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9","PDCR_pa11","PDCR_pa12","PDCR_pa13","PDCR_pa14"],
             "PDC-RMID": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
-            "PDC-RS": ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
-            "F96": ["F96_pa1"],
+            "PDC-RS":   ["PDCR_pa1","PDCR_pa6","PDCR_pa10","PDCR_pa2","PDCR_pa4","PDCR_pa5","PDCR_pa3","PDCR_pa7","PDCR_pa8","PDCR_pa9"],
+            "F96":      ["F96_pa1"],
+            "F96-1":    ["F961_pa1"],
             #"PDC-Dbracket": ["PDCDbracket_pa1"]
             }
 
@@ -598,6 +652,9 @@ class Model (QObject):
             'MFB-S': {
                 'A51': 'conTuerca', 'A52': 'conTuerca', 'A53': 'conTuerca', 'A54': 'conTuerca', 'A55': 'conTuerca', 'A56': 'conTuerca'
                 },
+            'MFB-S2': {
+                'A41': 'conTuerca', 'A42': 'conTuerca', 'A43': 'conTuerca', 'A44': 'conTuerca', 'A45': 'conTuerca', 'A46': 'conTuerca', 'A47': 'conTuerca'
+                },
             'MFB-E': {
                 'E1': 'conTuerca', 'A1': 'conTuerca', 'A2': 'conTuerca'
                 },
@@ -608,6 +665,9 @@ class Model (QObject):
                 'A20': 'sinTuerca', 'A21': 'sinTuerca', 'A22': 'sinTuerca', 'A23': 'sinTuerca', 'A24': 'sinTuerca', 'A25': 'sinTuerca', 'A26': 'sinTuerca', 'A27': 'sinTuerca', 'A28': 'sinTuerca', 'A29': 'sinTuerca', 'A30': 'sinTuerca'
                 },
             'MFB-P1': {
+                'A41': 'sinTuerca', 'A42': 'sinTuerca', 'A43': 'sinTuerca', 'A44': 'sinTuerca', 'A45': 'sinTuerca', 'A46': 'sinTuerca', 'A47': 'sinTuerca'
+                },
+            'MFB-S2': {
                 'A41': 'sinTuerca', 'A42': 'sinTuerca', 'A43': 'sinTuerca', 'A44': 'sinTuerca', 'A45': 'sinTuerca', 'A46': 'sinTuerca', 'A47': 'sinTuerca'
                 },
             'MFB-S': {
@@ -670,11 +730,29 @@ class Model (QObject):
                 }, 
             'PDC-S': {
                 '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'
-                }, 
+                },
+            'PDC-S9': {
+                '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'
+                },
+            'PDC-S19': {
+                '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'
+                },
+            'PDC-S20': {
+                '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'
+                },
+            'PDC-S21': {
+                '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'
+                },
+            'PDC-S17': {
+                '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio'
+                },
             'TBLU': {
                 '1': 'vacio', '2': 'vacio', '3': 'vacio', '4': 'vacio', '5': 'vacio', '6': 'vacio', '7': 'vacio', '8': 'vacio', '9': 'vacio'
                 },
             'F96': {
+                'F96': 'vacio'
+                },
+            'F96-1': {
                 'F96': 'vacio'
                 }
             }
