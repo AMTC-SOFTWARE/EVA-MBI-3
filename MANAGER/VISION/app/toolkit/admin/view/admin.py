@@ -239,7 +239,7 @@ class Ui_admin(object):
         self.checkBoxMFBP1.setGeometry(QtCore.QRect(240, 220, 150, 35))
         self.checkBoxMFBP1.setFont(font)
         self.checkBoxMFBP1.setObjectName("checkBoxMFBP1")
-        self.checkBoxMFBP1.setText("MFB-P1\n/MFB-S2")
+        self.checkBoxMFBP1.setText("MFB-P1\nMFB-S2")
         
         self.checkBoxMFBS = QtWidgets.QCheckBox(admin)
         self.checkBoxMFBS.setEnabled(False)

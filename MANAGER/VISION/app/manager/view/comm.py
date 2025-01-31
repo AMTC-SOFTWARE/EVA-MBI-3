@@ -451,6 +451,7 @@ class MqttClient (QObject):
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "PDC-R" in payload_str:
+
                     PDCR = ""
                     #detectar qué caja de PDC-R lleva el arnés
                     if "PDC-R" in self.model.input_data["database"]["modularity"].keys():
@@ -461,14 +462,16 @@ class MqttClient (QObject):
                         print("En realidad es una PDC-RS pero se cambia a PDC-RMID para GDI ya que es mismo nido")
                         PDCR = "PDC-RMID"
                     else: #si no hay ninguna caja PDCR en el contenido del arnés...
+
+                        print("no hay caja PDCR en modularity")
+
                         self.nido_PDCR = ""
                         self.color_PDCR = ""
                         command = {
                             "lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : True}
                             }
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
-                    
-                    
+
                     #si se encontró cualquier caja PDCR en el contenido del arnés...
                     if PDCR != "":
                         #no importa si es PDC-R o PDC-RMID los mensajes de ERROR y clamp no cambian (siempre se manda así desde GDI)
@@ -477,7 +480,7 @@ class MqttClient (QObject):
                                     self.nido_PDCR = f"{PDCR}:\n clamp incorrecto"
                                     self.color_PDCR = "red"
                                     
-                        if "clamp_PDC-R" in payload:
+                        elif "clamp_PDC-R" in payload:
                             if payload["clamp_PDC-R"] == True:
                                 self.nido_PDCR = f" {PDCR}:\n clamp correcto"
                                 self.color_PDCR = "green"
@@ -485,13 +488,7 @@ class MqttClient (QObject):
                                 self.nido_PDCR = f"{PDCR}:\n Habilitar"
                                 self.color_PDCR = "red"
                                                    
-
-                        if "PDC-R" in payload or "PDC-RS" in payload or PDCR in payload:
-                            
-                            if "True" in str(payload):
-                                payload = {PDCR:True}
-                            elif "False" in str(payload):
-                                payload = {PDCR:False}
+                        elif PDCR in payload:
                             
                             if payload[PDCR] == True:
                                 self.nido_PDCR = f"{PDCR}:\n Habilitada"
@@ -502,7 +499,6 @@ class MqttClient (QObject):
                                 self.color_PDCR = "red"
  
                         command = {"lbl_box3" : {"text": f"{self.nido_PDCR}", "color": f"{self.color_PDCR}", "hidden" : False}}
-                        print("COMMANDO PDCR",command)
                         self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
 
                 if "PDC-S" in payload_str:
