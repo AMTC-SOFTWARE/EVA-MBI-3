@@ -98,6 +98,12 @@ def makeModules(data):
                                         box = "BATTERY-2"
                                         torque = "BT"
                                         print("Box Actualizado: ",box)
+                                        print("Torque Actualizado: ",torque)   
+                                    if box == "MFB-S2" and torque== "G1/21":
+                                        print("Aquí viene una battery-3",module,' : ',box)
+                                        box = "BATTERY-3"
+                                        torque = "BT"
+                                        print("Box Actualizado: ",box)
                                         print("Torque Actualizado: ",torque)
                                     if not(box in modules_t[module]):
                                         modules_t[module][box] = {}
@@ -121,7 +127,7 @@ def makeModules(data):
                                     value = value.replace(" ","")#se eliminan posibles espacios existentes, si hay datos de lo contrario es None
 
                                 if value == "x" or value == "X":
-                                    box = currentSheet.cell(row = row, column = 1).value #se obtiene el nombre de la caja primer columna de excel ej: PDC-P
+                                    box = currentSheet.cell(row = row, column = 1).value.strip() #se obtiene el nombre de la caja primer columna de excel ej: PDC-P
 
                                     if isinstance(box,str):
                                         box = box.replace(" ","")#se eliminan posibles espacios existentes, si hay datos de lo contrario es None
@@ -134,13 +140,11 @@ def makeModules(data):
 
                                     if box == "TBLU":
                                         fuse = fuse.replace("A", "")
-                                    if box == "PDC-S":
+                                    if "PDC-S" in box:
                                         fuse = str(fuse)
                                         #print("Tipo del Fuse Ya convertido: ",type(fuse))
-                                    if box == "F96":
+                                    if "F96" in box:
                                         print("Caja F96 AQUI",module)
-                                        box = "PDC-RMID"
-                                        print("CAJA F96 TRANSFORMADA A PDC-RMID")
                                     if box == "PDC-R":
                                         if module in pdcrVariantes["large"]:
                                             box = "PDC-R"
@@ -185,7 +189,15 @@ def makeModules(data):
             "CAJA_5": {},
             "CAJA_6": {},
             "CAJA_7": {},
-            "CAJA_8": {}
+            "CAJA_8": {},
+            "CAJA_9": {},
+            "CAJA_10": {},
+            "CAJA_11": {},
+            "CAJA_12": {},
+            "CAJA_13": {},
+            "CAJA_14": {},
+            "CAJA_15": {},
+            "CAJA_16": {}
             }
 
         temp["MODULO"] = module
@@ -246,7 +258,14 @@ def makeModules(data):
             "CAJA_6": {},
             "CAJA_7": {},
             "CAJA_8": {},
-            "CAJA_9": {}
+            "CAJA_9": {},
+            "CAJA_10": {},
+            "CAJA_11": {},
+            "CAJA_12": {},
+            "CAJA_13": {},
+            "CAJA_14": {},
+            "CAJA_15": {},
+            "CAJA_16": {}
             }
 
         temp["MODULO"] = module
@@ -498,6 +517,7 @@ def makeModularities(data):
                                 "PDC-P": ["12239060702", True],
                                 "MFB-P1": ["12975402001", True],
                                 "MFB-S": ["12235403215", True],
+                                "MFB-S2": ["12975402001", True],
                                 "MFB-E": ["12975403015", True],
                                 "MFB-P2": flag_mfbp2
                                 }
@@ -511,6 +531,7 @@ def makeModularities(data):
                                 "PDC-P": ["12239060702", True],
                                 "MFB-P1": ["12975402001", True],
                                 "MFB-S": ["12235403215", True],
+                                "MFB-S2": ["12975402001", True],
                                 "MFB-E": ["12975403015", True],
                                 "MFB-P2": flag_mfbp2
                                 }
@@ -525,6 +546,7 @@ def makeModularities(data):
                                 "PDC-P": ["12239060702", True],
                                 "MFB-P1": ["12975402001", True],
                                 "MFB-S": ["12235403215", True],
+                                "MFB-S2": ["12975402001", True],
                                 "MFB-E": ["12975403015", True],
                                 "MFB-P2": flag_mfbp2
                                 }
@@ -538,6 +560,7 @@ def makeModularities(data):
                                 "PDC-P": ["12239060702", True],
                                 "MFB-P1": ["12975402001", True],
                                 "MFB-S": ["12235403215", True],
+                                "MFB-S2": ["12975402001", True],
                                 "MFB-E": ["12975403015", True],
                                 "MFB-P2": flag_mfbp2
                                 }
