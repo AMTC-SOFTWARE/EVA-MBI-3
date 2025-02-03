@@ -291,6 +291,7 @@ class Triggers (QState):
         name = self.model.qr_codes["HM"]#self.model.input_data["database"]["pedido"]["PEDIDO"]
         name += "_" + self.model.qr_codes["REF"]
         name += "_" + current_day + current_month + year + current_time
+        name += "_" + box
         name += "_" + current_trig
 
         nombre_carpeta = year + current_month+ current_day
