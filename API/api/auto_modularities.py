@@ -65,7 +65,7 @@ def makeModules(data):
                     if "Acomodos Modularidades" in sheet or "X294 Izquierda F96" in sheet:
                         continue
                     #para torques
-                    if "MFB" in sheet:
+                    if "MFB" in sheet or "BATTERY" in sheet:
                         currentSheet = file[sheet]
                         for column in range(11, currentSheet.max_column + 1):
                             module = currentSheet.cell(row = 3, column = column).value
@@ -104,6 +104,10 @@ def makeModules(data):
                                         box = "BATTERY-3"
                                         torque = "BT"
                                         print("Box Actualizado: ",box)
+                                        print("Torque Actualizado: ",torque)
+                                    if box == "BATTERY-3" and torque== "G1/21":
+                                        print("Aquí viene una battery-3",module,' : ',box)
+                                        torque ="BT"
                                         print("Torque Actualizado: ",torque)
                                     if not(box in modules_t[module]):
                                         modules_t[module][box] = {}
@@ -279,7 +283,7 @@ def makeModules(data):
                     try:
                         temp[key][box][torque] = modules_t[module][box][torque]
                     except Exception as ex:
-                        print("\nTroque exception in [", module, "] [", box, "] [", fuse, "]")
+                        print("\nTorque exception in [", module, "] [", box, "] [", fuse, "]")
                         print(ex)
             except Exception as ex:
                 print(ex)

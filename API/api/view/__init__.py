@@ -30,7 +30,6 @@ import requests
 from paho.mqtt import publish
 import pyodbc
 import auto_modularities
-import numpy as np
 
 app = Flask(__name__)
 CORS(app)
@@ -582,7 +581,7 @@ def preview(ILX):
             #print("creacion de array: ",modulos_cant)
             if len(modulos_cant) == 1: 
                 for j in resultado:
-                    if j == "ID" or j == "MODULO" or j == "CAJA_6" or j == "CAJA_7" or j == "CAJA_8":
+                    if j == "ID" or j == "MODULO":
                         pass
                         #resultado[j] = resultado[j][0]
                     else:
@@ -827,6 +826,7 @@ def newEvent():
         responseActivo = requests.post(endpoint, data = json.dumps(activo))
         connection.close()
         return response
+
 ################################################## Eliminar Base de Datos (Evento)  ####################################################
 @app.route("/api/delete/event",methods=["POST"])
 def delEvent():
@@ -936,15 +936,15 @@ def eventGET(table, db, column_1, operation_1, value_1, column_2, operation_2, v
         connection.close()
         return response
 
-@app.route("/api/get/preview/modularity/<ILX>",methods=["GET"])
-def preview(ILX):
-    endpoint = f"http://{host}:5000/api/get/pdcr/variantes"
+@app.route("/api/get/<db>/preview/modularity/<ILX>",methods=["GET"])
+def previewEvent(ILX,db):
+    endpoint = f"http://{host}:5000/api/get/{db}/pdcr/variantes"
     pdcrVariantes = requests.get(endpoint).json()
     print("Lista Final de Variantes PDC-R: \n",pdcrVariantes)
     flag_l = False
     flag_m = False
     flag_s = False
-    endpoint = f"http://{host}:5000/api/get/pedidos/PEDIDO/=/{ILX}/ACTIVE/=/1"
+    endpoint = f"http://{host}:5000/api/get/{db}/pedidos/PEDIDO/=/{ILX}/ACTIVE/=/1"
     response = requests.get(endpoint).json()
     #print("RESPONSE ",response)
     #print("RESPONSE ",response["MODULOS_VISION"])
@@ -963,7 +963,14 @@ def preview(ILX):
             'PDC-RMID': {},
             'PDC-RS': {},
             'PDC-S': {}, 
-            'TBLU': {}
+            'PDC-S17': {}, 
+            'PDC-S20': {}, 
+            'PDC-S21': {}, 
+            'PDC-S9': {}, 
+            'PDC-S19': {}, 
+            'TBLU': {},
+            'F96': {},
+            'F96-1': {}
         },
         'torque': {
             'PDC-P':{},
@@ -993,7 +1000,7 @@ def preview(ILX):
         if module in pdcrVariantes["small"]:
             flag_s = True
         #print("Module i de la Lista: "+module)
-        endpoint_Module= f"http://{host}:5000/api/get/modulos_fusibles/MODULO/=/{module}/_/=/_"
+        endpoint_Module= f"http://{host}:5000/api/get/{db}/modulos_fusibles/MODULO/=/{module}/_/=/_"
         #print("Endpoint del módulo"+endpoint_Module)
         resultado = requests.get(endpoint_Module).json()
         #print("Modulo Informacion",resultado)
@@ -1041,7 +1048,7 @@ def preview(ILX):
     print(f"\n\t\tMODULOS_TORQUE:\n{modules_torque}")
     for modulet in modules_torque:
         #print("Module i de la Lista: "+module)
-        endpoint_Modulet= f"http://{host}:5000/api/get/modulos_torques/MODULO/=/{modulet}/_/=/_"
+        endpoint_Modulet= f"http://{host}:5000/api/get/{db}/modulos_torques/MODULO/=/{modulet}/_/=/_"
         #print("Endpoint del módulo"+endpoint_Module)
         resultadot = requests.get(endpoint_Modulet).json()
         #print("Modulo Informacion",resultadot)

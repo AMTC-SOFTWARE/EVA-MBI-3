@@ -8,7 +8,7 @@ command to exe generation_
         Powershell 
         python -m PyInstaller --icon=icon.ico --add-data 'data;data' --noconfirm -F api.py
 
-        pyinstaller --onedir --icon=icon.ico --contents-directory "." --add-data data;data api.py
+        pyinstaller --onedir --icon=icon.ico --contents-directory "." --add-data 'data;data' api.py
 ###############################################################################
 
  TEST:
