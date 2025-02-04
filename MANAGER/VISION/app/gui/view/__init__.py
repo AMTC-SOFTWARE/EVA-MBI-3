@@ -156,7 +156,7 @@ class MainWindow (QMainWindow):
         elif box == "PDC-P":
             self.ui.lbl_box2.setIcon(QtGui.QIcon(self.ui.lbl_box_2movie.currentPixmap()))
             self.ui.lbl_box_2movie.start()
-        elif box == "PDC-R":
+        elif "PDC-R" in box:
             self.ui.lbl_box3.setIcon(QtGui.QIcon(self.ui.lbl_box_3movie.currentPixmap()))
             self.ui.lbl_box_3movie.start()
         elif box == "PDC-S":
@@ -217,7 +217,7 @@ class MainWindow (QMainWindow):
         elif box == "PDC-P":
             self.ui.lbl_box2.setIcon(QtGui.QIcon())
             self.ui.lbl_box_2movie.stop()
-        elif box == "PDC-R":
+        elif "PDC-R" in box:
             self.ui.lbl_box3.setIcon(QtGui.QIcon())
             self.ui.lbl_box_3movie.stop()
         elif box == "PDC-S":
