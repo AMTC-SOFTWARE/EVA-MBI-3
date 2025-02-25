@@ -207,6 +207,10 @@ class Triggers (QState):
                             error = True
                             img = self.model.drawBB(img = img, BB = temp, color = (0, 0, 255))
                             self.model.h_result[box][fuse] = not(height_d)
+
+                            #En caso de un error se guarda de nuevo los triggers de Vision para que se vuelvan a inspeccionar
+                            self.model.robot_data["v_queue"][box] = copy(self.model.rv_triggers[box])
+
                             self.model.expected_fuses = self.model.expected_fuses + str(fuse) + ":\tALTURA NOK\n"
                             print("||||||||||Cavidad en la que hubo error: ",fuse, " Caja: ",box)
                             print("Modelo: ",self.model.tries)
