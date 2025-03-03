@@ -4,7 +4,7 @@ from paho.mqtt import publish
 from threading import Timer
 from shutil import copyfile
 from time import strftime
-from copy import copy
+from copy import copy, deepcopy
 from math import ceil
 import threading
 import json
@@ -146,8 +146,8 @@ class Triggers (QState):
 
         print("esperando respuesta de sensor de altura")
 
-        #se manda señal de reintento en 18 segundos
-        self.model.tiempo = threading.Timer(2.5,self.retry.emit)
+        #se manda señal de reintento en 15 segundos
+        self.model.tiempo = threading.Timer(15,self.retry.emit)
         self.model.tiempo.start()
             
     def second_attempt (self):
@@ -182,6 +182,18 @@ class Triggers (QState):
         ################################## SE REVISA QUE LOS FUSIBLES LEÍDOS CORRESPONDAN A LOS ESPERADOS #####################################
 
         if box in self.model.modularity_fuses:
+
+            print("___________________________________________________________________________________")
+            print("___________________________________________________________________________________")
+
+            fusibles_a_inspeccionar = deepcopy(self.model.modularity_fuses[box])
+            fusibles_ordenados = dict(sorted(fusibles_a_inspeccionar.items()))
+
+            print("self.model.modularity_fuses[box]: ",fusibles_ordenados)
+
+            print("___________________________________________________________________________________")
+            print("___________________________________________________________________________________")
+
             for fuse in self.model.modularity_fuses[box]:
                 #height_d es una copia elemento a elemento de la base de datos que te indica si hay fusible o no
                 height_d = True if self.model.modularity_fuses[box][fuse] != "vacio" else False
@@ -207,9 +219,6 @@ class Triggers (QState):
                             error = True
                             img = self.model.drawBB(img = img, BB = temp, color = (0, 0, 255))
                             self.model.h_result[box][fuse] = not(height_d)
-
-                            #En caso de un error se guarda de nuevo los triggers de Vision para que se vuelvan a inspeccionar
-                            self.model.robot_data["v_queue"][box] = copy(self.model.rv_triggers[box])
 
                             self.model.expected_fuses = self.model.expected_fuses + str(fuse) + ":\tALTURA NOK\n"
                             print("||||||||||Cavidad en la que hubo error: ",fuse, " Caja: ",box)
@@ -259,9 +268,11 @@ class Triggers (QState):
         #guardando imagen generada final en imgs_path + module + .jpg
         imwrite(self.model.imgs_path + self.module + ".jpg", img)
 
-
-        print("\nINSPECTION:", results[box])
-        print("MASTER    :", self.model.modularity_fuses[box], "\n")
+        print("___________________________________________________________________________________")
+        print("___________________________________________________________________________________")
+        print("\n Resultados:", results[box])
+        print("___________________________________________________________________________________")
+        print("___________________________________________________________________________________")
 
         if error == False:
 
