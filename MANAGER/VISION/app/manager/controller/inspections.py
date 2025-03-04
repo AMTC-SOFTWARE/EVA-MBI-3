@@ -2,7 +2,7 @@ from PyQt5.QtCore import QState, pyqtSignal, QObject
 from paho.mqtt import publish
 from threading import Timer
 from cv2 import imread, imwrite
-from copy import copy
+from copy import copy, deepcopy
 import json
 from time import sleep #para poder usar sleep()
 from manager.controller import vision, height
@@ -231,79 +231,89 @@ class UpdateTriggers(QState):
             return
 
 
-        #revisar cajas que tiene modularity pendientes por hacer inspección
+        #revisar cajas que tiene modularity pendientes por hacer inspección, PARA ELIMINAR LAS QUE NO SON VÁLIDAS
         print("\n\n-------------------- cajas pendientes... --------------------")
-        for j in modularity:
-            print("\n\t" + j)
+        for caja in modularity:
+            print("\n\t" + caja)
             #si la caja actual no está en el arreglo de clamps actuales entonces... (o sea no es una caja válida)
-            if not(j in clamps):
+            if not(caja in clamps):
 
                 print("\t(esta caja no está en clamps)")
 
                 #quitar del modelo los puntos de vision y altura de esa caja que no se encontró
                 #none, si la llave está en el diccionario la remueve y retorna su valor, si no retorna un default
                 #si la llave no está y el default no está definido manda error, entonces se usa un none para decir que no se encontró
-                self.model.robot_data["v_queue"].pop(j, None)
-                self.model.robot_data["h_queue"].pop(j, None)
+                self.model.robot_data["v_queue"].pop(caja, None)
+                self.model.robot_data["h_queue"].pop(caja, None)
+
+
+        #se hace una limpieza de los datos de v_queue y h_queue actuales para volver a agregar y que no se mezclen
+        print("se limpian variables... ")
+        print("self.model.robot_data[v_queue].clear()")
+        print("self.model.robot_data[h_queue].clear()")
+        self.model.robot_data["v_queue"].clear()
+        self.model.robot_data["h_queue"].clear()
 
         #si se llega este punto ya se sabe que aún quedan cajas pendientes por hacer, se revisa cuáles de esas están clampeadas
         if len(clamps):
-            for i in clamps:
+
+            print("clamps: ",clamps)
+
+            for caja_clampeada in clamps:
                 #si la caja está en las modularidades...
-                if i in modularity:
+                if caja_clampeada in modularity:
 
                     #si la caja está en el listado del modelo de triggers de visión
-                    if i in self.model.v_triggers:
+                    if caja_clampeada in self.model.v_triggers:
 
-                        print("v_triggers \n")
-                        print(self.model.v_triggers[i])
+                        print(f"self.model.v_triggers[{caja_clampeada}] = ",self.model.v_triggers[caja_clampeada])
 
                         #aquí se agregan los triggers a robot_data usando de base lo de rv_triggers del modelo
-                        self.model.robot_data["v_queue"][i] = copy(self.model.rv_triggers[i])
-                        print(i)
+                        self.model.robot_data["v_queue"][caja_clampeada] = deepcopy(self.model.rv_triggers[caja_clampeada])
+
+                        print(f"self.model.robot_data[v_queue][{caja_clampeada}] = ",self.model.robot_data["v_queue"][caja_clampeada])
 
                     #si la caja está en el listado del modelo de triggers de alturas
-                    if i in self.model.rh_triggers:
+                    if caja_clampeada in self.model.rh_triggers:
 
-                        print("h_triggers \n")
-                        print(self.model.h_triggers[i])
+                        print(f"self.model.h_triggers[{caja_clampeada}] = ",self.model.h_triggers[caja_clampeada])
 
                         ############################################################
                         #se agrega revisión de altura solamente si hay contenido de fusibles diferentes a vacío en los fusibles externos de PDC-R
-                        if i == "PDC-R":
+                        if caja_clampeada == "PDC-R":
                             print("se trata de alturas en PDC-R grande")
                             self.model.eliminar_inspeccion_externos = True
 
                             for fusible in self.model.external_fuses:
-                                if self.model.modularity_fuses[i][fusible] != "vacio": #si cualquier fusible externo es diferente de vacío, se hacen inspecciones
+                                if self.model.modularity_fuses[caja_clampeada][fusible] != "vacio": #si cualquier fusible externo es diferente de vacío, se hacen inspecciones
                                     self.model.eliminar_inspeccion_externos = False
 
                             if self.model.eliminar_inspeccion_externos == False:
-                                self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
+                                self.model.robot_data["h_queue"][caja_clampeada] = deepcopy(self.model.rh_triggers[caja_clampeada])
                             else:
-                                self.model.robot_data["h_queue"][i] = copy(self.model.rh_trigger_pdcr[i])
+                                self.model.robot_data["h_queue"][caja_clampeada] = deepcopy(self.model.rh_trigger_pdcr[caja_clampeada])
+
                         else:
                         ############################################################
                             #FUNCIONAMIENTO NORMAL para agregar inspección de alturas...
 
                             #aquí se agregan triggers a robot_data usando de base lo de rh_triggers del modelo
-                            self.model.robot_data["h_queue"][i] = copy(self.model.rh_triggers[i])
+                            self.model.robot_data["h_queue"][caja_clampeada] = deepcopy(self.model.rh_triggers[caja_clampeada])
+
+                        print(f"self.model.robot_data[h_queue][{caja_clampeada}] = ",self.model.robot_data["h_queue"][caja_clampeada])
 
                     else:
                         #se agrega la caja con contenido vacío
-                        self.model.robot_data["h_queue"][i] = []
-
-
-                    print("self.model.robot_data[v_queue]-------",self.model.robot_data["v_queue"])
-                    print("self.model.robot_data[v_queue][i]",self.model.robot_data["v_queue"][i])
+                        self.model.robot_data["h_queue"][caja_clampeada] = []
+                        print(f"self.model.robot_data[h_queue][{caja_clampeada}] = []")
 
                     command = {
-                        "lbl_result" : {"text": "Inspección en " + i + " preparada", "color": "green"},
+                        "lbl_result" : {"text": "Inspección en " + caja_clampeada + " preparada", "color": "green"},
                         "lbl_steps" : {"text": "Por favor espere", "color": "black"},
-                        "img_center" : "boxes/" + i + ".jpg"
+                        "img_center" : "boxes/" + caja_clampeada + ".jpg"
                         }
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-                    #self.model.tries[i] += 1
+                    #self.model.tries[caja_clampeada] += 1
                      # self.model.robot_data Sale listo y recién horneado de aquí 
                     self.ok.emit()
                     break

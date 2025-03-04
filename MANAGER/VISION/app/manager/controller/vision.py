@@ -536,7 +536,10 @@ class Pose(QState):
         #se borran los errores de pantalla de visión
         command = {"lbl_info1" : {"text": "", "color": "blue"}}
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
-         #caja igual a el primer elemento de la lista de la copia de rv_triggers (que viene de inspections.py - UpdateTriggers)
+
+        print("self.queue: ",self.queue)
+
+        #caja igual a el primer elemento de la lista de la copia de rv_triggers (que viene de inspections.py - UpdateTriggers)
         box = list(self.queue)[0]
         #si la caja no está en las cajas clampeadas
         if not(box in self.model.input_data["plc"]["clamps"]):
