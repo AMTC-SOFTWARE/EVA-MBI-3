@@ -547,17 +547,19 @@ def preview(ILX):
             'TBLU': {}
         },
         'torque': {
-            'PDC-P':{},
+           'PDC-P':{},
             'PDC-D':{},
             'MFB-P1':{},
             'MFB-S':{},
+            'MFB-S2':{},
             'MFB-E':{},
             'MFB-P2':{},
             'PDC-R':{},
             'PDC-RMID':{},
             'PDC-RS': {},
             'BATTERY':{},
-            'BATTERY-2':{}
+            'BATTERY-2':{},
+            'BATTERY-3':{}
             },
         'variante': {}
     }
