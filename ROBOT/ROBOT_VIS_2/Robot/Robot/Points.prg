@@ -1,0 +1,218 @@
+Function Get_DesiredPoint
+	'########## HOME ##########'	
+	If DesiredPoint$ = "HOME" Then
+		P200 = Home1
+		
+	'########## VISION ##########'
+	'--- CAJA PDCR VISION ---'
+	ElseIf DesiredPoint$ = "PDCR_vision_1" Then
+		P200 = PDCR_vision_1
+	ElseIf DesiredPoint$ = "PDCR_vision_2" Then
+		P200 = PDCR_vision_2
+	ElseIf DesiredPoint$ = "PDCR_vision_3" Then
+		P200 = PDCR_vision_3
+	ElseIf DesiredPoint$ = "PDCR_vision_4" Then
+		P200 = PDCR_vision_4
+	ElseIf DesiredPoint$ = "PDCR_vision_5" Then
+		P200 = PDCR_vision_5
+	ElseIf DesiredPoint$ = "PDCR_vision_6" Then
+		P200 = PDCR_vision_6
+	ElseIf DesiredPoint$ = "PDCR_vision_7" Then
+		P200 = PDCR_vision_7
+	ElseIf DesiredPoint$ = "PDCR_vision_8" Then
+		P200 = PDCR_vision_8
+		
+    '--- CAJA PDCRMID VISION ---'   
+	ElseIf DesiredPoint$ = "PDCRMID_vision_1" Then
+		P200 = PDCRMID_vision_1
+	ElseIf DesiredPoint$ = "PDCRMID_vision_2" Then
+		P200 = PDCRMID_vision_2
+	ElseIf DesiredPoint$ = "PDCRMID_vision_3" Then
+		P200 = PDCR_vision_3
+	ElseIf DesiredPoint$ = "PDCRMID_vision_4" Then
+		P200 = PDCRMID_vision_4
+	ElseIf DesiredPoint$ = "PDCRMID_vision_5" Then
+		P200 = PDCR_vision_5
+	ElseIf DesiredPoint$ = "PDCRMID_vision_6" Then
+		P200 = PDCR_vision_6
+			
+	'--- CAJA PDCS VISION ---'
+	ElseIf DesiredPoint$ = "PDCS_vision_1" Then
+		P200 = PDCS_vision_1
+'		Nuevas cajas PDC-S
+	ElseIf DesiredPoint$ = "PDCS9_vision_1" Then
+		P200 = PDCS9_vision_1
+	ElseIf DesiredPoint$ = "PDCS19_vision_1" Then
+		P200 = PDCS19_vision_1
+	ElseIf DesiredPoint$ = "PDCS20_vision_1" Then
+		P200 = PDCS20_vision_1
+	ElseIf DesiredPoint$ = "PDCS17_vision_1" Then
+		P200 = PDCS17_vision_1
+	ElseIf DesiredPoint$ = "PDCS21_vision_1" Then
+		P200 = PDCS_vision_1
+		
+	'--- CAJA F96 VISION ---'
+	ElseIf DesiredPoint$ = "F96_vision_1" Then
+		P200 = F96_vision_1
+	ElseIf DesiredPoint$ = "F96_1_vision_1" Then
+		P200 = F961_vision_1
+	
+	'--- CAJA TBLU VISION ---'
+	ElseIf DesiredPoint$ = "TBLU_vision_1" Then
+		P200 = TBLU_vision_1
+	ElseIf DesiredPoint$ = "TBLU_vision_2" Then
+		P200 = TBLU_vision_2
+		
+	'--- CAJA PDCD VISION ---'
+	ElseIf DesiredPoint$ = "PDCD_vision_1" Then
+		P200 = PDCD_vision_1
+	ElseIf DesiredPoint$ = "PDCD_vision_2" Then
+		P200 = PDCD_vision_2
+		
+	'--- CAJA PDCDbracket VISION ---'
+	ElseIf DesiredPoint$ = "PDCDbracket_vision_1" Then
+		P200 = PDCDbracket_vision_1
+	
+	
+	'--- CAJA PDCP VISION ---'
+	ElseIf DesiredPoint$ = "PDCP_vision_1" Then
+		P200 = PDCP_vision_1
+			
+	'--- CAJA PDCP2 VISION ---'
+	ElseIf DesiredPoint$ = "PDCP2_vision_1" Then
+		P200 = PDCP2_vision_1
+			
+	'--- CAJA MFBP2 1 VISION ---'
+	ElseIf DesiredPoint$ = "MFBP2_vision_1" Then
+		P200 = MFBP2_vision_1
+		
+		'--- CAJA MFBP2 2 VISION ---'
+	ElseIf DesiredPoint$ = "MFBP2_vision_2" Then
+		P200 = MFBP2_vision_2
+		
+		'--- CAJA MFBP2 3 VISION ---'
+	ElseIf DesiredPoint$ = "MFBP2_vision_3" Then
+		P200 = MFBP2_vision_3
+			
+		'--- CAJA MFBP1 1 VISION ---'
+	ElseIf DesiredPoint$ = "MFBP1_vision_1" Then
+		P200 = MFBP1_vision_1
+		
+		'--- CAJA MFBP1 2 VISION ---'
+	ElseIf DesiredPoint$ = "MFBP1_vision_2" Then
+		P200 = MFBP1_vision_2
+		
+		'--- CAJA MFBS 1 VISION ---'
+	ElseIf DesiredPoint$ = "MFBS_vision_1" Then
+		P200 = MFBS_vision_1
+		
+		'--- CAJA MFBE 1 VISION ---'
+	ElseIf DesiredPoint$ = "MFBE_vision_1" Then
+		P200 = MFBE_vision_1
+		
+	'########## ALTURA #######################################################'		
+	'--- CAJA PDC_R ALTURA ---'
+	ElseIf DesiredPoint$ = "PDCR_pa1" Then
+		P200 = PDCR_pa1
+	ElseIf DesiredPoint$ = "PDCR_pa2" Then
+		P200 = PDCR_pa2
+	ElseIf DesiredPoint$ = "PDCR_pa3" Then
+		P200 = PDCR_pa3
+	ElseIf DesiredPoint$ = "PDCR_pa4" Then
+		P200 = PDCR_pa4
+	ElseIf DesiredPoint$ = "PDCR_pa5" Then
+		P200 = PDCR_pa5
+	ElseIf DesiredPoint$ = "PDCR_pa6" Then
+		P200 = PDCR_pa6
+	ElseIf DesiredPoint$ = "PDCR_pa7" Then
+		P200 = PDCR_pa7
+	ElseIf DesiredPoint$ = "PDCR_pa8" Then
+		P200 = PDCR_pa8
+	ElseIf DesiredPoint$ = "PDCR_pa9" Then
+		P200 = PDCR_pa9
+	ElseIf DesiredPoint$ = "PDCR_pa10" Then
+		P200 = PDCR_pa10
+	ElseIf DesiredPoint$ = "PDCR_pa11" Then
+		P200 = PDCR_pa11
+	ElseIf DesiredPoint$ = "PDCR_pa12" Then
+		P200 = PDCR_pa12
+	ElseIf DesiredPoint$ = "PDCR_pa13" Then
+		P200 = PDCR_pa13
+	ElseIf DesiredPoint$ = "PDCR_pa14" Then
+		P200 = PDCR_pa14
+
+	'--- CAJA PDC_Rmid ALTURA ---'
+	ElseIf DesiredPoint$ = "PDCRMID_pa1" Then
+		P200 = PDCR_pa1
+	ElseIf DesiredPoint$ = "PDCRMID_pa2" Then
+		P200 = PDCR_pa2
+	ElseIf DesiredPoint$ = "PDCRMID_pa3" Then
+		P200 = PDCR_pa3
+	ElseIf DesiredPoint$ = "PDCRMID_pa4" Then
+		P200 = PDCR_pa4
+	ElseIf DesiredPoint$ = "PDCRMID_pa5" Then
+		P200 = PDCR_pa5
+	ElseIf DesiredPoint$ = "PDCRMID_pa6" Then
+		P200 = PDCR_pa6
+	ElseIf DesiredPoint$ = "PDCRMID_pa7" Then
+		P200 = PDCR_pa7
+	ElseIf DesiredPoint$ = "PDCRMID_pa8" Then
+		P200 = PDCR_pa8
+
+	'--- CAJA PDC_S ALTURA ---'
+	ElseIf DesiredPoint$ = "PDCS_pa1" Then
+		P200 = PDCS_pa1
+	ElseIf DesiredPoint$ = "PDCS9_pa1" Then
+		P200 = PDCS9_pa1
+	ElseIf DesiredPoint$ = "PDCS19_pa1" Then
+		P200 = PDCS19_pa1
+	ElseIf DesiredPoint$ = "PDCS20_pa1" Then
+		P200 = PDCS20_pa1
+	ElseIf DesiredPoint$ = "PDCS17_pa1" Then
+		P200 = PDCS17_pa1
+	ElseIf DesiredPoint$ = "PDCS21_pa1" Then
+		P200 = PDCS21_pa1
+		
+		
+	'--- CAJA F96 ALTURA ---'
+	ElseIf DesiredPoint$ = "F96_pa1" Then
+		P200 = F96_pa1
+	ElseIf DesiredPoint$ = "F961_pa1" Then
+		P200 = F961_pa1
+		
+	'--- CAJA TBLU ALTURA ---'
+	ElseIf DesiredPoint$ = "TBLU_pa1" Then
+		P200 = TBLU_pa1
+	ElseIf DesiredPoint$ = "TBLU_pa2" Then
+		P200 = TBLU_pa2
+    ElseIf DesiredPoint$ = "TBLU_pa3" Then
+		P200 = TBLU_pa3
+
+	'--- CAJA PDC_D ALTURA ---'
+	ElseIf DesiredPoint$ = "PDCD_pa1" Then
+		P200 = PDCD_pa1
+	ElseIf DesiredPoint$ = "PDCD_pa2" Then
+		P200 = PDCD_pa2
+	ElseIf DesiredPoint$ = "PDCD_pa3" Then
+		P200 = PDCD_pa3
+	ElseIf DesiredPoint$ = "PDCD_pa4" Then
+		P200 = PDCD_pa4
+		
+'--- CAJA PDC_Dbracket ALTURA ---'
+	ElseIf DesiredPoint$ = "PDCDbracket_pa1" Then
+		P200 = PDCDbracket_pa1
+		
+	'--- CAJA PDC_P ALTURA ---'
+	ElseIf DesiredPoint$ = "PDCP_pa1" Then
+		P200 = PDCP_pa1
+	ElseIf DesiredPoint$ = "PDCP_pa2" Then
+		P200 = PDCP_pa2
+	ElseIf DesiredPoint$ = "PDCP_pa3" Then
+		P200 = PDCP_pa3
+	ElseIf DesiredPoint$ = "PDCP_WACKS" Then
+		P200 = GIO2
+	Else
+		Print("Invalid Point")
+		DesiredPoint$ = "Undefined"
+	EndIf
+Fend

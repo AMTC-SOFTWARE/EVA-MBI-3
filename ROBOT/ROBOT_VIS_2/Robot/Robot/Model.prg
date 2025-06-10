@@ -1,0 +1,13 @@
+Global String DesiredPoint$, DesiredBox$, Reached$, NoValid$, HomeMsj$
+Global Double Yzone, Zzone, Zlow
+
+Function Init_State
+	DesiredPoint$ = ""
+	Reached$ = "position_reached"
+	HomeMsj$ = "home_reached"
+	NoValid$ = "no_valid"
+	Zzone = -11
+	Yzone = 270
+	Zlow = -20
+Fend
+

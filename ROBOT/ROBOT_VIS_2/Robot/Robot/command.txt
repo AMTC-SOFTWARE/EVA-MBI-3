@@ -1,0 +1,170 @@
+go here + x(-1)
+> reset
+> RESET;MOTOR On; POWER High
+> 
+> ..............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+
+
+
+
+
+
+
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+!!Error: 1037, Cannot execute when Remote Ethernet enabled except from the remote Ethernet device.
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> go PDCR_pa1
+> 
+> 
+> 
+> 
+> go PDCR_pa7
+> go P200
+!!Error: 7007, Specified point number was not defined. Specify a teach point number.
+> 
+> go PDCR_pa1
+> 
+> 
+> go PDCRMID_vision_1
+> 
+> 
+> 
+!!Error: 4025, Cannot execute a motion command during emergency stop condition.
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+!!Error: 4025, Cannot execute a motion command during emergency stop condition.
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> jump PDCR_vision_1
+> 
+> jump PDCD_vision_1
+> jump PDCP_vision_1
+> 
+> 
+> jump PDCR_vision_2
+> 
+> 
+> jump PDCR_vision_3
+> 
+> 
+!!Error: 2318, Cannot execute a motion command when an error has been detected.
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> GO PDC_D_V1
+!!Error: 2513, Specified point label is not defined.
+> 
+!!Error: 2513, Specified point label is not defined.
+> 
+!!Error: 3205, Point is not specified.
+> 
+!!Error: 2513, Specified point label is not defined.
+> 
+!!Error: 2513, Specified point label is not defined.
+> 
+> 
+> GO PDC_R_pa1
+> GO PDC_R_pa2
+> 
+> GO Home1
+> GO PDC_D_PV
+> 
+> 
+!!Error: 4025, Cannot execute a motion command during emergency stop condition.
+> 
+> 
+!!Error: 2513, Specified point label is not defined.
+> GO PDC_R_pa5
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+!!Error: 4025, Cannot execute a motion command during emergency stop condition.
+> 
+> 
+> 
+> 
+> 
+> on 512
+> on 513
+> on 514
+> on 517
+> 
+> go TBLU_pa1
+> 

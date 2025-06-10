@@ -1,0 +1,54 @@
+Function Create_Zones
+Double XminZ1, XminZ2, XminZ3
+Double XmaxZ1, XmaxZ2, XmaxZ3
+	
+	XminZ1 = 100; XmaxZ1 = 1000
+	XminZ2 = -270; XmaxZ2 = 100
+	XminZ3 = -1000; XmaxZ3 = -270
+	
+	Box 1, XminZ1, XmaxZ1, 0, 0, 0, 0	'Zona 1: Caja PDCR, PDCS, F96
+	Box 2, XminZ2, XmaxZ2, 0, 0, 0, 0	'Zona 2: Cajas TBLU, PDCD
+	Box 3, XminZ3, XmaxZ3, 0, 0, 0, 0	'Zona 3: Caja PDCP
+Fend
+
+Function Update_CurrentZone
+	If InsideBox(1) = True Then
+		CurrentZone$ = "zone_1"
+	ElseIf InsideBox(2) = True Then
+		CurrentZone$ = "zone_2"
+	ElseIf InsideBox(3) = True Then
+		CurrentZone$ = "zone_3"
+	Else
+		CurrentZone$ = "Undefined zone"
+	EndIf
+	Print("current zone: " + CurrentZone$)
+Fend
+
+Function Go_Zone
+	
+	If CurrentZone$ = "zone_3" Then
+		Move Here :Z(Zzone)
+		Move P201 :U(CU(RealPos))
+	EndIf
+	
+	Move Here :Y(Yzone)
+	Move Here :Z(Zzone)
+		
+	Move P201 :U(CU(RealPos))
+	Move Here :U(CU(P200)) ROT
+Fend
+
+Function Get_DesiredZone
+	If DesiredZone$ = "zone_1" Then
+		P201 = Zone1_up
+	ElseIf DesiredZone$ = "zone_2" Then
+		P201 = Zone2_up
+	ElseIf DesiredZone$ = "zone_3" Then
+		P201 = Zone3_up
+	ElseIf DesiredZone$ = "HOME" Then
+		P201 = Home1
+	Else
+		Print("Undefined zone")
+	EndIf
+Fend
+

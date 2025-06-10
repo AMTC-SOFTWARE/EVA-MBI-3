@@ -1,0 +1,21 @@
+Function CreateZones
+	XminZ1 = 1000; XmaxZ1 = 100
+	XminZ2 = 100; XmaxZ2 = -300
+	XminZ3 = -300; XmaxZ3 = -1000
+	
+	Box 1, XminZ1, XmaxZ1, 0, 0, 0, 0	'Zona 1: Caja PDCR, PDCS, F96
+	Box 2, XminZ2, XmaxZ2, 0, 0, 0, 0	'Zona 2: Cajas TBLU, PDCD
+	Box 3, XminZ3, XmaxZ3, 0, 0, 0, 0	'Zona 3: Caja PDCP
+Fend
+
+Function UpdateZones
+	If InsideBox(1) = True Then
+		CurrentZone$ = "zone_1"
+	ElseIf InsideBox(2) = True Then
+		CurrentZone$ = "zone_2"
+	ElseIf InsideBox(3) = True Then
+		CurrentZone$ = "zone_3"
+	Else
+		CurrentZone$ = "Undefined zone"
+	EndIf
+Fend
