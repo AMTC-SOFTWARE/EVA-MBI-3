@@ -28,17 +28,19 @@ modules = {}
 modules_t = {}
 
 fuses_color = {
-    "1":    "black",
-    "5":    "beige",
-    "7.5":  "cafe",
-    "10":   "rojo",
-    "15":   "azul",
-    "20":   "amarillo",
-    "25":   "natural",
-    "30":   "verde",
-    "40":   "naranja",
-    "50":   "rojo",
-    "60":   "azul"
+    #"1":    "negro",
+    "5":    {1012177:"beige", 1012166:"beige", 1012180:"beige_clear", 1012147:"beige"},
+    "7.5":  {1012174:"cafe", 1012168:"cafe", 1012146:"cafe"},
+    "10":   {1012178:"rojo", 1012170:"rojo", 1012179:"rojo_clear"},
+    "15":   {1012172:"azul", 1012169:"azul"},
+    "20":   {1012167:"amarillo"},
+    "25":   {1012171:"natural"},
+    "30":   {1012173: "verde", 1020063:"verde"},
+    "40":   {1012175: "naranja"},
+    "50":   {1012176:"rojo"},
+    "60":   {1008695:"1008695"},
+    "70":   {1010733:"1010733"}
+    # "60":   "azul"
     }
 
 ##################################### Modules management #################################
@@ -162,7 +164,8 @@ def makeModules(data):
                                         #print("VARIANTE PARA PDC-R DEL MÓDULO: ",box)
                                         if fuse == "X" or fuse == "T" or fuse == "U":
                                             fuse = "REL" + fuse
-                                    amp = currentSheet.cell(row = row, column = 7).value #se obtiene el valor de la celda, ej: 7.5A
+                                    amp = currentSheet.cell(row = row, column = 7).value #se obtiene el valor de la celda, ej: 7.
+                                    oracle = currentSheet.cell(row = row, column = 5).value #se obtiene el valor de la celda, ej: 1012173
 
                                     if isinstance(amp,str):
                                         amp = amp.replace(" ","")#se eliminan posibles espacios existentes, si hay datos de lo contrario es None
@@ -179,7 +182,7 @@ def makeModules(data):
 
                                     if not(box in modules[module]):
                                         modules[module][box] = {}
-                                    modules[module][box][fuse] = amp[:-1]
+                                    modules[module][box][fuse] = [amp[:-1], oracle] #se quita la A de amp para que quede solo el número ej: 7
                 del file
                 gc.collect()
                 os.remove(root+'\\'+ file_name)
@@ -231,14 +234,15 @@ def makeModules(data):
                 temp[key][box]  = {}
             for fuse in modules[module][box]:
                 try:
-                    amp     = modules[module][box][fuse]
+                    amp     = modules[module][box][fuse][0]
+                    oracle     = modules[module][box][fuse][1]
                     color = ""
-                    if amp == "60":
-                        color = "1008695"
-                    elif amp == "70":
-                        color = "1010733"
-                    else:
-                        color   = fuses_color[amp]
+                    # if amp == "60":
+                    #     color = "1008695"
+                    # elif amp == "70":
+                    #     color = "1010733"
+                    # else:
+                    color   = fuses_color[amp][oracle]
                     temp[key][box][fuse] = color
                 except Exception as ex:
                     print("\n Vision exception in [", module, "] [", box, "] [", fuse, "]")
