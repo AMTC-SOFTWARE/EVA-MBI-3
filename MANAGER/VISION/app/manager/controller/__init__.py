@@ -291,6 +291,7 @@ class StartCycle (QState):
 
         self.model.reset()
         command = {
+            "lineEditKey": True,
             "lbl_info1" : {"text": "", "color": "black"},
             "lbl_info2" : {"text": "", "color": "green"},
             "lbl_info3" : {"text": "", "color": "black"},
@@ -1645,6 +1646,7 @@ class CheckPDCR (QState):
             command = {
                 "lbl_result" : {"text": "Demasiados Intentos, para reiniciar los intentos", "color": "red", "font": "35pt"},
                 "lbl_steps" : {"text": "Llamar a un SUPERVISOR de CALIDAD. Llave deshabilitada.", "color": "red", "font": "35pt"},
+                "lineEditKey_focus": False #line edit de "QR Key"
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
             self.model.disable_key = True
@@ -1652,8 +1654,6 @@ class CheckPDCR (QState):
             self.max_tries.emit()
 
         else:
-            
-            
             if self.model.qr_esperado in qr_leido:
                 print("Qr Correcto")
                 command = {
@@ -1789,6 +1789,7 @@ class QualityValidation (QState):
                     command = {
                         "lbl_result" : {"text": nombre_usuario + " Autorizó", "color": "green"},
                         "lbl_steps" : {"text": "Vuelva a Intentar, o Llave para Finalizar", "color": "green", "font": "35pt"},
+                        "lineEditKey_focus": True #line edit de "QR Key"
                         }
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                     
@@ -1841,7 +1842,8 @@ class QrRework (QState):
         command = {
             "lbl_result" : {"text": "Datamatrix procesado anteriormente", "color": "green"},
             "lbl_steps" : {"text": "Escanea otro código o gira la llave para continuar", "color": "black"},
-            "show":{"scanner": True}
+            "show":{"scanner": True},
+            "lineEditKey_focus": True #line edit de "QR Key"
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
@@ -1937,13 +1939,15 @@ class Finish (QState):
             else:
                 command = {
                     "lbl_result" : {"text": "Error al guardar los datos", "color": "red"},
-                    "lbl_steps" : {"text": "Gire la llave de reset", "color": "black"}
+                    "lbl_steps" : {"text": "Gire la llave de reset", "color": "black"},
+                    "lineEditKey_focus": True #line edit de "QR Key"
                     }
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         else:
             command = {
                 "lbl_result" : {"text": "Error de conexión con la base de datos", "color": "red"},
-                "lbl_steps" : {"text": "Gire la llave de reset", "color": "black"}
+                "lbl_steps" : {"text": "Gire la llave de reset", "color": "black"},
+                "lineEditKey_focus": True #line edit de "QR Key"
                 }
             publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
         
@@ -1977,7 +1981,8 @@ class Finish (QState):
                 print("Conexión con FAMX2 exception: ", ex)
                 command = {
                         "lbl_result" : {"text": "Error de Conexión con Sistema de Trazabilidad", "color": "red", "font": "40pt"},
-                        "lbl_steps" : {"text": "Gire la llave de reset", "color": "black", "font": "22pt"}
+                        "lbl_steps" : {"text": "Gire la llave de reset", "color": "black", "font": "22pt"},
+                        "lineEditKey_focus": True #line edit de "QR Key"
                         }
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 

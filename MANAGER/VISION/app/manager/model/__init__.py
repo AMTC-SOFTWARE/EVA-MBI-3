@@ -63,6 +63,7 @@ class Model (QObject):
         self.max_pdcr_try = 3
         #variable para inhabilitar la llave
         self.disable_key = False
+        self.llave = False
 
         #variable para avisar que se está saliendo de config y no es necesario re-calcular el conteo de arneses
         self.saliendo_config = False
@@ -148,6 +149,7 @@ class Model (QObject):
             }
 
         self.sub_topics = {
+                        "keyboard": "Keyboard/status",
                         "plc": "PLC/1/status",  
                         "torque_1": "torque/1/status",
                         "torque_2": "torque/2/status",

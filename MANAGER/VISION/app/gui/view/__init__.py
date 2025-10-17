@@ -18,7 +18,7 @@ from time import strftime, sleep
 from copy import copy
 import requests
 import pandas as pd
-from gui.view import resources_rc, main, login, scanner, img_popout, Tabla_horas
+from gui.view import resources_rc, main, login, scanner, img_popout, Tabla_horas, message_pop
 from gui.view.comm import MqttClient
 from manager.model import Model
 import math
@@ -46,6 +46,7 @@ class MainWindow (QMainWindow):
         self.qw_img_popout = Img_popout(parent = self)
         self.pop_out = PopOut(self)
         self.qw_Tabla_horas = Tabla_hora_w(parent = self)
+        self.qw_message_pop= Message_pop(parent = self)
 
         self.client = MqttClient(self.model, self)
         self.client.subscribe.connect(self.input) #suscrito a gui y al robot
@@ -82,6 +83,11 @@ class MainWindow (QMainWindow):
         self.ui.lineEdit.setFocus()
         self.ui.lineEdit.setVisible(False)
 
+        self.ui.lineEditKey.setPlaceholderText("QR Key")
+        self.ui.lineEditKey.setFocus(True)
+        self.ui.lineEditKey.setVisible(False)
+        self.ui.lineEditKey.setEchoMode(QLineEdit.Password)
+
         self.ui.lbl_cant.setVisible(False)
         self.ui.lbl_cant2.setVisible(False)
         self.ui.lbl_cant3.setVisible(False)
@@ -103,6 +109,7 @@ class MainWindow (QMainWindow):
         self.ui.btn_hxh.setFocusPolicy(Qt.NoFocus)
 
         #self.ui.lineEdit.returnPressed.connect(self.qrBoxes)
+        self.ui.lineEditKey.returnPressed.connect(self.QR)
         self.qw_login.ui.lineEdit.returnPressed.connect( self.login)
         self.qw_login.ui.btn_ok.clicked.connect(self.login)
         self.qw_scanner.ui.btn_ok.clicked.connect(self.scanner)
@@ -133,7 +140,9 @@ class MainWindow (QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.status)
         #self.timer.start(200)
-        
+
+        self.qw_message_pop.ui.btn_ok.clicked.connect(self.key_process)
+        self.qw_message_pop.ui.btn_cancel.clicked.connect(self.cancel_key_process)
         
         self.allow_close        = True
         self.cycle_started      = False
@@ -436,7 +445,17 @@ class MainWindow (QMainWindow):
                     print("La caja seleccionada no está clampeada ni fue deshabilitada por Raffi (no dice clamp_correcto ni Habilitar)")
                     print("No se envió ninguna acción")
 
-                
+    def cancel_key_process(self):
+        print("key no emit")
+        
+        self.output.emit({"keyboard_cancel":"true"})
+        print("vamos a cancelar")
+        self.qw_message_pop.close()
+    def key_process(self):
+        
+        self.output.emit({"keyboard_ok":"true"})
+        print("va a hacer algo con la llave")
+                  
     def horaxhora(self):
         #self.qw_Tabla_horas.show()
         print("vamos a calcular los hora por hora")
@@ -751,6 +770,18 @@ class MainWindow (QMainWindow):
         except Exception as ex:
             print("qrBoxes exception:", ex)
 
+    @pyqtSlot()
+    def QR (self):
+        try:
+            text = self.ui.lineEditKey.text().upper()
+            text = text.replace("\n","")
+            if len(text) > 0: 
+                self.output.emit({"codeQR":text})
+            self.ui.lineEditKey.clear()
+
+        except Exception as ex:
+            print("QR exception:", ex)
+
     @pyqtSlot(dict)
     def input(self, message):
         try:
@@ -837,6 +868,35 @@ class MainWindow (QMainWindow):
             if "request" in message:
                 if message["request"] == "status":
                     QTimer.singleShot(100, self.sendStatus)
+            if "message_pop" in message:
+                
+                if "Visible" in message["message_pop"]:
+                    self.qw_message_pop.setVisible(message["message_pop"]["Visible"])
+
+                if "text" in message["message_pop"]:
+                    self.qw_message_pop.ui.lbl_message_pop.setText(message["message_pop"]["text"])
+
+                if "close" in message["message_pop"] and self.qw_message_pop.isVisible: 
+                    self.qw_message_pop.ui.btn_cancel.click()
+            if "lineEditKey" in message:
+                    
+                if "lineEditKey_focus" in message:
+                    self.activateWindow()
+                    self.raise_()
+                    self.show()
+                    self.ui.lineEditKey.setFocus(True)
+                else:
+                    if message["lineEditKey"] == True:
+                        self.ui.lineEditKey.setVisible(True)
+                        
+                    if message["lineEditKey"] == False:
+                        self.ui.lineEditKey.setVisible(False)
+            if "lineEditKey_focus" in message:
+                self.activateWindow()
+                self.raise_()
+                self.show()
+                self.ui.lineEditKey.setFocus(True)
+
             if "lbl_info1" in message:
                 self.ui.lbl_info1.setText(message["lbl_info1"]["text"])
                 if "color" in message["lbl_info1"]:
@@ -1279,6 +1339,22 @@ class PopOut (QMessageBox):
         self.setStyleSheet("QPushButton { font-size: 20px; }"
                            "QLabel { color : red; font-size: 40px; font-weight: bold; }"
                            )
+
+    def closeEvent(self, event):
+        event.ignore() 
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            print("Escape key was pressed")
+
+class Message_pop (QDialog):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.ui = message_pop.Ui_message_pop()
+        self.ui.setupUi(self)
+        self.ui.btn_ok.setFocusPolicy(Qt.NoFocus)
+        self.ui.btn_cancel.setFocusPolicy(Qt.NoFocus)
+        #self.ui.lineEdit.setFocus()
 
     def closeEvent(self, event):
         event.ignore() 

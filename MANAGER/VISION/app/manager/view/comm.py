@@ -31,6 +31,9 @@ class MqttClient (QObject):
     vision      =   pyqtSignal()
     height      =   pyqtSignal()
     start       =   pyqtSignal()
+
+    keyboard_key = ""
+    keyboard_value = False
     
     #error_cortina   =   pyqtSignal()
 
@@ -1072,6 +1075,34 @@ class MqttClient (QObject):
                         self.model.revisando_resultado_height = False
             
             ##############################################################################################
+            if message.topic == self.model.sub_topics["keyboard"]:
+                #ejemplo de mensaje: { "keyboard_E" : true }
+                payload_str = json.dumps(payload)       # convertir diccionario payload a string y guardarlo
+                payload_str = payload_str.replace("{","")
+                payload_str = payload_str.replace("}","")
+                payload_str = payload_str.replace('"',"")
+                payload_str = payload_str.replace("true","True")
+                payload_str = payload_str.replace("false","False")
+                payload_str = payload_str.replace(" ","")
+                separate_msj = payload_str.rsplit(":")
+                self.keyboard_key = separate_msj[0]
+                #eval() evalua una cadena de caracteres y decide si es True o False si cumple con las entradas esperadas convirtiendolo a booleano
+                self.keyboard_value = eval(separate_msj[1])
+
+                ################## LLAVE MEDIANTE LAS FUNCIONES DE EL TECLADO Y MOUSE ################## 
+                if self.model.disable_key == False and self.model.llave == True:
+
+                    if self.keyboard_key == "keyboard_esc":
+                        print("key esc")
+                        command = {"message_pop":{"Visible":False}}
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        print("key no emit")
+                        self.model.llave = False
+                    elif self.keyboard_key == "click_derecho":
+                        command = {"message_pop":{"Visible":False}}
+                        self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                        self.key.emit()
+                        self.model.llave = False
 
             if "torque/" in message.topic and "/status" in message.topic:
                 if "result" in payload: 
@@ -1083,6 +1114,19 @@ class MqttClient (QObject):
                         self.torque.emit() 
 
             if message.topic == self.model.sub_topics["gui"]:
+                if self.model.llave == True:
+                  if "keyboard_cancel" in payload:
+                      command = {"message_pop":{"Visible":False}}
+                      self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                      print("key no emit")
+                      self.model.llave = False
+                  if "keyboard_ok" in payload:
+                      command = {"message_pop":{"Visible":False}}
+                      self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                      self.key.emit()
+                      print("key emit")
+                      self.model.llave = False
+
                 if "request" in payload:
                     self.model.input_data["gui"]["request"] = payload["request"]
                     if payload["request"] == "login":
@@ -1097,6 +1141,27 @@ class MqttClient (QObject):
                 if "code" in payload:
                     self.model.input_data["gui"]["code"] = payload["code"]
                     self.code.emit()
+
+                if "codeQR" in payload:
+                    #CENTERLLAVE AMTC
+                    if "CENTERLLAVE" in str(payload):
+                        print("CENTERLLAVE RECIVED")
+                        if self.model.disable_key == False:
+                            self.key.emit()
+                        else:
+                            print("Llave no emitida self.model.disable_key == True")
+
+                    #CENTERKEY CALIDAD
+                    if "CENTERKEY" in str(payload):
+                        print("CENTERKEY RECIVED")
+                        if self.model.disable_key == False:
+                            command = {"message_pop": {"text":"¿Seguro que desea dar llave?\n  Presione Esc. para salir, Click Derecho para continuar...",
+                                               "Visible":True},}
+                            self.client.publish(self.model.pub_topics["gui"],json.dumps(command), qos = 2)
+                            self.model.llave = True
+                        else:
+                            print("Llave no emitida, self.model.disable_key == True")
+                            
                 if "visible" in payload:
                     self.model.input_data["gui"]["visible"] = payload["visible"]
                     self.visible.emit()
