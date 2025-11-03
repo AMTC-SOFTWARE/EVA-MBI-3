@@ -28,18 +28,18 @@ modules = {}
 modules_t = {}
 
 fuses_color = {
-    #"1":    "negro",
-    "5":    {1012177:"beige", 1012166:"beige", 1012180:"beige_clear", 1012147:"beige"},
-    "7.5":  {1012174:"cafe", 1012168:"cafe", 1012146:"cafe"},
-    "10":   {1012178:"rojo", 1012170:"rojo", 1012179:"rojo_clear"},
-    "15":   {1012172:"azul", 1012169:"azul"},
-    "20":   {1012167:"amarillo"},
-    "25":   {1012171:"natural"},
-    "30":   {1012173: "verde", 1020063:"verde"},
-    "40":   {1012175: "naranja"},
-    "50":   {1012176:"rojo"},
-    "60":   {1008695:"1008695"},
-    "70":   {1010733:"1010733"}
+    #"1":    "negro", HMTEST ILX296270B1031517 EL.
+    "5":    {"N000000008698":"beige", "N000000008708":"beige", "N000000004202":"beigeClear", "N000000006465":"beige"},
+    "7.5":  {"N000000008699":"cafe", "N000000008709":"cafe", "N000000006466":"cafe"},
+    "10":   {"N000000008700":"rojo", "N000000008710":"rojo", "N000000004204":"rojoClear"},
+    "15":   {"N000000008701":"azul", "N000000008711":"azul"},
+    "20":   {"N000000008702":"amarillo"},
+    "25":   {"N000000008703":"natural"},
+    "30":   {"N000000008704": "verde", "N000000007658":"verde"},
+    "40":   {"N000000007659": "naranja"},
+    "50":   {"N000000007660":"rojo"},
+    "60":   {"A0009821923":"1008695"},
+    "70":   {"A0025429419":"1010733"}
     # "60":   "azul"
     }
 
@@ -165,7 +165,7 @@ def makeModules(data):
                                         if fuse == "X" or fuse == "T" or fuse == "U":
                                             fuse = "REL" + fuse
                                     amp = currentSheet.cell(row = row, column = 7).value #se obtiene el valor de la celda, ej: 7.
-                                    oracle = currentSheet.cell(row = row, column = 5).value #se obtiene el valor de la celda, ej: 1012173
+                                    mercedes = currentSheet.cell(row = row, column = 4).value #se obtiene el valor de la celda, ej: N000000008708
 
                                     if isinstance(amp,str):
                                         amp = amp.replace(" ","")#se eliminan posibles espacios existentes, si hay datos de lo contrario es None
@@ -182,7 +182,7 @@ def makeModules(data):
 
                                     if not(box in modules[module]):
                                         modules[module][box] = {}
-                                    modules[module][box][fuse] = [amp[:-1], oracle] #se quita la A de amp para que quede solo el número ej: 7
+                                    modules[module][box][fuse] = [amp[:-1], mercedes] #se quita la A de amp para que quede solo el número ej: 7
                 del file
                 gc.collect()
                 os.remove(root+'\\'+ file_name)
@@ -235,14 +235,14 @@ def makeModules(data):
             for fuse in modules[module][box]:
                 try:
                     amp     = modules[module][box][fuse][0]
-                    oracle     = modules[module][box][fuse][1]
+                    mercedes     = modules[module][box][fuse][1]
                     color = ""
                     # if amp == "60":
                     #     color = "1008695"
                     # elif amp == "70":
                     #     color = "1010733"
                     # else:
-                    color   = fuses_color[amp][oracle]
+                    color   = fuses_color[amp][mercedes]
                     temp[key][box][fuse] = color
                 except Exception as ex:
                     print("\n Vision exception in [", module, "] [", box, "] [", fuse, "]")
