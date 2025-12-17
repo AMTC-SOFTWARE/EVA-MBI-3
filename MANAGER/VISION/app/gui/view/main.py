@@ -175,20 +175,22 @@ class Ui_main(object):
         self.splitter = QtWidgets.QSplitter(self.centralwidget)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName("splitter")
-        self.lbl_info1 = QtWidgets.QLabel(self.splitter)
-        self.lbl_info1.setFixedSize(210, 50)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(self.lbl_info1.sizePolicy().hasHeightForWidth())
-        # self.lbl_info1.setSizePolicy(sizePolicy)
-        # self.lbl_info1.setMinimumSize(QtCore.QSize(400, 200))
-        # self.lbl_info1.setMaximumSize(QtCore.QSize(400, 200))
+
+         # --- Scroll Area para lbl_info1 ---
+        self.scroll_info = QtWidgets.QScrollArea(self.splitter)
+        self.scroll_info.setWidgetResizable(True)  # Para que se ajuste automáticamente
+        self.scroll_info.setFixedSize(420, 220)    # Tamaño visible del área con scroll
+
+        self.lbl_info1 = QtWidgets.QLabel()
+        self.lbl_info1.setWordWrap(True)  # Permite que el texto se ajuste en varias líneas
         font = QtGui.QFont()
         font.setFamily("Sitka Text")
         font.setPointSize(12)
         self.lbl_info1.setFont(font)
         self.lbl_info1.setObjectName("lbl_info1")
+
+        # Colocar el QLabel dentro del scroll area
+        self.scroll_info.setWidget(self.lbl_info1)
 
         #LineEdit para leer el QR
         self.lineEditKey = QtWidgets.QLineEdit(self.splitter)
