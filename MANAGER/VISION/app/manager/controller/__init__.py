@@ -691,8 +691,8 @@ class CheckQr (QState):
                 if coincidencias != 1:
                     print("Datamatrix Redundante")
                     command = {
-                        "lbl_result" : {"text": "Datamatrix redundante", "color": "red"},
-                        "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
+                        "lbl_result" : {"text": "Modularidad redundante", "color": "red"},
+                        "lbl_steps"  : {"text": "Revisar Base de Datos e inténtalo de nuevo", "color": "black"}
                         }
                     publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                     self.nok.emit()
@@ -702,8 +702,8 @@ class CheckQr (QState):
             else:
                 print("La Modularidad NO pertenece a ningún evento")
                 command = {
-                    "lbl_result" : {"text": "Datamatrix no registrado", "color": "green"},
-                    "lbl_steps" : {"text": "Inténtalo de nuevo", "color": "black"}
+                    "lbl_result" : {"text": "Modularidad no registrada en la bases de datos", "color": "red"},
+                    "lbl_steps"  : {"text": "Carga el .dat e inténtalo de nuevo", "color": "black"}
                     }
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
                 self.nok.emit()
@@ -1840,7 +1840,7 @@ class QrRework (QState):
         print("############################## ESTADO: QrRework ############################")
 
         command = {
-            "lbl_result" : {"text": "Datamatrix procesado anteriormente", "color": "green"},
+            "lbl_result": {"text": "Arnés procesado anteriormente", "color": "red"},
             "lbl_steps" : {"text": "Escanea otro código o gira la llave para continuar", "color": "black"},
             "show":{"scanner": True},
             "lineEditKey_focus": True #line edit de "QR Key"
