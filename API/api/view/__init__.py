@@ -30,6 +30,8 @@ import requests
 from paho.mqtt import publish
 import pyodbc
 import auto_modularities
+import config_modules
+import numpy as np
 
 app = Flask(__name__)
 CORS(app)
@@ -272,6 +274,7 @@ def updateModules():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "modules", filename))
             auto_modularities.refreshModules(data)
+            config_modules.stagingModules(data)
             excelnew = {
                 'DBEVENT': data,
                 'ARCHIVO': filename,
@@ -547,7 +550,7 @@ def preview(ILX):
             'TBLU': {}
         },
         'torque': {
-           'PDC-P':{},
+            'PDC-P':{},
             'PDC-D':{},
             'MFB-P1':{},
             'MFB-S':{},
@@ -706,7 +709,7 @@ def newEvent():
     historial["USUARIO"] = data["USUARIO"]
     historial["DATETIME"] = data["DATETIME"]
     historial["DBEVENT"] = event_name
-
+    escaped_event_name = f"`{event_name}`"
     activo["ACTIVE"] = data["ACTIVE"]
     activo["DBEVENT"] = event_name
     try:
@@ -716,8 +719,8 @@ def newEvent():
         return {"exception": ex.args}
     try:
         with connection.cursor() as cursor:
-            items = cursor.execute("create database "+event_name)
-            sql = "use "+event_name
+            items = cursor.execute("create database "+escaped_event_name)
+            sql = "use "+escaped_event_name
             cursor.execute(sql)
             definicionesTable = """CREATE TABLE definiciones (
             ID int primary key AUTO_INCREMENT, 
@@ -728,18 +731,65 @@ def newEvent():
             ACTIVE tinyint NOT NULL
             )"""
             cursor.execute(definicionesTable)
+            configTable = """CREATE TABLE modulos_configuracion (
+            ID int primary key AUTO_INCREMENT, 
+            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
+            TIPO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
+            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_13 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_14 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_15 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_16 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
+            )"""
+            cursor.execute(configTable)
+
+            configTableStaging = """CREATE TABLE modulos_configuracion_staging (
+            ID int primary key AUTO_INCREMENT, 
+            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
+            TIPO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
+            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_13 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_14 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_15 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_16 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
+            )"""
+            cursor.execute(configTableStaging)
+
+
             fusiblesTable = """CREATE TABLE modulos_fusibles (
             ID int primary key AUTO_INCREMENT, 
             MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            CAJA_1 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_2 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_3 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_4 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_5 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_6 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_7 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_8 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_9 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -752,15 +802,15 @@ def newEvent():
             alturaTable = """CREATE TABLE modulos_alturas (
             ID int primary key AUTO_INCREMENT, 
             MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            CAJA_1 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_2 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_3 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_4 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_5 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_6 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_7 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_8 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_9 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -773,15 +823,15 @@ def newEvent():
             torquesTable = """CREATE TABLE modulos_torques (
             ID int primary key AUTO_INCREMENT, 
             MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            CAJA_1 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_2 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_3 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_4 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_5 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_6 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_7 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_8 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_9 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -1718,8 +1768,7 @@ def verArnes():
     img_bytes.seek(0)
 
     # Retorna la imagen en la respuesta HTTP
-    return send_file(img_bytes, mimetype='image/webp')   
-
+    return send_file(img_bytes, mimetype='image/webp')
 @app.route('/horaxhora/<table>/<column>', methods=['GET'])
 def horaxhora(table, column):
     turnos = request.get_json(force=True)
@@ -1978,7 +2027,6 @@ def descargar(db, table, task):
     for j in arreglo:
         sheet.append(j)
     alineacion_izquierda = Alignment(horizontal='left')
-    
     sheet.insert_cols(idx=6,amount=1)
     sheet['F2'] = 'Duracion (dias, horas, minutos, segundos)'
     sheet['H2'] = 'Resultado-Vision'
