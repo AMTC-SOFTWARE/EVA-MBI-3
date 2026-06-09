@@ -1,0 +1,149 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aplicación Principal &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Interfaz Gráfica" href="gui.html" />
+    <link rel="prev" title="EVA-MBI-3 Documentación" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Aplicación Principal</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/app.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-app">
+<span id="aplicacion-principal"></span><h1>Aplicación Principal<a class="headerlink" href="#module-app" title="Link to this heading"></a></h1>
+<p>Punto de entrada principal de la aplicación EVA-MBI-3.</p>
+<p>Este módulo es responsable de:</p>
+<ul class="simple">
+<li><p>Crear la instancia de <code class="docutils literal notranslate"><span class="pre">QApplication</span></code>.</p></li>
+<li><p>Inicializar la interfaz gráfica principal <code class="docutils literal notranslate"><span class="pre">MainWindow</span></code>.</p></li>
+<li><p>Crear el controlador principal basado en máquina de estados.</p></li>
+<li><p>Conectar las señales iniciales de arranque.</p></li>
+</ul>
+<dl class="simple">
+<dt>Autores:</dt><dd><ul class="simple">
+<li><p>MS. Marco Rutiaga Quezada</p></li>
+<li><p>MS. Aarón Castillo Tobías</p></li>
+<li><p>MS. César Velázquez Zaldo</p></li>
+<li><p>Ing. Rogelio García</p></li>
+</ul>
+</dd>
+<dt>Contribuidores:</dt><dd><ul class="simple">
+<li><p>Ing. Osvaldo Garza</p></li>
+<li><p>Ing. Roberto Lugo</p></li>
+</ul>
+</dd>
+<dt>Notas:</dt><dd><p>Comandos utilizados para generar el ejecutable y configurar
+la experiencia de usuario.</p>
+</dd>
+</dl>
+<p>PyInstaller:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyinstaller</span> <span class="o">--</span><span class="n">noconsole</span> <span class="o">--</span><span class="n">icon</span><span class="o">=</span><span class="n">icon</span><span class="o">.</span><span class="n">ico</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">data</span> <span class="n">data</span><span class="p">;</span><span class="n">data</span> <span class="o">--</span><span class="n">noconfirm</span> <span class="n">app</span><span class="o">.</span><span class="n">py</span>
+<span class="n">pyinstaller</span> <span class="o">--</span><span class="n">icon</span><span class="o">=</span><span class="n">icon</span><span class="o">.</span><span class="n">ico</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">data</span> <span class="n">data</span><span class="p">;</span><span class="n">data</span> <span class="o">--</span><span class="n">noconfirm</span> <span class="n">app</span><span class="o">.</span><span class="n">py</span>
+<span class="n">pyinstaller</span> <span class="o">--</span><span class="n">onedir</span> <span class="o">--</span><span class="n">icon</span><span class="o">=</span><span class="n">icon</span><span class="o">.</span><span class="n">ico</span> <span class="o">--</span><span class="n">contents</span><span class="o">-</span><span class="n">directory</span> <span class="s2">&quot;.&quot;</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">data</span> <span class="n">data</span><span class="p">;</span><span class="n">data</span> <span class="n">app</span><span class="o">.</span><span class="n">py</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">PyInstaller</span> <span class="o">--</span><span class="n">icon</span><span class="o">=</span><span class="n">icon</span><span class="o">.</span><span class="n">ico</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">data</span> <span class="n">data</span><span class="p">;</span><span class="n">data</span> <span class="n">app</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Configuración de experiencia de usuario:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Reg</span> <span class="n">add</span> <span class="n">HKCU</span>\<span class="n">Software</span>\<span class="n">Microsoft</span>\<span class="n">Windows</span>\<span class="n">CurrentVersion</span>\<span class="n">Policies</span>\<span class="n">System</span> <span class="o">/</span><span class="n">v</span> <span class="n">DisableTaskMgr</span> <span class="o">/</span><span class="n">t</span> <span class="n">REG_DWORD</span> <span class="o">/</span><span class="n">d</span> <span class="mi">1</span> <span class="o">/</span><span class="n">f</span>
+<span class="n">taskkill</span> <span class="o">/</span><span class="n">f</span> <span class="o">/</span><span class="n">im</span> <span class="n">explorer</span><span class="o">.</span><span class="n">exe</span>
+<span class="n">start</span> <span class="n">explorer</span><span class="o">.</span><span class="n">exe</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="index.html" class="btn btn-neutral float-left" title="EVA-MBI-3 Documentación" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="gui.html" class="btn btn-neutral float-right" title="Interfaz Gráfica" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

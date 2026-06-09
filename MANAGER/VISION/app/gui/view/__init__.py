@@ -1,7 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-@author: MSc. Marco Rutiaga Quezada
+Interfaz gráfica del sistema EVA-MBI-3.
+
+Este módulo contiene la implementación de la ventana principal y de
+las ventanas auxiliares utilizadas durante la operación.
+
+Componentes principales:
+
+- MainWindow
+- Login
+- Scanner
+- Tabla_hora_w
+- Img_popout
+- PopOut
+- Message_pop
 """
+
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -25,6 +39,24 @@ import math
 import re
 import sys
 class MainWindow (QMainWindow):
+    """
+    Ventana principal de la aplicación EVA-MBI-3.
+
+    Esta clase actúa como la capa de presentación del sistema y es
+    responsable de la interacción entre la interfaz gráfica, el modelo
+    de datos y los servicios de comunicación.
+
+    Funcionalidades principales:
+
+    - Mostrar información del ciclo de producción.
+    - Gestionar el proceso de autenticación de operadores.
+    - Recibir y procesar mensajes MQTT.
+    - Actualizar dinámicamente los componentes visuales.
+    - Controlar ventanas auxiliares de escaneo y mensajes.
+    - Gestionar el estado visual de clamps y módulos.
+    - Mostrar imágenes de referencia e instrucciones.
+    - Presentar indicadores de producción y trazabilidad.
+    """
 
     output = pyqtSignal(dict)
     plc_output = pyqtSignal(dict)
@@ -37,6 +69,30 @@ class MainWindow (QMainWindow):
         return resultado
     
     def __init__(self, name = "GUI", topic = "gui", parent = None):
+        """
+        Inicializa la ventana principal del sistema.
+
+        Configura los componentes necesarios para la operación de la
+        interfaz gráfica, incluyendo:
+
+        - Modelo de datos.
+        - Cliente MQTT.
+        - Ventanas auxiliares.
+        - Señales y slots.
+        - Componentes visuales.
+        - Temporizadores.
+        - Recursos gráficos.
+
+        Args:
+            name:
+                Nombre de la aplicación o identificador de la interfaz.
+
+            topic:
+                Tópico MQTT utilizado para la comunicación de la interfaz.
+
+            parent:
+                Widget padre de Qt.
+        """
         super().__init__(parent)
 
         self.model = Model()

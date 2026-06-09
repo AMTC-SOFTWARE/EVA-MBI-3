@@ -1,0 +1,509 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interfaz Gráfica &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="prev" title="Aplicación Principal" href="app.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interfaz Gráfica</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gui.view.MainWindow"><code class="docutils literal notranslate"><span class="pre">MainWindow</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.output"><code class="docutils literal notranslate"><span class="pre">MainWindow.output</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.plc_output"><code class="docutils literal notranslate"><span class="pre">MainWindow.plc_output</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.rbt_output"><code class="docutils literal notranslate"><span class="pre">MainWindow.rbt_output</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.ready"><code class="docutils literal notranslate"><span class="pre">MainWindow.ready</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.quitar_numeros_enteros"><code class="docutils literal notranslate"><span class="pre">MainWindow.quitar_numeros_enteros()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.start_raffi_animation"><code class="docutils literal notranslate"><span class="pre">MainWindow.start_raffi_animation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.stop_raffi_animation"><code class="docutils literal notranslate"><span class="pre">MainWindow.stop_raffi_animation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.start_robot"><code class="docutils literal notranslate"><span class="pre">MainWindow.start_robot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.pause_robot"><code class="docutils literal notranslate"><span class="pre">MainWindow.pause_robot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.continue_robot"><code class="docutils literal notranslate"><span class="pre">MainWindow.continue_robot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.HOME_robot"><code class="docutils literal notranslate"><span class="pre">MainWindow.HOME_robot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.raffi_activation"><code class="docutils literal notranslate"><span class="pre">MainWindow.raffi_activation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.cancel_key_process"><code class="docutils literal notranslate"><span class="pre">MainWindow.cancel_key_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.key_process"><code class="docutils literal notranslate"><span class="pre">MainWindow.key_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.horaxhora"><code class="docutils literal notranslate"><span class="pre">MainWindow.horaxhora()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.menuProcess"><code class="docutils literal notranslate"><span class="pre">MainWindow.menuProcess()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.launchWEB"><code class="docutils literal notranslate"><span class="pre">MainWindow.launchWEB()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.status"><code class="docutils literal notranslate"><span class="pre">MainWindow.status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.login"><code class="docutils literal notranslate"><span class="pre">MainWindow.login()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.scanner"><code class="docutils literal notranslate"><span class="pre">MainWindow.scanner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.qrBoxes"><code class="docutils literal notranslate"><span class="pre">MainWindow.qrBoxes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.QR"><code class="docutils literal notranslate"><span class="pre">MainWindow.QR()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.input"><code class="docutils literal notranslate"><span class="pre">MainWindow.input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.launcher"><code class="docutils literal notranslate"><span class="pre">MainWindow.launcher()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.sendStatus"><code class="docutils literal notranslate"><span class="pre">MainWindow.sendStatus()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.resizeEvent"><code class="docutils literal notranslate"><span class="pre">MainWindow.resizeEvent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.closeEvent"><code class="docutils literal notranslate"><span class="pre">MainWindow.closeEvent()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui.view.Login"><code class="docutils literal notranslate"><span class="pre">Login</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.Login.keyPressEvent"><code class="docutils literal notranslate"><span class="pre">Login.keyPressEvent()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui.view.Scanner"><code class="docutils literal notranslate"><span class="pre">Scanner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.Scanner.closeEvent"><code class="docutils literal notranslate"><span class="pre">Scanner.closeEvent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.Scanner.keyPressEvent"><code class="docutils literal notranslate"><span class="pre">Scanner.keyPressEvent()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui.view.Tabla_hora_w"><code class="docutils literal notranslate"><span class="pre">Tabla_hora_w</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.Tabla_hora_w.closeEvent"><code class="docutils literal notranslate"><span class="pre">Tabla_hora_w.closeEvent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.Tabla_hora_w.keyPressEvent"><code class="docutils literal notranslate"><span class="pre">Tabla_hora_w.keyPressEvent()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui.view.Img_popout"><code class="docutils literal notranslate"><span class="pre">Img_popout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gui.view.PopOut"><code class="docutils literal notranslate"><span class="pre">PopOut</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.PopOut.closeEvent"><code class="docutils literal notranslate"><span class="pre">PopOut.closeEvent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.PopOut.keyPressEvent"><code class="docutils literal notranslate"><span class="pre">PopOut.keyPressEvent()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gui.view.Message_pop"><code class="docutils literal notranslate"><span class="pre">Message_pop</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.Message_pop.closeEvent"><code class="docutils literal notranslate"><span class="pre">Message_pop.closeEvent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.Message_pop.keyPressEvent"><code class="docutils literal notranslate"><span class="pre">Message_pop.keyPressEvent()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Interfaz Gráfica</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/gui.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-gui.view">
+<span id="interfaz-grafica"></span><h1>Interfaz Gráfica<a class="headerlink" href="#module-gui.view" title="Link to this heading"></a></h1>
+<p>Interfaz gráfica del sistema EVA-MBI-3.</p>
+<p>Este módulo contiene la implementación de la ventana principal y de
+las ventanas auxiliares utilizadas durante la operación.</p>
+<p>Componentes principales:</p>
+<ul class="simple">
+<li><p>MainWindow</p></li>
+<li><p>Login</p></li>
+<li><p>Scanner</p></li>
+<li><p>Tabla_hora_w</p></li>
+<li><p>Img_popout</p></li>
+<li><p>PopOut</p></li>
+<li><p>Message_pop</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.view.MainWindow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">MainWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GUI'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gui'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMainWindow</span></code></p>
+<p>Ventana principal de la aplicación EVA-MBI-3.</p>
+<p>Esta clase actúa como la capa de presentación del sistema y es
+responsable de la interacción entre la interfaz gráfica, el modelo
+de datos y los servicios de comunicación.</p>
+<p>Funcionalidades principales:</p>
+<ul class="simple">
+<li><p>Mostrar información del ciclo de producción.</p></li>
+<li><p>Gestionar el proceso de autenticación de operadores.</p></li>
+<li><p>Recibir y procesar mensajes MQTT.</p></li>
+<li><p>Actualizar dinámicamente los componentes visuales.</p></li>
+<li><p>Controlar ventanas auxiliares de escaneo y mensajes.</p></li>
+<li><p>Gestionar el estado visual de clamps y módulos.</p></li>
+<li><p>Mostrar imágenes de referencia e instrucciones.</p></li>
+<li><p>Presentar indicadores de producción y trazabilidad.</p></li>
+</ul>
+<p>Inicializa la ventana principal del sistema.</p>
+<p>Configura los componentes necesarios para la operación de la
+interfaz gráfica, incluyendo:</p>
+<ul class="simple">
+<li><p>Modelo de datos.</p></li>
+<li><p>Cliente MQTT.</p></li>
+<li><p>Ventanas auxiliares.</p></li>
+<li><p>Señales y slots.</p></li>
+<li><p>Componentes visuales.</p></li>
+<li><p>Temporizadores.</p></li>
+<li><p>Recursos gráficos.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Nombre de la aplicación o identificador de la interfaz.</p></li>
+<li><p><strong>topic</strong> – Tópico MQTT utilizado para la comunicación de la interfaz.</p></li>
+<li><p><strong>parent</strong> – Widget padre de Qt.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gui.view.MainWindow.output">
+<span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#gui.view.MainWindow.output" title="Link to this definition"></a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id1"><span class="problematic" id="id2">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gui.view.MainWindow.plc_output">
+<span class="sig-name descname"><span class="pre">plc_output</span></span><a class="headerlink" href="#gui.view.MainWindow.plc_output" title="Link to this definition"></a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id3"><span class="problematic" id="id4">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gui.view.MainWindow.rbt_output">
+<span class="sig-name descname"><span class="pre">rbt_output</span></span><a class="headerlink" href="#gui.view.MainWindow.rbt_output" title="Link to this definition"></a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id5"><span class="problematic" id="id6">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gui.view.MainWindow.ready">
+<span class="sig-name descname"><span class="pre">ready</span></span><a class="headerlink" href="#gui.view.MainWindow.ready" title="Link to this definition"></a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id7"><span class="problematic" id="id8">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.quitar_numeros_enteros">
+<span class="sig-name descname"><span class="pre">quitar_numeros_enteros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cadena</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.quitar_numeros_enteros"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.quitar_numeros_enteros" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.start_raffi_animation">
+<span class="sig-name descname"><span class="pre">start_raffi_animation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.start_raffi_animation"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.start_raffi_animation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.stop_raffi_animation">
+<span class="sig-name descname"><span class="pre">stop_raffi_animation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.stop_raffi_animation"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.stop_raffi_animation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.start_robot">
+<span class="sig-name descname"><span class="pre">start_robot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.start_robot"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.start_robot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.pause_robot">
+<span class="sig-name descname"><span class="pre">pause_robot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.pause_robot"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.pause_robot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.continue_robot">
+<span class="sig-name descname"><span class="pre">continue_robot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.continue_robot"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.continue_robot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.HOME_robot">
+<span class="sig-name descname"><span class="pre">HOME_robot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.HOME_robot"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.HOME_robot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.raffi_activation">
+<span class="sig-name descname"><span class="pre">raffi_activation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.raffi_activation"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.raffi_activation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.cancel_key_process">
+<span class="sig-name descname"><span class="pre">cancel_key_process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.cancel_key_process"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.cancel_key_process" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.key_process">
+<span class="sig-name descname"><span class="pre">key_process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.key_process"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.key_process" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.horaxhora">
+<span class="sig-name descname"><span class="pre">horaxhora</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.horaxhora"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.horaxhora" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.menuProcess">
+<span class="sig-name descname"><span class="pre">menuProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.menuProcess"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.menuProcess" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.launchWEB">
+<span class="sig-name descname"><span class="pre">launchWEB</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.launchWEB"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.launchWEB" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.status">
+<span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.status"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.login">
+<span class="sig-name descname"><span class="pre">login</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.login"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.login" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.scanner">
+<span class="sig-name descname"><span class="pre">scanner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.scanner"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.scanner" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.qrBoxes">
+<span class="sig-name descname"><span class="pre">qrBoxes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.qrBoxes"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.qrBoxes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.QR">
+<span class="sig-name descname"><span class="pre">QR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.QR"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.QR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.input">
+<span class="sig-name descname"><span class="pre">input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.input"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.input" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.launcher">
+<span class="sig-name descname"><span class="pre">launcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.launcher"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.launcher" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.sendStatus">
+<span class="sig-name descname"><span class="pre">sendStatus</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.sendStatus"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.sendStatus" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.resizeEvent">
+<span class="sig-name descname"><span class="pre">resizeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QResizeEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.resizeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.resizeEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.MainWindow.closeEvent">
+<span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.closeEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.view.Login">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Login"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Login" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.Login.keyPressEvent">
+<span class="sig-name descname"><span class="pre">keyPressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QKeyEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Login.keyPressEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Login.keyPressEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.view.Scanner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Scanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Scanner"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Scanner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.Scanner.closeEvent">
+<span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Scanner.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Scanner.closeEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.Scanner.keyPressEvent">
+<span class="sig-name descname"><span class="pre">keyPressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QKeyEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Scanner.keyPressEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Scanner.keyPressEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.view.Tabla_hora_w">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Tabla_hora_w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Tabla_hora_w"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Tabla_hora_w" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.Tabla_hora_w.closeEvent">
+<span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Tabla_hora_w.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Tabla_hora_w.closeEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.Tabla_hora_w.keyPressEvent">
+<span class="sig-name descname"><span class="pre">keyPressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QKeyEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Tabla_hora_w.keyPressEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Tabla_hora_w.keyPressEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.view.Img_popout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Img_popout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Img_popout"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Img_popout" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.view.PopOut">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">PopOut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#PopOut"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.PopOut" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMessageBox</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.PopOut.closeEvent">
+<span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#PopOut.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.PopOut.closeEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.PopOut.keyPressEvent">
+<span class="sig-name descname"><span class="pre">keyPressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QKeyEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#PopOut.keyPressEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.PopOut.keyPressEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.view.Message_pop">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Message_pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Message_pop"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Message_pop" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.Message_pop.closeEvent">
+<span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Message_pop.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Message_pop.closeEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.Message_pop.keyPressEvent">
+<span class="sig-name descname"><span class="pre">keyPressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QKeyEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Message_pop.keyPressEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Message_pop.keyPressEvent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="app.html" class="btn btn-neutral float-left" title="Aplicación Principal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
