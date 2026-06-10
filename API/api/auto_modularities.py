@@ -647,29 +647,92 @@ def updateModularities(data):
             print (ex)
 
 ##################################### Determinantes management #################################
-def refreshDeterminantes(data,usuario):
-    data = makeDeterminantes(data,usuario)
-    updateDeterminantes(data)
+def refreshDeterminantes(db_event, usuario):
+    """
+    Ejecuta el flujo completo de actualización de módulos determinantes.
+
+    La función genera la estructura de módulos determinantes a partir
+    de archivos Excel locales y posteriormente sincroniza los registros
+    resultantes contra la tabla ``determinantes``.
+
+    Args:
+        db_event (str): Identificador del evento en la base de datos.
+        usuario (str):  Identificador del usuario que ejecuta la carga.
+
+    Returns:
+        None
+
+    Raises:
+        IndexError: Si el procesamiento no genera registros válidos.
+        requests.exceptions.RequestException: Si ocurre un error durante
+            la comunicación con la API.
+        FileNotFoundError: Si la carpeta de archivos Excel no existe.
+    """
+
+    print("#################### refreshDeterminantes ####################")
+
+    determinantes_data = makeDeterminantes(db_event, usuario)
+    updateDeterminantes(determinantes_data)
 
 def makeDeterminantes(data,usuario):
+    
+    """
+    Lee archivos Excel del directorio de determinantes, clasifica los módulos
+    por variante de la PDC-R y genera una lista estructurada para su procesamiento.
+
+    La función busca recursivamente archivos ``.xls`` y ``.xlsx`` en la carpeta
+    ``../determinantes``, extrae la información de las hojas válidas, omite la
+    hoja ``PIEZAS`` y organiza los módulos según las columnas correspondientes.
+    Al finalizar, elimina los archivos procesados del directorio.
+
+    Args:
+        data (str): Identificador del evento en la base de datos.
+        usuario (str): Identificador del usuario que ejecuta la carga.
+
+    Returns:
+        list[dict]: Lista de diccionarios con la información estructurada
+        de los módulos determinantes. Cada elemento contiene:
+
+            - ``DBEVENT`` (str): Identificador del evento en la base de datos.
+            - ``MODULO`` (str): Módulo identificador.
+            - ``VARIANTE`` (str): Tipo de caja PDC-R.
+            - ``DATETIME`` (str): Marcador automático para asignación de timestamp.
+            - ``USUARIO`` (str): Identificador del usuario que ejecuta la carga.
+            - ``ACTIVO`` (int): Estado lógico del registro 0/1.
+
+    Raises:
+        FileNotFoundError: Si la ruta del directorio de determinantes no existe.
+        PermissionError: Si el sistema no puede eliminar el archivo Excel procesado.
+    """
+
+    print("#################### makeDeterminantes ####################")
+
     global determinantes
+    # Se crea un diccionario de determinantes para identificar el tipo de caja PDC-R
     determinantes = {
         "PDC-RS":[],
         "PDC-RMID":[],
         "PDC-R":[]
         }
-    print("#################### Modulos Determinantes ####################")
+    
     print("Modulos anteriormente cargados: ",determinantes)
     print("DATA que se pasa como arugmento a Determinantes",data)
     print("USUARIO que se pasa como arugmento a Determinantes",usuario)
+    
+    # Se obtiene la ruta de la carpeta "determinantes" ubicada un nivel arriba del directorio actual
     dir_path = os.path.join(os.getcwd(), '..\\determinantes\\')
     file_name = None
+    
+    # Se recorre recursivamente el contenido del directorio obtenido en dir_path
     for root, dirs, files in os.walk(dir_path):
-        for file_name in files: 
+        for file_name in files:
             if file_name.endswith('.xls') or file_name.endswith('.xlsx'):
                 file = openpyxl.load_workbook(filename = dir_path + file_name, data_only=True)
                 sheets = file.sheetnames
                 for sheet in sheets:
+                    # La hoja PIEZAS no contiene módulos determinantes
+                    if "PIEZAS" in sheet:
+                        continue
                     currentSheet = file[sheet]
                     columnas = ["PDC-RS","PDC-RMID","PDC-R"]
                     for variante in columnas:
@@ -679,30 +742,33 @@ def makeDeterminantes(data,usuario):
                             col = 5
                         if variante == "PDC-R":
                             col = 8
-                        #print("Col Actual: ",col)
-                        for row in range(3, currentSheet.max_row + 1):
+                        # Se inicia desde la fila 3 porque las primeras filas contienen encabezados
+                        for row in range(3, currentSheet.max_row + 1): 
                             module = currentSheet.cell(column = col, row = row).value
+                            
                             if not(module in determinantes[variante]):
                                 if module != None:
                                     determinantes[variante].append(module)
-                                    #print("Modulo: ", module)
                 print("Arreglo final de determinantes: ",determinantes)
                 del file
                 gc.collect()
                 os.remove(root+'\\'+ file_name)
-
+    
+    # Estructura la información en un formato plano compatible con el modelo
+    # de la base de datos (tabla: ``determinantes``)
     structured_data = []
     for variante in determinantes:
         print("Variante: ",variante)
         for module in determinantes[variante]:
             print("Modulo: ",module)
+
             temp = {
             "DBEVENT": data,
             "MODULO": module,
             "VARIANTE": variante,
             "DATETIME": "AUTO",
             "USUARIO": usuario,
-            "ACTIVE": 1
+            "ACTIVO": 1
             }
             structured_data.append(temp)
 
@@ -710,27 +776,63 @@ def makeDeterminantes(data,usuario):
 
     return structured_data
 
-def updateDeterminantes(data):
-    print("updating")
-    tabla = data[0]["DBEVENT"]
-    print("Update determinantes evento+-+-+-+-: ",tabla)
-    endpoint = f"http://{host}:5000/api/get/{tabla}/definiciones/all/-/-/-/-/-"
-    existing = requests.get(endpoint).json()
-    if not("MODULO" in existing):
-        existing["MODULO"] = []
-    for i in data:
+def updateDeterminantes(determinantes_data):
+    """
+    Sincroniza los módulos determinantes contra la tabla ``determinantes``.
+
+    La función consulta los registros existentes asociados al evento recibido
+    (``DBEVENT``) y determina si cada módulo debe insertarse o actualizarse
+    mediante peticiones HTTP a la API.
+
+    Args:
+        determinantes_data (list[dict]): Lista de registros estructurados
+        de módulos determinantes. Cada elemento debe contener los campos:
+
+            - ``DBEVENT`` (str): Identificador del evento en la base de datos.
+            - ``MODULO`` (str): Módulo identificador.
+            - ``VARIANTE`` (str): Tipo de caja PDC-R.
+            - ``DATETIME`` (str): Marcador automático para asignación de timestamp.
+            - ``USUARIO`` (str): Identificador del usuario que ejecuta la carga.
+            - ``ACTIVO`` (int): Estado lógico del registro 0/1.
+
+    Returns:
+        None
+
+    Raises:
+        requests.exceptions.RequestException: Si ocurre un error durante la
+        comunicación con la API.
+        KeyError: Si algún registro no contiene las claves esperadas.
+        IndexError: Si la lista recibida está vacía.
+    """
+
+    print("#################### updateDeterminantes ####################")
+    print("data recibida", determinantes_data)
+
+    database_name = determinantes_data[0]["DBEVENT"]
+    print("Update determinantes evento+-+-+-+-: ", database_name)
+
+    # Obtiene los registros existentes asociados al evento actual
+    endpoint = f"http://{host}:5000/api/get/{database_name}/determinantes/all/-/-/-/-/-"
+    existing_determinantes = requests.get(endpoint).json()
+    
+    # Inicializa la estructura esperada si la consulta no retorna módulos
+    if not("MODULO" in existing_determinantes):
+        existing_determinantes["MODULO"] = []
+
+    for record in determinantes_data:
         try:
-            if not(i["MODULO"] in existing["MODULO"]):
-                endpoint = f"http://{host}:5000/api/post/definiciones"
-                response = requests.post(endpoint, data = json.dumps(i))
+            # Inserta el módulo si aún no existe en la tabla determinantes
+            if not(record["MODULO"] in existing_determinantes["MODULO"]):
+                endpoint = f"http://{host}:5000/api/post/determinantes"
+                post_response = requests.post(endpoint, data=json.dumps(record))
+            # Actualiza el registro existente utilizando el ID asociado al módulo
             else:
-                #pass
-                index = existing["MODULO"].index(i["MODULO"])
-                id = existing["ID"][index]
-                endpoint = f"http://{host}:5000/api/update/definiciones/{id}"
-                response = requests.post(endpoint, data = json.dumps(i))
-        except Exception as ex:
-            print (ex)
+                module_index = existing_determinantes["MODULO"].index(record["MODULO"])
+                record_id = existing_determinantes["ID"][module_index]
+                endpoint = f"http://{host}:5000/api/update/determinantes/{record_id}"
+                update_response = requests.post(endpoint, data=json.dumps(record))
+        except Exception as error:
+            print(f"Error procesando el modulo {record.get('MODULO', 'Desconocido')}: {error}")
 
 if __name__ == '__main__':
     #print("finished")

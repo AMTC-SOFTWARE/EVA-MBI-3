@@ -30,7 +30,7 @@ import requests
 from paho.mqtt import publish
 import pyodbc
 import auto_modularities
-import config_modules
+#import config_modules
 import numpy as np
 
 app = Flask(__name__)
@@ -292,46 +292,88 @@ def updateModules():
 
     finally:
         return response
-
+    
+# Microservicio para cargar la matriz de módulos determinantes
 @app.route('/update/determinantes', methods=['POST'])
 def updateDeterminantes():
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
-    response = {"items": 0}
+    """
+    Procesa la carga de archivos Excel correspondientes a la matriz
+    de módulos determinantes.
+
+    El endpoint recibe un archivo ``.xls`` o ``.xlsx`` junto con los
+    parámetros ``DBEVENT`` y ``USUARIO`` mediante una petición HTTP POST.
+    Posteriormente:
+
+        1. Elimina la carpeta temporal de determinantes existente.
+        2. Valida el archivo recibido.
+        3. Crea el directorio de carga si no existe.
+        4. Guarda el archivo físicamente en disco.
+        5. Ejecuta el proceso de extracción y sincronización de módulos
+           determinantes mediante ``refreshDeterminantes``.
+
+    Request Form Data:
+        DBEVENT (str): Identificador del evento en la base de datos.
+        USUARIO (str): Identificador del usuario que ejecuta la carga.
+
+    Request Files:
+        file: Archivo Excel con la matriz de módulos determinantes.
+
+    Returns:
+        dict: Diccionario con el resultado de la operación.
+
+            - ``{"items": 1}``: La carga fue procesada correctamente.
+            - ``{"items": 0}``: No se procesó ningún archivo válido.
+            - ``{"exception": ...}``: Ocurrió un error durante el proceso.
+
+    Raises:
+        OSError: Si ocurre un error al eliminar o crear directorios.
+        PermissionError: Si el sistema no tiene permisos sobre archivos o carpetas.
+        Exception: Cualquier excepción no controlada durante el procesamiento.
+    """
+
+    response = {"items": 0} # Respuesta de estado del proceso
     allowed_file = False
     file = None
-
-    #se asigna el path de la carpeta que se quiere limpiar y crear
-    path_carpeta = "..\\determinantes"
-    #se obtiene true si existe la carpeta
-    existe_carpeta = os.path.isdir(path_carpeta)
-    if existe_carpeta == True:
-        try:
-            #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
-            rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
-            print("se elimina la carpeta")
-        except OSError as error:
-            print("ERROR AL ELIMINAR CARPETA:::\n",error)
-    #mientras la carpeta no esté creada, se estará tratando de crear
-    while(not(os.path.isdir(path_carpeta))):
-        try:
-            os.mkdir(path_carpeta)
-        except OSError as error:
-            print("ERROR AL CREAR CARPETA:::\n",error)
-
     try:
+        # Ruta temporal utilizada para almacenar archivos determinantes
+        path_carpeta = "..\\determinantes";
+        # Elimina la carpeta existente para evitar reprocesar archivos anteriores
+        existe_carpeta = os.path.isdir(path_carpeta)
+        
+        if existe_carpeta == True:
+            try:
+                rmtree(path_carpeta)
+                print(f'Se elimino la carpeta {path_carpeta} y su contenido')
+            except OSError as error:
+                print("ERROR AL ELIMINAR CARPETA:::\n",error)
+
         data = request.form['DBEVENT']
-        print("DB a la que se carga la Info: ",data)
         usuario = request.form['USUARIO']
-        print("Usuario que carga la info: ",usuario)
+        print("DB a la que se carga la info ->: ",data)
+        print("Usuario que carga la info ->: ",usuario,"\n")
+        
+        # Valida que la petición contenga un archivo Excel compatible
         if 'file' in request.files:
             file = request.files['file']
             if file.filename != '':
                 filename = file.filename
                 allowed_file = '.' in filename and \
                     filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']
+        
+        # Procesa únicamente archivos válidos
         if file and allowed_file:
             filename = secure_filename(file.filename)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], "determinantes")
+            print(path, 'Ubicacion a la que se subira el archivo con la matriz determinantes')
+            
+            # Crea el directorio de carga si aún no existe
+            isExist = os.path.exists(path)
+            if not isExist:
+                # En caso de que no exista, se crea
+                os.makedirs(path)
+                print("The new directory is created!", path)
+            
+            # Guarda el archivo y ejecuta el flujo de actualización
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "determinantes", filename))
             auto_modularities.refreshDeterminantes(data,usuario)
             response["items"] = 1
@@ -691,192 +733,180 @@ def bkup():
 ################################################## Crear Base de Datos (Evento)  ####################################################
 @app.route("/api/post/newEvent",methods=["POST"])
 def newEvent():
-    charSet = "utf8mb4_bin"
+    """
+    Crea un nuevo evento y genera la estructura inicial de base de datos
+    requerida por el sistema.
+
+    El endpoint recibe la información del evento mediante una petición
+    HTTP POST en formato JSON y realiza las siguientes operaciones:
+
+        1. Genera dinámicamente el nombre de la base de datos del evento.
+        2. Crea la base de datos asociada al evento.
+        3. Inicializa las tablas requeridas para la operación del sistema.
+        4. Registra el estado inicial del evento.
+        5. Registra el historial de creación del evento.
+
+    Request JSON:
+        EVENTO (str): Identificador del evento en la base de datos.
+        NUMERO (str): Flujo del evento.
+        CONDUCCION (str): Tipo de conducción del arnés.
+        USUARIO (str): Identificador del usuario que crea el evento.
+        DATETIME (str): Fecha y hora de creación del evento.
+        ACTIVO (int, optional): Estado lógico del evento 0/1.
+
+    Generated Database:
+        evento_<EVENTO>_<NUMERO>_<CONDUCCION>
+
+    Created Tables:
+        - ``activo``
+        - ``determinantes``
+        - ``historial``
+        - ``modularidades``
+        - ``modulos_fusibles``
+        - ``modulos_torques``
+        - ``modulos_covers``
+
+    Returns:
+        dict: Resultado de la operación.
+
+            - ``{"items": 1}``: La base de datos fue creada correctamente.
+            - ``{"items": 0}``: No se realizaron cambios.
+            - ``{"exception": ...}``: Ocurrió un error durante el proceso.
+
+    Raises:
+        pymysql.MySQLError: Si ocurre un error durante la creación de la
+            base de datos o tablas.
+        requests.exceptions.RequestException: Si falla el registro remoto
+            de historial o estado del evento.
+        KeyError: Si faltan campos requeridos en el payload recibido.
+    """
+    db_charset = "utf8mb4" # Codificacion UTF-8
+
+    # Registro inicial para la tabla historial
     historial = {
         "DBEVENT": "",
         "ARCHIVO": "",
         "USUARIO": "",
         "DATETIME": "",
     }
+    # Registro inicial para la tabla activo
     activo = {
         "DBEVENT": "",
-        "ACTIVE": ""
+        "ACTIVO": ""
     }
 
     data = request.get_json(force=True)
     print("Data: ",data)
-    event_name = 'evento_'+data["EVENTO"]+"_"+data["NUMERO"]+"_"+data["CONDUCCION"]
+    event_name = 'evento_'+data["EVENTO"]+"_"+data["NUMERO"]+"_"+data["CONDUCCION"] # Genera el nombre único de la base de datos para el evento
+    
+    historial["DBEVENT"] = event_name
     historial["USUARIO"] = data["USUARIO"]
     historial["DATETIME"] = data["DATETIME"]
-    historial["DBEVENT"] = event_name
-    escaped_event_name = f"`{event_name}`"
-    activo["ACTIVE"] = data["ACTIVE"]
+  
+    if "ACTIVO" in data:
+        activo["ACTIVO"] = data["ACTIVO"]
+    elif "ACTIVE" in data:
+        activo["ACTIVO"] = data["ACTIVE"]
     activo["DBEVENT"] = event_name
+    
+    # Formatea el nombre del evento como identificador SQL
+    escaped_event_name = f"`{event_name}`"
+
     try:
-        connection = pymysql.connect(host = host, user = user, passwd = password)
+        connection = pymysql.connect(host = host, user = user, passwd = password, charset=db_charset)
     except Exception as ex:
-        print("generalPOST connection Exception: ", ex)
+        print("newEvent connection Exception: ", ex)
         return {"exception": ex.args}
     try:
         with connection.cursor() as cursor:
-            items = cursor.execute("create database "+escaped_event_name)
+            items = cursor.execute("create database "+escaped_event_name) # Se crea la base de datos. Ej: create database `evento_aj2025_x296_izquierda`
             sql = "use "+escaped_event_name
             cursor.execute(sql)
-            definicionesTable = """CREATE TABLE definiciones (
+            
+            # Creación de la tabla activo para habilitar o deshabilitar el evento sin eliminarlo permanentemente
+            activoTabla = """CREATE TABLE activo (
             ID int primary key AUTO_INCREMENT, 
-            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
+            ACTIVO tinyint NOT NULL
+            )"""
+            cursor.execute(activoTabla)
+            
+            # Creación de la tabla determinantes para obtener el tipo de PDC-R que llevara el arnes
+            determinantesTabla = """CREATE TABLE determinantes (
+            ID int primary key AUTO_INCREMENT,
+            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             VARIANTE text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             DATETIME datetime NOT NULL,
             USUARIO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            ACTIVE tinyint NOT NULL
+            ACTIVO tinyint NOT NULL
             )"""
-            cursor.execute(definicionesTable)
-            configTable = """CREATE TABLE modulos_configuracion (
-            ID int primary key AUTO_INCREMENT, 
-            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            TIPO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_13 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_14 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_15 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_16 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-            )"""
-            cursor.execute(configTable)
-
-            configTableStaging = """CREATE TABLE modulos_configuracion_staging (
-            ID int primary key AUTO_INCREMENT, 
-            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            TIPO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_13 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_14 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_15 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_16 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-            )"""
-            cursor.execute(configTableStaging)
-
-
-            fusiblesTable = """CREATE TABLE modulos_fusibles (
-            ID int primary key AUTO_INCREMENT, 
-            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_13 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_14 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_15 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_16 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-            )"""
-            cursor.execute(fusiblesTable)
-            alturaTable = """CREATE TABLE modulos_alturas (
-            ID int primary key AUTO_INCREMENT, 
-            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_13 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_14 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_15 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_16 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-            )"""
-            cursor.execute(alturaTable)
-            torquesTable = """CREATE TABLE modulos_torques (
-            ID int primary key AUTO_INCREMENT, 
-            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
-            CAJA_1  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_2  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_3  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_4  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_5  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_6  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_7  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_8  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_9  longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_10 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_11 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_12 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_13 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_14 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_15 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            CAJA_16 longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-            )"""
-            cursor.execute(torquesTable)
-            pedidosTable = """CREATE TABLE pedidos (
-            ID int primary key AUTO_INCREMENT, 
-            PEDIDO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            DATETIME datetime NOT NULL,
-            MODULOS_VISION longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            MODULOS_TORQUE longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            MODULOS_ALTURA longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            QR_BOXES longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-            ACTIVE tinyint NOT NULL
-            )"""
-            cursor.execute(pedidosTable)
-            historialTable = """CREATE TABLE historial (
+            cursor.execute(determinantesTabla)
+            
+            # Creación de la tabla historial para registrar los archivos de matrices cargados por cada usuario
+            historialTabla = """CREATE TABLE historial (
             ID int primary key AUTO_INCREMENT, 
             ARCHIVO longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, 
             USUARIO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             DATETIME datetime NOT NULL
             )"""
-            cursor.execute(historialTable)
-            activoTable = """CREATE TABLE activo (
+            cursor.execute(historialTabla)
+            
+            # Creación de la tabla modularidades utilizada para determinar el contenido del arnés según los módulos definidos
+            modularidadesTabla = """CREATE TABLE modularidades (
             ID int primary key AUTO_INCREMENT, 
-            ACTIVE tinyint NOT NULL
+            MODULARIDAD text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            FECHA datetime NOT NULL,
+            MODULOS_FUSIBLES text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            MODULOS_TORQUE text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            MODULOS_COVER text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            QR_BOXES longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            ACTIVO tinyint NOT NULL
             )"""
-            cursor.execute(activoTable)
+            cursor.execute(modularidadesTabla)
+            
+            # Creación de la tabla modulos_fusibles que almacena los modulos de fusibles y el contenido de cada caja basado en la matriz cargada
+            modulosFusiblesTabla = """CREATE TABLE modulos_fusibles (
+            ID int primary key AUTO_INCREMENT,
+            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            FUSIBLES_DATA longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            UNIQUE KEY unique_modulo (MODULO)
+            )"""
+            cursor.execute(modulosFusiblesTabla)
+            
+            # Creación de la tabla modulos_torques que almacena los modulos de torque y el contenido de cada caja del arnés basado en la matriz cargada
+            modulosTorqueTabla = """CREATE TABLE modulos_torques (
+            ID INT AUTO_INCREMENT PRIMARY KEY,
+            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            TORQUES_DATA LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            ACTIVO TINYINT NOT NULL DEFAULT 1,
+            UNIQUE KEY unique_modulo (MODULO)
+            )
+            """
+            cursor.execute(modulosTorqueTabla)
+           
+            # Creación de la tabla modulos_covers que almacena los modulos de cover y el tipo de cover para la caja Battery basado en la matriz cargada
+            modulosCoverTable = """CREATE TABLE modulos_covers (
+            ID INT AUTO_INCREMENT PRIMARY KEY,
+            MODULO text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            COVERS_DATA LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+            UNIQUE KEY unique_modulo (MODULO)
+            )
+            """
+            cursor.execute(modulosCoverTable)
+            
         connection.commit()
-        response = {"items": items}
+        response = {"items": items} # Resultado de la creación de la estructura inicial del evento
     except Exception as ex:
-        print("generalPOST Exception: ", ex)
+        print("newEvent create database Exception: ", ex)
         response = {"exception": ex.args}
     finally:
-        #print("Información que se manda al POST DE EVENTOS HISTORIAL: ",historial)
+        # Registra el historial inicial del evento
         endpoint = f"http://{host}:5000/api/post/historial"
         responseHistorial = requests.post(endpoint, data = json.dumps(historial))
-        #print("Información que se manda al POST DE EVENTOS ACTIVO: ",activo)
+        # Registra el estado inicial del evento
         endpoint = f"http://{host}:5000/api/post/activo"
         responseActivo = requests.post(endpoint, data = json.dumps(activo))
-        connection.close()
+        
+        connection.close() # Cerramos la conexion con el servidor
         return response
 
 ################################################## Eliminar Base de Datos (Evento)  ####################################################
@@ -931,16 +961,24 @@ def eventos():
                     respHistorial = requests.get(endpoint).json()
                     endpoint = f"http://{host}:5000/api/get/{i[0]}/activo/all/-/-/-/-/-"
                     respActivo = requests.get(endpoint).json()
+                    if "exception" in respActivo:
+                        endpoint = f"http://{host}:5000/api/get/{i[0]}/active/all/-/-/-/-/-"
+                        respActivo = requests.get(endpoint).json()
                     #print("Respuesta de Historial: ",respHistorial)
                     #print("Respuesta de Historial Archivo: ",respHistorial["ARCHIVO"])
                     #print("Respuesta de Activo: ",respActivo)
                     #print("Respuesta de Activo: ",respActivo["ACTIVE"])
+                    if "ACTIVO" in respActivo:
+                        respuestaActivoo = respActivo["ACTIVO"]
+                    elif "ACTIVE" in respActivo:
+                        respuestaActivoo = respActivo["ACTIVE"]
+
                     if type(respHistorial["ARCHIVO"]) == list:
                         #print("Es una lista!")
-                        lista["eventos"][i[0]] = [respHistorial["ARCHIVO"][-1],respActivo["ACTIVE"]]
+                        lista["eventos"][i[0]] = [respHistorial["ARCHIVO"][-1],respuestaActivoo]
                     else:
                         #print("No es una lista, es posible que sea solo un elemento o esté vacío")
-                        lista["eventos"][i[0]] = [respHistorial["ARCHIVO"],respActivo["ACTIVE"]]
+                        lista["eventos"][i[0]] = [respHistorial["ARCHIVO"],respuestaActivoo]
             #print("Lista de bases de datos: ",x)
             print("Lista de eventos final: ",lista)
         connection.commit()
