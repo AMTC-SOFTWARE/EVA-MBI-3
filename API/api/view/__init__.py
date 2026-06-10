@@ -233,63 +233,97 @@ def updateRef():
     ilxfaltantes = auto_modularities.makeModularities(data)
     return ilxfaltantes
 
+# Microservicio para cargar la matriz de módulos de fusibles, torques y covers
 @app.route('/update/modules', methods=['POST'])
 def updateModules():
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
-    response = {"items": 0}
+    """
+    Procesa la carga de archivos Excel correspondientes a la matriz
+    de módulos.
+
+    El endpoint recibe un archivo ``.xls`` o ``.xlsx`` junto con los
+    parámetros ``DBEVENT`` y ``USUARIO`` mediante una petición HTTP POST.
+    Posteriormente:
+
+        1. Elimina la carpeta temporal de modules existente.
+        2. Valida el archivo recibido.
+        3. Crea el directorio de carga si no existe.
+        4. Guarda el archivo físicamente en disco.
+        5. Ejecuta el proceso de extracción y sincronización de módulos
+           mediante ``refreshModules``.
+
+    Request Form Data:
+        DBEVENT (str): Identificador del evento en la base de datos.
+        USUARIO (str): Identificador del usuario que ejecuta la carga.
+
+    Request Files:
+        file: Archivo Excel con la matriz de módulos de fusibles, torques y covers.
+
+    Returns:
+        dict: Diccionario con el resultado de la operación.
+
+            - ``{"items": 1}``: La carga fue procesada correctamente.
+            - ``{"items": 0}``: No se procesó ningún archivo válido.
+            - ``{"exception": ...}``: Ocurrió un error durante el proceso.
+    """
+    response = {"items": 0} # Respuesta de estado del proceso
     allowed_file = False
     file = None
-
-    #se asigna el path de la carpeta que se quiere limpiar y crear
-    path_carpeta = "..\\modules"
-    #se obtiene true si existe la carpeta
-    existe_carpeta = os.path.isdir(path_carpeta)
-    if existe_carpeta == True:
-        try:
-            #Eliminar la carpeta (con archivos dentro) anteriormente generada, (pueden quedarse por algún error de la matriz al tratar de cargar un formato inválido)
-            rmtree(path_carpeta) #para eliminar archivo único: from os import remove | remove("archivo.txt") ; para eliminar carpeta vacía: from os import rmdir | rmdir("carpeta_vacia")
-            print("se elimina la carpeta")
-        except OSError as error:
-            print("ERROR AL ELIMINAR CARPETA:::\n",error)
-    #mientras la carpeta no esté creada, se estará tratando de crear
-    while(not(os.path.isdir(path_carpeta))):
-        try:
-            os.mkdir(path_carpeta)
-        except OSError as error:
-            print("ERROR AL CREAR CARPETA:::\n",error)
-
     try:
+        # Ruta temporal utilizada para almacenar archivos de módulos
+        path_carpeta = "..\\modules";
+        # Elimina la carpeta existente para evitar reprocesar archivos anteriores
+        existe_carpeta = os.path.isdir(path_carpeta)
+        
+        if existe_carpeta == True:
+            try:
+                rmtree(path_carpeta)
+                print("se elimina la carpeta")
+            except OSError as error:
+                print("ERROR AL ELIMINAR CARPETA:::\n",error)
+
         data = request.form['DBEVENT']
         print("DB a la que se carga la Info: ",data)
         usuario = request.form['USUARIO']
         print("Usuario que carga la info: ",usuario)
+        
+        # Valida que la petición contenga un archivo Excel compatible
         if 'file' in request.files:
             file = request.files['file']
             if file.filename != '':
                 filename = file.filename
                 allowed_file = '.' in filename and \
                     filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']
+                
+        # Procesa únicamente archivos válidos
         if file and allowed_file:
             filename = secure_filename(file.filename)
+
+            path = os.path.join(app.config['UPLOAD_FOLDER'], "modules")
+            
+            # Crea el directorio de carga si aún no existe
+            isExist = os.path.exists(path)
+            if not isExist:
+                os.makedirs(path)
+                print("The new directory is created!", path)
+            
+            # Guarda el archivo y ejecuta el flujo de actualización de módulos
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "modules", filename))
             auto_modularities.refreshModules(data)
-            config_modules.stagingModules(data)
+            
+            # Registra el archivo cargado en el historial del evento
             excelnew = {
                 'DBEVENT': data,
                 'ARCHIVO': filename,
                 'USUARIO': usuario,
                 'DATETIME': 'AUTO'
                 }
-            #print("Información que se manda al POST DE EVENTOS HISTORIAL: ",excelnew)
+            print("Información que se manda al POST DE EVENTOS HISTORIAL: ",excelnew)
             endpoint = f"http://{host}:5000/api/post/historial"
             responseHistorial = requests.post(endpoint, data = json.dumps(excelnew))
             response["items"] = 1
-
     except Exception as ex:
         print("updateModules Exception: ", ex)
         response = {"exception" : ex.args}
-
     finally:
         return response
     
@@ -1168,6 +1202,7 @@ def previewEvent(ILX,db):
                                 pass
     return modularity
 
+# Microservicio para consultar los modulos determinantes de la PDC-R
 @app.route("/api/get/<db>/pdcr/variantes",methods=["GET"])
 def variantesEvent(db):
     datos_conexion=model()
@@ -1177,8 +1212,11 @@ def variantesEvent(db):
     "medium": [],
     "large": [],
     }
-    endpoint = f"http://{host}:5000/api/get/{db}/definiciones/ACTIVE/=/1/_/_/_"
+    endpoint = f"http://{host}:5000/api/get/{db}/determinantes/ACTIVO/=/1/_/_/_"
     pdcrVariantesDB = requests.get(endpoint).json()
+    if "exception" in pdcrVariantesDB:
+        endpoint = f"http://{host}:5000/api/get/{db}/definiciones/ACTIVE/=/1/_/_/_"
+        pdcrVariantesDB = requests.get(endpoint).json()
     #print("pdcrVariantesDB-------",pdcrVariantesDB)
     try:
         if len(pdcrVariantesDB["MODULO"]) > 0:
