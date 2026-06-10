@@ -222,16 +222,52 @@ def uploadRef():
         response = {"exception" : ex.args}
     finally:
         return response
-
+    
+# Microservicio para procesar y sincronizar modularidades
+# Microservicio para procesar y sincronizar modularidades
 @app.route('/update/modularities', methods=['POST'])
 def updateRef():
-    datos_conexion=model()
-    host, user,password,database,serverp2,dbp2,userp2,passwordp2=datos_conexion.datos_acceso()
+    """
+    Procesa los archivos DAT asociados al evento y genera las modularidades.
+
+    El endpoint recibe el identificador del evento mediante una petición
+    HTTP POST y ejecuta el flujo de generación de modularidades a partir
+    de los archivos DAT previamente cargados en el sistema.
+
+    Durante el procesamiento:
+
+        1. Se validan los archivos DAT contra el evento actual.
+        2. Se clasifican módulos de fusibles, torques y covers.
+        3. Se generan las estructuras de modularidad.
+        4. Se identifican módulos faltantes o no clasificados.
+        5. Se sincronizan las modularidades válidas contra la base de datos.
+
+    Request Form Data:
+        DBEVENT (str): Identificador del evento en la base de datos.
+
+    Returns:
+        dict: Estructura con los módulos faltantes o inconsistencias
+        detectadas durante el procesamiento.
+
+            - ``ILX`` (dict): Modularidades con módulos faltantes.
+            - ``Modulos`` (list): Lista consolidada de módulos no clasificados.
+
+    Raises:
+        requests.exceptions.RequestException: Si falla la comunicación
+            con la API durante la consulta de módulos.
+        FileNotFoundError: Si el directorio de archivos DAT no existe.
+        Exception: Cualquier error no controlado durante el procesamiento.
+    """
+
     data = request.form['DBEVENT']
-    print("DB a la que se cargan los DAT: ",data)
-    print("se actualizarán los DATS en la base de datos, ingresando a función auto_modularities.makeModularities")
+
+    print("DB a la que se cargn los DAT: ", data)
+
+    # Ejecuta el flujo completo de generación de modularidades
     ilxfaltantes = auto_modularities.makeModularities(data)
+
     return ilxfaltantes
+
 
 # Microservicio para cargar la matriz de módulos de fusibles, torques y covers
 @app.route('/update/modules', methods=['POST'])
@@ -484,7 +520,7 @@ def generalPOST(table):
         query += ' ({}) VALUES ({})'.format(cols, placeholders)
         for key in data:
             try:
-                if key == "DATETIME":
+                if key == "FECHA" or key == "DATETIME":
                     if data[key] == "AUTO":
                         data[key] = datetime.now().isoformat()
                 if type(data[key]) == dict:

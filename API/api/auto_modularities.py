@@ -1130,266 +1130,410 @@ def pdcrVariants (data):
 
 
 ################################### Modularities management ##############################
-def makeModularities(data):
-    global modules
-    print("Dentro de MakeModularities DATA: ",data)
-    # Se manda llamar a la función encargada de consultar los módulos determinantes desde la base de datos, para posteriormente meterlos en un json llamado "pdcrVariantes".
-    endpoint = f"http://{host}:5000/api/get/{data}/pdcr/variantes"
-    pdcrVariantes = requests.get(endpoint).json()
-    print("Lista Final de Variantes PDC-R:\n",pdcrVariantes)
+def makeModularities(db_event):
+    """
+    Procesa archivos DAT para generar las modularidades asociadas
+    al evento.
+
+    La función analiza los archivos DAT ubicados en el directorio
+    ILX, clasifica módulos según las tablas de fusibles,
+    torques y covers previamente cargadas, valida variantes PDC-R
+    y construye la estructura final requerida por la tabla
+    ``modularidades``.
+
+    Además, identifica módulos faltantes o archivos DAT incompatibles
+    con el evento actual y genera un reporte estructurado de incidencias.
+
+    Args:
+        db_event (str): Identificador del evento en la base de datos (DBEVENT).
+
+    Returns:
+        dict: Estructura con los módulos faltantes o inconsistencias
+        detectadas durante el procesamiento.
+
+        Formato:
+
+            - ``ILX`` (dict): Relación de modularidades con módulos faltantes.
+            - ``Modulos`` (list): Lista consolidada de módulos no clasificados.
+
+    Raises:
+        FileNotFoundError: Si el directorio de archivos DAT no existe.
+        requests.exceptions.RequestException: Si falla la consulta de módulos
+            o variantes contra la API.
+        Exception: Cualquier error no controlado durante el procesamiento.
+    """
+    
     print("#################### Modularities ####################")
-    endpoint = f"http://{host}:5000/api/get/{data}/modulos_fusibles/all/-/-/-/-/-"
-    modulesExisting = requests.get(endpoint).json()
-    #print("Modulos existentes en la base de datos VISION: ",modulesExisting["MODULO"])
-    print("LEN VISION: ",len(modulesExisting["MODULO"]))
-
-    endpoint = f"http://{host}:5000/api/get/{data}/modulos_torques/all/-/-/-/-/-"
-    modulesExisting_t = requests.get(endpoint).json()
-    #print("Modulos existentes en la base de datos TORQUES: ",modulesExisting_t["MODULO"])
-    print("LEN TORQUES: ",len(modulesExisting_t["MODULO"]))
-
-    dir_path = os.path.join(os.getcwd(), '..\\ILX\\')
-    file_name = None
-    modularities = []
-    modulosFaltantes = []
-    ilxfaltantes = {
-        "ILX": {},
-        "Modulos": {}
-        }
+   
     flujo = ""
     numero = ""
-    if 'izquierda' in data:
+    
+    # Determina el tipo de conducción y flujo asociado al evento.
+    if 'izquierda' in db_event:
         print('EVENTO DE CONDUCCION IZQUIERDA')
-        if 'z296' in data or 'Z296' in data:
+        if 'z296' in db_event or 'Z296' in db_event:
             flujo = 'ILZ'
             numero = '296'
-        if 'x296' in data or 'X296' in data:
+        if 'x296' in db_event or 'X296' in db_event:
             flujo = 'ILX'
             numero = '296'
-        if 'x294' in data or 'X294' in data: 
+        if 'x294' in db_event or 'X294' in db_event: 
             flujo = 'ILX'
             numero = '294'
-    if 'derecha' in data:
+            
+    if 'derecha' in db_event:
         print('EVENTO DE CONDUCCION DERECHA')
-        if 'z296' in data or 'Z296' in data:
+        if 'z296' in db_event or 'Z296' in db_event:
             flujo = 'IRZ'
             numero = '296'
-        if 'x296' in data or 'X296' in data:
+        if 'x296' in db_event or 'X296' in db_event:
             flujo = 'IRX'
             numero = '296'
-        if 'x294' in data or 'X294' in data: 
+        if 'x294' in db_event or 'X294' in db_event: 
             flujo = 'IRX'
-            numero = '294'        
+            numero = '294'
+            
     flujo_numero = flujo + numero
     
-    global modules
-    print("Dentro de MakeModularities DATA: ",data)
-    # Se manda llamar a la función encargada de consultar los módulos determinantes desde la base de datos, para posteriormente meterlos en un json llamado "pdcrVariantes".
-    endpoint = f"http://{host}:5000/api/get/{data}/pdcr/variantes"
+    # Obtiene módulos determinantes para variantes PDC-R.
+    endpoint = f"http://{host}:5000/api/get/{db_event}/pdcr/variantes"
     pdcrVariantes = requests.get(endpoint).json()
-    print("Lista Final de Variantes PDC-R:\n",pdcrVariantes)
+    
+    print("Lista Final de Variantes PDC-R:\n", pdcrVariantes)
     print("#################### Modularities ####################")
-    print("se obtienen los módulos existentes de fusibles cargados para este evento (obtenidos de la matriz)")
-    endpoint = f"http://{host}:5000/api/get/{data}/modulos_fusibles/all/-/-/-/-/-"
+    
+    # Obtiene módulos cargados en cada tabla.
+    endpoint = f"http://{host}:5000/api/get/{db_event}/modulos_fusibles/all/-/-/-/-/-"
     modulesExisting = requests.get(endpoint).json()
-    #print("Modulos existentes en la base de datos VISION: ",modulesExisting["MODULO"])
-    print("LEN VISION: ",len(modulesExisting["MODULO"]))
-
-    endpoint = f"http://{host}:5000/api/get/{data}/modulos_torques/all/-/-/-/-/-"
+    
+    endpoint = f"http://{host}:5000/api/get/{db_event}/modulos_torques/all/-/-/-/-/-"
     modulesExisting_t = requests.get(endpoint).json()
-    #print("Modulos existentes en la base de datos TORQUES: ",modulesExisting_t["MODULO"])
-    print("LEN TORQUES: ",len(modulesExisting_t["MODULO"]))
+
+    endpoint = f"http://{host}:5000/api/get/{db_event}/modulos_covers/all/-/-/-/-/-"
+    coversExisting = requests.get(endpoint).json()
+    
+    print("LEN FUSIBLES:", len(modulesExisting.get("MODULO", [])))
+    print("LEN TORQUES:", len(modulesExisting_t.get("MODULO", [])))
+    print("LEN COVERS:", len(coversExisting.get("MODULO", [])))
+    
+    # Se convierten a sets para optimizar búsquedas.
+    modulosFusiblesBD = set(modulesExisting.get("MODULO", []))
+    modulosTorqueBD = set(modulesExisting_t.get("MODULO", []))
+    modulosCoverBD = set(coversExisting.get("MODULO", []))
+    
     dir_path = os.path.join(os.getcwd(), '..\\ILX\\')
-    file_name = None
+    
     modularities = []
     modulosFaltantes = []
+    
     ilxfaltantes = {
         "ILX": {},
         "Modulos": {}
-        }
+    }
+
     for root, dirs, files in os.walk(dir_path):
-        for file_name in files: #se recorre cada archivo existente dentro de el folder en que se cargaron
-            temp = file_name.lower()
-            ILX = temp.split(sep = ".")[0].upper() #se obtiene el nombre de la modularidad separando el filename por el punto y quedando con la parte antes del punto en mayúsculas
 
-            if not(flujo_numero in file_name):# SI NO se encuentra el nombre esperado de inicio para un arnés de este tipo:
+        for file_name in files:
+
+            temp_name = file_name.lower()
+            ILX = temp_name.split(sep=".")[0].upper()
+
+            # Valida que el DAT pertenezca al evento actual.
+            if not(flujo_numero in file_name):
+
                 ilxfaltantes["ILX"][ILX] = {
-                            "vision": [],
-                            "torque": []
-                            } #se crea un diccionario para esta modularidad
-                ilxfaltantes["ILX"][ILX]["vision"].append("No es un DAT válido para este evento") #se agrega el mensaje que no es un DAT válido
-                ilxfaltantes["ILX"][ILX]["torque"].append("No es un DAT válido para este evento") #se agrega el mensaje que no es un DAT válido
-                modulosFaltantes.append(ILX) #se agrega a la lista final de módulos faltantes para que aparezca en pantalla
-                ilxfaltantes["Modulos"] = modulosFaltantes #se actualiza esta lista
-                os.remove(root+'\\'+ file_name) #se elimina el archivo de los DATS
-            else:
+                    "fusibles": [],
+                    "torque": [],
+                    "cover": []
+                }
 
-                if temp.endswith('.dat'):
-                    flag_s = False
-                    flag_m = False
-                    flag_l = False
-                    qr_pdcr = {}
-                    flag_mfbp2_der = False
-                    flag_mfbp2 = []
-                    fic = open(dir_path + file_name)
-                    lines = list(fic)
-                    csv = ""
-                    for line in lines:
-                        csv += line.rsplit(sep = "=")[-1][:-1] + ","
-                    csv = csv[:-1]
-                    fic.close()
-                    #print("MODULOS DEL ILX: ",csv.split(sep = ","))
-                    if "ILX294" in ILX:
-                        print("Evento 294 IZQUIERDA")
-                    if "IRX294" in ILX:
-                        print("Evento 294 DERECHA")
-                    if "ILX296" in ILX:
-                        print("Evento 296 IZQUIERDA")
-                    if "IRX296" in ILX:
-                        print("Evento 296 DERECHA")
-                    if "296" in ILX or "294" in ILX:
-                        #print("Evento 296")
-                        if "IRX" in ILX or "IRZ" in ILX:
-                            print("Lleva la MFB-P2 DERECHA con terminación : 7216")
-                            flag_mfbp2_der = True
-                        for mod in csv.split(sep = ","):
-                            if mod in pdcrVariantes["large"]:
-                                flag_l = True
-                            if mod in pdcrVariantes["medium"]:
-                                flag_m = True
-                            if mod in pdcrVariantes["small"]:
-                                flag_s = True
-                        print("\t\t+++++++++++ FLAGS de",ILX,":+++++++++++\n Flag S - ",flag_s," Flag M - ",flag_m," Flag L - ",flag_l," Flag MFB-P2 DER: ",flag_mfbp2_der)
-                        if flag_mfbp2_der == True:
-                            flag_mfbp2 = ["12975407216", True]
-                        else:
-                            flag_mfbp2 = ["12975407316", True]
-                        if flag_l == True:
-                            qr_pdcr = {
-                                "PDC-R": ["12239061602", True],
-                                "PDC-RMID": ["", False],
-                                "PDC-RS": ["", False],
-                                "PDC-D": ["12239060402", True],
-                                "PDC-P": ["12239060702", True],
-                                "MFB-P1": ["12975402001", True],
-                                "MFB-S": ["12235403215", True],
-                                "MFB-S2": ["12975402001", True],
-                                "MFB-E": ["12975403015", True],
-                                "MFB-P2": flag_mfbp2
-                                }
-                            print("Variante de caja PDC-R")
-                        if flag_m == True and flag_l == False:
-                            qr_pdcr = {
-                                "PDC-R": ["", False],
-                                "PDC-RMID": ["12239061502", True],
-                                "PDC-RS": ["", False],
-                                "PDC-D": ["12239060402", True],
-                                "PDC-P": ["12239060702", True],
-                                "MFB-P1": ["12975402001", True],
-                                "MFB-S": ["12235403215", True],
-                                "MFB-S2": ["12975402001", True],
-                                "MFB-E": ["12975403015", True],
-                                "MFB-P2": flag_mfbp2
-                                }
-                            print("Variante de caja PDC-RMID")
-                        if flag_s == True and flag_m == False:
-                            print("Variante de caja PDC-RS")
-                            qr_pdcr = {
-                                "PDC-R": ["", False],
-                                "PDC-RMID": ["", False],
-                                "PDC-RS": ["12239061402", True],
-                                "PDC-D": ["12239060402", True],
-                                "PDC-P": ["12239060702", True],
-                                "MFB-P1": ["12975402001", True],
-                                "MFB-S": ["12235403215", True],
-                                "MFB-S2": ["12975402001", True],
-                                "MFB-E": ["12975403015", True],
-                                "MFB-P2": flag_mfbp2
-                                }
-                        if flag_s == False and flag_m == False and flag_l == False:
-                            print("La caja no contiene módulos pertenecientes a las categorías.")
-                            qr_pdcr = {
-                                "PDC-R": ["", False],
-                                "PDC-RMID": ["", False],
-                                "PDC-RS": ["", False],
-                                "PDC-D": ["12239060402", True],
-                                "PDC-P": ["12239060702", True],
-                                "MFB-P1": ["12975402001", True],
-                                "MFB-S": ["12235403215", True],
-                                "MFB-S2": ["12975402001", True],
-                                "MFB-E": ["12975403015", True],
-                                "MFB-P2": flag_mfbp2
-                                }
+                ilxfaltantes["ILX"][ILX]["fusibles"].append(
+                    "No es un DAT válido para este evento"
+                )
 
-                    temp = {
-                        "DBEVENT": data,
-                        "PEDIDO": ILX,
-                        "DATETIME": "AUTO",
-                        "MODULOS_VISION": {"INTERIOR": csv.split(sep = ",")},
-                        "MODULOS_TORQUE": {"INTERIOR": csv.split(sep = ",")},
-                        "MODULOS_ALTURA": {"INTERIOR": csv.split(sep = ",")},
-                        "QR_BOXES": qr_pdcr,
-                        "ACTIVE": 1
-                        }
-                    print("Códigos QR FINAL: ",qr_pdcr)
-                    #print("ILX: ",ILX)
-                    #print("Modulos que tiene: ",csv)
-                    #print("Modulos que tiene TIPO: ",type(csv))
-                    #print("Modulos que tiene el ILX: ",csv.split(","))
-                    #print("Modulos que tiene convertido a array TIPO: ",type(csv.split(",")))
-                    modulosDesconocidos = set(csv.split(",")) - set(modulesExisting["MODULO"])
-                    modulosDesconocidos_t = set(csv.split(",")) - set(modulesExisting_t["MODULO"])
-                    #print("Comparación; Modulos del ILX que NO están en la base de datos: ", modulosDesconocidos)
-                    #print("Comparación; Modulos del ILX que NO están en la base de datos LEN VISION: ", len(modulosDesconocidos))
-                    #print("Comparación; Modulos del ILX que NO están en la base de datos LEN TORQUES: ", len(modulosDesconocidos_t))
-                    #print("Comparación tipo", type(modulosDesconocidos))
-                    if len(modulosDesconocidos) == 0 and len(modulosDesconocidos_t) == 0:
-                        modularities.append(temp)
+                ilxfaltantes["ILX"][ILX]["torque"].append(
+                    "No es un DAT válido para este evento"
+                )
+
+                ilxfaltantes["ILX"][ILX]["cover"].append(
+                    "No es un DAT válido para este evento"
+                )
+
+                modulosFaltantes.append(ILX)
+                ilxfaltantes["Modulos"] = modulosFaltantes
+
+                os.remove(root + '\\' + file_name)
+
+                continue
+
+            if temp_name.endswith('.dat'):
+
+                flag_s = False
+                flag_m = False
+                flag_l = False
+
+                qr_pdcr = {}
+
+                flag_mfbp2_der = False
+                flag_mfbp2 = []
+
+                # Lee el contenido del archivo DAT.
+                fic = open(dir_path + file_name)
+
+                lines = list(fic)
+                csv = ""
+
+                for line in lines:
+                    csv += line.rsplit(sep="=")[-1][:-1] + ","
+
+                csv = csv[:-1]
+
+                fic.close()
+
+                modules_list = csv.split(",")
+
+                # Estructuras por tipo de módulo.
+                modulos_fusibles = []
+                modulos_torque = []
+                modulos_cover = []
+
+                # Lista de módulos inexistentes en BD.
+                modulos_no_clasificados = []
+
+                # Clasifica únicamente módulos presentes en el archivo DAT
+                for modulo in modules_list:
+
+                    modulo = modulo.strip()
+
+                    existe_en_fusibles = modulo in modulosFusiblesBD
+                    existe_en_torque = modulo in modulosTorqueBD
+                    existe_en_cover = modulo in modulosCoverBD
+
+                    if existe_en_fusibles:
+                        modulos_fusibles.append(modulo)
+
+                    if existe_en_torque:
+                        modulos_torque.append(modulo)
+
+                    if existe_en_cover:
+                        modulos_cover.append(modulo)
+
+                    # Si el módulo no existe en ninguna tabla,
+                    # se marca como faltante.
+                    if (
+                        not existe_en_fusibles and
+                        not existe_en_torque and
+                        not existe_en_cover
+                    ):
+                        modulos_no_clasificados.append(modulo)
+
+                # Validación de variantes PDC-R.
+                if "296" in ILX or "294" in ILX:
+
+                    if "IRX" in ILX or "IRZ" in ILX:
+                        flag_mfbp2_der = True
+
+                    for mod in modules_list:
+
+                        mod = mod.strip()
+
+                        if mod in pdcrVariantes["large"]:
+                            flag_l = True
+
+                        if mod in pdcrVariantes["medium"]:
+                            flag_m = True
+
+                        if mod in pdcrVariantes["small"]:
+                            flag_s = True
+
+                    print(
+                        "\t\t+++++++++++ FLAGS de",
+                        ILX,
+                        ":+++++++++++\n Flag S - ",
+                        flag_s,
+                        " Flag M - ",
+                        flag_m,
+                        " Flag L - ",
+                        flag_l,
+                        " Flag MFB-P2 DER: ",
+                        flag_mfbp2_der
+                    )
+
+                    # Define variante MFB-P2.
+                    if flag_mfbp2_der == True:
+                        flag_mfbp2 = ["12975407216", True]
                     else:
-                        ilxfaltantes["ILX"][ILX] = {
-                            "vision": [],
-                            "torque": []
-                            }
-                        for e in modulosDesconocidos:
-                            ilxfaltantes["ILX"][ILX]["vision"].append(e)
-                        #print(e)
-                            if not(e in modulosFaltantes):
-                                modulosFaltantes.append(e)
-                        for t in modulosDesconocidos_t:
-                            #print(t)
-                            ilxfaltantes["ILX"][ILX]["torque"].append(t)
-                            if not(t in modulosFaltantes):
-                                modulosFaltantes.append(t)
-                    
-                    ilxfaltantes["Modulos"] = modulosFaltantes
-                    os.remove(root+'\\'+ file_name)
-    #print("Lista total de Módulos Faltantes: ",ilxfaltantes)
+                        flag_mfbp2 = ["12975407316", True]
+
+                    # Variante LARGE.
+                    if flag_l == True:
+
+                        qr_pdcr = {
+                            "PDC-R": ["12239061602", True],
+                            "PDC-RMID": ["", False],
+                            "PDC-RS": ["", False],
+                            "PDC-D": ["12239060402", True],
+                            "PDC-P": ["12239060702", True],
+                            "MFB-P1": ["12975402001", True],
+                            "MFB-S": ["12235403215", True],
+                            "MFB-E": ["12975403015", True],
+                            "MFB-P2": flag_mfbp2
+                        }
+
+                    # Variante MEDIUM.
+                    elif flag_m == True and flag_l == False:
+
+                        qr_pdcr = {
+                            "PDC-R": ["", False],
+                            "PDC-RMID": ["12239061502", True],
+                            "PDC-RS": ["", False],
+                            "PDC-D": ["12239060402", True],
+                            "PDC-P": ["12239060702", True],
+                            "MFB-P1": ["12975402001", True],
+                            "MFB-S": ["12235403215", True],
+                            "MFB-E": ["12975403015", True],
+                            "MFB-P2": flag_mfbp2
+                        }
+
+                    # Variante SMALL.
+                    elif flag_s == True and flag_m == False:
+
+                        qr_pdcr = {
+                            "PDC-R": ["", False],
+                            "PDC-RMID": ["", False],
+                            "PDC-RS": ["12239061402", True],
+                            "PDC-D": ["12239060402", True],
+                            "PDC-P": ["12239060702", True],
+                            "MFB-P1": ["12975402001", True],
+                            "MFB-S": ["12235403215", True],
+                            "MFB-E": ["12975403015", True],
+                            "MFB-P2": flag_mfbp2
+                        }
+
+                # Estructura final de modularidad.
+                temp = {
+                    "DBEVENT": db_event,
+                    "MODULARIDAD": ILX,
+                    "FECHA": "AUTO",
+                    "MODULOS_FUSIBLES": json.dumps({
+                        "INTERIOR": sorted(set(modulos_fusibles))
+                    }),
+                    "MODULOS_TORQUE": json.dumps({
+                        "INTERIOR": sorted(set(modulos_torque))
+                    }),
+                    "MODULOS_COVER": json.dumps({
+                        "INTERIOR": sorted(set(modulos_cover))
+                    }),
+                    "QR_BOXES": json.dumps(qr_pdcr),
+                    "ACTIVO": 1
+                }
+
+                print("Códigos QR FINAL:", qr_pdcr)
+
+                # Inserta modularidad únicamente si no existen módulos faltantes.
+                if len(modulos_no_clasificados) == 0:
+
+                    modularities.append(temp)
+
+                else:
+
+                    ilxfaltantes["ILX"][ILX] = {
+                        "fusibles": [],
+                        "torque": [],
+                        "cover": []
+                    }
+
+                    for modulo in modulos_no_clasificados:
+
+                        ilxfaltantes["ILX"][ILX]["fusibles"].append(modulo)
+                        ilxfaltantes["ILX"][ILX]["torque"].append(modulo)
+                        ilxfaltantes["ILX"][ILX]["cover"].append(modulo)
+
+                        if modulo not in modulosFaltantes:
+                            modulosFaltantes.append(modulo)
+
+                ilxfaltantes["Modulos"] = modulosFaltantes
+
+                # Elimina archivo procesado.
+                os.remove(root + '\\' + file_name)
+
+    # Actualiza modularidades únicamente si existen registros válidos.
     if len(modularities) != 0:
         updateModularities(modularities)
+
     return ilxfaltantes
  
-def updateModularities(data):
-    print("updating")
-    #print("Data dentro de Upload Modularities: ",data)
-    tabla = data[0]["DBEVENT"]
-    print("TABLA en updating para DATS: ",tabla)
-    endpoint = f"http://{host}:5000/api/get/{tabla}/pedidos/all/-/-/-/-/-"
+def updateModularities(modularities_data):
+    """
+    Sincroniza las modularidades contra la tabla ``modularidades``.
+
+    La función consulta las modularidades existentes asociadas al evento
+    actual y determina si cada registro debe insertarse o actualizarse
+    mediante peticiones HTTP a la API.
+
+    Args:
+        modularities_data (list[dict]): Lista de registros estructurados
+        de modularidades.
+
+        Cada elemento debe contener:
+
+            - ``DBEVENT`` (str): Identificador del evento.
+            - ``MODULARIDAD`` (str): Identificador único de la modularidad.
+            - ``MODULOS_FUSIBLES`` (str): Información de módulos
+              de fusibles.
+            - ``MODULOS_TORQUE`` (str): Información de módulos
+              de torque.
+            - ``MODULOS_COVER`` (str): Información de módulos
+              de covers.
+            - ``QR_BOXES`` (str): Información de variantes QR.
+            - ``ACTIVO`` (int): Estado lógico del registro.
+
+    Returns:
+        None
+
+    Raises:
+        requests.exceptions.RequestException: Si ocurre un error durante
+            la comunicación con la API.
+        KeyError: Si algún registro no contiene las claves esperadas.
+        IndexError: Si la lista recibida está vacía.
+        Exception: Cualquier error no controlado durante el proceso.
+    """
+    
+    
+    print("#################### update modularities ####################")
+
+    if len(modularities_data) == 0:
+        print("No hay modularidades para insertar")
+        return
+
+    database_name = modularities_data[0]["DBEVENT"]
+    
+    # Obtiene las modularidades existentes asociadas al evento
+    endpoint = f"http://{host}:5000/api/get/{database_name}/modularidades/all/-/-/-/-/-"
     existing = requests.get(endpoint).json()
-    if not("PEDIDO" in existing):
-        existing["PEDIDO"] = []
-    for i in data:
+
+    # Inicializa la estructura esperada si no existen modularidades registradas
+    if "MODULARIDAD" not in existing:
+        existing["MODULARIDAD"] = []
+
+    for item in modularities_data:
+
         try:
-            if not(i["PEDIDO"] in existing["PEDIDO"]):
-                endpoint = f"http://{host}:5000/api/post/pedidos"
-                response = requests.post(endpoint, data = json.dumps(i))
+            if item["MODULARIDAD"] not in existing["MODULARIDAD"]:
+                # Inserta la modularidad si aún no existe en la tabla
+                endpoint = f"http://{host}:5000/api/post/modularidades"
+                requests.post(endpoint, data=json.dumps(item))
+
             else:
-                #pass
-                index = existing["PEDIDO"].index(i["PEDIDO"])
+                # Actualiza la modularidad existente utilizando su ID asociado
+                index = existing["MODULARIDAD"].index(item["MODULARIDAD"])
                 id = existing["ID"][index]
-                endpoint = f"http://{host}:5000/api/update/pedidos/{id}"
-                response = requests.post(endpoint, data = json.dumps(i))
+
+                endpoint = f"http://{host}:5000/api/update/modularidades/{id}"
+                requests.post(endpoint, data=json.dumps(item))
+
         except Exception as ex:
-            print (ex)
+            print("updateModularities Exception:", ex)
 
 ##################################### Determinantes management #################################
 def refreshDeterminantes(db_event, usuario):
