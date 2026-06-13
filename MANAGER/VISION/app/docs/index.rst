@@ -43,6 +43,9 @@ El sistema se encuentra dividido en diferentes componentes:
 
    app
    gui
+   gui_model
+   gui_comm
+   controller
 
 Índices y tablas
 ================

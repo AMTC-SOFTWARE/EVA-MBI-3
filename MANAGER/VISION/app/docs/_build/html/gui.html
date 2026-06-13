@@ -14,12 +14,13 @@
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=4936afed"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/translations.js?v=f85f4cfb"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Índice" href="genindex.html" />
     <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Modelo de Datos de la GUI" href="gui_model.html" />
     <link rel="prev" title="Aplicación Principal" href="app.html" /> 
 </head>
 
@@ -46,11 +47,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Interfaz Gráfica</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#componentes-principales">Componentes principales</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gui.view.MainWindow"><code class="docutils literal notranslate"><span class="pre">MainWindow</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.output"><code class="docutils literal notranslate"><span class="pre">MainWindow.output</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.plc_output"><code class="docutils literal notranslate"><span class="pre">MainWindow.plc_output</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.rbt_output"><code class="docutils literal notranslate"><span class="pre">MainWindow.rbt_output</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.ready"><code class="docutils literal notranslate"><span class="pre">MainWindow.ready</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.quitar_numeros_enteros"><code class="docutils literal notranslate"><span class="pre">MainWindow.quitar_numeros_enteros()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.start_raffi_animation"><code class="docutils literal notranslate"><span class="pre">MainWindow.start_raffi_animation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gui.view.MainWindow.stop_raffi_animation"><code class="docutils literal notranslate"><span class="pre">MainWindow.stop_raffi_animation()</span></code></a></li>
@@ -103,6 +101,9 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a></li>
 </ul>
 
         </div>
@@ -133,8 +134,9 @@
 <span id="interfaz-grafica"></span><h1>Interfaz Gráfica<a class="headerlink" href="#module-gui.view" title="Link to this heading"></a></h1>
 <p>Interfaz gráfica del sistema EVA-MBI-3.</p>
 <p>Este módulo contiene la implementación de la ventana principal y de
-las ventanas auxiliares utilizadas durante la operación.</p>
-<p>Componentes principales:</p>
+las ventanas auxiliares utilizadas durante la operación del sistema.</p>
+<section id="componentes-principales">
+<h2>Componentes principales<a class="headerlink" href="#componentes-principales" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>MainWindow</p></li>
 <li><p>Login</p></li>
@@ -144,157 +146,114 @@ las ventanas auxiliares utilizadas durante la operación.</p>
 <li><p>PopOut</p></li>
 <li><p>Message_pop</p></li>
 </ul>
+</section>
 <dl class="py class">
 <dt class="sig sig-object py" id="gui.view.MainWindow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">MainWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GUI'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gui'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">MainWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GUI'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gui'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMainWindow</span></code></p>
 <p>Ventana principal de la aplicación EVA-MBI-3.</p>
 <p>Esta clase actúa como la capa de presentación del sistema y es
 responsable de la interacción entre la interfaz gráfica, el modelo
 de datos y los servicios de comunicación.</p>
-<p>Funcionalidades principales:</p>
+<section id="funcionalidades-principales">
+<h2>Funcionalidades principales<a class="headerlink" href="#funcionalidades-principales" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Mostrar información del ciclo de producción.</p></li>
-<li><p>Gestionar el proceso de autenticación de operadores.</p></li>
+<li><p>Gestionar visualmente la autenticación de operadores.</p></li>
 <li><p>Recibir y procesar mensajes MQTT.</p></li>
 <li><p>Actualizar dinámicamente los componentes visuales.</p></li>
 <li><p>Controlar ventanas auxiliares de escaneo y mensajes.</p></li>
-<li><p>Gestionar el estado visual de clamps y módulos.</p></li>
+<li><p>Gestionar el estado visual de clamps para los nidos de las cajas.</p></li>
 <li><p>Mostrar imágenes de referencia e instrucciones.</p></li>
 <li><p>Presentar indicadores de producción y trazabilidad.</p></li>
 </ul>
-<p>Inicializa la ventana principal del sistema.</p>
-<p>Configura los componentes necesarios para la operación de la
-interfaz gráfica, incluyendo:</p>
+</section>
+<section id="senales-principales">
+<h2>Señales principales<a class="headerlink" href="#senales-principales" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Modelo de datos.</p></li>
-<li><p>Cliente MQTT.</p></li>
-<li><p>Ventanas auxiliares.</p></li>
-<li><p>Señales y slots.</p></li>
-<li><p>Componentes visuales.</p></li>
-<li><p>Temporizadores.</p></li>
-<li><p>Recursos gráficos.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output</span></code>:
+Envía mensajes MQTT generales.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plc_output</span></code>:
+Envía comandos hacia PLCs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rbt_output</span></code>:
+Envía comandos hacia el robot.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ready</span></code>:
+Indica que la interfaz gráfica y la comunicación MQTT
+se encuentran listas para iniciar operación.</p></li>
+</ul>
+</section>
+<section id="componentes-gestionados">
+<h2>Componentes gestionados<a class="headerlink" href="#componentes-gestionados" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Ventana principal de operación.</p></li>
+<li><p>Formularios de autenticación.</p></li>
+<li><p>Escáner de códigos QR.</p></li>
+<li><p>Indicadores de producción.</p></li>
+<li><p>Gestión visual de clamps.</p></li>
+<li><p>Ventanas emergentes y mensajes.</p></li>
+<li><p>Imágenes de referencia e instrucciones.</p></li>
+</ul>
+</section>
+<section id="constructor-de-mainwindow">
+<h2>Constructor de MainWindow<a class="headerlink" href="#constructor-de-mainwindow" title="Link to this heading"></a></h2>
+<p>Inicializa la interfaz gráfica principal de EVA-MBI-3 y configura
+los recursos necesarios para la operación del sistema de visión.</p>
+<p>Configuraciones realizadas:</p>
+<ul class="simple">
+<li><p>Creación del modelo de datos.</p></li>
+<li><p>Inicialización del cliente MQTT.</p></li>
+<li><p>Configuración de ventanas auxiliares.</p></li>
+<li><p>Registro de señales y slots.</p></li>
+<li><p>Inicialización de componentes visuales.</p></li>
+<li><p>Configuración de temporizadores.</p></li>
+<li><p>Carga de recursos gráficos y parámetros de operación.</p></li>
 </ul>
 <dl class="field-list simple">
-<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> – Nombre de la aplicación o identificador de la interfaz.</p></li>
-<li><p><strong>topic</strong> – Tópico MQTT utilizado para la comunicación de la interfaz.</p></li>
-<li><p><strong>parent</strong> – Widget padre de Qt.</p></li>
-</ul>
+<dt class="field-odd">param name<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre de la aplicación.</p>
+</dd>
+<dt class="field-even">param topic<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tópico MQTT utilizado para la comunicación de la interfaz.</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Widget padre de Qt.</p>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="gui.view.MainWindow.output">
-<span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#gui.view.MainWindow.output" title="Link to this definition"></a></dt>
-<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
-<p>types is normally a sequence of individual types.  Each type is either a
-type object or a string that is the name of a C++ type.  Alternatively
-each type could itself be a sequence of types each describing a different
-overloaded signal.
-name is the optional C++ name of the signal.  If it is not specified then
-the name of the class attribute that is bound to the signal is used.
-revision is the optional revision of the signal that is exported to QML.
-If it is not specified then 0 is used.
-arguments is the optional sequence of the names of the signal’s arguments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pyqtSignal(<a href="#id1"><span class="problematic" id="id2">*</span></a>types, name</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str = …, revision</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="gui.view.MainWindow.plc_output">
-<span class="sig-name descname"><span class="pre">plc_output</span></span><a class="headerlink" href="#gui.view.MainWindow.plc_output" title="Link to this definition"></a></dt>
-<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
-<p>types is normally a sequence of individual types.  Each type is either a
-type object or a string that is the name of a C++ type.  Alternatively
-each type could itself be a sequence of types each describing a different
-overloaded signal.
-name is the optional C++ name of the signal.  If it is not specified then
-the name of the class attribute that is bound to the signal is used.
-revision is the optional revision of the signal that is exported to QML.
-If it is not specified then 0 is used.
-arguments is the optional sequence of the names of the signal’s arguments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pyqtSignal(<a href="#id3"><span class="problematic" id="id4">*</span></a>types, name</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str = …, revision</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="gui.view.MainWindow.rbt_output">
-<span class="sig-name descname"><span class="pre">rbt_output</span></span><a class="headerlink" href="#gui.view.MainWindow.rbt_output" title="Link to this definition"></a></dt>
-<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
-<p>types is normally a sequence of individual types.  Each type is either a
-type object or a string that is the name of a C++ type.  Alternatively
-each type could itself be a sequence of types each describing a different
-overloaded signal.
-name is the optional C++ name of the signal.  If it is not specified then
-the name of the class attribute that is bound to the signal is used.
-revision is the optional revision of the signal that is exported to QML.
-If it is not specified then 0 is used.
-arguments is the optional sequence of the names of the signal’s arguments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pyqtSignal(<a href="#id5"><span class="problematic" id="id6">*</span></a>types, name</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str = …, revision</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="gui.view.MainWindow.ready">
-<span class="sig-name descname"><span class="pre">ready</span></span><a class="headerlink" href="#gui.view.MainWindow.ready" title="Link to this definition"></a></dt>
-<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
-<p>types is normally a sequence of individual types.  Each type is either a
-type object or a string that is the name of a C++ type.  Alternatively
-each type could itself be a sequence of types each describing a different
-overloaded signal.
-name is the optional C++ name of the signal.  If it is not specified then
-the name of the class attribute that is bound to the signal is used.
-revision is the optional revision of the signal that is exported to QML.
-If it is not specified then 0 is used.
-arguments is the optional sequence of the names of the signal’s arguments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pyqtSignal(<a href="#id7"><span class="problematic" id="id8">*</span></a>types, name</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str = …, revision</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.quitar_numeros_enteros">
 <span class="sig-name descname"><span class="pre">quitar_numeros_enteros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cadena</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.quitar_numeros_enteros"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.quitar_numeros_enteros" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Elimina los caracteres numéricos de una cadena de texto.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cadena</strong> – Texto a procesar.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cadena sin caracteres numéricos.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.start_raffi_animation">
 <span class="sig-name descname"><span class="pre">start_raffi_animation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.start_raffi_animation"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.start_raffi_animation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Inicia la animación visual asociada al boton de la caja.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.stop_raffi_animation">
 <span class="sig-name descname"><span class="pre">stop_raffi_animation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.stop_raffi_animation"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.stop_raffi_animation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Detiene la animación visual asociada al boton de la caja.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.start_robot">
 <span class="sig-name descname"><span class="pre">start_robot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.start_robot"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.start_robot" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Envía el comando de inicio al robot.</p>
+<p>Permite dar la instruccion al robot de iniciar.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.pause_robot">
@@ -309,12 +268,23 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.HOME_robot">
 <span class="sig-name descname"><span class="pre">HOME_robot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.HOME_robot"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.HOME_robot" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Solicita al robot regresar a la posición HOME.</p>
+<p>Permite dar la instruccion al robot de regresar
+a su punto de origen.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.raffi_activation">
 <span class="sig-name descname"><span class="pre">raffi_activation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.raffi_activation"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.raffi_activation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Gestiona la activación y desactivación de clamps.</p>
+<p>Dependiendo del estado actual del proceso puede habilitar,
+deshabilitar o solicitar acciones relacionadas con los nidos de las cajas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>box</strong> – Identificador del clamp o módulo seleccionado.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.cancel_key_process">
@@ -329,12 +299,24 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.horaxhora">
 <span class="sig-name descname"><span class="pre">horaxhora</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.horaxhora"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.horaxhora" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Calcula indicadores de producción por hora.</p>
+<p>Obtiene información histórica y genera métricas como:</p>
+<ul class="simple">
+<li><p>Producción por hora.</p></li>
+<li><p>Mejor tiempo de ciclo.</p></li>
+<li><p>Tiempo promedio de ciclo.</p></li>
+<li><p>Tiempo perdido.</p></li>
+</ul>
+<p>Los resultados son mostrados en la ventana Tabla_hora_w.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.menuProcess">
 <span class="sig-name descname"><span class="pre">menuProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.menuProcess"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.menuProcess" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Gestiona las acciones asociadas al menú de proceso.</p>
+<p>Permite ejecutar acciones como Login, Logout,
+Config y WEB.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.launchWEB">
@@ -344,17 +326,60 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.status">
 <span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.status"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.status" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Sincroniza el estado de visibilidad de los componentes de la interfaz.</p>
+<p>Verifica periódicamente la visibilidad de las ventanas principales
+y auxiliares del sistema. Cuando detecta un cambio de estado,
+actualiza el modelo interno y publica la información mediante MQTT.</p>
+<p>Componentes monitoreados:</p>
+<ul class="simple">
+<li><p>Ventana principal (gui).</p></li>
+<li><p>Ventana de login.</p></li>
+<li><p>Ventana de escaneo.</p></li>
+<li><p>Ventanas emergentes (pop_out).</p></li>
+</ul>
+<p>Los cambios detectados son enviados mediante la señal <code class="docutils literal notranslate"><span class="pre">output</span></code>
+para mantener sincronizados los demás componentes del sistema.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.login">
 <span class="sig-name descname"><span class="pre">login</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.login"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.login" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Procesa el código de acceso ingresado por el operador.</p>
+<p>Obtiene el valor capturado en la ventana de autenticación y,
+si el contenido es válido, envía el identificador mediante
+la señal <code class="docutils literal notranslate"><span class="pre">output</span></code> para su posterior validación por el
+controlador.</p>
+<p>Comportamiento:</p>
+<ul class="simple">
+<li><p>Obtiene el texto ingresado.</p></li>
+<li><p>Valida que no esté vacío.</p></li>
+<li><p>Envía el identificador del operador.</p></li>
+<li><p>Limpia el campo de captura.</p></li>
+<li><p>Restablece el focus al campo de entrada.</p></li>
+</ul>
+<p>En caso de que no se capture información, se muestra un mensaje
+indicativo en el placeholder del campo de texto.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.scanner">
 <span class="sig-name descname"><span class="pre">scanner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.scanner"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.scanner" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Procesa el código QR capturado por el operador.</p>
+<p>Obtiene el contenido escaneado desde la ventana de captura,
+lo convierte a mayúsculas y lo envía mediante la señal
+<code class="docutils literal notranslate"><span class="pre">output</span></code> para su validación dentro del flujo de producción.</p>
+<p>Comportamiento:</p>
+<ul class="simple">
+<li><p>Obtiene el código capturado.</p></li>
+<li><p>Convierte el contenido a mayúsculas.</p></li>
+<li><p>Valida que no esté vacío.</p></li>
+<li><p>Envía el código al controlador.</p></li>
+<li><p>Limpia el campo de captura.</p></li>
+<li><p>Restablece el foco al campo de entrada.</p></li>
+</ul>
+<p>En caso de que no se capture información, se muestra un mensaje
+indicativo en el placeholder del campo de texto.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.qrBoxes">
@@ -364,17 +389,47 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.QR">
 <span class="sig-name descname"><span class="pre">QR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.QR"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.QR" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Procesa el código QR de llave virtual.</p>
+<p>Permite ejecutar acciones especiales dentro de la estación, tales como el
+reinicio del ciclo de producción.</p>
+<p>Una vez capturado, el código es enviado al comm del manager para
+su validación y posterior ejecución de la acción solicitada.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.input">
 <span class="sig-name descname"><span class="pre">input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.input"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.input" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Procesa mensajes recibidos mediante MQTT.</p>
+<p>Este método funciona como el principal receptor de mensajes
+provenientes del manager y dispositivos como PLC y Robot.</p>
+<p>Dependiendo del contenido del mensaje puede:</p>
+<ul class="simple">
+<li><p>Actualizar etiquetas.</p></li>
+<li><p>Actualizar imágenes.</p></li>
+<li><p>Mostrar ventanas auxiliares.</p></li>
+<li><p>Modificar indicadores visuales.</p></li>
+<li><p>Actualizar información de producción.</p></li>
+<li><p>Procesar respuestas del robot.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> – Diccionario recibido mediante MQTT.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.launcher">
 <span class="sig-name descname"><span class="pre">launcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.launcher"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.launcher" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Gestiona la visibilidad de ventanas y componentes auxiliares.</p>
+<p>Permite mostrar u ocultar elementos de la interfaz según
+la configuración recibida.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>show</strong> – Configuración visual recibida mediante MQTT.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.MainWindow.sendStatus">
@@ -391,23 +446,41 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#MainWindow.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.MainWindow.closeEvent" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</section>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gui.view.Login">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Login"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Login" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Login"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Login" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+<p>Inicializa la ventana de autenticación.</p>
+<p>Configura los controles visuales, el campo de captura
+de contraseña y el comportamiento inicial del formulario.</p>
+<p>Inicializa la ventana de autenticación.</p>
+<p>Configura los controles visuales, el campo de captura
+de contraseña y el comportamiento inicial del formulario.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.Login.keyPressEvent">
-<span class="sig-name descname"><span class="pre">keyPressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QKeyEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Login.keyPressEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Login.keyPressEvent" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">keyPressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Login.keyPressEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Login.keyPressEvent" title="Link to this definition"></a></dt>
+<dd><p>Gestiona eventos de teclado de la ventana.</p>
+<p>Actualmente intercepta la tecla Escape para evitar
+el cierre accidental del formulario de autenticación.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> – Evento de teclado recibido por Qt.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gui.view.Scanner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Scanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Scanner"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Scanner" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Scanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Scanner"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Scanner" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+<p>Ventana utilizada para la captura de códigos QR
+y códigos de producción durante la operación
+de la estación.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.Scanner.closeEvent">
 <span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Scanner.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Scanner.closeEvent" title="Link to this definition"></a></dt>
@@ -422,8 +495,10 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gui.view.Tabla_hora_w">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Tabla_hora_w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Tabla_hora_w"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Tabla_hora_w" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Tabla_hora_w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Tabla_hora_w"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Tabla_hora_w" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+<p>Ventana encargada de mostrar indicadores
+históricos y métricas de producción por hora.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.Tabla_hora_w.closeEvent">
 <span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Tabla_hora_w.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Tabla_hora_w.closeEvent" title="Link to this definition"></a></dt>
@@ -438,14 +513,17 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gui.view.Img_popout">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Img_popout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Img_popout"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Img_popout" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Img_popout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Img_popout"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Img_popout" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gui.view.PopOut">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">PopOut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#PopOut"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.PopOut" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">PopOut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#PopOut"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.PopOut" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMessageBox</span></code></p>
+<p>Ventana emergente utilizada para mostrar
+mensajes informativos, advertencias y
+notificaciones al operador.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.PopOut.closeEvent">
 <span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QCloseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#PopOut.closeEvent"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.PopOut.closeEvent" title="Link to this definition"></a></dt>
@@ -460,7 +538,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gui.view.Message_pop">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Message_pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Message_pop"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Message_pop" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.view.</span></span><span class="sig-name descname"><span class="pre">Message_pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view.html#Message_pop"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.Message_pop" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gui.view.Message_pop.closeEvent">
@@ -481,6 +559,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
         <a href="app.html" class="btn btn-neutral float-left" title="Aplicación Principal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="gui_model.html" class="btn btn-neutral float-right" title="Modelo de Datos de la GUI" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

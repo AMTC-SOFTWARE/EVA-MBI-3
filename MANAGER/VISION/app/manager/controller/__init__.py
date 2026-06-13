@@ -1,3 +1,9 @@
+"""
+Controlador principal del sistema EVA-MBI-3.
+
+Este módulo contiene la lógica principal de operación basada en
+máquina de estados mediante QState y QStateMachine.
+"""
 from PyQt5.QtCore import QObject, QStateMachine, QState, pyqtSlot, pyqtSignal, QTimer, QThread
 from manager.view.comm import MqttClient
 from manager.model import Model
@@ -16,8 +22,38 @@ from manager.controller import inspections
 from toolkit.admin import Admin       
 import math
 class Controller (QObject):
+    """
+    Controlador central de la aplicación.
 
+    Administra la máquina de estados principal del sistema y coordina
+    el flujo operativo de EVA-MBI-3.
+
+    Responsabilidades principales
+    -----------------------------
+
+    - Inicializar estados de operación.
+    - Configurar transiciones de la máquina de estados.
+    - Coordinar comunicación MQTT.
+    - Sincronizar la GUI con el modelo de datos.
+    - Administrar el flujo de validación, escaneo e inspección.
+    """
     def __init__(self, parent = None, model_gui = None):
+        """
+        Constructor de Controller
+        -------------------------
+
+        Inicializa el controlador principal y configura la máquina de
+        estados utilizada durante la operación del sistema.
+
+        Configuraciones realizadas:
+
+        - Asociación con la ventana principal.
+        - Asociación con el modelo compartido.
+        - Inicialización del cliente MQTT.
+        - Creación de estados operativos.
+        - Configuración de transiciones.
+        - Definición del estado inicial.
+        """
         super().__init__(parent)
 
         if hasattr(self.parent(),'model'):
@@ -105,18 +141,71 @@ class Controller (QObject):
 
     @pyqtSlot()
     def start(self):
+        """
+        Inicia la operación del controlador principal.
+
+        Establece la comunicación MQTT requerida por el sistema y
+        pone en marcha la máquina de estados encargada de controlar
+        el flujo operativo de EVA-MBI-3.
+
+        Este método representa el punto de inicio de la aplicación
+        una vez que la interfaz gráfica ha finalizado su proceso
+        de inicialización.
+        """
         self.client.setup()
         self.stateMachine.start()
           
  
 class Startup(QState):
+    """
+    Estado inicial de la máquina de estados.
+
+    Responsable de preparar las condiciones necesarias para
+    comenzar la operación de EVA-MBI-3.
+
+    Durante este estado se realizan las verificaciones e
+    inicializaciones requeridas antes de permitir el acceso
+    del operador al sistema.
+
+    Señales
+    --------
+
+    - ``ok``:
+      Indica que la inicialización fue completada
+      correctamente y permite avanzar al estado
+      de Login.
+    """
     ok  = pyqtSignal()
 
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de Startup
+        ----------------------
+
+        Inicializa el estado encargado de la preparación inicial
+        del sistema antes de iniciar el flujo operativo.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, event):
+        """
+        Ejecuta la secuencia de inicialización del sistema.
+
+        Verifica las condiciones necesarias para comenzar la
+        operación de la estación y prepara la interfaz para
+        el ingreso del operador.
+
+        Una vez completada la inicialización, emite la señal
+        ``ok`` para continuar con el flujo de autenticación.
+        """
 
         print("############################## ESTADO: Startup ############################")
 
@@ -185,11 +274,44 @@ class Startup(QState):
         self.ok.emit()
 
     def kioskMode(self):
+        """
+        Configura la estación en modo kiosco.
+
+        Aplica restricciones del sistema operativo destinadas a
+        evitar interrupciones durante la operación de EVA-MBI-3.
+
+        Entre las acciones realizadas pueden incluirse:
+
+        - Restricción de herramientas administrativas.
+        - Limitación de acceso al escritorio.
+        - Control de aplicaciones externas.
+        - Configuración del entorno de producción.
+
+        El objetivo es garantizar una operación controlada y
+        minimizar intervenciones no autorizadas por parte del
+        operador.
+        """
         system("taskkill /f /im explorer.exe")
         #publish.single("modules/set",json.dumps({"window" : False}),hostname='127.0.0.1', qos = 2)
         #publish.single("visycam/set",json.dumps({"window" : False}),hostname='127.0.0.1', qos = 2)
 
     def logout(self, user):
+        """
+        Finaliza la sesión activa del operador.
+
+        Ejecuta las acciones necesarias para cerrar la sesión actual
+        y regresar el sistema a un estado seguro de espera.
+
+        Este proceso permite:
+
+        - Liberar la sesión del operador actual.
+        - Restablecer información de autenticación.
+        - Limpiar datos temporales de operación.
+        - Preparar la estación para un nuevo inicio de sesión.
+
+        Una vez completado el proceso, el sistema retorna al flujo
+        inicial de autenticación.
+        """
         try:
             data = {
                 "NAME": user["name"],
@@ -203,11 +325,46 @@ class Startup(QState):
             print("Logout Exception: ", ex)
 
 class Login (QState):
+    """
+    Estado de autenticación de operadores.
+
+    Responsable de habilitar el proceso de inicio de sesión
+    dentro de EVA-MBI-3 y solicitar las credenciales necesarias
+    para acceder a la estación.
+
+    Durante este estado la interfaz gráfica presenta la ventana
+    de autenticación y permanece a la espera de la identificación
+    del operador.
+    """
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de Login
+        --------------------
+
+        Inicializa el estado encargado de gestionar la solicitud
+        de credenciales del operador.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
     def onEntry(self, event):
+        """
+        Ejecuta las acciones de entrada al estado de autenticación.
 
+        Configura la interfaz gráfica para mostrar la ventana de
+        inicio de sesión y habilita la captura del identificador
+        del operador.
+
+        El sistema permanece en este estado hasta recibir las
+        credenciales que serán evaluadas por el estado
+        ``CheckLogin``.
+        """
         print("############################## ESTADO: Login ############################")
 
         command = {
@@ -217,15 +374,57 @@ class Login (QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 class CheckLogin (QState):
+    """
+    Estado de validación de credenciales.
+
+    Responsable de verificar la autenticación del operador
+    utilizando la información capturada durante el estado
+    ``Login``.
+
+    Dependiendo del resultado de la validación, el sistema
+    permitirá el acceso al flujo operativo o solicitará
+    nuevamente las credenciales.
+
+    Señales
+    --------
+
+    - ``ok``:
+      Indica que la autenticación fue realizada correctamente
+      y el operador puede continuar con la operación de la estación.
+
+    - ``nok``:
+      Indica que la autenticación falló y es necesario
+      solicitar nuevamente las credenciales.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
 
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de CheckLogin
+        -------------------------
+
+        Inicializa el estado encargado de validar las credenciales
+        ingresadas por el operador.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, event):
+        """
+        Prepara la interfaz para la validación del operador.
 
+        Oculta la ventana de login, muestra el estado de validación
+        en la GUI y programa la consulta a la base de datos para verificar
+        las credenciales capturadas.
+        """
         print("############################## ESTADO: CheckLogin ############################")
 
         command = {
@@ -237,6 +436,29 @@ class CheckLogin (QState):
         Timer(0.05,self.API_requests).start()
 
     def API_requests (self):
+        """
+        Valida las credenciales del operador contra la base de datos.
+
+        Consulta el registro de usuarios activos utilizando el gafete
+        capturado desde la interfaz gráfica. Si el operador existe y se
+        encuentra activo, actualiza la información local del usuario,
+        registra el evento de login y permite continuar con el flujo
+        operativo de la estación.
+
+        En caso de que el usuario no sea válido o exista un error de
+        comunicación con el servidor-base de datos, informa el rechazo en la interfaz
+        y regresa al estado de autenticación.
+
+        Flujo de validación
+        -------------------
+
+        - Consulta el usuario activo mediante su gafete.
+        - Actualiza los datos locales del operador.
+        - Registra el evento de login en la base de datos.
+        - Actualiza la información visual del usuario en la GUI.
+        - Emite ``ok`` si la autenticación es correcta.
+        - Emite ``nok`` si la autenticación falla.
+        """
         try:
             endpoint = ("http://{}/api/get/usuarios/GAFET/=/{}/ACTIVE/=/1".format(self.model.server, self.model.input_data["gui"]["ID"]))
             response = requests.get(endpoint).json()
@@ -280,13 +502,66 @@ class CheckLogin (QState):
             self.nok.emit()
 
 class StartCycle (QState):
+    """
+    Estado de inicio de ciclo de producción.
+
+    Responsable de preparar la estación para comenzar un nuevo ciclo
+    operativo dentro de EVA-MBI-3.
+
+    Durante este estado se reinician datos temporales del proceso,
+    se actualiza la interfaz gráfica, se limpian indicadores visuales
+    y se calculan métricas iniciales de producción.
+
+    Señales
+    -------
+
+    - ``ok``:
+      Indica que la estación fue preparada correctamente y puede
+      continuar hacia el escaneo del número HM.
+    """
     ok = pyqtSignal()
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de StartCycle
+        -------------------------
+
+        Inicializa el estado encargado de preparar un nuevo ciclo
+        de producción.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, event):
+        """
+        Prepara la estación para un nuevo ciclo de producción.
 
+        Reinicia el modelo de operación, limpia la información visual
+        de la interfaz y habilita los indicadores requeridos para iniciar
+        la captura del número HM.
+
+        Operaciones principales
+        -----------------------
+
+        - Reinicia datos temporales del ciclo.
+        - Limpia etiquetas, imágenes e indicadores de la GUI.
+        - Oculta botones de cajas hasta que sean requeridos.
+        - Habilita la lectura de llave virtual.
+        - Actualiza el estado de trazabilidad.
+        - Consulta métricas de producción del turno.
+        - Calcula el tiempo promedio de ciclo.
+        - Publica la información inicial hacia la interfaz gráfica.
+
+        En caso de apagado del sistema, registra el cierre de sesión,
+        notifica el apagado a la interfaz y solicita liberar clamps
+        antes de finalizar la operación.
+        """
         print("############################## ESTADO: StartCycle ############################")
 
         self.model.reset()
@@ -440,6 +715,16 @@ class StartCycle (QState):
             self.ok.emit()
 
     def fuseBoxesClamps (self):
+        """
+        Libera los clamps asociados a las cajas de fusibles.
+
+        Durante el proceso de apagado o recuperación segura, envía
+        señales al PLC para desactivar los clamps registrados en el
+        modelo del sistema.
+
+        Esta acción ayuda a dejar la estación en una condición segura
+        antes de finalizar la operación.
+        """
         command = {}
         for i in self.model.fuses_BB:
              command[i] = False
@@ -447,6 +732,16 @@ class StartCycle (QState):
         publish.single(self.model.pub_topics["plc"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def logout(self, user):
+        """
+        Registra el cierre de sesión del operador.
+
+        Envía al servidor la información del usuario activo para dejar
+        trazabilidad del evento de salida del sistema.
+
+        Args:
+            user:
+                Información del operador que finaliza sesión.
+        """
         try:
             data = {
                 "NAME": user["name"],
@@ -460,12 +755,46 @@ class StartCycle (QState):
             print("Logout Exception: ", ex)
 
 class Config (QState):
+    """
+    Estado de configuración del sistema.
+
+    Permite acceder a las funciones administrativas y de
+    configuración de EVA-MBI-3.
+
+    Mientras este estado se encuentra activo, el flujo normal
+    de producción permanece suspendido hasta que el operador
+    finalice las tareas de configuración.
+    """
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de Config
+        ---------------------
+
+        Inicializa el estado encargado de gestionar las tareas
+        de configuración y administración del sistema.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.admin = None
 
     def onEntry(self, event):
+        """
+        Ingresa al modo de configuración.
+
+        Abre la interfaz administrativa y actualiza la GUI para
+        indicar que el sistema se encuentra fuera del flujo normal
+        de producción.
+
+        Durante este estado no es posible iniciar nuevos ciclos
+        operativos hasta abandonar el modo de configuración.
+        """
 
         print("############################## ESTADO: Config ############################")
 
@@ -478,16 +807,59 @@ class Config (QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def onExit(self, event):
+        """
+        Finaliza el modo de configuración.
+
+        Registra la salida del entorno administrativo y marca
+        el sistema para reanudar el flujo operativo normal.
+
+        Al regresar al ciclo de producción se evita ejecutar
+        nuevamente las tareas de inicialización asociadas a un
+        nuevo ciclo.
+        """
         self.model.saliendo_config = True
         print("Saliendo de Config")
 
 class ScanQr (QState):
+    """
+    Estado de captura del identificador de producción.
+
+    Responsable de solicitar al operador el escaneo del número HM
+    o código QR utilizado para identificar el producto que será
+    procesado por la estación.
+
+    Este estado representa el punto de entrada de cada ciclo de
+    producción y permanece activo hasta recibir un código válido.
+    """
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de ScanQr
+        ---------------------
+
+        Inicializa el estado encargado de la captura de información
+        de producción mediante escaneo.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, event):
+        """
+        Habilita la captura del código de producción.
 
+        Muestra la ventana de escaneo para permitir que el operador
+        capture el número HM o código QR asociado al arnes que
+        será procesado por la estación.
+
+        El sistema permanece a la espera de un código válido para
+        continuar con el proceso de validación.
+        """
         print("############################## ESTADO: ScanQr ############################")
 
         command = {
@@ -496,12 +868,46 @@ class ScanQr (QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def onExit(self, QEvent):
+        """
+        Finaliza la captura del código de producción.
+
+        Oculta la ventana de escaneo una vez que el sistema ha
+        recibido la información necesaria para continuar con las
+        validaciones posteriores del ciclo.
+        """
         command = {
             "show":{"scanner": False}
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 class CheckQr (QState):
+    """
+    Estado de validación del Datamatrix del arnés.
+
+    Responsable de validar el código escaneado al inicio del ciclo
+    de producción y preparar la información necesaria para las
+    inspecciones posteriores.
+
+    Este estado integra validaciones de formato, trazabilidad,
+    historial de proceso, evento activo, modularidad, contenido de
+    fusibles, contenido de torque y datos requeridos para la etiqueta
+    final.
+
+    Señales
+    -------
+
+    - ``ok``:
+      Indica que el Datamatrix fue validado correctamente y el ciclo
+      puede continuar.
+
+    - ``nok``:
+      Indica que el Datamatrix no es válido o que alguna validación
+      requerida falló.
+
+    - ``rework``:
+      Indica que el arnés ya cuenta con historial previo y requiere
+      autorización para retrabajo.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
     rework  = pyqtSignal()
@@ -511,7 +917,15 @@ class CheckQr (QState):
         self.model = model
 
     def onEntry(self, event):
+        """
+        Inicia la validación del Datamatrix escaneado.
 
+        Actualiza la interfaz para indicar que el código fue recibido,
+        habilita el cronómetro del ciclo y programa la validación completa
+        del arnés.
+
+        La validación principal se ejecuta en ``API_requests``.
+        """
         print("############################## ESTADO: CheckQr ############################")
 
         command = {
@@ -523,8 +937,36 @@ class CheckQr (QState):
         Timer(0.05, self.API_requests).start()
 
     def API_requests (self):
-        try:
+        """
+        Ejecuta la validación completa del Datamatrix del arnés.
 
+        Este método concentra las verificaciones necesarias para permitir
+        el inicio del ciclo de producción en EVA-MBI-3.
+
+        Flujo de validación
+        -------------------
+
+        - Extrae la información principal del Datamatrix.
+        - Verifica que el formato de la etiqueta sea correcto.
+        - Valida trazabilidad contra FAMX2 cuando está habilitada.
+        - Verifica que el arnés no requiera autorización de retrabajo.
+        - Busca el evento activo asociado a la modularidad.
+        - Obtiene la información necesaria para la etiqueta final.
+        - Genera el contenido de torques a inspeccionar.
+        - Genera el contenido de fusibles a inspeccionar.
+        - Integra cavidades vacías y contenido real del arnés.
+        - Agrega inspecciones obligatorias de conectores y bracket.
+        - Actualiza el modelo con la información final del ciclo.
+        - Notifica a la GUI el inicio del ciclo.
+
+        Resultado
+        ---------
+
+        - Emite ``ok`` cuando el arnés puede continuar el proceso.
+        - Emite ``nok`` cuando alguna validación falla.
+        - Emite ``rework`` cuando el arnés requiere autorización de retrabajo.
+        """
+        try:
             ##################################### Formato Etiqueta ##########################################################
 
             print("||||||Estado de Sistema de Trazabilidad: ",self.model.config_data["trazabilidad"])
@@ -1000,6 +1442,19 @@ class CheckQr (QState):
             self.nok.emit()
 
     def procesado_anteriormente (self):
+        """
+        Verifica si el arnés ya fue procesado anteriormente.
+
+        Consulta el historial de producción utilizando el HM escaneado.
+        Si el arnés ya cuenta con un resultado aprobado, el sistema lo
+        considera un posible retrabajo y solicita autorización antes de
+        permitir continuar el ciclo.
+
+        Returns:
+            bool:
+                ``True`` si el arnés requiere validación de retrabajo.
+                ``False`` o ``None`` si puede continuar normalmente.
+        """
         print("buscando procesado_anteriormente")
 
         if self.model.local_data["qr_rework"] == False:
@@ -1028,6 +1483,17 @@ class CheckQr (QState):
                 print("no se encontró arnés procesado anteriormente, continunando normalmente...")
 
     def build_contenido_torques_from_results (self):
+        """
+        Genera el contenido de torques a partir del historial del arnés.
+
+        Utiliza los resultados de torque previamente registrados en el
+        sistema de trazabilidad para determinar qué cajas y tuercas deben
+        ser inspeccionadas durante el ciclo actual.
+
+        Si no es posible generar el contenido desde los resultados
+        históricos, el sistema intenta construirlo desde la base de datos
+        local del evento.
+        """
         print("\nbuild_contenido_torques_from_results")
         try:
             print("se acomodan los queue necesarios para las cajas de torque con la información de la tabla en red: valores")
@@ -1083,6 +1549,17 @@ class CheckQr (QState):
             return
 
     def build_contenido_torques (self):
+        """
+        Genera el contenido de torques desde la base de datos local.
+
+        Consulta los módulos de torque asociados al evento activo y a la
+        referencia del arnés para construir la lista de cajas y tuercas que
+        deberán ser inspeccionadas.
+
+        En caso de encontrar módulos faltantes o inconsistencias en la base
+        de datos, se notifica el error a la interfaz y se detiene el avance
+        del ciclo.
+        """
         print("\nbuild_contenido_torques")
         try:
                 #se leen los módulos de Torque cargados en la estación
@@ -1193,6 +1670,20 @@ class CheckQr (QState):
             return
 
     def build_contenido_fusibles (self):
+        """
+        Genera el contenido de fusibles a inspeccionar.
+
+        Consulta los módulos de visión asociados al evento activo y a la
+        referencia del arnés para construir la configuración de cajas,
+        cavidades y colores esperados durante la inspección.
+
+        También determina la variante correspondiente de PDC-R y agrega
+        inspecciones obligatorias como conectores y bracket.
+
+        En caso de error o módulos faltantes, se informa la condición a la
+        interfaz y se detiene el avance del ciclo.
+        """
+
         print("\nbuild_contenido_fusibles")
         try:
 
@@ -1359,6 +1850,27 @@ class CheckQr (QState):
             return
 
     def ETIQUETA(self, ID):
+        """
+        Prepara la información de torque para la etiqueta final.
+
+        Busca el historial de torque asociado al HM del arnés. Cuando la
+        trazabilidad está habilitada, utiliza la información registrada en
+        el sistema para incluir valores reales de torque en la etiqueta
+        final.
+
+        Si no existen resultados disponibles, el sistema permite continuar
+        el ciclo, pero marca los valores de torque como ``No Results``.
+
+        Args:
+            ID:
+                HM del arnés utilizado para consultar el historial de torque.
+
+        Returns:
+            bool:
+                ``True`` si la información de etiqueta fue preparada o si
+                el ciclo puede continuar sin resultados de torque.
+                ``False`` si existe un error que impide continuar.
+        """
         #Función para buscar el historial de Torque de un HM, y con esto agregar los datos a la etiqueta final,
         #Además, se decide si se generarán los torques a inspeccionar desde su historial de torques o si se generarán desde la base de datos local
 
@@ -1590,14 +2102,62 @@ class CheckQr (QState):
             return False
 
 class ScanPDCR (QState):
+    """
+    Estado encargado de solicitar el escaneo de la caja PDC-R.
+
+    Antes de iniciar las inspecciones del arnés, este estado valida
+    que la variante física de la caja PDC-R instalada corresponda con
+    la configuración esperada para la modularidad procesada.
+
+    Dependiendo de la variante detectada durante la preparación del
+    ciclo, se solicita al operador el escaneo del código QR
+    correspondiente.
+
+    Señales
+    -------
+
+    - ``emptypdcr``:
+      Indica que la validación de la caja PDC-R no pudo completarse o
+      que se requiere una acción adicional antes de continuar.
+    """
 
     emptypdcr = pyqtSignal()
 
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de ScanPDCR.
+
+        Inicializa el estado encargado de la validación de la caja
+        PDC-R y conserva una referencia al modelo compartido del sistema.
+
+        Args:
+            model:
+                Modelo principal utilizado para acceder a la información
+                del ciclo y de la modularidad procesada.
+
+            parent:
+                Objeto padre de Qt.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, event):
+        """
+        Solicita el escaneo de la variante PDC-R correspondiente.
+
+        Determina el código QR esperado a partir de la variante detectada
+        para el arnés actual y actualiza la interfaz para solicitar al
+        operador el escaneo de la caja física instalada.
+
+        Variantes soportadas:
+
+        - ``PDC-R``
+        - ``PDC-RMID``
+        - ``PDC-RS``
+
+        La ventana de escaneo permanece habilitada hasta que se complete
+        la validación del código leído.
+        """
         print("############################## ESTADO: ScanPDCR ############################")
 
         #self.model.pdcrvariant puede valer: 
@@ -1620,6 +2180,13 @@ class ScanPDCR (QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def onExit(self, QEvent):
+        """
+        Finaliza el proceso de escaneo de la caja PDC-R.
+
+        Oculta la ventana de captura de códigos utilizada durante la
+        validación y deja preparada la interfaz para el siguiente estado
+        del flujo de producción.
+        """
         print("Saliendo de ScanPDCR")
         command = {
             "show":{"scanner": False}
@@ -1627,16 +2194,70 @@ class ScanPDCR (QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 class CheckPDCR (QState):
+    """
+    Estado de validación del QR de la caja PDC-R.
 
+    Responsable de comparar el código escaneado por el operador contra
+    el QR esperado para la variante PDC-R determinada previamente.
+
+    Este estado ayuda a asegurar que la caja física instalada en el
+    arnés corresponda con la configuración requerida por la modularidad.
+
+    Señales
+    -------
+
+    - ``ok``:
+      Indica que el QR de la caja PDC-R corresponde con la variante
+      esperada y el ciclo puede continuar.
+
+    - ``nok``:
+      Indica que el QR escaneado no corresponde con el esperado y se
+      debe solicitar nuevamente el escaneo.
+
+    - ``max_tries``:
+      Indica que se alcanzó el número máximo de intentos permitidos y
+      el proceso debe ser atendido por calidad o supervisor.
+    """
     ok = pyqtSignal()
     nok = pyqtSignal()
     max_tries = pyqtSignal()
 
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de CheckPDCR
+        ------------------------
+
+        Inicializa el estado encargado de validar el QR de la caja PDC-R
+        contra la variante esperada para el arnés actual.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta la validación del QR escaneado para la caja PDC-R.
+
+        Compara el código leído contra el QR esperado para la variante
+        correspondiente. Si el código es correcto, permite continuar el
+        flujo operativo; si es incorrecto, incrementa el contador de
+        intentos y solicita un nuevo escaneo.
+
+        Control de intentos
+        -------------------
+
+        - Si el QR coincide con la variante esperada, emite ``ok``.
+        - Si el QR no coincide, emite ``nok`` para repetir el escaneo.
+        - Si se alcanza el máximo de intentos permitidos, emite
+        ``max_tries`` y deshabilita la llave virtual hasta intervención
+        de calidad o supervisor.
+        """
         print("############################## ESTADO: CheckPDCR ############################")
 
         #se guarda el qr leído de la caja PDCR
@@ -1684,17 +2305,69 @@ class CheckPDCR (QState):
 
 
     def onExit(self, QEvent):
+        """
+        Finaliza el estado de validación de PDC-R.
+
+        Registra la salida del estado antes de continuar con el siguiente
+        paso del flujo operativo.
+        """
         print("Saliendo de CheckPDCR")
 
 class EnableClamps (QState):
+    """
+    Estado de habilitación de clamps.
 
+    Responsable de habilitar físicamente los nidos o clamps requeridos
+    para el arnés validado antes de iniciar las inspecciones.
+
+    A partir de la modularidad generada durante la validación del
+    Datamatrix, este estado muestra en la GUI las cajas necesarias
+    y envía al PLC la solicitud de habilitación correspondiente.
+
+    Señales
+    -------
+
+    - ``continuar``:
+      Indica que los clamps fueron solicitados correctamente y el
+      flujo puede avanzar al estado de espera o inspección.
+    """
     continuar = pyqtSignal()
 
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de EnableClamps
+        ---------------------------
+
+        Inicializa el estado encargado de habilitar los clamps requeridos
+        por el arnés actual.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Habilita los clamps necesarios para el ciclo actual.
+
+        Muestra en la interfaz las cajas requeridas por la modularidad
+        del arnés y envía al PLC las señales necesarias para habilitar
+        los nidos correspondientes.
+
+        Operaciones principales
+        -----------------------
+
+        - Reactiva la llave virtual del sistema.
+        - Muestra en GUI las cajas requeridas.
+        - Solicita al PLC la habilitación de clamps.
+        - Indica al operador colocar las cajas en los nidos.
+        - Emite ``continuar`` para avanzar al siguiente estado.
+        """
         print("############################## ESTADO: EnableClamps ############################")
 
         self.model.disable_key = False
@@ -1749,18 +2422,66 @@ class EnableClamps (QState):
         Timer(1,self.continuar.emit).start()
 
     def onExit(self, QEvent):
+        """
+        Finaliza el estado de habilitación de clamps.
+
+        Registra la salida del estado antes de continuar con el flujo
+        operativo de inspección.
+        """
         print("Saliendo de EnableClamps")
 
 class QualityValidation (QState):
+    """
+    Estado de validación de autorización de calidad.
+
+    Responsable de verificar que un supervisor de calidad autorice la
+    recuperación del proceso cuando se alcanza el límite de intentos
+    durante la validación de PDC-R.
+
+    Este estado protege el flujo operativo evitando que el ciclo sea
+    reiniciado sin intervención de personal autorizado.
+
+    Señales
+    -------
+
+    - ``ok``:
+      Indica que el supervisor de calidad fue validado correctamente
+      y el sistema puede permitir un nuevo intento.
+
+    - ``nok``:
+      Indica que el código ingresado no pertenece a un usuario con
+      permisos de calidad o que la validación falló.
+    """
 
     ok = pyqtSignal()
     nok = pyqtSignal()
 
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de QualityValidation
+        --------------------------------
+
+        Inicializa el estado encargado de validar permisos de calidad
+        antes de permitir la recuperación del proceso.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Inicia la validación del usuario de calidad.
+
+        Actualiza la interfaz para indicar que se están revisando
+        permisos y programa la consulta del usuario ingresado contra
+        el servidor.
+        """
         print("############################## ESTADO: QualityValidation ############################")
 
         command = {
@@ -1773,6 +2494,23 @@ class QualityValidation (QState):
 
 
     def consulta_usuarios (self):
+        """
+        Consulta y valida los permisos del usuario ingresado.
+
+        Verifica el código capturado contra el servidor de usuarios.
+        Si el usuario existe, está activo y pertenece al perfil
+        ``SUPCALIDAD``, se autoriza la recuperación del proceso.
+
+        Flujo de validación
+        -------------------
+
+        - Consulta el usuario activo mediante gafete.
+        - Verifica que el perfil corresponda a supervisor de calidad.
+        - Reactiva la llave virtual.
+        - Reinicia el contador de intentos de PDC-R.
+        - Emite ``ok`` cuando la autorización es válida.
+        - Emite ``nok`` cuando el usuario no tiene permisos o la consulta falla.
+        """
         try:
             #se guarda el usuario ingresado
             usuario_ingresado = copy(self.model.input_data["gui"]["code"])
@@ -1824,11 +2562,49 @@ class QualityValidation (QState):
 
 
     def onExit(self, QEvent):
+        """
+        Finaliza el estado de validación de calidad.
+
+        Registra la salida del estado antes de regresar al flujo de
+        escaneo o recuperación del proceso.
+        """
         print("Saliendo de QualityValidation")
 
 class QrRework (QState):
+    """
+    Estado de autorización para retrabajo de arnés.
+
+    Responsable de detener el flujo cuando el HM escaneado ya cuenta
+    con historial previo de proceso y requiere confirmación antes de
+    continuar.
+
+    Este estado permite al operador decidir entre escanear otro arnés
+    o autorizar el retrabajo mediante la llave virtual.
+
+    Señales
+    -------
+
+    - ``ok``:
+      Indica que se tomó una decisión y el flujo puede regresar a la
+      validación del Datamatrix.
+    """
     ok = pyqtSignal()
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de QrRework
+        -----------------------
+
+        Inicializa el estado encargado de gestionar la autorización de
+        retrabajo y conecta las señales utilizadas para confirmar o
+        rechazar la continuación del proceso.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
@@ -1836,7 +2612,13 @@ class QrRework (QState):
         self.model.transitions.code.connect(self.noRework)
 
     def onEntry(self, QEvent):
+        """
+        Solicita autorización para continuar con un arnés reprocesado.
 
+        Informa al operador que el arnés ya fue procesado anteriormente,
+        habilita nuevamente el escáner y permite continuar únicamente si
+        se autoriza mediante la llave virtual o si se escanea otro código.
+        """
         print("############################## ESTADO: QrRework ############################")
 
         command = {
@@ -1848,28 +2630,104 @@ class QrRework (QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def onExit(self, QEvent):
+        """
+        Finaliza la solicitud de autorización de retrabajo.
+
+        Oculta la ventana de escaneo antes de regresar al flujo de
+        validación del Datamatrix.
+        """
         command = {
             "show":{"scanner": False}
             }
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def rework (self):
+        """
+        Autoriza el retrabajo del arnés actual.
+
+        Marca el ciclo como retrabajo autorizado para permitir que el
+        sistema continúe con la validación del mismo HM procesado
+        anteriormente.
+        """
         self.model.local_data["qr_rework"] = True
         Timer(0.05, self.ok.emit).start()
 
     def noRework(self):
+        """
+        Cancela la autorización de retrabajo.
+
+        Permite regresar al flujo de validación para procesar el nuevo
+        código escaneado por el operador.
+        """
         Timer(0.05, self.ok.emit).start()
 
 class Finish (QState):
+    """
+    Estado de finalización del ciclo de producción.
+
+    Responsable de cerrar el ciclo operativo del arnés después de
+    completar las inspecciones requeridas por EVA-MBI-3.
+
+    Durante este estado se registra el resultado final del proceso,
+    se genera la información para impresión de etiqueta y, si la
+    trazabilidad está habilitada, se actualiza la salida del arnés
+    en el sistema FAMX2.
+
+    Señales
+    -------
+
+    - ``ok``:
+      Indica que el ciclo fue finalizado correctamente y el sistema
+      puede iniciar un nuevo ciclo de producción.
+
+    - ``nok``:
+      Indica que ocurrió una condición que impide cerrar el ciclo de
+      forma correcta.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
 
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de Finish
+        ---------------------
+
+        Inicializa el estado encargado de registrar y cerrar el ciclo
+        de producción del arnés actual.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, event):
+        """
+        Ejecuta el cierre del ciclo de producción.
 
+        Consolida los resultados del arnés procesado y registra el
+        historial final del ciclo en el servidor.
+
+        Operaciones principales
+        -----------------------
+
+        - Detiene el cronómetro del ciclo.
+        - Construye el registro histórico del arnés.
+        - Guarda resultados de visión, torque y altura.
+        - Registra intentos, seriales, usuario e información de scrap.
+        - Genera la información requerida para impresión de etiqueta.
+        - Publica la etiqueta hacia el sistema de impresión.
+        - Muestra el mensaje final al operador.
+        - Actualiza la trazabilidad de salida en FAMX2 cuando aplica.
+
+        Si ocurre un error al guardar información o actualizar
+        trazabilidad, se notifica al operador y se solicita recuperación
+        mediante llave de reset.
+        """
         print("############################## ESTADO: Finish ############################")
 
         print("HM: ",self.model.qr_codes["HM"])
@@ -1987,6 +2845,12 @@ class Finish (QState):
                 publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def finalMessage(self):
+        """
+        Muestra el mensaje final del ciclo al operador.
+
+        Notifica que el ciclo fue terminado correctamente y solicita
+        retirar las cajas de la estación para preparar el siguiente ciclo.
+        """
         command = {
             "lbl_result" : {"text": "Ciclo terminado", "color": "green"},
             "lbl_steps" : {"text": "Retira las cajas", "color": "black"}
@@ -1994,14 +2858,67 @@ class Finish (QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 class Reset (QState):
+    """
+    Estado de reinicio controlado del ciclo.
+
+    Responsable de detener el ciclo actual, liberar los clamps activos
+    y registrar el evento de reset cuando existe un arnés en proceso.
+
+    Este estado se utiliza cuando el operador gira la llave de reset
+    para recuperar la estación ante una interrupción, error o condición
+    que impide continuar el flujo normal.
+
+    Señales
+    -------
+
+    - ``ok``:
+      Indica que el reinicio fue ejecutado correctamente y el sistema
+      puede regresar al inicio de ciclo.
+
+    - ``nok``:
+      Indica que ocurrió una condición que impide completar el reinicio.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de Reset
+        --------------------
+
+        Inicializa el estado encargado de ejecutar el reinicio controlado
+        del ciclo de producción.
+
+        Args:
+            model:
+                Modelo compartido utilizado por el controlador.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, event):
+        """
+        Ejecuta el reinicio controlado de la estación.
 
+        Limpia la información temporal del ciclo, detiene el cronómetro
+        de operación y solicita al PLC liberar los clamps asociados a las
+        cajas activas.
+
+        Si existe un ciclo iniciado, registra en el historial un resultado
+        de reset para conservar la trazabilidad del arnés interrumpido.
+
+        Operaciones principales
+        -----------------------
+
+        - Reinicia el modelo de operación.
+        - Detiene el cronómetro del ciclo.
+        - Notifica el reset en la interfaz gráfica.
+        - Libera clamps mediante el PLC.
+        - Registra historial de ciclo interrumpido cuando aplica.
+        - Emite ``ok`` para regresar al inicio del ciclo.
+        """
         print("############################## ESTADO: Reset ############################")
         self.model.reset()
         self.model.cronometro_ciclo=False

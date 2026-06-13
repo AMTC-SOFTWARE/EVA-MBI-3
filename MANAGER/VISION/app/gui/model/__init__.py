@@ -1,10 +1,36 @@
 # -*- coding: utf-8 -*-
 """
-@author: MSc. Marco Rutiaga Quezada
+Modelo de datos de la interfaz gráfica EVA-MBI-3.
+
+Este módulo contiene la estructura de datos utilizada por la interfaz
+gráfica para almacenar configuraciones, estados de operación,
+información de usuario y parámetros de comunicación.
 """
 
 class Model (object):
-    def __init__(self):   
+    """
+    Modelo de datos principal de la interfaz gráfica EVA-MBI-3.
+
+    Centraliza la información compartida utilizada por los
+    componentes visuales y de comunicación del sistema.
+    """
+    def __init__(self):
+        """
+        Constructor de Model
+        --------------------
+
+        Inicializa la configuración base utilizada por la interfaz
+        gráfica, incluyendo parámetros de comunicación, recursos
+        visuales, información de usuario y estados de operación.
+
+        Configuraciones iniciales:
+
+        - Tópicos MQTT de comunicación.
+        - Dirección del servidor.
+        - Recursos gráficos por defecto.
+        - Estado de visibilidad de ventanas.
+        - Variables auxiliares.
+        """
         self.name = "GUI"
         self.imgsPath = "data/imgs/"
         self.img_fuse = ""

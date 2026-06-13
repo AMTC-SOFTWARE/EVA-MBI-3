@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comunicación MQTT de la GUI &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Controlador" href="controller.html" />
+    <link rel="prev" title="Modelo de Datos de la GUI" href="gui_model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Comunicación MQTT de la GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gui.view.comm.MqttClient"><code class="docutils literal notranslate"><span class="pre">MqttClient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.comm.MqttClient.setup"><code class="docutils literal notranslate"><span class="pre">MqttClient.setup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.comm.MqttClient.on_connect"><code class="docutils literal notranslate"><span class="pre">MqttClient.on_connect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.comm.MqttClient.on_message"><code class="docutils literal notranslate"><span class="pre">MqttClient.on_message()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.comm.MqttClient.publish"><code class="docutils literal notranslate"><span class="pre">MqttClient.publish()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.comm.MqttClient.plc_publish"><code class="docutils literal notranslate"><span class="pre">MqttClient.plc_publish()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.comm.MqttClient.rbt_publish"><code class="docutils literal notranslate"><span class="pre">MqttClient.rbt_publish()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gui.view.comm.MqttClient.closePopout"><code class="docutils literal notranslate"><span class="pre">MqttClient.closePopout()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Comunicación MQTT de la GUI</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/gui_comm.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-gui.view.comm">
+<span id="comunicacion-mqtt-de-la-gui"></span><h1>Comunicación MQTT de la GUI<a class="headerlink" href="#module-gui.view.comm" title="Link to this heading"></a></h1>
+<p>Comunicación MQTT de la interfaz gráfica EVA-MBI-3.</p>
+<p>Este módulo contiene la implementación del cliente MQTT utilizado
+por la GUI para intercambiar información con los diferentes
+componentes del sistema.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.view.comm.MqttClient">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.view.comm.</span></span><span class="sig-name descname"><span class="pre">MqttClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view/comm.html#MqttClient"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.comm.MqttClient" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
+<p>Cliente MQTT principal de la interfaz gráfica.</p>
+<p>Responsable de establecer la conexión con el broker,
+gestionar las suscripciones y distribuir los mensajes
+recibidos entre los componentes de la GUI.</p>
+<section id="senales-principales">
+<h2>Señales principales<a class="headerlink" href="#senales-principales" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">subscribe</span></code>:
+Emitida cuando se recibe un mensaje MQTT válido.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">connected</span></code>:
+Emitida cuando el cliente establece correctamente
+la conexión con el broker MQTT.</p></li>
+</ul>
+</section>
+<section id="constructor-de-mqttclient">
+<h2>Constructor de MqttClient<a class="headerlink" href="#constructor-de-mqttclient" title="Link to this heading"></a></h2>
+<p>Inicializa el cliente MQTT utilizado por la interfaz gráfica
+y configura los mecanismos necesarios para la comunicación
+con los diferentes componentes del sistema.</p>
+<p>Configuraciones realizadas:</p>
+<ul class="simple">
+<li><p>Asociación con el modelo de datos.</p></li>
+<li><p>Creación de la instancia MQTT.</p></li>
+<li><p>Registro de callbacks de conexión y recepción.</p></li>
+<li><p>Programación del intento inicial de conexión al broker.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instancia del modelo de datos utilizada para obtener
+parámetros de configuración y tópicos MQTT.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Objeto padre de Qt.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.comm.MqttClient.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view/comm.html#MqttClient.setup"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.comm.MqttClient.setup" title="Link to this definition"></a></dt>
+<dd><p>Establece la conexión inicial con el broker MQTT.</p>
+<p>Intenta conectar el cliente MQTT de la interfaz gráfica al broker
+local y activa el ciclo de recepción de mensajes.</p>
+<p>En caso de falla, notifica el error a la GUI mediante la señal
+<code class="docutils literal notranslate"><span class="pre">subscribe</span></code> y programa el cierre automático del mensaje emergente.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.comm.MqttClient.on_connect">
+<span class="sig-name descname"><span class="pre">on_connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view/comm.html#MqttClient.on_connect"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.comm.MqttClient.on_connect" title="Link to this definition"></a></dt>
+<dd><p>Gestiona la conexión de la interfaz gráfica con el broker MQTT.</p>
+<p>Una vez establecida la conexión, realiza la suscripción a los
+tópicos necesarios para la operación de EVA-MBI-3 y notifica
+el resultado de la comunicación.</p>
+<p>En caso de éxito se habilita el intercambio de mensajes entre
+la GUI, el controlador y los dispositivos externos. En caso
+de error, se muestra un error mediante la interfaz gráfica.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Cliente MQTT que originó el evento.</p></li>
+<li><p><strong>userdata</strong> – Datos de usuario asociados al cliente.</p></li>
+<li><p><strong>flags</strong> – Indicadores de conexión proporcionados por MQTT.</p></li>
+<li><p><strong>rc</strong> – Código de resultado de la conexión.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.comm.MqttClient.on_message">
+<span class="sig-name descname"><span class="pre">on_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view/comm.html#MqttClient.on_message"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.comm.MqttClient.on_message" title="Link to this definition"></a></dt>
+<dd><p>Procesa los mensajes recibidos durante la operación de EVA-MBI-3.</p>
+<p>Este método recibe y distribuye la información proveniente de los
+diferentes componentes del sistema, permitiendo mantener
+sincronizada la interfaz gráfica con el estado actual de la estación.</p>
+<p>Los mensajes recibidos pueden incluir:</p>
+<ul class="simple">
+<li><p>Actualización de indicadores de producción.</p></li>
+<li><p>Instrucciones para el operador.</p></li>
+<li><p>Cambios de estado de la interfaz.</p></li>
+<li><p>Eventos generados por el controlador.</p></li>
+<li><p>Información proveniente del robot y dispositivos externos.</p></li>
+<li><p>Notificaciones relacionadas con la trazabilidad del proceso.</p></li>
+</ul>
+<p>Una vez procesado el mensaje, la información es distribuida a la
+interfaz gráfica mediante señales Qt para actualizar los componentes
+visuales correspondientes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Cliente MQTT que recibió el mensaje.</p></li>
+<li><p><strong>userdata</strong> – Datos asociados al cliente MQTT.</p></li>
+<li><p><strong>message</strong> – Mensaje recibido desde alguno de los tópicos suscritos.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.comm.MqttClient.publish">
+<span class="sig-name descname"><span class="pre">publish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view/comm.html#MqttClient.publish"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.comm.MqttClient.publish" title="Link to this definition"></a></dt>
+<dd><p>Publica información de estado de la interfaz gráfica.</p>
+<p>Envía eventos generados por la GUI hacia los demás componentes
+del sistema para mantener sincronizada la operación de la estación.</p>
+<p>Entre los mensajes publicados pueden encontrarse:</p>
+<ul class="simple">
+<li><p>Solicitudes de autenticación.</p></li>
+<li><p>Códigos escaneados por el operador.</p></li>
+<li><p>Cambios de visibilidad de ventanas.</p></li>
+<li><p>Eventos de interacción con la interfaz.</p></li>
+<li><p>Actualizaciones de estado de operación.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> – Información que será enviada mediante MQTT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.comm.MqttClient.plc_publish">
+<span class="sig-name descname"><span class="pre">plc_publish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view/comm.html#MqttClient.plc_publish"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.comm.MqttClient.plc_publish" title="Link to this definition"></a></dt>
+<dd><p>Envía comandos destinados al PLC de la estación.</p>
+<p>Permite transmitir instrucciones relacionadas con el control
+del proceso productivo y la interacción con los dispositivos
+industriales conectados al sistema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> – Comando o información destinada al PLC.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.comm.MqttClient.rbt_publish">
+<span class="sig-name descname"><span class="pre">rbt_publish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view/comm.html#MqttClient.rbt_publish"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.comm.MqttClient.rbt_publish" title="Link to this definition"></a></dt>
+<dd><p>Envía comandos destinados al robot de la estación.</p>
+<p>Permite iniciar acciones, movimientos o secuencias de trabajo
+requeridas durante la ejecución del ciclo de producción.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> – Comando o información destinada al robot.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.view.comm.MqttClient.closePopout">
+<span class="sig-name descname"><span class="pre">closePopout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui/view/comm.html#MqttClient.closePopout"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.view.comm.MqttClient.closePopout" title="Link to this definition"></a></dt>
+<dd><p>Solicita el cierre automático de mensajes emergentes.</p>
+<p>Utilizado principalmente durante la gestión de errores de
+comunicación para retirar de la interfaz las notificaciones
+temporales una vez transcurrido el tiempo de visualización.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="gui_model.html" class="btn btn-neutral float-left" title="Modelo de Datos de la GUI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="controller.html" class="btn btn-neutral float-right" title="Controlador" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

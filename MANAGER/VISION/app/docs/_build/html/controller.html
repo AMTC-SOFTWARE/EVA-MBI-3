@@ -1,0 +1,1255 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controlador &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="prev" title="Comunicación MQTT de la GUI" href="gui_comm.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Controlador</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Controller.start"><code class="docutils literal notranslate"><span class="pre">Controller.start()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.Startup"><code class="docutils literal notranslate"><span class="pre">Startup</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Startup.onEntry"><code class="docutils literal notranslate"><span class="pre">Startup.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Startup.kioskMode"><code class="docutils literal notranslate"><span class="pre">Startup.kioskMode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Startup.logout"><code class="docutils literal notranslate"><span class="pre">Startup.logout()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.Login"><code class="docutils literal notranslate"><span class="pre">Login</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Login.onEntry"><code class="docutils literal notranslate"><span class="pre">Login.onEntry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.CheckLogin"><code class="docutils literal notranslate"><span class="pre">CheckLogin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckLogin.onEntry"><code class="docutils literal notranslate"><span class="pre">CheckLogin.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckLogin.API_requests"><code class="docutils literal notranslate"><span class="pre">CheckLogin.API_requests()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.StartCycle"><code class="docutils literal notranslate"><span class="pre">StartCycle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.StartCycle.onEntry"><code class="docutils literal notranslate"><span class="pre">StartCycle.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.StartCycle.fuseBoxesClamps"><code class="docutils literal notranslate"><span class="pre">StartCycle.fuseBoxesClamps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.StartCycle.logout"><code class="docutils literal notranslate"><span class="pre">StartCycle.logout()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Config.onEntry"><code class="docutils literal notranslate"><span class="pre">Config.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Config.onExit"><code class="docutils literal notranslate"><span class="pre">Config.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.ScanQr"><code class="docutils literal notranslate"><span class="pre">ScanQr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.ScanQr.onEntry"><code class="docutils literal notranslate"><span class="pre">ScanQr.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.ScanQr.onExit"><code class="docutils literal notranslate"><span class="pre">ScanQr.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.CheckQr"><code class="docutils literal notranslate"><span class="pre">CheckQr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckQr.onEntry"><code class="docutils literal notranslate"><span class="pre">CheckQr.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckQr.API_requests"><code class="docutils literal notranslate"><span class="pre">CheckQr.API_requests()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckQr.procesado_anteriormente"><code class="docutils literal notranslate"><span class="pre">CheckQr.procesado_anteriormente()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckQr.build_contenido_torques_from_results"><code class="docutils literal notranslate"><span class="pre">CheckQr.build_contenido_torques_from_results()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckQr.build_contenido_torques"><code class="docutils literal notranslate"><span class="pre">CheckQr.build_contenido_torques()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckQr.build_contenido_fusibles"><code class="docutils literal notranslate"><span class="pre">CheckQr.build_contenido_fusibles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckQr.ETIQUETA"><code class="docutils literal notranslate"><span class="pre">CheckQr.ETIQUETA()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.ScanPDCR"><code class="docutils literal notranslate"><span class="pre">ScanPDCR</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.ScanPDCR.emptypdcr"><code class="docutils literal notranslate"><span class="pre">ScanPDCR.emptypdcr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.ScanPDCR.onEntry"><code class="docutils literal notranslate"><span class="pre">ScanPDCR.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.ScanPDCR.onExit"><code class="docutils literal notranslate"><span class="pre">ScanPDCR.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.CheckPDCR"><code class="docutils literal notranslate"><span class="pre">CheckPDCR</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckPDCR.onEntry"><code class="docutils literal notranslate"><span class="pre">CheckPDCR.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.CheckPDCR.onExit"><code class="docutils literal notranslate"><span class="pre">CheckPDCR.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.EnableClamps"><code class="docutils literal notranslate"><span class="pre">EnableClamps</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.EnableClamps.onEntry"><code class="docutils literal notranslate"><span class="pre">EnableClamps.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.EnableClamps.onExit"><code class="docutils literal notranslate"><span class="pre">EnableClamps.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.QualityValidation"><code class="docutils literal notranslate"><span class="pre">QualityValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.QualityValidation.onEntry"><code class="docutils literal notranslate"><span class="pre">QualityValidation.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.QualityValidation.consulta_usuarios"><code class="docutils literal notranslate"><span class="pre">QualityValidation.consulta_usuarios()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.QualityValidation.onExit"><code class="docutils literal notranslate"><span class="pre">QualityValidation.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.QrRework"><code class="docutils literal notranslate"><span class="pre">QrRework</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.QrRework.onEntry"><code class="docutils literal notranslate"><span class="pre">QrRework.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.QrRework.onExit"><code class="docutils literal notranslate"><span class="pre">QrRework.onExit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.QrRework.noRework"><code class="docutils literal notranslate"><span class="pre">QrRework.noRework()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.Finish"><code class="docutils literal notranslate"><span class="pre">Finish</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Finish.onEntry"><code class="docutils literal notranslate"><span class="pre">Finish.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Finish.finalMessage"><code class="docutils literal notranslate"><span class="pre">Finish.finalMessage()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.Reset"><code class="docutils literal notranslate"><span class="pre">Reset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.Reset.onEntry"><code class="docutils literal notranslate"><span class="pre">Reset.onEntry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.MyThreadReloj"><code class="docutils literal notranslate"><span class="pre">MyThreadReloj</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.MyThreadReloj.run"><code class="docutils literal notranslate"><span class="pre">MyThreadReloj.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.MyThread"><code class="docutils literal notranslate"><span class="pre">MyThread</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.MyThread.run"><code class="docutils literal notranslate"><span class="pre">MyThread.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Controlador</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/controller.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="controlador">
+<h1>Controlador<a class="headerlink" href="#controlador" title="Link to this heading"></a></h1>
+<p id="module-manager.controller">Controlador principal del sistema EVA-MBI-3.</p>
+<p>Este módulo contiene la lógica principal de operación basada en
+máquina de estados mediante QState y QStateMachine.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.Controller">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">Controller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_gui</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Controller"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Controller" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
+<p>Controlador central de la aplicación.</p>
+<p>Administra la máquina de estados principal del sistema y coordina
+el flujo operativo de EVA-MBI-3.</p>
+<section id="responsabilidades-principales">
+<h2>Responsabilidades principales<a class="headerlink" href="#responsabilidades-principales" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Inicializar estados de operación.</p></li>
+<li><p>Configurar transiciones de la máquina de estados.</p></li>
+<li><p>Coordinar comunicación MQTT.</p></li>
+<li><p>Sincronizar la GUI con el modelo de datos.</p></li>
+<li><p>Administrar el flujo de validación, escaneo e inspección.</p></li>
+</ul>
+</section>
+<section id="constructor-de-controller">
+<h2>Constructor de Controller<a class="headerlink" href="#constructor-de-controller" title="Link to this heading"></a></h2>
+<p>Inicializa el controlador principal y configura la máquina de
+estados utilizada durante la operación del sistema.</p>
+<p>Configuraciones realizadas:</p>
+<ul class="simple">
+<li><p>Asociación con la ventana principal.</p></li>
+<li><p>Asociación con el modelo compartido.</p></li>
+<li><p>Inicialización del cliente MQTT.</p></li>
+<li><p>Creación de estados operativos.</p></li>
+<li><p>Configuración de transiciones.</p></li>
+<li><p>Definición del estado inicial.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Controller.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Controller.start"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Controller.start" title="Link to this definition"></a></dt>
+<dd><p>Inicia la operación del controlador principal.</p>
+<p>Establece la comunicación MQTT requerida por el sistema y
+pone en marcha la máquina de estados encargada de controlar
+el flujo operativo de EVA-MBI-3.</p>
+<p>Este método representa el punto de inicio de la aplicación
+una vez que la interfaz gráfica ha finalizado su proceso
+de inicialización.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.Startup">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">Startup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Startup"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Startup" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado inicial de la máquina de estados.</p>
+<p>Responsable de preparar las condiciones necesarias para
+comenzar la operación de EVA-MBI-3.</p>
+<p>Durante este estado se realizan las verificaciones e
+inicializaciones requeridas antes de permitir el acceso
+del operador al sistema.</p>
+<section id="senales">
+<h2>Señales<a class="headerlink" href="#senales" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que la inicialización fue completada
+correctamente y permite avanzar al estado
+de Login.</p></li>
+</ul>
+</section>
+<section id="constructor-de-startup">
+<h2>Constructor de Startup<a class="headerlink" href="#constructor-de-startup" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de la preparación inicial
+del sistema antes de iniciar el flujo operativo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Startup.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Startup.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Startup.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta la secuencia de inicialización del sistema.</p>
+<p>Verifica las condiciones necesarias para comenzar la
+operación de la estación y prepara la interfaz para
+el ingreso del operador.</p>
+<p>Una vez completada la inicialización, emite la señal
+<code class="docutils literal notranslate"><span class="pre">ok</span></code> para continuar con el flujo de autenticación.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Startup.kioskMode">
+<span class="sig-name descname"><span class="pre">kioskMode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Startup.kioskMode"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Startup.kioskMode" title="Link to this definition"></a></dt>
+<dd><p>Configura la estación en modo kiosco.</p>
+<p>Aplica restricciones del sistema operativo destinadas a
+evitar interrupciones durante la operación de EVA-MBI-3.</p>
+<p>Entre las acciones realizadas pueden incluirse:</p>
+<ul class="simple">
+<li><p>Restricción de herramientas administrativas.</p></li>
+<li><p>Limitación de acceso al escritorio.</p></li>
+<li><p>Control de aplicaciones externas.</p></li>
+<li><p>Configuración del entorno de producción.</p></li>
+</ul>
+<p>El objetivo es garantizar una operación controlada y
+minimizar intervenciones no autorizadas por parte del
+operador.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Startup.logout">
+<span class="sig-name descname"><span class="pre">logout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Startup.logout"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Startup.logout" title="Link to this definition"></a></dt>
+<dd><p>Finaliza la sesión activa del operador.</p>
+<p>Ejecuta las acciones necesarias para cerrar la sesión actual
+y regresar el sistema a un estado seguro de espera.</p>
+<p>Este proceso permite:</p>
+<ul class="simple">
+<li><p>Liberar la sesión del operador actual.</p></li>
+<li><p>Restablecer información de autenticación.</p></li>
+<li><p>Limpiar datos temporales de operación.</p></li>
+<li><p>Preparar la estación para un nuevo inicio de sesión.</p></li>
+</ul>
+<p>Una vez completado el proceso, el sistema retorna al flujo
+inicial de autenticación.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.Login">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">Login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Login"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Login" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de autenticación de operadores.</p>
+<p>Responsable de habilitar el proceso de inicio de sesión
+dentro de EVA-MBI-3 y solicitar las credenciales necesarias
+para acceder a la estación.</p>
+<p>Durante este estado la interfaz gráfica presenta la ventana
+de autenticación y permanece a la espera de la identificación
+del operador.</p>
+<section id="constructor-de-login">
+<h2>Constructor de Login<a class="headerlink" href="#constructor-de-login" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de gestionar la solicitud
+de credenciales del operador.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Login.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Login.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Login.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones de entrada al estado de autenticación.</p>
+<p>Configura la interfaz gráfica para mostrar la ventana de
+inicio de sesión y habilita la captura del identificador
+del operador.</p>
+<p>El sistema permanece en este estado hasta recibir las
+credenciales que serán evaluadas por el estado
+<code class="docutils literal notranslate"><span class="pre">CheckLogin</span></code>.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.CheckLogin">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">CheckLogin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckLogin"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckLogin" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de validación de credenciales.</p>
+<p>Responsable de verificar la autenticación del operador
+utilizando la información capturada durante el estado
+<code class="docutils literal notranslate"><span class="pre">Login</span></code>.</p>
+<p>Dependiendo del resultado de la validación, el sistema
+permitirá el acceso al flujo operativo o solicitará
+nuevamente las credenciales.</p>
+<section id="id1">
+<h2>Señales<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que la autenticación fue realizada correctamente
+y el operador puede continuar con la operación de la estación.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nok</span></code>:
+Indica que la autenticación falló y es necesario
+solicitar nuevamente las credenciales.</p></li>
+</ul>
+</section>
+<section id="constructor-de-checklogin">
+<h2>Constructor de CheckLogin<a class="headerlink" href="#constructor-de-checklogin" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de validar las credenciales
+ingresadas por el operador.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckLogin.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckLogin.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckLogin.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Prepara la interfaz para la validación del operador.</p>
+<p>Oculta la ventana de login, muestra el estado de validación
+en la GUI y programa la consulta a la base de datos para verificar
+las credenciales capturadas.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckLogin.API_requests">
+<span class="sig-name descname"><span class="pre">API_requests</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckLogin.API_requests"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckLogin.API_requests" title="Link to this definition"></a></dt>
+<dd><p>Valida las credenciales del operador contra la base de datos.</p>
+<p>Consulta el registro de usuarios activos utilizando el gafete
+capturado desde la interfaz gráfica. Si el operador existe y se
+encuentra activo, actualiza la información local del usuario,
+registra el evento de login y permite continuar con el flujo
+operativo de la estación.</p>
+<p>En caso de que el usuario no sea válido o exista un error de
+comunicación con el servidor-base de datos, informa el rechazo en la interfaz
+y regresa al estado de autenticación.</p>
+<section id="flujo-de-validacion">
+<h3>Flujo de validación<a class="headerlink" href="#flujo-de-validacion" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Consulta el usuario activo mediante su gafete.</p></li>
+<li><p>Actualiza los datos locales del operador.</p></li>
+<li><p>Registra el evento de login en la base de datos.</p></li>
+<li><p>Actualiza la información visual del usuario en la GUI.</p></li>
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">ok</span></code> si la autenticación es correcta.</p></li>
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">nok</span></code> si la autenticación falla.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.StartCycle">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">StartCycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#StartCycle"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.StartCycle" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de inicio de ciclo de producción.</p>
+<p>Responsable de preparar la estación para comenzar un nuevo ciclo
+operativo dentro de EVA-MBI-3.</p>
+<p>Durante este estado se reinician datos temporales del proceso,
+se actualiza la interfaz gráfica, se limpian indicadores visuales
+y se calculan métricas iniciales de producción.</p>
+<section id="id2">
+<h2>Señales<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que la estación fue preparada correctamente y puede
+continuar hacia el escaneo del número HM.</p></li>
+</ul>
+</section>
+<section id="constructor-de-startcycle">
+<h2>Constructor de StartCycle<a class="headerlink" href="#constructor-de-startcycle" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de preparar un nuevo ciclo
+de producción.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.StartCycle.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#StartCycle.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.StartCycle.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Prepara la estación para un nuevo ciclo de producción.</p>
+<p>Reinicia el modelo de operación, limpia la información visual
+de la interfaz y habilita los indicadores requeridos para iniciar
+la captura del número HM.</p>
+<section id="operaciones-principales">
+<h3>Operaciones principales<a class="headerlink" href="#operaciones-principales" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Reinicia datos temporales del ciclo.</p></li>
+<li><p>Limpia etiquetas, imágenes e indicadores de la GUI.</p></li>
+<li><p>Oculta botones de cajas hasta que sean requeridos.</p></li>
+<li><p>Habilita la lectura de llave virtual.</p></li>
+<li><p>Actualiza el estado de trazabilidad.</p></li>
+<li><p>Consulta métricas de producción del turno.</p></li>
+<li><p>Calcula el tiempo promedio de ciclo.</p></li>
+<li><p>Publica la información inicial hacia la interfaz gráfica.</p></li>
+</ul>
+<p>En caso de apagado del sistema, registra el cierre de sesión,
+notifica el apagado a la interfaz y solicita liberar clamps
+antes de finalizar la operación.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.StartCycle.fuseBoxesClamps">
+<span class="sig-name descname"><span class="pre">fuseBoxesClamps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#StartCycle.fuseBoxesClamps"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.StartCycle.fuseBoxesClamps" title="Link to this definition"></a></dt>
+<dd><p>Libera los clamps asociados a las cajas de fusibles.</p>
+<p>Durante el proceso de apagado o recuperación segura, envía
+señales al PLC para desactivar los clamps registrados en el
+modelo del sistema.</p>
+<p>Esta acción ayuda a dejar la estación en una condición segura
+antes de finalizar la operación.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.StartCycle.logout">
+<span class="sig-name descname"><span class="pre">logout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#StartCycle.logout"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.StartCycle.logout" title="Link to this definition"></a></dt>
+<dd><p>Registra el cierre de sesión del operador.</p>
+<p>Envía al servidor la información del usuario activo para dejar
+trazabilidad del evento de salida del sistema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user</strong> – Información del operador que finaliza sesión.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.Config">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Config"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de configuración del sistema.</p>
+<p>Permite acceder a las funciones administrativas y de
+configuración de EVA-MBI-3.</p>
+<p>Mientras este estado se encuentra activo, el flujo normal
+de producción permanece suspendido hasta que el operador
+finalice las tareas de configuración.</p>
+<section id="constructor-de-config">
+<h2>Constructor de Config<a class="headerlink" href="#constructor-de-config" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de gestionar las tareas
+de configuración y administración del sistema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Config.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Config.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Config.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ingresa al modo de configuración.</p>
+<p>Abre la interfaz administrativa y actualiza la GUI para
+indicar que el sistema se encuentra fuera del flujo normal
+de producción.</p>
+<p>Durante este estado no es posible iniciar nuevos ciclos
+operativos hasta abandonar el modo de configuración.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Config.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Config.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Config.onExit" title="Link to this definition"></a></dt>
+<dd><p>Finaliza el modo de configuración.</p>
+<p>Registra la salida del entorno administrativo y marca
+el sistema para reanudar el flujo operativo normal.</p>
+<p>Al regresar al ciclo de producción se evita ejecutar
+nuevamente las tareas de inicialización asociadas a un
+nuevo ciclo.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.ScanQr">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">ScanQr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#ScanQr"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.ScanQr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de captura del identificador de producción.</p>
+<p>Responsable de solicitar al operador el escaneo del número HM
+o código QR utilizado para identificar el producto que será
+procesado por la estación.</p>
+<p>Este estado representa el punto de entrada de cada ciclo de
+producción y permanece activo hasta recibir un código válido.</p>
+<section id="constructor-de-scanqr">
+<h2>Constructor de ScanQr<a class="headerlink" href="#constructor-de-scanqr" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de la captura de información
+de producción mediante escaneo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.ScanQr.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#ScanQr.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.ScanQr.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Habilita la captura del código de producción.</p>
+<p>Muestra la ventana de escaneo para permitir que el operador
+capture el número HM o código QR asociado al arnes que
+será procesado por la estación.</p>
+<p>El sistema permanece a la espera de un código válido para
+continuar con el proceso de validación.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.ScanQr.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#ScanQr.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.ScanQr.onExit" title="Link to this definition"></a></dt>
+<dd><p>Finaliza la captura del código de producción.</p>
+<p>Oculta la ventana de escaneo una vez que el sistema ha
+recibido la información necesaria para continuar con las
+validaciones posteriores del ciclo.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.CheckQr">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">CheckQr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckQr"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckQr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de validación del Datamatrix del arnés.</p>
+<p>Responsable de validar el código escaneado al inicio del ciclo
+de producción y preparar la información necesaria para las
+inspecciones posteriores.</p>
+<p>Este estado integra validaciones de formato, trazabilidad,
+historial de proceso, evento activo, modularidad, contenido de
+fusibles, contenido de torque y datos requeridos para la etiqueta
+final.</p>
+<section id="id3">
+<h2>Señales<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que el Datamatrix fue validado correctamente y el ciclo
+puede continuar.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nok</span></code>:
+Indica que el Datamatrix no es válido o que alguna validación
+requerida falló.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rework</span></code>:
+Indica que el arnés ya cuenta con historial previo y requiere
+autorización para retrabajo.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckQr.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckQr.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckQr.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Inicia la validación del Datamatrix escaneado.</p>
+<p>Actualiza la interfaz para indicar que el código fue recibido,
+habilita el cronómetro del ciclo y programa la validación completa
+del arnés.</p>
+<p>La validación principal se ejecuta en <code class="docutils literal notranslate"><span class="pre">API_requests</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckQr.API_requests">
+<span class="sig-name descname"><span class="pre">API_requests</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckQr.API_requests"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckQr.API_requests" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta la validación completa del Datamatrix del arnés.</p>
+<p>Este método concentra las verificaciones necesarias para permitir
+el inicio del ciclo de producción en EVA-MBI-3.</p>
+<section id="id4">
+<h3>Flujo de validación<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Extrae la información principal del Datamatrix.</p></li>
+<li><p>Verifica que el formato de la etiqueta sea correcto.</p></li>
+<li><p>Valida trazabilidad contra FAMX2 cuando está habilitada.</p></li>
+<li><p>Verifica que el arnés no requiera autorización de retrabajo.</p></li>
+<li><p>Busca el evento activo asociado a la modularidad.</p></li>
+<li><p>Obtiene la información necesaria para la etiqueta final.</p></li>
+<li><p>Genera el contenido de torques a inspeccionar.</p></li>
+<li><p>Genera el contenido de fusibles a inspeccionar.</p></li>
+<li><p>Integra cavidades vacías y contenido real del arnés.</p></li>
+<li><p>Agrega inspecciones obligatorias de conectores y bracket.</p></li>
+<li><p>Actualiza el modelo con la información final del ciclo.</p></li>
+<li><p>Notifica a la GUI el inicio del ciclo.</p></li>
+</ul>
+</section>
+<section id="resultado">
+<h3>Resultado<a class="headerlink" href="#resultado" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">ok</span></code> cuando el arnés puede continuar el proceso.</p></li>
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">nok</span></code> cuando alguna validación falla.</p></li>
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">rework</span></code> cuando el arnés requiere autorización de retrabajo.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckQr.procesado_anteriormente">
+<span class="sig-name descname"><span class="pre">procesado_anteriormente</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckQr.procesado_anteriormente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckQr.procesado_anteriormente" title="Link to this definition"></a></dt>
+<dd><p>Verifica si el arnés ya fue procesado anteriormente.</p>
+<p>Consulta el historial de producción utilizando el HM escaneado.
+Si el arnés ya cuenta con un resultado aprobado, el sistema lo
+considera un posible retrabajo y solicita autorización antes de
+permitir continuar el ciclo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> si el arnés requiere validación de retrabajo.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> o <code class="docutils literal notranslate"><span class="pre">None</span></code> si puede continuar normalmente.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckQr.build_contenido_torques_from_results">
+<span class="sig-name descname"><span class="pre">build_contenido_torques_from_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckQr.build_contenido_torques_from_results"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckQr.build_contenido_torques_from_results" title="Link to this definition"></a></dt>
+<dd><p>Genera el contenido de torques a partir del historial del arnés.</p>
+<p>Utiliza los resultados de torque previamente registrados en el
+sistema de trazabilidad para determinar qué cajas y tuercas deben
+ser inspeccionadas durante el ciclo actual.</p>
+<p>Si no es posible generar el contenido desde los resultados
+históricos, el sistema intenta construirlo desde la base de datos
+local del evento.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckQr.build_contenido_torques">
+<span class="sig-name descname"><span class="pre">build_contenido_torques</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckQr.build_contenido_torques"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckQr.build_contenido_torques" title="Link to this definition"></a></dt>
+<dd><p>Genera el contenido de torques desde la base de datos local.</p>
+<p>Consulta los módulos de torque asociados al evento activo y a la
+referencia del arnés para construir la lista de cajas y tuercas que
+deberán ser inspeccionadas.</p>
+<p>En caso de encontrar módulos faltantes o inconsistencias en la base
+de datos, se notifica el error a la interfaz y se detiene el avance
+del ciclo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckQr.build_contenido_fusibles">
+<span class="sig-name descname"><span class="pre">build_contenido_fusibles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckQr.build_contenido_fusibles"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckQr.build_contenido_fusibles" title="Link to this definition"></a></dt>
+<dd><p>Genera el contenido de fusibles a inspeccionar.</p>
+<p>Consulta los módulos de visión asociados al evento activo y a la
+referencia del arnés para construir la configuración de cajas,
+cavidades y colores esperados durante la inspección.</p>
+<p>También determina la variante correspondiente de PDC-R y agrega
+inspecciones obligatorias como conectores y bracket.</p>
+<p>En caso de error o módulos faltantes, se informa la condición a la
+interfaz y se detiene el avance del ciclo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckQr.ETIQUETA">
+<span class="sig-name descname"><span class="pre">ETIQUETA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckQr.ETIQUETA"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckQr.ETIQUETA" title="Link to this definition"></a></dt>
+<dd><p>Prepara la información de torque para la etiqueta final.</p>
+<p>Busca el historial de torque asociado al HM del arnés. Cuando la
+trazabilidad está habilitada, utiliza la información registrada en
+el sistema para incluir valores reales de torque en la etiqueta
+final.</p>
+<p>Si no existen resultados disponibles, el sistema permite continuar
+el ciclo, pero marca los valores de torque como <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">Results</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ID</strong> – HM del arnés utilizado para consultar el historial de torque.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> si la información de etiqueta fue preparada o si
+el ciclo puede continuar sin resultados de torque.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> si existe un error que impide continuar.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.ScanPDCR">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">ScanPDCR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#ScanPDCR"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.ScanPDCR" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de solicitar el escaneo de la caja PDC-R.</p>
+<p>Antes de iniciar las inspecciones del arnés, este estado valida
+que la variante física de la caja PDC-R instalada corresponda con
+la configuración esperada para la modularidad procesada.</p>
+<p>Dependiendo de la variante detectada durante la preparación del
+ciclo, se solicita al operador el escaneo del código QR
+correspondiente.</p>
+<section id="id5">
+<h2>Señales<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">emptypdcr</span></code>:
+Indica que la validación de la caja PDC-R no pudo completarse o
+que se requiere una acción adicional antes de continuar.</p></li>
+</ul>
+<p>Constructor de ScanPDCR.</p>
+<p>Inicializa el estado encargado de la validación de la caja
+PDC-R y conserva una referencia al modelo compartido del sistema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal utilizado para acceder a la información
+del ciclo y de la modularidad procesada.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Objeto padre de Qt.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="manager.controller.ScanPDCR.emptypdcr">
+<span class="sig-name descname"><span class="pre">emptypdcr</span></span><a class="headerlink" href="#manager.controller.ScanPDCR.emptypdcr" title="Link to this definition"></a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id6"><span class="problematic" id="id7">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.ScanPDCR.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#ScanPDCR.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.ScanPDCR.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Solicita el escaneo de la variante PDC-R correspondiente.</p>
+<p>Determina el código QR esperado a partir de la variante detectada
+para el arnés actual y actualiza la interfaz para solicitar al
+operador el escaneo de la caja física instalada.</p>
+<p>Variantes soportadas:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PDC-R</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PDC-RMID</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PDC-RS</span></code></p></li>
+</ul>
+<p>La ventana de escaneo permanece habilitada hasta que se complete
+la validación del código leído.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.ScanPDCR.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#ScanPDCR.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.ScanPDCR.onExit" title="Link to this definition"></a></dt>
+<dd><p>Finaliza el proceso de escaneo de la caja PDC-R.</p>
+<p>Oculta la ventana de captura de códigos utilizada durante la
+validación y deja preparada la interfaz para el siguiente estado
+del flujo de producción.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.CheckPDCR">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">CheckPDCR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckPDCR"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckPDCR" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de validación del QR de la caja PDC-R.</p>
+<p>Responsable de comparar el código escaneado por el operador contra
+el QR esperado para la variante PDC-R determinada previamente.</p>
+<p>Este estado ayuda a asegurar que la caja física instalada en el
+arnés corresponda con la configuración requerida por la modularidad.</p>
+<section id="id8">
+<h2>Señales<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que el QR de la caja PDC-R corresponde con la variante
+esperada y el ciclo puede continuar.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nok</span></code>:
+Indica que el QR escaneado no corresponde con el esperado y se
+debe solicitar nuevamente el escaneo.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_tries</span></code>:
+Indica que se alcanzó el número máximo de intentos permitidos y
+el proceso debe ser atendido por calidad o supervisor.</p></li>
+</ul>
+</section>
+<section id="constructor-de-checkpdcr">
+<h2>Constructor de CheckPDCR<a class="headerlink" href="#constructor-de-checkpdcr" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de validar el QR de la caja PDC-R
+contra la variante esperada para el arnés actual.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckPDCR.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckPDCR.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckPDCR.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta la validación del QR escaneado para la caja PDC-R.</p>
+<p>Compara el código leído contra el QR esperado para la variante
+correspondiente. Si el código es correcto, permite continuar el
+flujo operativo; si es incorrecto, incrementa el contador de
+intentos y solicita un nuevo escaneo.</p>
+<section id="control-de-intentos">
+<h3>Control de intentos<a class="headerlink" href="#control-de-intentos" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Si el QR coincide con la variante esperada, emite <code class="docutils literal notranslate"><span class="pre">ok</span></code>.</p></li>
+<li><p>Si el QR no coincide, emite <code class="docutils literal notranslate"><span class="pre">nok</span></code> para repetir el escaneo.</p></li>
+<li><p>Si se alcanza el máximo de intentos permitidos, emite</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">max_tries</span></code> y deshabilita la llave virtual hasta intervención
+de calidad o supervisor.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.CheckPDCR.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#CheckPDCR.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.CheckPDCR.onExit" title="Link to this definition"></a></dt>
+<dd><p>Finaliza el estado de validación de PDC-R.</p>
+<p>Registra la salida del estado antes de continuar con el siguiente
+paso del flujo operativo.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.EnableClamps">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">EnableClamps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#EnableClamps"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.EnableClamps" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de habilitación de clamps.</p>
+<p>Responsable de habilitar físicamente los nidos o clamps requeridos
+para el arnés validado antes de iniciar las inspecciones.</p>
+<p>A partir de la modularidad generada durante la validación del
+Datamatrix, este estado muestra en la GUI las cajas necesarias
+y envía al PLC la solicitud de habilitación correspondiente.</p>
+<section id="id9">
+<h2>Señales<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">continuar</span></code>:
+Indica que los clamps fueron solicitados correctamente y el
+flujo puede avanzar al estado de espera o inspección.</p></li>
+</ul>
+</section>
+<section id="constructor-de-enableclamps">
+<h2>Constructor de EnableClamps<a class="headerlink" href="#constructor-de-enableclamps" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de habilitar los clamps requeridos
+por el arnés actual.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.EnableClamps.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#EnableClamps.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.EnableClamps.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Habilita los clamps necesarios para el ciclo actual.</p>
+<p>Muestra en la interfaz las cajas requeridas por la modularidad
+del arnés y envía al PLC las señales necesarias para habilitar
+los nidos correspondientes.</p>
+<section id="id10">
+<h3>Operaciones principales<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Reactiva la llave virtual del sistema.</p></li>
+<li><p>Muestra en GUI las cajas requeridas.</p></li>
+<li><p>Solicita al PLC la habilitación de clamps.</p></li>
+<li><p>Indica al operador colocar las cajas en los nidos.</p></li>
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">continuar</span></code> para avanzar al siguiente estado.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.EnableClamps.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#EnableClamps.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.EnableClamps.onExit" title="Link to this definition"></a></dt>
+<dd><p>Finaliza el estado de habilitación de clamps.</p>
+<p>Registra la salida del estado antes de continuar con el flujo
+operativo de inspección.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.QualityValidation">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">QualityValidation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#QualityValidation"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.QualityValidation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de validación de autorización de calidad.</p>
+<p>Responsable de verificar que un supervisor de calidad autorice la
+recuperación del proceso cuando se alcanza el límite de intentos
+durante la validación de PDC-R.</p>
+<p>Este estado protege el flujo operativo evitando que el ciclo sea
+reiniciado sin intervención de personal autorizado.</p>
+<section id="id11">
+<h2>Señales<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que el supervisor de calidad fue validado correctamente
+y el sistema puede permitir un nuevo intento.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nok</span></code>:
+Indica que el código ingresado no pertenece a un usuario con
+permisos de calidad o que la validación falló.</p></li>
+</ul>
+</section>
+<section id="constructor-de-qualityvalidation">
+<h2>Constructor de QualityValidation<a class="headerlink" href="#constructor-de-qualityvalidation" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de validar permisos de calidad
+antes de permitir la recuperación del proceso.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.QualityValidation.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#QualityValidation.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.QualityValidation.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Inicia la validación del usuario de calidad.</p>
+<p>Actualiza la interfaz para indicar que se están revisando
+permisos y programa la consulta del usuario ingresado contra
+el servidor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.QualityValidation.consulta_usuarios">
+<span class="sig-name descname"><span class="pre">consulta_usuarios</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#QualityValidation.consulta_usuarios"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.QualityValidation.consulta_usuarios" title="Link to this definition"></a></dt>
+<dd><p>Consulta y valida los permisos del usuario ingresado.</p>
+<p>Verifica el código capturado contra el servidor de usuarios.
+Si el usuario existe, está activo y pertenece al perfil
+<code class="docutils literal notranslate"><span class="pre">SUPCALIDAD</span></code>, se autoriza la recuperación del proceso.</p>
+<section id="id12">
+<h3>Flujo de validación<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Consulta el usuario activo mediante gafete.</p></li>
+<li><p>Verifica que el perfil corresponda a supervisor de calidad.</p></li>
+<li><p>Reactiva la llave virtual.</p></li>
+<li><p>Reinicia el contador de intentos de PDC-R.</p></li>
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">ok</span></code> cuando la autorización es válida.</p></li>
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">nok</span></code> cuando el usuario no tiene permisos o la consulta falla.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.QualityValidation.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#QualityValidation.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.QualityValidation.onExit" title="Link to this definition"></a></dt>
+<dd><p>Finaliza el estado de validación de calidad.</p>
+<p>Registra la salida del estado antes de regresar al flujo de
+escaneo o recuperación del proceso.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.QrRework">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">QrRework</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#QrRework"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.QrRework" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de autorización para retrabajo de arnés.</p>
+<p>Responsable de detener el flujo cuando el HM escaneado ya cuenta
+con historial previo de proceso y requiere confirmación antes de
+continuar.</p>
+<p>Este estado permite al operador decidir entre escanear otro arnés
+o autorizar el retrabajo mediante la llave virtual.</p>
+<section id="id13">
+<h2>Señales<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que se tomó una decisión y el flujo puede regresar a la
+validación del Datamatrix.</p></li>
+</ul>
+</section>
+<section id="constructor-de-qrrework">
+<h2>Constructor de QrRework<a class="headerlink" href="#constructor-de-qrrework" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de gestionar la autorización de
+retrabajo y conecta las señales utilizadas para confirmar o
+rechazar la continuación del proceso.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.QrRework.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#QrRework.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.QrRework.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Solicita autorización para continuar con un arnés reprocesado.</p>
+<p>Informa al operador que el arnés ya fue procesado anteriormente,
+habilita nuevamente el escáner y permite continuar únicamente si
+se autoriza mediante la llave virtual o si se escanea otro código.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.QrRework.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#QrRework.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.QrRework.onExit" title="Link to this definition"></a></dt>
+<dd><p>Finaliza la solicitud de autorización de retrabajo.</p>
+<p>Oculta la ventana de escaneo antes de regresar al flujo de
+validación del Datamatrix.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.QrRework.noRework">
+<span class="sig-name descname"><span class="pre">noRework</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#QrRework.noRework"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.QrRework.noRework" title="Link to this definition"></a></dt>
+<dd><p>Cancela la autorización de retrabajo.</p>
+<p>Permite regresar al flujo de validación para procesar el nuevo
+código escaneado por el operador.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.Finish">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">Finish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Finish"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Finish" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de finalización del ciclo de producción.</p>
+<p>Responsable de cerrar el ciclo operativo del arnés después de
+completar las inspecciones requeridas por EVA-MBI-3.</p>
+<p>Durante este estado se registra el resultado final del proceso,
+se genera la información para impresión de etiqueta y, si la
+trazabilidad está habilitada, se actualiza la salida del arnés
+en el sistema FAMX2.</p>
+<section id="id14">
+<h2>Señales<a class="headerlink" href="#id14" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que el ciclo fue finalizado correctamente y el sistema
+puede iniciar un nuevo ciclo de producción.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nok</span></code>:
+Indica que ocurrió una condición que impide cerrar el ciclo de
+forma correcta.</p></li>
+</ul>
+</section>
+<section id="constructor-de-finish">
+<h2>Constructor de Finish<a class="headerlink" href="#constructor-de-finish" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de registrar y cerrar el ciclo
+de producción del arnés actual.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Finish.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Finish.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Finish.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta el cierre del ciclo de producción.</p>
+<p>Consolida los resultados del arnés procesado y registra el
+historial final del ciclo en el servidor.</p>
+<section id="id15">
+<h3>Operaciones principales<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Detiene el cronómetro del ciclo.</p></li>
+<li><p>Construye el registro histórico del arnés.</p></li>
+<li><p>Guarda resultados de visión, torque y altura.</p></li>
+<li><p>Registra intentos, seriales, usuario e información de scrap.</p></li>
+<li><p>Genera la información requerida para impresión de etiqueta.</p></li>
+<li><p>Publica la etiqueta hacia el sistema de impresión.</p></li>
+<li><p>Muestra el mensaje final al operador.</p></li>
+<li><p>Actualiza la trazabilidad de salida en FAMX2 cuando aplica.</p></li>
+</ul>
+<p>Si ocurre un error al guardar información o actualizar
+trazabilidad, se notifica al operador y se solicita recuperación
+mediante llave de reset.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Finish.finalMessage">
+<span class="sig-name descname"><span class="pre">finalMessage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Finish.finalMessage"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Finish.finalMessage" title="Link to this definition"></a></dt>
+<dd><p>Muestra el mensaje final del ciclo al operador.</p>
+<p>Notifica que el ciclo fue terminado correctamente y solicita
+retirar las cajas de la estación para preparar el siguiente ciclo.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.Reset">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Reset"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Reset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de reinicio controlado del ciclo.</p>
+<p>Responsable de detener el ciclo actual, liberar los clamps activos
+y registrar el evento de reset cuando existe un arnés en proceso.</p>
+<p>Este estado se utiliza cuando el operador gira la llave de reset
+para recuperar la estación ante una interrupción, error o condición
+que impide continuar el flujo normal.</p>
+<section id="id16">
+<h2>Señales<a class="headerlink" href="#id16" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>:
+Indica que el reinicio fue ejecutado correctamente y el sistema
+puede regresar al inicio de ciclo.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nok</span></code>:
+Indica que ocurrió una condición que impide completar el reinicio.</p></li>
+</ul>
+</section>
+<section id="constructor-de-reset">
+<h2>Constructor de Reset<a class="headerlink" href="#constructor-de-reset" title="Link to this heading"></a></h2>
+<p>Inicializa el estado encargado de ejecutar el reinicio controlado
+del ciclo de producción.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por el controlador.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.Reset.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#Reset.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.Reset.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta el reinicio controlado de la estación.</p>
+<p>Limpia la información temporal del ciclo, detiene el cronómetro
+de operación y solicita al PLC liberar los clamps asociados a las
+cajas activas.</p>
+<p>Si existe un ciclo iniciado, registra en el historial un resultado
+de reset para conservar la trazabilidad del arnés interrumpido.</p>
+<section id="id17">
+<h3>Operaciones principales<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Reinicia el modelo de operación.</p></li>
+<li><p>Detiene el cronómetro del ciclo.</p></li>
+<li><p>Notifica el reset en la interfaz gráfica.</p></li>
+<li><p>Libera clamps mediante el PLC.</p></li>
+<li><p>Registra historial de ciclo interrumpido cuando aplica.</p></li>
+<li><p>Emite <code class="docutils literal notranslate"><span class="pre">ok</span></code> para regresar al inicio del ciclo.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.MyThreadReloj">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">MyThreadReloj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#MyThreadReloj"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.MyThreadReloj" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QThread</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.MyThreadReloj.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#MyThreadReloj.run"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.MyThreadReloj.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.MyThread">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.</span></span><span class="sig-name descname"><span class="pre">MyThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#MyThread"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.MyThread" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QThread</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.MyThread.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller.html#MyThread.run"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.MyThread.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="gui_comm.html" class="btn btn-neutral float-left" title="Comunicación MQTT de la GUI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

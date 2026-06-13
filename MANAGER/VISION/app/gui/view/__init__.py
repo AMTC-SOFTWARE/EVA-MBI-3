@@ -3,9 +3,10 @@
 Interfaz gráfica del sistema EVA-MBI-3.
 
 Este módulo contiene la implementación de la ventana principal y de
-las ventanas auxiliares utilizadas durante la operación.
+las ventanas auxiliares utilizadas durante la operación del sistema.
 
-Componentes principales:
+Componentes principales
+-----------------------
 
 - MainWindow
 - Login
@@ -15,7 +16,6 @@ Componentes principales:
 - PopOut
 - Message_pop
 """
-
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -38,7 +38,7 @@ from manager.model import Model
 import math
 import re
 import sys
-class MainWindow (QMainWindow):
+class MainWindow(QMainWindow):
     """
     Ventana principal de la aplicación EVA-MBI-3.
 
@@ -46,46 +46,87 @@ class MainWindow (QMainWindow):
     responsable de la interacción entre la interfaz gráfica, el modelo
     de datos y los servicios de comunicación.
 
-    Funcionalidades principales:
+    Funcionalidades principales
+    ---------------------------
 
     - Mostrar información del ciclo de producción.
-    - Gestionar el proceso de autenticación de operadores.
+    - Gestionar visualmente la autenticación de operadores.
     - Recibir y procesar mensajes MQTT.
     - Actualizar dinámicamente los componentes visuales.
     - Controlar ventanas auxiliares de escaneo y mensajes.
-    - Gestionar el estado visual de clamps y módulos.
+    - Gestionar el estado visual de clamps para los nidos de las cajas.
     - Mostrar imágenes de referencia e instrucciones.
     - Presentar indicadores de producción y trazabilidad.
+
+    Señales principales
+    -------------------
+
+    - ``output``:
+      Envía mensajes MQTT generales.
+
+    - ``plc_output``:
+      Envía comandos hacia PLCs.
+
+    - ``rbt_output``:
+      Envía comandos hacia el robot.
+
+    - ``ready``:
+      Indica que la interfaz gráfica y la comunicación MQTT
+      se encuentran listas para iniciar operación.
+
+    Componentes gestionados
+    -----------------------
+
+    - Ventana principal de operación.
+    - Formularios de autenticación.
+    - Escáner de códigos QR.
+    - Indicadores de producción.
+    - Gestión visual de clamps.
+    - Ventanas emergentes y mensajes.
+    - Imágenes de referencia e instrucciones.
     """
 
     output = pyqtSignal(dict)
     plc_output = pyqtSignal(dict)
     rbt_output = pyqtSignal(dict)
-    
     ready =  pyqtSignal()
+
     def quitar_numeros_enteros(self,cadena):
-        # Utilizar una expresión regular para encontrar y reemplazar números enteros
+        """
+        Elimina los caracteres numéricos de una cadena de texto.
+
+        Args:
+            cadena:
+                Texto a procesar.
+
+        Returns:
+            str:
+                Cadena sin caracteres numéricos.
+        """
         resultado = re.sub(r'\d+', '', cadena)
         return resultado
     
     def __init__(self, name = "GUI", topic = "gui", parent = None):
         """
-        Inicializa la ventana principal del sistema.
+        Constructor de MainWindow
+        -------------------------
 
-        Configura los componentes necesarios para la operación de la
-        interfaz gráfica, incluyendo:
+        Inicializa la interfaz gráfica principal de EVA-MBI-3 y configura
+        los recursos necesarios para la operación del sistema de visión.
 
-        - Modelo de datos.
-        - Cliente MQTT.
-        - Ventanas auxiliares.
-        - Señales y slots.
-        - Componentes visuales.
-        - Temporizadores.
-        - Recursos gráficos.
+        Configuraciones realizadas:
+
+        - Creación del modelo de datos.
+        - Inicialización del cliente MQTT.
+        - Configuración de ventanas auxiliares.
+        - Registro de señales y slots.
+        - Inicialización de componentes visuales.
+        - Configuración de temporizadores.
+        - Carga de recursos gráficos y parámetros de operación.
 
         Args:
             name:
-                Nombre de la aplicación o identificador de la interfaz.
+                Nombre de la aplicación.
 
             topic:
                 Tópico MQTT utilizado para la comunicación de la interfaz.
@@ -208,6 +249,9 @@ class MainWindow (QMainWindow):
         
    #Función para iniciar la animación gif
     def start_raffi_animation(self, box):
+        """
+        Inicia la animación visual asociada al boton de la caja.
+        """
         print("EJECUTANDO START_RAFFI_ANIMATION")
         print(f"ACTIVANDO ANIMACION PARA: {box}")
         print("*********************************************** \n")
@@ -269,6 +313,9 @@ class MainWindow (QMainWindow):
            
     #Función para detener la animación del gif
     def stop_raffi_animation(self, box):
+        """
+        Detiene la animación visual asociada al boton de la caja.
+        """
         print("EJECUTANDO STOP_RAFFI_ANIMATION")
         print(f"DETENIENDO ANIMACION PARA: {box}")
         print("*********************************************** \n")
@@ -329,6 +376,11 @@ class MainWindow (QMainWindow):
             self.ui.lbl_box_16movie.stop()
         
     def start_robot(self):
+        """
+        Envía el comando de inicio al robot.
+
+        Permite dar la instruccion al robot de iniciar.
+        """
         print("EJECUTANDO START_ROBOT DESDE GUI.VIEW")
         print("ENVIANDO COMMAND:START")
         print("*********************************************** \n")
@@ -353,6 +405,12 @@ class MainWindow (QMainWindow):
         self.rbt_output.emit({"command": "continue"})
 
     def HOME_robot(self):
+        """
+        Solicita al robot regresar a la posición HOME.
+
+        Permite dar la instruccion al robot de regresar
+        a su punto de origen.
+        """
         print("EJECUTANDO HOME_ROBOT DESDE GUI.VIEW")
         print("ENVIANDO TRIGGER:HOME")
         print("*********************************************** \n")
@@ -361,6 +419,16 @@ class MainWindow (QMainWindow):
         self.rbt_output.emit({"trigger": "HOME"})
 
     def raffi_activation(self, box):
+        """
+        Gestiona la activación y desactivación de clamps.
+
+        Dependiendo del estado actual del proceso puede habilitar,
+        deshabilitar o solicitar acciones relacionadas con los nidos de las cajas.
+
+        Args:
+            box:
+                Identificador del clamp o módulo seleccionado.
+        """
         print("\n ***** EJECUTANDO RAFFI_ACTIVATION *****")
         print(f"CAJA CLICKEADA: {box}")
         print("*********************************************** \n")
@@ -513,6 +581,18 @@ class MainWindow (QMainWindow):
         print("va a hacer algo con la llave")
                   
     def horaxhora(self):
+        """
+        Calcula indicadores de producción por hora.
+
+        Obtiene información histórica y genera métricas como:
+
+        - Producción por hora.
+        - Mejor tiempo de ciclo.
+        - Tiempo promedio de ciclo.
+        - Tiempo perdido.
+
+        Los resultados son mostrados en la ventana Tabla_hora_w.
+        """
         #self.qw_Tabla_horas.show()
         print("vamos a calcular los hora por hora")
         horario_turno1={"7":0,
@@ -720,6 +800,12 @@ class MainWindow (QMainWindow):
             print("Error en el conteo ", ex)
         
     def menuProcess(self, q):
+        """
+        Gestiona las acciones asociadas al menú de proceso.
+
+        Permite ejecutar acciones como Login, Logout,
+        Config y WEB.
+        """
         try:
             case = q.text()               
             if case == "Login":
@@ -764,6 +850,23 @@ class MainWindow (QMainWindow):
 
     @pyqtSlot()
     def status (self):
+        """
+        Sincroniza el estado de visibilidad de los componentes de la interfaz.
+
+        Verifica periódicamente la visibilidad de las ventanas principales
+        y auxiliares del sistema. Cuando detecta un cambio de estado,
+        actualiza el modelo interno y publica la información mediante MQTT.
+
+        Componentes monitoreados:
+
+        - Ventana principal (gui).
+        - Ventana de login.
+        - Ventana de escaneo.
+        - Ventanas emergentes (pop_out).
+
+        Los cambios detectados son enviados mediante la señal ``output``
+        para mantener sincronizados los demás componentes del sistema.
+        """
         try:
             if self.isVisible() != self.model.status["visible"]["gui"]:
                 self.model.status["visible"]["gui"] = self.isVisible()
@@ -786,6 +889,25 @@ class MainWindow (QMainWindow):
 
     @pyqtSlot()
     def login (self):
+        """
+        Procesa el código de acceso ingresado por el operador.
+
+        Obtiene el valor capturado en la ventana de autenticación y,
+        si el contenido es válido, envía el identificador mediante
+        la señal ``output`` para su posterior validación por el
+        controlador.
+
+        Comportamiento:
+
+        - Obtiene el texto ingresado.
+        - Valida que no esté vacío.
+        - Envía el identificador del operador.
+        - Limpia el campo de captura.
+        - Restablece el focus al campo de entrada.
+
+        En caso de que no se capture información, se muestra un mensaje
+        indicativo en el placeholder del campo de texto.
+        """
         try:
             text = self.qw_login.ui.lineEdit.text()
             if len(text) > 0: 
@@ -800,6 +922,25 @@ class MainWindow (QMainWindow):
 
     @pyqtSlot()
     def scanner (self):
+        """
+        Procesa el código QR capturado por el operador.
+
+        Obtiene el contenido escaneado desde la ventana de captura,
+        lo convierte a mayúsculas y lo envía mediante la señal
+        ``output`` para su validación dentro del flujo de producción.
+
+        Comportamiento:
+
+        - Obtiene el código capturado.
+        - Convierte el contenido a mayúsculas.
+        - Valida que no esté vacío.
+        - Envía el código al controlador.
+        - Limpia el campo de captura.
+        - Restablece el foco al campo de entrada.
+
+        En caso de que no se capture información, se muestra un mensaje
+        indicativo en el placeholder del campo de texto.
+        """
         try:
             text = self.qw_scanner.ui.lineEdit.text().upper()
             if len(text) > 0: 
@@ -828,6 +969,15 @@ class MainWindow (QMainWindow):
 
     @pyqtSlot()
     def QR (self):
+        """
+        Procesa el código QR de llave virtual.
+
+        Permite ejecutar acciones especiales dentro de la estación, tales como el
+        reinicio del ciclo de producción.
+
+        Una vez capturado, el código es enviado al comm del manager para
+        su validación y posterior ejecución de la acción solicitada.
+        """
         try:
             text = self.ui.lineEditKey.text().upper()
             text = text.replace("\n","")
@@ -840,6 +990,25 @@ class MainWindow (QMainWindow):
 
     @pyqtSlot(dict)
     def input(self, message):
+        """
+        Procesa mensajes recibidos mediante MQTT.
+
+        Este método funciona como el principal receptor de mensajes
+        provenientes del manager y dispositivos como PLC y Robot.
+
+        Dependiendo del contenido del mensaje puede:
+
+        - Actualizar etiquetas.
+        - Actualizar imágenes.
+        - Mostrar ventanas auxiliares.
+        - Modificar indicadores visuales.
+        - Actualizar información de producción.
+        - Procesar respuestas del robot.
+
+        Args:
+            message:
+                Diccionario recibido mediante MQTT.
+        """
         try:
             #print(message)
 
@@ -1263,6 +1432,16 @@ class MainWindow (QMainWindow):
     
     @pyqtSlot()
     def launcher(self, show):
+        """
+        Gestiona la visibilidad de ventanas y componentes auxiliares.
+
+        Permite mostrar u ocultar elementos de la interfaz según
+        la configuración recibida.
+
+        Args:
+            show:
+                Configuración visual recibida mediante MQTT.
+        """
         try:
             if "login" in show:
                 self.qw_login.ui.lineEdit.setPlaceholderText("Escanea o escribe tu codigo")
@@ -1332,7 +1511,19 @@ class MainWindow (QMainWindow):
             self.pop_out.exec()
 
 class Login (QDialog):
+    """
+    Inicializa la ventana de autenticación.
+
+    Configura los controles visuales, el campo de captura
+    de contraseña y el comportamiento inicial del formulario.
+    """
     def __init__(self, parent = None):
+        """
+        Inicializa la ventana de autenticación.
+
+        Configura los controles visuales, el campo de captura
+        de contraseña y el comportamiento inicial del formulario.
+        """
         super().__init__(parent)
         self.ui = login.Ui_login()
         self.ui.setupUi(self)
@@ -1342,10 +1533,25 @@ class Login (QDialog):
         self.ui.lineEdit.setFocus()
 
     def keyPressEvent(self, event):
+        """
+        Gestiona eventos de teclado de la ventana.
+
+        Actualmente intercepta la tecla Escape para evitar
+        el cierre accidental del formulario de autenticación.
+
+        Args:
+            event:
+                Evento de teclado recibido por Qt.
+        """
         if event.key() == Qt.Key_Escape:
             print("Escape key was pressed")
            
 class Scanner (QDialog):
+    """
+    Ventana utilizada para la captura de códigos QR
+    y códigos de producción durante la operación
+    de la estación.
+    """
     def __init__(self, parent = None):
         super().__init__(parent)
         self.ui = scanner.Ui_scanner()
@@ -1364,6 +1570,10 @@ class Scanner (QDialog):
             print("Escape key was pressed")
 
 class Tabla_hora_w (QDialog):
+    """
+    Ventana encargada de mostrar indicadores
+    históricos y métricas de producción por hora.
+    """
     def __init__(self, parent = None):
         super().__init__(parent)
         self.ui = Tabla_horas.Ui_Ui_Tabla_h()
@@ -1386,6 +1596,11 @@ class Img_popout (QDialog):
         self.ui.label.setText("")
         
 class PopOut (QMessageBox):
+    """
+    Ventana emergente utilizada para mostrar
+    mensajes informativos, advertencias y
+    notificaciones al operador.
+    """
     def __init__(self, parent = None):
         super().__init__(parent)
         self.setIcon(QMessageBox.Warning)

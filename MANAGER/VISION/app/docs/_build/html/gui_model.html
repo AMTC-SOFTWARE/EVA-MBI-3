@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="es" data-content_root="./">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Índice de Módulos Python &mdash; documentación de EVA-MBI-3 - 1.0</title>
+  <title>Modelo de Datos de la GUI &mdash; documentación de EVA-MBI-3 - 1.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -19,9 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Índice" href="genindex.html" />
     <link rel="search" title="Búsqueda" href="search.html" />
- 
-
-
+    <link rel="next" title="Comunicación MQTT de la GUI" href="gui_comm.html" />
+    <link rel="prev" title="Interfaz Gráfica" href="gui.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,10 +44,13 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modelo de Datos de la GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gui.model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a></li>
 </ul>
@@ -66,8 +69,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Índice de Módulos Python</li>
+      <li class="breadcrumb-item active">Modelo de Datos de la GUI</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="_sources/gui_model.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
       </li>
   </ul>
   <hr/>
@@ -75,68 +79,44 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
+  <section id="module-gui.model">
+<span id="modelo-de-datos-de-la-gui"></span><h1>Modelo de Datos de la GUI<a class="headerlink" href="#module-gui.model" title="Link to this heading"></a></h1>
+<p>Modelo de datos de la interfaz gráfica EVA-MBI-3.</p>
+<p>Este módulo contiene la estructura de datos utilizada por la interfaz
+gráfica para almacenar configuraciones, estados de operación,
+información de usuario y parámetros de comunicación.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.model.Model">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><a class="reference internal" href="_modules/gui/model.html#Model"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gui.model.Model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Modelo de datos principal de la interfaz gráfica EVA-MBI-3.</p>
+<p>Centraliza la información compartida utilizada por los
+componentes visuales y de comunicación del sistema.</p>
+<section id="constructor-de-model">
+<h2>Constructor de Model<a class="headerlink" href="#constructor-de-model" title="Link to this heading"></a></h2>
+<p>Inicializa la configuración base utilizada por la interfaz
+gráfica, incluyendo parámetros de comunicación, recursos
+visuales, información de usuario y estados de operación.</p>
+<p>Configuraciones iniciales:</p>
+<ul class="simple">
+<li><p>Tópicos MQTT de comunicación.</p></li>
+<li><p>Dirección del servidor.</p></li>
+<li><p>Recursos gráficos por defecto.</p></li>
+<li><p>Estado de visibilidad de ventanas.</p></li>
+<li><p>Variables auxiliares.</p></li>
+</ul>
+</section>
+</dd></dl>
 
-   <h1>Índice de Módulos Python</h1>
-
-   <div class="modindex-jumpbox">
-   <a href="#cap-a"><strong>a</strong></a> | 
-   <a href="#cap-g"><strong>g</strong></a> | 
-   <a href="#cap-m"><strong>m</strong></a>
-   </div>
-
-   <table class="indextable modindextable">
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-a"><td></td><td>
-       <strong>a</strong></td><td></td></tr>
-     <tr>
-       <td></td>
-       <td>
-       <a href="app.html#module-app"><code class="xref">app</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-g"><td></td><td>
-       <strong>g</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">gui</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="gui_model.html#module-gui.model"><code class="xref">gui.model</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="gui.html#module-gui.view"><code class="xref">gui.view</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="gui_comm.html#module-gui.view.comm"><code class="xref">gui.view.comm</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-m"><td></td><td>
-       <strong>m</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-2" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">manager</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-2">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="controller.html#module-manager.controller"><code class="xref">manager.controller</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+</section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="gui.html" class="btn btn-neutral float-left" title="Interfaz Gráfica" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="gui_comm.html" class="btn btn-neutral float-right" title="Comunicación MQTT de la GUI" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

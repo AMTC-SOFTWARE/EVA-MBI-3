@@ -1,0 +1,385 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gui.view.comm &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../app.html">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller.html">Controlador</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código de módulo</a></li>
+          <li class="breadcrumb-item"><a href="../view.html">gui.view</a></li>
+      <li class="breadcrumb-item active">gui.view.comm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para gui.view.comm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Comunicación MQTT de la interfaz gráfica EVA-MBI-3.</span>
+
+<span class="sd">Este módulo contiene la implementación del cliente MQTT utilizado</span>
+<span class="sd">por la GUI para intercambiar información con los diferentes</span>
+<span class="sd">componentes del sistema.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">pyqtSlot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">QObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">paho.mqtt.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<div class="viewcode-block" id="MqttClient">
+<a class="viewcode-back" href="../../../gui_comm.html#gui.view.comm.MqttClient">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MqttClient</span> <span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cliente MQTT principal de la interfaz gráfica.</span>
+
+<span class="sd">    Responsable de establecer la conexión con el broker,</span>
+<span class="sd">    gestionar las suscripciones y distribuir los mensajes</span>
+<span class="sd">    recibidos entre los componentes de la GUI.</span>
+
+<span class="sd">    Señales principales</span>
+<span class="sd">    -------------------</span>
+
+<span class="sd">    - ``subscribe``:</span>
+<span class="sd">      Emitida cuando se recibe un mensaje MQTT válido.</span>
+
+<span class="sd">    - ``connected``:</span>
+<span class="sd">      Emitida cuando el cliente establece correctamente</span>
+<span class="sd">      la conexión con el broker MQTT.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">subscribe</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">connected</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor de MqttClient</span>
+<span class="sd">        -------------------------</span>
+
+<span class="sd">        Inicializa el cliente MQTT utilizado por la interfaz gráfica</span>
+<span class="sd">        y configura los mecanismos necesarios para la comunicación</span>
+<span class="sd">        con los diferentes componentes del sistema.</span>
+
+<span class="sd">        Configuraciones realizadas:</span>
+
+<span class="sd">        - Asociación con el modelo de datos.</span>
+<span class="sd">        - Creación de la instancia MQTT.</span>
+<span class="sd">        - Registro de callbacks de conexión y recepción.</span>
+<span class="sd">        - Programación del intento inicial de conexión al broker.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model:</span>
+<span class="sd">                Instancia del modelo de datos utilizada para obtener</span>
+<span class="sd">                parámetros de configuración y tópicos MQTT.</span>
+
+<span class="sd">            parent:</span>
+<span class="sd">                Objeto padre de Qt.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_connect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_message</span>
+        <span class="n">Timer</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="MqttClient.setup">
+<a class="viewcode-back" href="../../../gui_comm.html#gui.view.comm.MqttClient.setup">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Establece la conexión inicial con el broker MQTT.</span>
+
+<span class="sd">        Intenta conectar el cliente MQTT de la interfaz gráfica al broker</span>
+<span class="sd">        local y activa el ciclo de recepción de mensajes.</span>
+
+<span class="sd">        En caso de falla, notifica el error a la GUI mediante la señal</span>
+<span class="sd">        ``subscribe`` y programa el cierre automático del mensaje emergente.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span> <span class="o">=</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="mi">1883</span><span class="p">,</span> <span class="n">keepalive</span> <span class="o">=</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">loop_start</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GUI MQTT client stup fail. Exception:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;popOut&quot;</span><span class="p">:</span> <span class="s2">&quot;GUI MQTT setup fail&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;GUI MQTT connection fail&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span> 
+                        <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Check broker and restart&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+                    <span class="p">})</span>
+            <span class="n">Timer</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">closePopout</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MqttClient.on_connect">
+<a class="viewcode-back" href="../../../gui_comm.html#gui.view.comm.MqttClient.on_connect">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gestiona la conexión de la interfaz gráfica con el broker MQTT.</span>
+
+<span class="sd">        Una vez establecida la conexión, realiza la suscripción a los</span>
+<span class="sd">        tópicos necesarios para la operación de EVA-MBI-3 y notifica</span>
+<span class="sd">        el resultado de la comunicación.</span>
+
+<span class="sd">        En caso de éxito se habilita el intercambio de mensajes entre</span>
+<span class="sd">        la GUI, el controlador y los dispositivos externos. En caso</span>
+<span class="sd">        de error, se muestra un error mediante la interfaz gráfica.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            client:</span>
+<span class="sd">                Cliente MQTT que originó el evento.</span>
+
+<span class="sd">            userdata:</span>
+<span class="sd">                Datos de usuario asociados al cliente.</span>
+
+<span class="sd">            flags:</span>
+<span class="sd">                Indicadores de conexión proporcionados por MQTT.</span>
+
+<span class="sd">            rc:</span>
+<span class="sd">                Código de resultado de la conexión.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1">#Generamos una lista con los topicos a los que nos vamos a subscribir (gui y robot)</span>
+            <span class="n">topics</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">setTopic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">statusrbtTopic</span><span class="p">]</span>
+            
+            <span class="c1">#Generamos un for para recorrar cada topico y asi el cliente pueda subscribirse individualmente a cada uno.</span>
+            <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">:</span>
+                <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GUI MQTT client connected with code [</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">connected</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GUI MQTT client connection fail, code [</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;popOut&quot;</span><span class="p">:</span> <span class="s2">&quot;GUI MQTT connection fail&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;GUI MQTT connection fail&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span> 
+                            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Check broker and restart&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+                        <span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GUI MQTT client connection fail. Exception: &quot;</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;popOut&quot;</span><span class="p">:</span> <span class="s2">&quot;GUI MQTT connection fail&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;GUI MQTT connection fail&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span> 
+                        <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Check broker and restart&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+                    <span class="p">})</span>
+            <span class="n">Timer</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">closePopout</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MqttClient.on_message">
+<a class="viewcode-back" href="../../../gui_comm.html#gui.view.comm.MqttClient.on_message">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa los mensajes recibidos durante la operación de EVA-MBI-3.</span>
+
+<span class="sd">        Este método recibe y distribuye la información proveniente de los</span>
+<span class="sd">        diferentes componentes del sistema, permitiendo mantener</span>
+<span class="sd">        sincronizada la interfaz gráfica con el estado actual de la estación.</span>
+
+<span class="sd">        Los mensajes recibidos pueden incluir:</span>
+
+<span class="sd">        - Actualización de indicadores de producción.</span>
+<span class="sd">        - Instrucciones para el operador.</span>
+<span class="sd">        - Cambios de estado de la interfaz.</span>
+<span class="sd">        - Eventos generados por el controlador.</span>
+<span class="sd">        - Información proveniente del robot y dispositivos externos.</span>
+<span class="sd">        - Notificaciones relacionadas con la trazabilidad del proceso.</span>
+
+<span class="sd">        Una vez procesado el mensaje, la información es distribuida a la</span>
+<span class="sd">        interfaz gráfica mediante señales Qt para actualizar los componentes</span>
+<span class="sd">        visuales correspondientes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            client:</span>
+<span class="sd">                Cliente MQTT que recibió el mensaje.</span>
+
+<span class="sd">            userdata:</span>
+<span class="sd">                Datos asociados al cliente MQTT.</span>
+
+<span class="sd">            message:</span>
+<span class="sd">                Mensaje recibido desde alguno de los tópicos suscritos.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+            <span class="c1">#print (&quot;   &quot; + message.topic + &quot; &quot;, payload)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MqttClient.publish">
+<a class="viewcode-back" href="../../../gui_comm.html#gui.view.comm.MqttClient.publish">[documentos]</a>
+    <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">publish</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Publica información de estado de la interfaz gráfica.</span>
+
+<span class="sd">        Envía eventos generados por la GUI hacia los demás componentes</span>
+<span class="sd">        del sistema para mantener sincronizada la operación de la estación.</span>
+
+<span class="sd">        Entre los mensajes publicados pueden encontrarse:</span>
+
+<span class="sd">        - Solicitudes de autenticación.</span>
+<span class="sd">        - Códigos escaneados por el operador.</span>
+<span class="sd">        - Cambios de visibilidad de ventanas.</span>
+<span class="sd">        - Eventos de interacción con la interfaz.</span>
+<span class="sd">        - Actualizaciones de estado de operación.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message:</span>
+<span class="sd">                Información que será enviada mediante MQTT.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">statusTopic</span><span class="p">,</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">message</span><span class="p">),</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MqttClient.plc_publish">
+<a class="viewcode-back" href="../../../gui_comm.html#gui.view.comm.MqttClient.plc_publish">[documentos]</a>
+    <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plc_publish</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Envía comandos destinados al PLC de la estación.</span>
+
+<span class="sd">        Permite transmitir instrucciones relacionadas con el control</span>
+<span class="sd">        del proceso productivo y la interacción con los dispositivos</span>
+<span class="sd">        industriales conectados al sistema.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message:</span>
+<span class="sd">                Comando o información destinada al PLC.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">plcTopic</span><span class="p">,</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">message</span><span class="p">),</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">)</span></div>
+
+            
+<div class="viewcode-block" id="MqttClient.rbt_publish">
+<a class="viewcode-back" href="../../../gui_comm.html#gui.view.comm.MqttClient.rbt_publish">[documentos]</a>
+    <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rbt_publish</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Envía comandos destinados al robot de la estación.</span>
+
+<span class="sd">        Permite iniciar acciones, movimientos o secuencias de trabajo</span>
+<span class="sd">        requeridas durante la ejecución del ciclo de producción.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message:</span>
+<span class="sd">                Comando o información destinada al robot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>           
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rbtTopic</span><span class="p">,</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">message</span><span class="p">),</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>         
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MqttClient.closePopout">
+<a class="viewcode-back" href="../../../gui_comm.html#gui.view.comm.MqttClient.closePopout">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">closePopout</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solicita el cierre automático de mensajes emergentes.</span>
+
+<span class="sd">        Utilizado principalmente durante la gestión de errores de</span>
+<span class="sd">        comunicación para retirar de la interfaz las notificaciones</span>
+<span class="sd">        temporales una vez transcurrido el tiempo de visualización.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="o">.</span><span class="n">emit</span><span class="p">({</span><span class="s2">&quot;popOut&quot;</span><span class="p">:</span> <span class="s2">&quot;close&quot;</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

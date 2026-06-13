@@ -13,8 +13,8 @@
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=4936afed"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/translations.js?v=f85f4cfb"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Índice" href="#" />
@@ -44,6 +44,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a></li>
 </ul>
 
         </div>
@@ -74,13 +77,17 @@
 
 <div class="genindex-jumpbox">
  <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#Q"><strong>Q</strong></a>
@@ -92,6 +99,14 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.CheckLogin.API_requests">API_requests() (método de manager.controller.CheckLogin)</a>
+
+      <ul>
+        <li><a href="controller.html#manager.controller.CheckQr.API_requests">(método de manager.controller.CheckQr)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     app
 
@@ -102,10 +117,30 @@
   </ul></td>
 </tr></table>
 
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.CheckQr.build_contenido_fusibles">build_contenido_fusibles() (método de manager.controller.CheckQr)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.CheckQr.build_contenido_torques">build_contenido_torques() (método de manager.controller.CheckQr)</a>
+</li>
+      <li><a href="controller.html#manager.controller.CheckQr.build_contenido_torques_from_results">build_contenido_torques_from_results() (método de manager.controller.CheckQr)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.MainWindow.cancel_key_process">cancel_key_process() (método de gui.view.MainWindow)</a>
+</li>
+      <li><a href="controller.html#manager.controller.CheckLogin">CheckLogin (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.CheckPDCR">CheckPDCR (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.CheckQr">CheckQr (clase en manager.controller)</a>
 </li>
       <li><a href="gui.html#gui.view.MainWindow.closeEvent">closeEvent() (método de gui.view.MainWindow)</a>
 
@@ -121,7 +156,43 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="gui_comm.html#gui.view.comm.MqttClient.closePopout">closePopout() (método de gui.view.comm.MqttClient)</a>
+</li>
+      <li><a href="controller.html#manager.controller.Config">Config (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.QualityValidation.consulta_usuarios">consulta_usuarios() (método de manager.controller.QualityValidation)</a>
+</li>
       <li><a href="gui.html#gui.view.MainWindow.continue_robot">continue_robot() (método de gui.view.MainWindow)</a>
+</li>
+      <li><a href="controller.html#manager.controller.Controller">Controller (clase en manager.controller)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.ScanPDCR.emptypdcr">emptypdcr (atributo de manager.controller.ScanPDCR)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.EnableClamps">EnableClamps (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.CheckQr.ETIQUETA">ETIQUETA() (método de manager.controller.CheckQr)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.Finish.finalMessage">finalMessage() (método de manager.controller.Finish)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.Finish">Finish (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.StartCycle.fuseBoxesClamps">fuseBoxesClamps() (método de manager.controller.StartCycle)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -130,10 +201,26 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
+    gui.model
+
+      <ul>
+        <li><a href="gui_model.html#module-gui.model">module</a>
+</li>
+      </ul></li>
+      <li>
     gui.view
 
       <ul>
         <li><a href="gui.html#module-gui.view">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    gui.view.comm
+
+      <ul>
+        <li><a href="gui_comm.html#module-gui.view.comm">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -181,6 +268,10 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.Startup.kioskMode">kioskMode() (método de manager.controller.Startup)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="L">L</h2>
@@ -190,12 +281,22 @@
 </li>
       <li><a href="gui.html#gui.view.MainWindow.launchWEB">launchWEB() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="gui.html#gui.view.Login">Login (clase en gui.view)</a>
+
+      <ul>
+        <li><a href="controller.html#manager.controller.Login">(clase en manager.controller)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="gui.html#gui.view.Login">Login (clase en gui.view)</a>
-</li>
       <li><a href="gui.html#gui.view.MainWindow.login">login() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="controller.html#manager.controller.StartCycle.logout">logout() (método de manager.controller.StartCycle)</a>
+
+      <ul>
+        <li><a href="controller.html#manager.controller.Startup.logout">(método de manager.controller.Startup)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -204,29 +305,108 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.MainWindow">MainWindow (clase en gui.view)</a>
 </li>
+      <li>
+    manager.controller
+
+      <ul>
+        <li><a href="controller.html#module-manager.controller">module</a>
+</li>
+      </ul></li>
       <li><a href="gui.html#gui.view.MainWindow.menuProcess">menuProcess() (método de gui.view.MainWindow)</a>
 </li>
       <li><a href="gui.html#gui.view.Message_pop">Message_pop (clase en gui.view)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="gui_model.html#gui.model.Model">Model (clase en gui.model)</a>
+</li>
       <li>
     module
 
       <ul>
         <li><a href="app.html#module-app">app</a>
 </li>
+        <li><a href="gui_model.html#module-gui.model">gui.model</a>
+</li>
         <li><a href="gui.html#module-gui.view">gui.view</a>
 </li>
+        <li><a href="gui_comm.html#module-gui.view.comm">gui.view.comm</a>
+</li>
+        <li><a href="controller.html#module-manager.controller">manager.controller</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="gui_comm.html#gui.view.comm.MqttClient">MqttClient (clase en gui.view.comm)</a>
+</li>
+      <li><a href="controller.html#manager.controller.MyThread">MyThread (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.MyThreadReloj">MyThreadReloj (clase en manager.controller)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.QrRework.noRework">noRework() (método de manager.controller.QrRework)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="gui.html#gui.view.MainWindow.output">output (atributo de gui.view.MainWindow)</a>
+      <li><a href="gui_comm.html#gui.view.comm.MqttClient.on_connect">on_connect() (método de gui.view.comm.MqttClient)</a>
 </li>
+      <li><a href="gui_comm.html#gui.view.comm.MqttClient.on_message">on_message() (método de gui.view.comm.MqttClient)</a>
+</li>
+      <li><a href="controller.html#manager.controller.CheckLogin.onEntry">onEntry() (método de manager.controller.CheckLogin)</a>
+
+      <ul>
+        <li><a href="controller.html#manager.controller.CheckPDCR.onEntry">(método de manager.controller.CheckPDCR)</a>
+</li>
+        <li><a href="controller.html#manager.controller.CheckQr.onEntry">(método de manager.controller.CheckQr)</a>
+</li>
+        <li><a href="controller.html#manager.controller.Config.onEntry">(método de manager.controller.Config)</a>
+</li>
+        <li><a href="controller.html#manager.controller.EnableClamps.onEntry">(método de manager.controller.EnableClamps)</a>
+</li>
+        <li><a href="controller.html#manager.controller.Finish.onEntry">(método de manager.controller.Finish)</a>
+</li>
+        <li><a href="controller.html#manager.controller.Login.onEntry">(método de manager.controller.Login)</a>
+</li>
+        <li><a href="controller.html#manager.controller.QrRework.onEntry">(método de manager.controller.QrRework)</a>
+</li>
+        <li><a href="controller.html#manager.controller.QualityValidation.onEntry">(método de manager.controller.QualityValidation)</a>
+</li>
+        <li><a href="controller.html#manager.controller.Reset.onEntry">(método de manager.controller.Reset)</a>
+</li>
+        <li><a href="controller.html#manager.controller.ScanPDCR.onEntry">(método de manager.controller.ScanPDCR)</a>
+</li>
+        <li><a href="controller.html#manager.controller.ScanQr.onEntry">(método de manager.controller.ScanQr)</a>
+</li>
+        <li><a href="controller.html#manager.controller.StartCycle.onEntry">(método de manager.controller.StartCycle)</a>
+</li>
+        <li><a href="controller.html#manager.controller.Startup.onEntry">(método de manager.controller.Startup)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.CheckPDCR.onExit">onExit() (método de manager.controller.CheckPDCR)</a>
+
+      <ul>
+        <li><a href="controller.html#manager.controller.Config.onExit">(método de manager.controller.Config)</a>
+</li>
+        <li><a href="controller.html#manager.controller.EnableClamps.onExit">(método de manager.controller.EnableClamps)</a>
+</li>
+        <li><a href="controller.html#manager.controller.QrRework.onExit">(método de manager.controller.QrRework)</a>
+</li>
+        <li><a href="controller.html#manager.controller.QualityValidation.onExit">(método de manager.controller.QualityValidation)</a>
+</li>
+        <li><a href="controller.html#manager.controller.ScanPDCR.onExit">(método de manager.controller.ScanPDCR)</a>
+</li>
+        <li><a href="controller.html#manager.controller.ScanQr.onExit">(método de manager.controller.ScanQr)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -235,11 +415,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.MainWindow.pause_robot">pause_robot() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="gui_comm.html#gui.view.comm.MqttClient.plc_publish">plc_publish() (método de gui.view.comm.MqttClient)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="gui.html#gui.view.MainWindow.plc_output">plc_output (atributo de gui.view.MainWindow)</a>
-</li>
       <li><a href="gui.html#gui.view.PopOut">PopOut (clase en gui.view)</a>
+</li>
+      <li><a href="controller.html#manager.controller.CheckQr.procesado_anteriormente">procesado_anteriormente() (método de manager.controller.CheckQr)</a>
+</li>
+      <li><a href="gui_comm.html#gui.view.comm.MqttClient.publish">publish() (método de gui.view.comm.MqttClient)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -249,9 +433,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.MainWindow.QR">QR() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="gui.html#gui.view.MainWindow.qrBoxes">qrBoxes() (método de gui.view.MainWindow)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="gui.html#gui.view.MainWindow.qrBoxes">qrBoxes() (método de gui.view.MainWindow)</a>
+      <li><a href="controller.html#manager.controller.QrRework">QrRework (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.QualityValidation">QualityValidation (clase en manager.controller)</a>
 </li>
       <li><a href="gui.html#gui.view.MainWindow.quitar_numeros_enteros">quitar_numeros_enteros() (método de gui.view.MainWindow)</a>
 </li>
@@ -263,14 +451,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.MainWindow.raffi_activation">raffi_activation() (método de gui.view.MainWindow)</a>
 </li>
-      <li><a href="gui.html#gui.view.MainWindow.rbt_output">rbt_output (atributo de gui.view.MainWindow)</a>
+      <li><a href="gui_comm.html#gui.view.comm.MqttClient.rbt_publish">rbt_publish() (método de gui.view.comm.MqttClient)</a>
+</li>
+      <li><a href="controller.html#manager.controller.Reset">Reset (clase en manager.controller)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="gui.html#gui.view.MainWindow.ready">ready (atributo de gui.view.MainWindow)</a>
-</li>
       <li><a href="gui.html#gui.view.MainWindow.resizeEvent">resizeEvent() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="controller.html#manager.controller.MyThread.run">run() (método de manager.controller.MyThread)</a>
+
+      <ul>
+        <li><a href="controller.html#manager.controller.MyThreadReloj.run">(método de manager.controller.MyThreadReloj)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -281,13 +475,25 @@
 </li>
       <li><a href="gui.html#gui.view.MainWindow.scanner">scanner() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="controller.html#manager.controller.ScanPDCR">ScanPDCR (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.ScanQr">ScanQr (clase en manager.controller)</a>
+</li>
       <li><a href="gui.html#gui.view.MainWindow.sendStatus">sendStatus() (método de gui.view.MainWindow)</a>
+</li>
+      <li><a href="gui_comm.html#gui.view.comm.MqttClient.setup">setup() (método de gui.view.comm.MqttClient)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.Controller.start">start() (método de manager.controller.Controller)</a>
+</li>
       <li><a href="gui.html#gui.view.MainWindow.start_raffi_animation">start_raffi_animation() (método de gui.view.MainWindow)</a>
 </li>
       <li><a href="gui.html#gui.view.MainWindow.start_robot">start_robot() (método de gui.view.MainWindow)</a>
+</li>
+      <li><a href="controller.html#manager.controller.StartCycle">StartCycle (clase en manager.controller)</a>
+</li>
+      <li><a href="controller.html#manager.controller.Startup">Startup (clase en manager.controller)</a>
 </li>
       <li><a href="gui.html#gui.view.MainWindow.status">status() (método de gui.view.MainWindow)</a>
 </li>

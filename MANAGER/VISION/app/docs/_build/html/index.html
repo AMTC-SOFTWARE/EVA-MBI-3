@@ -14,8 +14,8 @@
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=4936afed"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/translations.js?v=f85f4cfb"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Índice" href="genindex.html" />
@@ -46,6 +46,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a></li>
 </ul>
 
         </div>
@@ -115,6 +118,7 @@ proceso de producción.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gui.html#componentes-principales">Componentes principales</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gui.html#gui.view.MainWindow"><code class="docutils literal notranslate"><span class="pre">MainWindow</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="gui.html#gui.view.Login"><code class="docutils literal notranslate"><span class="pre">Login</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="gui.html#gui.view.Scanner"><code class="docutils literal notranslate"><span class="pre">Scanner</span></code></a></li>
@@ -122,6 +126,34 @@ proceso de producción.</p>
 <li class="toctree-l2"><a class="reference internal" href="gui.html#gui.view.Img_popout"><code class="docutils literal notranslate"><span class="pre">Img_popout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="gui.html#gui.view.PopOut"><code class="docutils literal notranslate"><span class="pre">PopOut</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="gui.html#gui.view.Message_pop"><code class="docutils literal notranslate"><span class="pre">Message_pop</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gui_model.html#gui.model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gui_comm.html#gui.view.comm.MqttClient"><code class="docutils literal notranslate"><span class="pre">MqttClient</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Startup"><code class="docutils literal notranslate"><span class="pre">Startup</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Login"><code class="docutils literal notranslate"><span class="pre">Login</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.CheckLogin"><code class="docutils literal notranslate"><span class="pre">CheckLogin</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.StartCycle"><code class="docutils literal notranslate"><span class="pre">StartCycle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.ScanQr"><code class="docutils literal notranslate"><span class="pre">ScanQr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.CheckQr"><code class="docutils literal notranslate"><span class="pre">CheckQr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.ScanPDCR"><code class="docutils literal notranslate"><span class="pre">ScanPDCR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.CheckPDCR"><code class="docutils literal notranslate"><span class="pre">CheckPDCR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.EnableClamps"><code class="docutils literal notranslate"><span class="pre">EnableClamps</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.QualityValidation"><code class="docutils literal notranslate"><span class="pre">QualityValidation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.QrRework"><code class="docutils literal notranslate"><span class="pre">QrRework</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Finish"><code class="docutils literal notranslate"><span class="pre">Finish</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Reset"><code class="docutils literal notranslate"><span class="pre">Reset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.MyThreadReloj"><code class="docutils literal notranslate"><span class="pre">MyThreadReloj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.MyThread"><code class="docutils literal notranslate"><span class="pre">MyThread</span></code></a></li>
 </ul>
 </li>
 </ul>

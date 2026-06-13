@@ -13,8 +13,8 @@
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../_static/documentation_options.js?v=4936afed"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/translations.js?v=f85f4cfb"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Índice" href="../../genindex.html" />
@@ -44,6 +44,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../app.html">Aplicación Principal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../controller.html">Controlador</a></li>
 </ul>
 
         </div>
@@ -76,9 +79,10 @@
 <span class="sd">Interfaz gráfica del sistema EVA-MBI-3.</span>
 
 <span class="sd">Este módulo contiene la implementación de la ventana principal y de</span>
-<span class="sd">las ventanas auxiliares utilizadas durante la operación.</span>
+<span class="sd">las ventanas auxiliares utilizadas durante la operación del sistema.</span>
 
-<span class="sd">Componentes principales:</span>
+<span class="sd">Componentes principales</span>
+<span class="sd">-----------------------</span>
 
 <span class="sd">- MainWindow</span>
 <span class="sd">- Login</span>
@@ -88,7 +92,6 @@
 <span class="sd">- PopOut</span>
 <span class="sd">- Message_pop</span>
 <span class="sd">&quot;&quot;&quot;</span>
-
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtGui</span>
@@ -113,7 +116,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <div class="viewcode-block" id="MainWindow">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow">[documentos]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MainWindow</span> <span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MainWindow</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ventana principal de la aplicación EVA-MBI-3.</span>
 
@@ -121,49 +124,90 @@
 <span class="sd">    responsable de la interacción entre la interfaz gráfica, el modelo</span>
 <span class="sd">    de datos y los servicios de comunicación.</span>
 
-<span class="sd">    Funcionalidades principales:</span>
+<span class="sd">    Funcionalidades principales</span>
+<span class="sd">    ---------------------------</span>
 
 <span class="sd">    - Mostrar información del ciclo de producción.</span>
-<span class="sd">    - Gestionar el proceso de autenticación de operadores.</span>
+<span class="sd">    - Gestionar visualmente la autenticación de operadores.</span>
 <span class="sd">    - Recibir y procesar mensajes MQTT.</span>
 <span class="sd">    - Actualizar dinámicamente los componentes visuales.</span>
 <span class="sd">    - Controlar ventanas auxiliares de escaneo y mensajes.</span>
-<span class="sd">    - Gestionar el estado visual de clamps y módulos.</span>
+<span class="sd">    - Gestionar el estado visual de clamps para los nidos de las cajas.</span>
 <span class="sd">    - Mostrar imágenes de referencia e instrucciones.</span>
 <span class="sd">    - Presentar indicadores de producción y trazabilidad.</span>
+
+<span class="sd">    Señales principales</span>
+<span class="sd">    -------------------</span>
+
+<span class="sd">    - ``output``:</span>
+<span class="sd">      Envía mensajes MQTT generales.</span>
+
+<span class="sd">    - ``plc_output``:</span>
+<span class="sd">      Envía comandos hacia PLCs.</span>
+
+<span class="sd">    - ``rbt_output``:</span>
+<span class="sd">      Envía comandos hacia el robot.</span>
+
+<span class="sd">    - ``ready``:</span>
+<span class="sd">      Indica que la interfaz gráfica y la comunicación MQTT</span>
+<span class="sd">      se encuentran listas para iniciar operación.</span>
+
+<span class="sd">    Componentes gestionados</span>
+<span class="sd">    -----------------------</span>
+
+<span class="sd">    - Ventana principal de operación.</span>
+<span class="sd">    - Formularios de autenticación.</span>
+<span class="sd">    - Escáner de códigos QR.</span>
+<span class="sd">    - Indicadores de producción.</span>
+<span class="sd">    - Gestión visual de clamps.</span>
+<span class="sd">    - Ventanas emergentes y mensajes.</span>
+<span class="sd">    - Imágenes de referencia e instrucciones.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">output</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">plc_output</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">rbt_output</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-    
     <span class="n">ready</span> <span class="o">=</span>  <span class="n">pyqtSignal</span><span class="p">()</span>
+
 <div class="viewcode-block" id="MainWindow.quitar_numeros_enteros">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.quitar_numeros_enteros">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">quitar_numeros_enteros</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cadena</span><span class="p">):</span>
-        <span class="c1"># Utilizar una expresión regular para encontrar y reemplazar números enteros</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Elimina los caracteres numéricos de una cadena de texto.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cadena:</span>
+<span class="sd">                Texto a procesar.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str:</span>
+<span class="sd">                Cadena sin caracteres numéricos.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">resultado</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cadena</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">resultado</span></div>
 
     
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;GUI&quot;</span><span class="p">,</span> <span class="n">topic</span> <span class="o">=</span> <span class="s2">&quot;gui&quot;</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inicializa la ventana principal del sistema.</span>
+<span class="sd">        Constructor de MainWindow</span>
+<span class="sd">        -------------------------</span>
 
-<span class="sd">        Configura los componentes necesarios para la operación de la</span>
-<span class="sd">        interfaz gráfica, incluyendo:</span>
+<span class="sd">        Inicializa la interfaz gráfica principal de EVA-MBI-3 y configura</span>
+<span class="sd">        los recursos necesarios para la operación del sistema de visión.</span>
 
-<span class="sd">        - Modelo de datos.</span>
-<span class="sd">        - Cliente MQTT.</span>
-<span class="sd">        - Ventanas auxiliares.</span>
-<span class="sd">        - Señales y slots.</span>
-<span class="sd">        - Componentes visuales.</span>
-<span class="sd">        - Temporizadores.</span>
-<span class="sd">        - Recursos gráficos.</span>
+<span class="sd">        Configuraciones realizadas:</span>
+
+<span class="sd">        - Creación del modelo de datos.</span>
+<span class="sd">        - Inicialización del cliente MQTT.</span>
+<span class="sd">        - Configuración de ventanas auxiliares.</span>
+<span class="sd">        - Registro de señales y slots.</span>
+<span class="sd">        - Inicialización de componentes visuales.</span>
+<span class="sd">        - Configuración de temporizadores.</span>
+<span class="sd">        - Carga de recursos gráficos y parámetros de operación.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name:</span>
-<span class="sd">                Nombre de la aplicación o identificador de la interfaz.</span>
+<span class="sd">                Nombre de la aplicación.</span>
 
 <span class="sd">            topic:</span>
 <span class="sd">                Tópico MQTT utilizado para la comunicación de la interfaz.</span>
@@ -288,6 +332,9 @@
 <div class="viewcode-block" id="MainWindow.start_raffi_animation">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.start_raffi_animation">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">start_raffi_animation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicia la animación visual asociada al boton de la caja.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EJECUTANDO START_RAFFI_ANIMATION&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ACTIVANDO ANIMACION PARA: </span><span class="si">{</span><span class="n">box</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*********************************************** </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -352,6 +399,9 @@
 <div class="viewcode-block" id="MainWindow.stop_raffi_animation">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.stop_raffi_animation">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop_raffi_animation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Detiene la animación visual asociada al boton de la caja.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EJECUTANDO STOP_RAFFI_ANIMATION&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DETENIENDO ANIMACION PARA: </span><span class="si">{</span><span class="n">box</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*********************************************** </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -415,6 +465,11 @@
 <div class="viewcode-block" id="MainWindow.start_robot">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.start_robot">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">start_robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Envía el comando de inicio al robot.</span>
+
+<span class="sd">        Permite dar la instruccion al robot de iniciar.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EJECUTANDO START_ROBOT DESDE GUI.VIEW&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ENVIANDO COMMAND:START&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*********************************************** </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -448,6 +503,12 @@
 <div class="viewcode-block" id="MainWindow.HOME_robot">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.HOME_robot">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">HOME_robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solicita al robot regresar a la posición HOME.</span>
+
+<span class="sd">        Permite dar la instruccion al robot de regresar</span>
+<span class="sd">        a su punto de origen.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EJECUTANDO HOME_ROBOT DESDE GUI.VIEW&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ENVIANDO TRIGGER:HOME&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*********************************************** </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -459,6 +520,16 @@
 <div class="viewcode-block" id="MainWindow.raffi_activation">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.raffi_activation">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">raffi_activation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gestiona la activación y desactivación de clamps.</span>
+
+<span class="sd">        Dependiendo del estado actual del proceso puede habilitar,</span>
+<span class="sd">        deshabilitar o solicitar acciones relacionadas con los nidos de las cajas.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            box:</span>
+<span class="sd">                Identificador del clamp o módulo seleccionado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> ***** EJECUTANDO RAFFI_ACTIVATION *****&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CAJA CLICKEADA: </span><span class="si">{</span><span class="n">box</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*********************************************** </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -620,6 +691,18 @@
 <div class="viewcode-block" id="MainWindow.horaxhora">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.horaxhora">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">horaxhora</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calcula indicadores de producción por hora.</span>
+
+<span class="sd">        Obtiene información histórica y genera métricas como:</span>
+
+<span class="sd">        - Producción por hora.</span>
+<span class="sd">        - Mejor tiempo de ciclo.</span>
+<span class="sd">        - Tiempo promedio de ciclo.</span>
+<span class="sd">        - Tiempo perdido.</span>
+
+<span class="sd">        Los resultados son mostrados en la ventana Tabla_hora_w.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#self.qw_Tabla_horas.show()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;vamos a calcular los hora por hora&quot;</span><span class="p">)</span>
         <span class="n">horario_turno1</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;7&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
@@ -830,6 +913,12 @@
 <div class="viewcode-block" id="MainWindow.menuProcess">
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.menuProcess">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">menuProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gestiona las acciones asociadas al menú de proceso.</span>
+
+<span class="sd">        Permite ejecutar acciones como Login, Logout,</span>
+<span class="sd">        Config y WEB.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">case</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>               
             <span class="k">if</span> <span class="n">case</span> <span class="o">==</span> <span class="s2">&quot;Login&quot;</span><span class="p">:</span>
@@ -880,6 +969,23 @@
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.status">[documentos]</a>
     <span class="nd">@pyqtSlot</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">status</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sincroniza el estado de visibilidad de los componentes de la interfaz.</span>
+
+<span class="sd">        Verifica periódicamente la visibilidad de las ventanas principales</span>
+<span class="sd">        y auxiliares del sistema. Cuando detecta un cambio de estado,</span>
+<span class="sd">        actualiza el modelo interno y publica la información mediante MQTT.</span>
+
+<span class="sd">        Componentes monitoreados:</span>
+
+<span class="sd">        - Ventana principal (gui).</span>
+<span class="sd">        - Ventana de login.</span>
+<span class="sd">        - Ventana de escaneo.</span>
+<span class="sd">        - Ventanas emergentes (pop_out).</span>
+
+<span class="sd">        Los cambios detectados son enviados mediante la señal ``output``</span>
+<span class="sd">        para mantener sincronizados los demás componentes del sistema.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">status</span><span class="p">[</span><span class="s2">&quot;visible&quot;</span><span class="p">][</span><span class="s2">&quot;gui&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">status</span><span class="p">[</span><span class="s2">&quot;visible&quot;</span><span class="p">][</span><span class="s2">&quot;gui&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()</span>
@@ -905,6 +1011,25 @@
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.login">[documentos]</a>
     <span class="nd">@pyqtSlot</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">login</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa el código de acceso ingresado por el operador.</span>
+
+<span class="sd">        Obtiene el valor capturado en la ventana de autenticación y,</span>
+<span class="sd">        si el contenido es válido, envía el identificador mediante</span>
+<span class="sd">        la señal ``output`` para su posterior validación por el</span>
+<span class="sd">        controlador.</span>
+
+<span class="sd">        Comportamiento:</span>
+
+<span class="sd">        - Obtiene el texto ingresado.</span>
+<span class="sd">        - Valida que no esté vacío.</span>
+<span class="sd">        - Envía el identificador del operador.</span>
+<span class="sd">        - Limpia el campo de captura.</span>
+<span class="sd">        - Restablece el focus al campo de entrada.</span>
+
+<span class="sd">        En caso de que no se capture información, se muestra un mensaje</span>
+<span class="sd">        indicativo en el placeholder del campo de texto.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qw_login</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
@@ -922,6 +1047,25 @@
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.scanner">[documentos]</a>
     <span class="nd">@pyqtSlot</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">scanner</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa el código QR capturado por el operador.</span>
+
+<span class="sd">        Obtiene el contenido escaneado desde la ventana de captura,</span>
+<span class="sd">        lo convierte a mayúsculas y lo envía mediante la señal</span>
+<span class="sd">        ``output`` para su validación dentro del flujo de producción.</span>
+
+<span class="sd">        Comportamiento:</span>
+
+<span class="sd">        - Obtiene el código capturado.</span>
+<span class="sd">        - Convierte el contenido a mayúsculas.</span>
+<span class="sd">        - Valida que no esté vacío.</span>
+<span class="sd">        - Envía el código al controlador.</span>
+<span class="sd">        - Limpia el campo de captura.</span>
+<span class="sd">        - Restablece el foco al campo de entrada.</span>
+
+<span class="sd">        En caso de que no se capture información, se muestra un mensaje</span>
+<span class="sd">        indicativo en el placeholder del campo de texto.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qw_scanner</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
@@ -956,6 +1100,15 @@
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.QR">[documentos]</a>
     <span class="nd">@pyqtSlot</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">QR</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa el código QR de llave virtual.</span>
+
+<span class="sd">        Permite ejecutar acciones especiales dentro de la estación, tales como el</span>
+<span class="sd">        reinicio del ciclo de producción.</span>
+
+<span class="sd">        Una vez capturado, el código es enviado al comm del manager para</span>
+<span class="sd">        su validación y posterior ejecución de la acción solicitada.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditKey</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
@@ -971,6 +1124,25 @@
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.input">[documentos]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa mensajes recibidos mediante MQTT.</span>
+
+<span class="sd">        Este método funciona como el principal receptor de mensajes</span>
+<span class="sd">        provenientes del manager y dispositivos como PLC y Robot.</span>
+
+<span class="sd">        Dependiendo del contenido del mensaje puede:</span>
+
+<span class="sd">        - Actualizar etiquetas.</span>
+<span class="sd">        - Actualizar imágenes.</span>
+<span class="sd">        - Mostrar ventanas auxiliares.</span>
+<span class="sd">        - Modificar indicadores visuales.</span>
+<span class="sd">        - Actualizar información de producción.</span>
+<span class="sd">        - Procesar respuestas del robot.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message:</span>
+<span class="sd">                Diccionario recibido mediante MQTT.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1">#print(message)</span>
 
@@ -1397,6 +1569,16 @@
 <a class="viewcode-back" href="../../gui.html#gui.view.MainWindow.launcher">[documentos]</a>
     <span class="nd">@pyqtSlot</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">launcher</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gestiona la visibilidad de ventanas y componentes auxiliares.</span>
+
+<span class="sd">        Permite mostrar u ocultar elementos de la interfaz según</span>
+<span class="sd">        la configuración recibida.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            show:</span>
+<span class="sd">                Configuración visual recibida mediante MQTT.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;login&quot;</span> <span class="ow">in</span> <span class="n">show</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">qw_login</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span><span class="s2">&quot;Escanea o escribe tu codigo&quot;</span><span class="p">)</span>
@@ -1479,7 +1661,19 @@
 <div class="viewcode-block" id="Login">
 <a class="viewcode-back" href="../../gui.html#gui.view.Login">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Login</span> <span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inicializa la ventana de autenticación.</span>
+
+<span class="sd">    Configura los controles visuales, el campo de captura</span>
+<span class="sd">    de contraseña y el comportamiento inicial del formulario.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa la ventana de autenticación.</span>
+
+<span class="sd">        Configura los controles visuales, el campo de captura</span>
+<span class="sd">        de contraseña y el comportamiento inicial del formulario.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">login</span><span class="o">.</span><span class="n">Ui_login</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1491,6 +1685,16 @@
 <div class="viewcode-block" id="Login.keyPressEvent">
 <a class="viewcode-back" href="../../gui.html#gui.view.Login.keyPressEvent">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gestiona eventos de teclado de la ventana.</span>
+
+<span class="sd">        Actualmente intercepta la tecla Escape para evitar</span>
+<span class="sd">        el cierre accidental del formulario de autenticación.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            event:</span>
+<span class="sd">                Evento de teclado recibido por Qt.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Escape</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Escape key was pressed&quot;</span><span class="p">)</span></div>
 </div>
@@ -1499,6 +1703,11 @@
 <div class="viewcode-block" id="Scanner">
 <a class="viewcode-back" href="../../gui.html#gui.view.Scanner">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Scanner</span> <span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ventana utilizada para la captura de códigos QR</span>
+<span class="sd">    y códigos de producción durante la operación</span>
+<span class="sd">    de la estación.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">scanner</span><span class="o">.</span><span class="n">Ui_scanner</span><span class="p">()</span>
@@ -1526,6 +1735,10 @@
 <div class="viewcode-block" id="Tabla_hora_w">
 <a class="viewcode-back" href="../../gui.html#gui.view.Tabla_hora_w">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Tabla_hora_w</span> <span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ventana encargada de mostrar indicadores</span>
+<span class="sd">    históricos y métricas de producción por hora.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">Tabla_horas</span><span class="o">.</span><span class="n">Ui_Ui_Tabla_h</span><span class="p">()</span>
@@ -1560,6 +1773,11 @@
 <div class="viewcode-block" id="PopOut">
 <a class="viewcode-back" href="../../gui.html#gui.view.PopOut">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PopOut</span> <span class="p">(</span><span class="n">QMessageBox</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ventana emergente utilizada para mostrar</span>
+<span class="sd">    mensajes informativos, advertencias y</span>
+<span class="sd">    notificaciones al operador.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Warning</span><span class="p">)</span>
