@@ -1,3 +1,9 @@
+"""
+Procesamiento de inspecciones del sistema EVA-MBI-3.
+
+Este módulo contiene la lógica principal de operación de inspeccion basada en
+máquina de estados mediante QState y QStateMachine.
+"""
 from PyQt5.QtCore import QState, pyqtSignal, QObject
 from paho.mqtt import publish
 from threading import Timer
@@ -9,8 +15,48 @@ from manager.controller import vision, height
 #self.QState.assignProperty(self.button, 'text', 'Off')
 
 class Inspections(QState):
+    """
+    Estado compuesto encargado de coordinar el proceso completo de inspección
+    de visión y alturas.
+
+    Este estado administra el flujo principal de inspección, desde la
+    configuración inicial del robot hasta la liberación de las cajas
+    inspeccionadas. Además, coordina la ejecución de los módulos de visión
+    y alturas, así como la actualización de disparadores (triggers) y la
+    sincronización con el robot.
+
+    El flujo de inspección incluye la preparación del robot, la espera de
+    condiciones para iniciar el proceso, la ejecución de las inspecciones,
+    la liberación de cajas y la notificación cuando todas las inspecciones
+    han finalizado.
+
+    Señales
+    --------
+
+    - ``finished``:
+    Indica que todas las inspecciones de visión y alturas han finalizado
+    correctamente y el flujo puede continuar con el siguiente estado de
+    la máquina de estados.
+    """
     finished  = pyqtSignal()
     def __init__(self, model = None, ID = "1", parent = None):
+        """
+        Inicializa el controlador de inspecciones.
+
+        Parameters
+        ----------
+        model : Model, optional
+            Modelo compartido que contiene la información del proceso,
+            configuración de los módulos y comunicación entre estados.
+
+        ID : str, optional
+            Identificador del conjunto de inspección. Se utiliza para
+            seleccionar los módulos de visión y alturas correspondientes
+            (por ejemplo ``vision1`` y ``height1``).
+
+        parent : QObject, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.ID = ID
@@ -62,11 +108,50 @@ class Inspections(QState):
 
 
 class Stop(QState):
+    """
+    Estado de detención del proceso de inspección.
+
+    Responsable de detener temporalmente la secuencia de inspección
+    cuando el robot entra en modo STOP.
+
+    Mientras este estado permanezca activo, la interfaz informa al
+    operador que el robot está detenido y que es necesario presionar
+    el botón START para reanudar la operación.
+
+    Señales
+    --------
+
+    Este estado no define señales propias.
+    """
     def __init__(self, model = None, parent = None):
+        """
+        Inicializa el estado STOP.
+
+        Parameters
+        ----------
+        model : object, optional
+            Modelo principal de la aplicación. Contiene la configuración
+            MQTT y referencias utilizadas durante la ejecución del estado.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
+
+        Muestra en la interfaz un mensaje indicando que el robot se
+        encuentra en modo STOP y que el operador debe presionar START
+        para continuar con la inspección.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
 
         print("############################## ESTADO: Stop INSPECTIONS ############################")
 
@@ -78,13 +163,58 @@ class Stop(QState):
 
 
 class WaitStart(QState):
+    """
+    Estado de espera para iniciar el proceso de inspección.
+
+    Responsable de mantener el sistema en espera hasta que el operador
+    presione el botón START para comenzar el ciclo de inspección.
+
+    Mientras este estado permanece activo, se habilitan los controles de
+    Raffi y se informa a la interfaz gráfica que el sistema está preparado
+    para iniciar la operación.
+
+    Si existe un bracket PDC-D pendiente de colocar, este estado solicita
+    al operador realizar la colocación antes de iniciar la inspección.
+
+    Señales
+    --------
+
+    Este estado no define señales propias.
+    """
 
     def __init__(self, model = None, parent = None):
+        """
+        Inicializa el estado WaitStart.
+
+        Parameters
+        ----------
+        model : object, optional
+            Modelo principal de la aplicación. Contiene las variables
+            de control del proceso, configuración MQTT y estados de
+            operación utilizados durante la ejecución.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Habilita la disponibilidad de los controles de Raffi y activa
+        la bandera que indica que el sistema se encuentra esperando la
+        acción del botón START.
+
+        Dependiendo de la condición del bracket PDC-D, muestra en la
+        interfaz gráfica el mensaje correspondiente al operador.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: WaitStart INSPECTIONS ############################")
         
         #solamente se pueden usar los botones de raffi cuando raffi_disponible sea True
@@ -116,11 +246,54 @@ class WaitStart(QState):
 
 
 class SetRobot(QState):
+    """
+    Estado encargado de reiniciar la comunicación con el robot.
+
+    Responsable de realizar la secuencia de reinicio del robot antes de
+    continuar con el proceso de inspección.
+
+    Al ingresar a este estado, se informa al operador que el robot está
+    siendo reiniciado. Posteriormente se envía una orden de detención y
+    después una orden de inicio mediante comunicación MQTT.
+
+    Señales
+    --------
+
+    ok : pyqtSignal
+        Señal emitida para indicar que la configuración o reinicio del
+        robot fue completado correctamente.
+    """
     ok     =   pyqtSignal()
     def __init__(self, model = None, parent = None):
+        """
+        Inicializa el estado SetRobot.
+
+        Parameters
+        ----------
+        model : object, optional
+            Modelo principal de la aplicación. Contiene la configuración
+            MQTT y referencias utilizadas durante la ejecución del estado.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
+
+        Envía una notificación a la interfaz gráfica indicando que el robot
+        está siendo reiniciado.
+
+        Posteriormente ejecuta la secuencia de reinicio del robot mediante
+        MQTT, enviando primero la orden de STOP y después la orden START.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
 
         print("############################## ESTADO: SetRobot INSPECTIONS ############################")
 
@@ -136,12 +309,57 @@ class SetRobot(QState):
 
 
 class WaitingHome(QState):
+    """
+    Estado de espera del robot en posición Home.
+
+    Responsable de mantener el sistema en espera mientras el robot se
+    desplaza a la posición Home para liberar las cajas del proceso.
+
+    Mientras este estado permanece activo, se informa al operador que el
+    robot está realizando el movimiento hacia Home y que debe esperar o
+    utilizar el botón amarillo para reintentar la operación.
+
+    La variable de control waiting_home permite identificar que el sistema
+    se encuentra esperando la confirmación de llegada del robot a la
+    posición Home.
+
+    Señales
+    --------
+
+    Este estado no define señales propias.
+    """
     def __init__(self, model = None, parent = None):
+        """
+        Inicializa el estado WaitingHome.
+
+        Parameters
+        ----------
+        model : object, optional
+            Modelo principal de la aplicación. Contiene las variables de
+            control del proceso, configuración MQTT y estados utilizados
+            durante la ejecución.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Activa la bandera waiting_home para indicar que el sistema está
+        esperando la confirmación de posición Home del robot.
+
+        Envía una notificación a la interfaz gráfica indicando que el robot
+        está siendo enviado a Home para liberar las cajas del proceso.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: WaitingHome INSPECTIONS ############################")
         self.model.waiting_home = True
         command = {
@@ -159,12 +377,67 @@ class WaitingHome(QState):
         self.model.waiting_home = False
 
 class LiberarCajas(QState):
+    """
+    Estado encargado de liberar las cajas sujetadas durante el proceso
+    de inspección.
+
+    Responsable de enviar las señales necesarias al PLC para desactivar
+    los elementos de sujeción de las cajas cuando las condiciones del
+    proceso permiten su liberación.
+
+    Antes de realizar la liberación, valida que el proceso de colocación
+    del bracket PDC-D haya finalizado o que no exista un bracket pendiente.
+    Si la condición no se cumple, las cajas permanecen sujetas y el estado
+    continúa el flujo sin ejecutar la liberación.
+
+    Señales
+    --------
+
+    ok : pyqtSignal
+        Señal emitida al finalizar el proceso de liberación o cuando la
+        operación no puede ejecutarse debido a condiciones del proceso.
+    """
     ok     =   pyqtSignal()
     def __init__(self, model = None, parent = None):
+        """
+        Inicializa el estado LiberarCajas.
+
+        Parameters
+        ----------
+        model : object, optional
+            Modelo principal de la aplicación. Contiene las variables
+            de control del proceso, configuración MQTT y comunicación
+            con dispositivos externos.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
+
+        Verifica si las condiciones del bracket PDC-D permiten liberar
+        las cajas.
+
+        Cuando la liberación está autorizada, envía comandos al PLC para
+        desactivar los sujetadores correspondientes a las cajas almacenadas
+        en la variable cajas_a_desclampear.
+
+        Después de enviar las señales al PLC, limpia las variables de
+        control asociadas al proceso de liberación y emite la señal de
+        finalización del estado.
+
+        Si el bracket PDC-D aún no ha sido terminado, no se realiza la
+        liberación de cajas y se continúa el flujo del proceso.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: LiberarCajas INSPECTIONS ############################")
 
         if self.model.PDCD_bracket_terminado or self.model.PDCD_bracket_pendiente==False:
@@ -185,6 +458,50 @@ class LiberarCajas(QState):
 
 
 class UpdateTriggers(QState):
+    """
+    Estado encargado de actualizar los triggers de inspección del robot.
+
+    Responsable de preparar la información necesaria para ejecutar las
+    inspecciones de visión y altura durante el ciclo de producción.
+
+    Este estado valida las condiciones actuales del proceso, administra
+    las cajas disponibles en los clamps, genera las colas de inspección
+    del robot y prepara los datos necesarios para las siguientes etapas
+    del ciclo.
+
+    También gestiona condiciones especiales del proceso como:
+
+    - Liberación de cajas pendientes.
+    - Colocación de bracket PDC-D.
+    - Colocación de fusible F96.
+    - Finalización del ciclo cuando no existen cajas pendientes.
+
+    Señales
+    --------
+
+    ok : pyqtSignal
+        Señal emitida cuando una caja queda preparada correctamente para
+        iniciar su proceso de inspección.
+
+    finished : pyqtSignal
+        Señal emitida cuando todas las inspecciones pendientes han sido
+        completadas.
+
+    nok : pyqtSignal
+        Señal emitida cuando no existe una caja válida disponible para
+        inspección y es necesario solicitar una nueva colocación.
+
+    esperar_robot_home : pyqtSignal
+        Señal emitida cuando el robot debe regresar a posición Home antes
+        de continuar el proceso.
+
+    F96_espera : pyqtSignal
+        Señal emitida cuando el proceso requiere esperar la colocación y
+        validación del fusible F96.
+
+    BRACKET_PDCD : pyqtSignal
+        Señal emitida cuando el bracket PDC-D ha sido colocado y validado.
+    """
     ok          = pyqtSignal()
     finished    = pyqtSignal()
     nok         = pyqtSignal()
@@ -192,11 +509,49 @@ class UpdateTriggers(QState):
     F96_espera  = pyqtSignal()
     BRACKET_PDCD     = pyqtSignal()
     def __init__(self, model = None, parent = None):
+        """
+        Inicializa el estado UpdateTriggers.
+
+        Parameters
+        ----------
+        model : object, optional
+            Modelo principal de la aplicación. Contiene la información
+            del proceso, configuración de inspecciones, datos del robot,
+            estados de clamps y comunicación MQTT.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Actualiza la configuración de inspección de acuerdo con las cajas
+        disponibles en los clamps y prepara las colas de ejecución del robot.
+
+        Durante su ejecución realiza las siguientes validaciones:
+
+        - Verifica si existen cajas pendientes de liberar.
+        - Solicita al robot regresar a Home cuando es necesario.
+        - Gestiona la colocación del bracket PDC-D.
+        - Gestiona la colocación del fusible F96.
+        - Valida cajas disponibles contra la modularidad actual.
+        - Actualiza las colas de inspección de visión y altura.
+        - Notifica a la interfaz gráfica el estado actual del proceso.
+
+        Las colas generadas son almacenadas en:
+
+        - robot_data["v_queue"] para inspecciones de visión.
+        - robot_data["h_queue"] para inspecciones de altura.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: UpdateTriggers INSPECTIONS ############################")
 
         if self.model.desclampear_ready == True:
@@ -337,14 +692,67 @@ class UpdateTriggers(QState):
             self.nok.emit()
 
     def onExit(self, QEvent):
+        """
+        Ejecuta las acciones al salir del estado.
+
+        Finaliza la ejecución del estado UpdateTriggers.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al abandonar el estado.
+        """
         print("Saliendo de UpdateTriggers (inspections.py)")
 
 class Standby(QState):
+    """
+    Estado de espera del sistema de inspección.
+
+    Responsable de mantener el sistema en estado de espera mientras no se
+    ejecuta un ciclo activo de inspección.
+
+    Mientras este estado permanece activo, se habilitan los controles de
+    Raffi para permitir la interacción del operador con el sistema.
+
+    Al abandonar este estado, los controles de Raffi son deshabilitados
+    para evitar acciones manuales durante la ejecución de otros estados
+    del proceso.
+
+    Señales
+    --------
+
+    Este estado no define señales propias.
+    """
     def __init__(self, model = None, parent = None):
+        """
+        Inicializa el estado Standby.
+
+        Parameters
+        ----------
+        model : object, optional
+            Modelo principal de la aplicación. Contiene las variables
+            de control del proceso y estados utilizados durante la
+            ejecución.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
+
+        Habilita la disponibilidad de los controles de Raffi indicando que
+        el sistema se encuentra en un estado donde el operador puede
+        interactuar manualmente.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: Standby INSPECTIONS ############################")
         
         print("self.model.raffi_disponible = True")

@@ -1,0 +1,1218 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>manager.controller.height &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../app.html">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller.html">Controlador Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller_model.html">Modelo de Datos del Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller_height.html">Controlador De Alturas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller_inspections.html">Controlador De Inspecciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller_vision.html">Controlador De Vision</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código de módulo</a></li>
+          <li class="breadcrumb-item"><a href="../controller.html">manager.controller</a></li>
+      <li class="breadcrumb-item active">manager.controller.height</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para manager.controller.height</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Procesamiento de alturas del sistema EVA-MBI-3.</span>
+
+<span class="sd">Este módulo contiene la lógica principal de operación de inspeccion de alturas basada en</span>
+<span class="sd">máquina de estados mediante QState y QStateMachine.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">QState</span><span class="p">,</span> <span class="n">pyqtSignal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">imwrite</span><span class="p">,</span> <span class="n">imread</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">paho.mqtt</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">copyfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">strftime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">ceil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span> <span class="c1">#para poder usar sleep()</span>
+
+<div class="viewcode-block" id="Height">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Height">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Height</span><span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado compuesto para la validación de altura.</span>
+
+<span class="sd">    Coordina el flujo completo de inspección de altura durante el ciclo</span>
+<span class="sd">    de producción. Este estado administra la ejecución de la inspección,</span>
+<span class="sd">    el manejo de errores y el reintento solicitado por el operador.</span>
+
+<span class="sd">    El flujo interno está compuesto por los siguientes subestados:</span>
+
+<span class="sd">    - ``Process``: Ejecuta la inspección de altura y procesa el resultado.</span>
+<span class="sd">    - ``Error``: Muestra la condición de error cuando la inspección falla.</span>
+<span class="sd">    - ``Standby``: Espera la solicitud de un nuevo intento de inspección.</span>
+
+
+<span class="sd">    Señales</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    - ``retry``:</span>
+<span class="sd">      Solicita al controlador principal ejecutar nuevamente la inspección</span>
+<span class="sd">      de altura.</span>
+
+<span class="sd">    - ``finished``:</span>
+<span class="sd">      Indica que la validación de altura concluyó y el flujo puede</span>
+<span class="sd">      continuar con el siguiente estado de la máquina.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">retry</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span> 
+    <span class="n">finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;height1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor de Height</span>
+<span class="sd">        ---------------------</span>
+
+<span class="sd">        Inicializa el estado compuesto encargado de la validación de altura,</span>
+<span class="sd">        creando los subestados internos y configurando las transiciones entre</span>
+<span class="sd">        ellos.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            module (str):</span>
+<span class="sd">                Identificador del módulo o estación de altura que será</span>
+<span class="sd">                controlado.</span>
+
+<span class="sd">            model:</span>
+<span class="sd">                Modelo compartido utilizado por la máquina de estados.</span>
+
+<span class="sd">            parent:</span>
+<span class="sd">                Estado padre dentro de la jerarquía de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span>    <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span>      <span class="o">=</span> <span class="n">Error</span><span class="p">(</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standby</span>    <span class="o">=</span> <span class="n">QState</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">nok</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">retry_btn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">standby</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">standby</span><span class="o">.</span><span class="n">entered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setInitialState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Process">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Process">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Process</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado compuesto encargado del proceso de validación de altura.</span>
+
+<span class="sd">    Coordina la ejecución completa de la inspección de altura,</span>
+<span class="sd">    administrando el posicionamiento del robot, la adquisición de</span>
+<span class="sd">    mediciones, el procesamiento de resultados, el manejo de errores,</span>
+<span class="sd">    los reintentos y la detención del proceso.</span>
+
+<span class="sd">    Este estado encapsula y coordina los siguientes subestados:</span>
+
+<span class="sd">    - Pose</span>
+<span class="sd">    - Triggers</span>
+<span class="sd">    - Receiver</span>
+<span class="sd">    - Reintento</span>
+<span class="sd">    - Stop</span>
+
+<span class="sd">    Señales:</span>
+<span class="sd">        finished:</span>
+<span class="sd">            Emitida cuando el proceso de validación concluye</span>
+<span class="sd">            correctamente.</span>
+
+<span class="sd">        nok:</span>
+<span class="sd">            Emitida cuando ocurre un error que impide continuar el</span>
+<span class="sd">            proceso de inspección.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nok</span>         <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">finished</span>    <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;height1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el proceso de validación de altura.</span>
+
+<span class="sd">        Crea los subestados internos y configura las transiciones de la</span>
+<span class="sd">        máquina de estados para ejecutar el flujo completo de inspección.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            module (str): Identificador del módulo de altura.</span>
+<span class="sd">            model: Modelo compartido de la aplicación.</span>
+<span class="sd">            parent: Estado padre.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span>       <span class="o">=</span> <span class="n">Pose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span>   <span class="o">=</span> <span class="n">Triggers</span><span class="p">(</span> <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">receiver</span>   <span class="o">=</span> <span class="n">Receiver</span><span class="p">(</span> <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span>       <span class="o">=</span> <span class="n">Stop</span><span class="p">(</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span>  <span class="o">=</span> <span class="n">Reintento</span><span class="p">(</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">rbt_pose</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="p">)</span>
+        <span class="c1">#triggers.finished se emite cuando ya se terminó toda la cola de secciones correctamente</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">finished</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">retry_btn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">retry_btn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">retry_btn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">rbt_home</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>
+        <span class="c1">#height.emit() se hace como respuesta cuando se reciven los resultados del sensor de altura</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">receiver</span><span class="p">)</span>
+
+        <span class="c1">#señal de la bandera de una mala comunicación con sensor de altura habilita señal retry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">retry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">receiver</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">receiver</span><span class="o">.</span><span class="n">ok</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">rbt_stop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">nok</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nok</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">nok</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nok</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setInitialState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>    </div>
+
+
+
+<div class="viewcode-block" id="Stop">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Stop">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Stop</span><span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado de detención del proceso de validación de altura.</span>
+
+<span class="sd">    Suspende temporalmente la inspección cuando el robot entra en modo</span>
+<span class="sd">    STOP. Durante este estado se notifica al operador que el proceso se</span>
+<span class="sd">    encuentra detenido y se espera una orden de inicio para reanudar la</span>
+<span class="sd">    validación.</span>
+
+<span class="sd">    Al abandonar este estado se restablece el contexto de trabajo del</span>
+<span class="sd">    módulo de altura, eliminando la información temporal utilizada</span>
+<span class="sd">    durante la inspección.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        La transición de salida es activada mediante la señal de inicio</span>
+<span class="sd">        del robot, permitiendo reiniciar el flujo de inspección.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;height1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado de detención.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            module (str):</span>
+<span class="sd">                Identificador del módulo de altura asociado.</span>
+
+<span class="sd">            model:</span>
+<span class="sd">                Modelo compartido de la aplicación.</span>
+
+<span class="sd">            parent:</span>
+<span class="sd">                Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+<div class="viewcode-block" id="Stop.onEntry">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Stop.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado.</span>
+
+<span class="sd">        Muestra en la interfaz gráfica que el robot se encuentra en modo</span>
+<span class="sd">        STOP y solicita al operador presionar el botón START para continuar</span>
+<span class="sd">        con el proceso.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Stop HEIGHT ############################&quot;</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Robot en modo STOP&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Presiona START para continuar&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stop.onExit">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Stop.onExit">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onExit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al salir del estado.</span>
+
+<span class="sd">        Limpia la información temporal utilizada durante la inspección,</span>
+<span class="sd">        incluyendo la caja procesada, la cola de inspecciones, el disparo</span>
+<span class="sd">        actual, los resultados obtenidos y la solicitud pendiente.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Triggers">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Triggers">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Triggers</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Administra la secuencia de disparos (triggers) enviados al sensor</span>
+<span class="sd">    para inspeccionar las distintas secciones de una caja.</span>
+
+<span class="sd">    Durante su ejecución obtiene cada sección pendiente de la cola,</span>
+<span class="sd">    envía el comando de medición correspondiente y espera la respuesta</span>
+<span class="sd">    del sensor. Además, implementa un mecanismo de reintento cuando no</span>
+<span class="sd">    se recibe respuesta dentro del tiempo establecido.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        La lista de secciones a inspeccionar es obtenida del modelo</span>
+<span class="sd">        compartido y se procesa de forma secuencial hasta completar</span>
+<span class="sd">        todas las mediciones.</span>
+
+<span class="sd">    Señales:</span>
+<span class="sd">        finished:</span>
+<span class="sd">            Emitida cuando todas las secciones fueron inspeccionadas.</span>
+
+<span class="sd">        nok:</span>
+<span class="sd">            Emitida cuando ocurre un error que impide continuar la</span>
+<span class="sd">            inspección.</span>
+
+<span class="sd">        retry:</span>
+<span class="sd">            Emitida cuando expira el tiempo de espera para recibir una</span>
+<span class="sd">            respuesta del sensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">finished</span>    <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>         <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">retry</span>       <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;height1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado encargado de controlar los disparos del</span>
+<span class="sd">        sensor de altura.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            module (str):</span>
+<span class="sd">                Identificador del módulo de altura.</span>
+
+<span class="sd">            model:</span>
+<span class="sd">                Modelo compartido de la aplicación.</span>
+
+<span class="sd">            parent:</span>
+<span class="sd">                Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fuses_BB</span>
+
+<div class="viewcode-block" id="Triggers.onEntry">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Triggers.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado.</span>
+
+<span class="sd">        Inicia el proceso de inspección llamando al método encargado de</span>
+<span class="sd">        enviar el siguiente disparo al sensor de altura.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Triggers HEIGHT ############################&quot;</span><span class="p">)</span>
+        <span class="c1">#se llama al método triggers de la clase Triggers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Triggers.triggers">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Triggers.triggers">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">triggers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa la siguiente sección pendiente de inspección.</span>
+
+<span class="sd">        Obtiene el siguiente elemento de la cola de inspección y envía el</span>
+<span class="sd">        comando correspondiente al sensor de altura. Si no existen más</span>
+<span class="sd">        secciones pendientes, finaliza el proceso de inspección.</span>
+
+<span class="sd">        Después de enviar el disparo, inicia un temporizador que permitirá</span>
+<span class="sd">        detectar una falta de respuesta del sensor y solicitar un</span>
+<span class="sd">        reintento.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># si hay cola de secciones a revisar (esta cola de &quot;secciones de inspección de fusibles&quot; se genera desde las modularidades)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1">#se iguala la variable model.height_data[&quot;height1&quot;][&quot;current_trig&quot;] a la sección de la cola</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;model.height_data[height1][current_trig]: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#si ya se leyó el Trigger actual se accede al método finish</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;trigger&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span>
+                    <span class="p">}</span>
+        <span class="c1">#se manda mensaje {&quot;trigger&quot;: model.height_data[&quot;height1&quot;][&quot;current_trig&quot;] }, esto es: {&quot;trigger&quot;: &quot;R5&quot;}</span>
+        <span class="c1">#pub_topic viene de ...self.model.pub_topics[&quot;height&quot;].. que es: LaserSensor/3</span>
+
+        <span class="c1">#se hace trigger de sensor de altura</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        
+        <span class="c1">#codigo para hacer una segunda petición de trigger para comenzar medición</span>
+        <span class="c1">#Timer(2.5,self.second_attempt).start()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1">#CREEMOS QUE SE HACE TRUE PARA EL BYPASSEADO</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fuses_parser</span><span class="p">[</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;esperando respuesta de sensor de altura&quot;</span><span class="p">)</span>
+
+        <span class="c1">#se manda señal de reintento en 15 segundos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tiempo</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tiempo</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+            
+<div class="viewcode-block" id="Triggers.second_attempt">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Triggers.second_attempt">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">second_attempt</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reenvía el último disparo al sensor de altura.</span>
+
+<span class="sd">        Este método realiza un segundo intento de medición utilizando el</span>
+<span class="sd">        mismo trigger cuando la primera solicitud no produjo la respuesta</span>
+<span class="sd">        esperada.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;second attempt para: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">])</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;trigger&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+
+    <span class="c1">#A ESTE MÉTODO SOLO SE ACCEDE SI YA SE RECIBIÓ EL TRIGGER ACTUAL DE INSPECCIÓN DE ALTURAS</span>
+    <span class="c1">#(EN Receiver SE HACE UN POP DEL TRIGGER ACTUAL QUE SE ESTÁ REVISANDO, si da NOK en trigger )</span>
+<div class="viewcode-block" id="Triggers.finish">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Triggers.finish">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finish</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finaliza la validación del trigger actual.</span>
+
+<span class="sd">        Compara los resultados obtenidos por el sensor de altura con la</span>
+<span class="sd">        configuración esperada para la caja inspeccionada.</span>
+
+<span class="sd">        Durante este proceso:</span>
+
+<span class="sd">        - Verifica que cada cavidad inspeccionada coincida con la</span>
+<span class="sd">        configuración definida en la modularidad.</span>
+
+<span class="sd">        - Actualiza los resultados de la inspección en el modelo.</span>
+
+<span class="sd">        - Resalta mediante *bounding boxes* los elementos correctos e</span>
+<span class="sd">        incorrectos sobre la imagen de inspección.</span>
+
+<span class="sd">        - Registra los intentos fallidos de cada cavidad cuando se detectan</span>
+<span class="sd">        discrepancias.</span>
+
+<span class="sd">        - Comprueba, al finalizar el último trigger de la caja, que todas</span>
+<span class="sd">        las cavidades esperadas hayan sido inspeccionadas.</span>
+
+<span class="sd">        Si la inspección finaliza sin errores, la imagen resultante se</span>
+<span class="sd">        publica en la interfaz gráfica y se emite la señal ``finished`` para</span>
+<span class="sd">        continuar con el siguiente trigger o finalizar el proceso.</span>
+
+<span class="sd">        Si se detectan errores, la interfaz muestra las cavidades con</span>
+<span class="sd">        inconsistencias y se emite la señal ``nok`` para iniciar el flujo de</span>
+<span class="sd">        manejo de errores.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">        La validación utiliza la información de ``model.modularity_fuses``</span>
+<span class="sd">        como referencia para determinar la configuración esperada de cada</span>
+<span class="sd">        cavidad.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;########## FUNCION: Finish de Triggers de Height ##########&quot;</span><span class="p">)</span>
+
+        <span class="c1">#se reinicia la variable que guarda expected_fuses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Lectura</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="c1">#se guarda la sección de inspección de fusibles actual</span>
+        <span class="n">current_trig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span>
+        <span class="c1">#copia de los resultados de la inspección de esa sección</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+        <span class="c1">#copia de imagen</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="s2">&quot;img&quot;</span><span class="p">]</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1">#copia de la caja que se está inspeccionando</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current_trig: &quot;</span><span class="p">,</span><span class="n">current_trig</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.model.robot_data[h_queue][box]: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;h_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;len(self.model.robot_data[h_queue][box]): &quot;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;h_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]))</span>
+
+        <span class="c1">################################## SE REVISA QUE LOS FUSIBLES LEÍDOS CORRESPONDAN A LOS ESPERADOS #####################################</span>
+
+        <span class="k">if</span> <span class="n">box</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;___________________________________________________________________________________&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;___________________________________________________________________________________&quot;</span><span class="p">)</span>
+
+            <span class="n">fusibles_a_inspeccionar</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">])</span>
+            <span class="n">fusibles_ordenados</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">fusibles_a_inspeccionar</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.model.modularity_fuses[box]: &quot;</span><span class="p">,</span><span class="n">fusibles_ordenados</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;___________________________________________________________________________________&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;___________________________________________________________________________________&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">fuse</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">]:</span>
+                <span class="c1">#height_d es una copia elemento a elemento de la base de datos que te indica si hay fusible o no</span>
+                <span class="n">height_d</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;vacio&quot;</span> <span class="k">else</span> <span class="kc">False</span>
+
+                <span class="c1">#revisando si el fusible está en los resultados del sensor de altura (si está en esta sección de inspección)</span>
+                <span class="k">if</span> <span class="n">fuse</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">history_fuses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fuse</span><span class="p">)</span> <span class="c1">#Variable que va guardando cada fusible que llega en &quot;results&quot;</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Box: </span><span class="si">{</span><span class="n">box</span><span class="si">}</span><span class="s2"> Fuse: </span><span class="si">{</span><span class="n">fuse</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;results (Leído): &quot;</span><span class="p">,</span><span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">])</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Height_d (Esperado): &quot;</span><span class="p">,</span><span class="n">height_d</span><span class="p">)</span>
+
+                    <span class="c1">#se guarda el nombre de la caja y el nombre del fusible para poderlo modificar en bounding box</span>
+                    <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">box</span><span class="p">,</span> <span class="n">fuse</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">])</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">:</span>
+
+                        <span class="c1">#si el resultado de la inspección (true/false) == true/false (dependiendo de si debe llevar o no fusible)</span>
+                        <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">height_d</span><span class="p">:</span>
+                            <span class="c1">#si es lo que debe ser, se pinta verde</span>
+                            <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">drawBB</span><span class="p">(</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">,</span> <span class="n">BB</span> <span class="o">=</span> <span class="n">temp</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">h_result</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">drawBB</span><span class="p">(</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">,</span> <span class="n">BB</span> <span class="o">=</span> <span class="n">temp</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">h_result</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span><span class="p">(</span><span class="n">height_d</span><span class="p">)</span>
+
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fuse</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:</span><span class="se">\t</span><span class="s2">ALTURA NOK</span><span class="se">\n</span><span class="s2">&quot;</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;||||||||||Cavidad en la que hubo error: &quot;</span><span class="p">,</span><span class="n">fuse</span><span class="p">,</span> <span class="s2">&quot; Caja: &quot;</span><span class="p">,</span><span class="n">box</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modelo: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">fuse</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;ALTURA&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;ALTURA&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;ALTURA&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modelo Final: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1">#si el resultado de la inspección (true/false) == true/false (dependiendo de si debe llevar o no fusible)</span>
+                        <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">==</span> <span class="n">height_d</span><span class="p">:</span>
+                            <span class="c1">#si es lo que debe ser, se pinta verde</span>
+                            <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">drawBB</span><span class="p">(</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">,</span> <span class="n">BB</span> <span class="o">=</span> <span class="n">temp</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">h_result</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">drawBB</span><span class="p">(</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">,</span> <span class="n">BB</span> <span class="o">=</span> <span class="n">temp</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">h_result</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span><span class="p">(</span><span class="n">height_d</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fuse</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:</span><span class="se">\t</span><span class="s2">ALTURA NOK</span><span class="se">\n</span><span class="s2">&quot;</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;||||||||||Cavidad en la que hubo error: &quot;</span><span class="p">,</span><span class="n">fuse</span><span class="p">,</span> <span class="s2">&quot; Caja: &quot;</span><span class="p">,</span><span class="n">box</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modelo: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">fuse</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;ALTURA&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;ALTURA&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;ALTURA&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modelo Final: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">)</span>
+
+                <span class="c1">############################################# EN EL ÚLTIMO TRIGGER DE LA CAJA ########################################################</span>
+                <span class="c1">################################# SE REVISA QUE SE HAYAN INSPECCIONADO TODOS LOS FUSIBLES DE LA CAJA ##################################</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;h_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1">#cuando sea el último trigger solo queda este en robot_data</span>
+                    <span class="c1">#Si el fuse no estra dentro de model.history_fuses, se emite un error = True y se muestra en pantalla las cavidades faltantes por inspeccionar</span>
+                    <span class="k">if</span> <span class="n">fuse</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">history_fuses</span><span class="p">:</span>
+                        <span class="c1">#SOLAMENTE SE EXCLUYEN DE ALTURAS DE FUSIBELS EXTERNOS DE PDC-R, SIEMPRE Y CUANDO TODOS SEAN VACIOS</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">fuse</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">external_fuses</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eliminar_inspeccion_externos</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span> <span class="c1">#se excluyen los fusibles ya que pueden faltar de inspeccionar si se requiere (PDC-R fusibles externos de caja grande)</span>
+                            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">BB</span> <span class="o">=</span> <span class="p">[</span><span class="n">box</span><span class="p">,</span> <span class="n">fuse</span><span class="p">]</span>
+                            <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">drawBB</span><span class="p">(</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">,</span> <span class="n">BB</span> <span class="o">=</span> <span class="n">BB</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;||||||||||Alturas faltantes en: &quot;</span><span class="p">,</span><span class="n">fuse</span><span class="p">,</span> <span class="s2">&quot; Caja: &quot;</span><span class="p">,</span><span class="n">box</span><span class="p">)</span>
+
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">missing_fuses</span> <span class="o">+=</span> <span class="s2">&quot;Inspección de alturas faltante: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fuse</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finalizó inspección de trigger...&quot;</span><span class="p">)</span>
+        <span class="c1">###################################################################################</span>
+
+        <span class="c1">#guardando imagen generada final en imgs_path + module + .jpg</span>
+        <span class="n">imwrite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">imgs_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;___________________________________________________________________________________&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;___________________________________________________________________________________&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Resultados:&quot;</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;___________________________________________________________________________________&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;___________________________________________________________________________________&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">error</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">revisando_resultado_height</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1">#para no salir de Triggers si llega otro resultado de alturas y aún no se manda el finished</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;img_center&quot;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span>
+                <span class="p">}</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;h_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;h_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.finished.emit de Trigger actual para height.py&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+            <span class="c1">#Timer(1,self.finished.emit).start()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;img_center&quot;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">}</span>
+                <span class="p">}</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Reintento">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Reintento">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Reintento</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de reiniciar la inspección de alturas tras una solicitud</span>
+<span class="sd">    de reintento.</span>
+
+<span class="sd">    Cuando el operador presiona el botón de reintento, este estado limpia</span>
+<span class="sd">    la información temporal de la inspección actual y ordena al robot regresar</span>
+<span class="sd">    a la posición HOME para iniciar nuevamente el proceso de medición.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    - ``ok``: Indica que el reintento concluyó correctamente.</span>
+<span class="sd">    - ``nok``: Indica que ocurrió un error durante el proceso de reintento.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ok</span>      <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>     <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;height1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+<div class="viewcode-block" id="Reintento.onEntry">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Reintento.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta el procedimiento de reinicio de la inspección.</span>
+
+<span class="sd">        Al entrar en este estado se notifica al operador que el sistema está</span>
+<span class="sd">        preparando el reintento, se eliminan los datos temporales de la inspección</span>
+<span class="sd">        actual (trigger, resultados, solicitudes y datos recibidos del sensor) y</span>
+<span class="sd">        finalmente se ordena al robot regresar a la posición HOME para iniciar</span>
+<span class="sd">        nuevamente la inspección.</span>
+
+<span class="sd">        Parametros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento de entrada al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: reintento HEIGHT ############################&quot;</span><span class="p">)</span>
+
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;ESPERE&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Boton de reintento presionado&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1">#Descomentar si se quiere pasar por vision de nuevo</span>
+        <span class="c1">#self.model.height_data[self.module][&quot;box&quot;] = &quot;&quot;</span>
+        <span class="c1">#self.model.height_data[self.module][&quot;queue&quot;].clear()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">home</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Reintento.onExit">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Reintento.onExit">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onExit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Actualiza la interfaz indicando que la inspección de alturas será</span>
+<span class="sd">        ejecutada nuevamente.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento de salida del estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Reintentando inspección de alturas&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Espera el resultado&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Receiver">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Receiver">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Receiver</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de recibir y almacenar los resultados de las</span>
+<span class="sd">    mediciones del sensor de altura.</span>
+
+<span class="sd">    Al entrar en este estado se procesa la información recibida del</span>
+<span class="sd">    sensor, asociando cada resultado con la caja y la sección de</span>
+<span class="sd">    inspección correspondientes.</span>
+
+<span class="sd">    Una vez almacenadas las mediciones, el trigger procesado se elimina</span>
+<span class="sd">    de la cola de inspección y se notifica a la máquina de estados para</span>
+<span class="sd">    continuar con la siguiente etapa del proceso.</span>
+
+<span class="sd">    Hereda de</span>
+<span class="sd">        QState</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+<span class="sd">    ok : pyqtSignal</span>
+<span class="sd">        Emitida cuando los resultados del sensor fueron procesados y</span>
+<span class="sd">        almacenados correctamente.</span>
+
+<span class="sd">    Parámetros</span>
+<span class="sd">    ----------</span>
+<span class="sd">    module : str, opcional</span>
+<span class="sd">        Identificador del módulo de inspección de alturas.</span>
+<span class="sd">        Por defecto es ``&quot;module1&quot;``.</span>
+
+<span class="sd">    model : Model, opcional</span>
+<span class="sd">        Modelo principal de la aplicación que contiene la información</span>
+<span class="sd">        compartida del proceso de inspección.</span>
+
+<span class="sd">    parent : QObject, opcional</span>
+<span class="sd">        Objeto padre dentro de la máquina de estados.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ok</span>      <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="c1">#nok     = pyqtSignal()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;module1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado encargado de recibir los resultados del sensor</span>
+<span class="sd">        de altura.</span>
+
+<span class="sd">        Obtiene las referencias a las estructuras de datos compartidas que</span>
+<span class="sd">        almacenarán las mediciones y configura los parámetros utilizados</span>
+<span class="sd">        durante la recepción de resultados.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, opcional</span>
+<span class="sd">            Identificador del módulo de alturas.</span>
+
+<span class="sd">        model : Model, opcional</span>
+<span class="sd">            Modelo principal de la aplicación.</span>
+
+<span class="sd">        parent : QObject, opcional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;epoches&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresh</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoches</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+        
+
+<div class="viewcode-block" id="Receiver.onEntry">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Receiver.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa los resultados recibidos del sensor de altura.</span>
+
+<span class="sd">        Al entrar en este estado se cancela el temporizador de espera,</span>
+<span class="sd">        se almacenan las mediciones recibidas para la sección actual,</span>
+<span class="sd">        se actualiza la estructura de resultados del modelo y se elimina</span>
+<span class="sd">        el trigger procesado de la cola de inspección.</span>
+
+<span class="sd">        Finalmente se emite la señal ``ok`` para continuar con el flujo</span>
+<span class="sd">        de la máquina de estados.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento de entrada al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Receiver HEIGHT ############################&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.model.tiempo.cancel()&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tiempo</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1">#bypass:::::::::</span>
+            <span class="c1">#if not(self.model.height_data[&quot;rqst&quot;]):</span>
+            <span class="c1">#    self.ok.emit()</span>
+            <span class="c1">#    return</span>
+
+            <span class="c1">#variable para saber si algún fusible de esa sección tiene al menos una altura NOK</span>
+            <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1">#sección actual de inspección de fusibles se guarda en trigger</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span>
+            <span class="c1">#se hace una copia de los resultados que se han estado generando (donde ya vienen las cajas con fusibles y true o false correspondientes)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+            <span class="c1">#caja actual que se está inspeccionando</span>
+            <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">box</span> <span class="ow">in</span> <span class="n">results</span><span class="p">):</span>
+                <span class="c1">#si no tienes registro de esa caja, creas un espacio dentro de la variable resultados para las inspecciones de esa caja</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1">#self.model.input_data[&quot;height&quot;] contiene la lectura actual del sensor de altura para la seccion de inspección actual</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">]):</span>
+                    <span class="c1">#si no hay registro de un fusible &quot;x&quot; para esa caja, se genera el espacio de variable</span>
+                    <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1">#posteriormente agregas el fusible con su correspondiente resultado</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">][</span><span class="n">item</span><span class="p">])</span>
+                
+                <span class="c1">#si el resultado del fusible es falso...</span>
+                <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="c1">#tu variable para inspección ok, se hace false</span>
+                    <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
+            
+            <span class="c1">#se retira el trigger de la cola una vez que se hizo correctamente</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trigger</span><span class="p">))</span>
+
+            <span class="c1">#se guardan los resultados de inspección ya actualizados con las correspondientes inspecciones nuevas agregadas</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1">#se emite el ok de inspección</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Height.Receiver exception: &quot;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Error">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Error">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Error</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado que gestiona los errores detectados durante la inspección de</span>
+<span class="sd">    alturas.</span>
+
+<span class="sd">    Se activa cuando la validación de una o más cavidades falla o cuando</span>
+<span class="sd">    existen cavidades que no pudieron ser inspeccionadas.</span>
+
+<span class="sd">    Al entrar en este estado se informa al operador del motivo del error,</span>
+<span class="sd">    se habilita la interacción necesaria para realizar un reintento o</span>
+<span class="sd">    solicitar asistencia técnica y se restablece el contexto de la</span>
+<span class="sd">    inspección actual.</span>
+
+<span class="sd">    Al abandonar el estado se actualiza la interfaz para indicar que la</span>
+<span class="sd">    inspección será ejecutada nuevamente.</span>
+
+<span class="sd">    Hereda de</span>
+<span class="sd">        QState</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+<span class="sd">    ok : pyqtSignal</span>
+<span class="sd">        Señal disponible para indicar que el error fue resuelto.</span>
+
+<span class="sd">    nok : pyqtSignal</span>
+<span class="sd">        Señal disponible para indicar que el error persiste.</span>
+
+<span class="sd">    Parámetros</span>
+<span class="sd">    ----------</span>
+<span class="sd">    module : str, opcional</span>
+<span class="sd">        Identificador del módulo de inspección de alturas.</span>
+<span class="sd">        Por defecto es ``&quot;height1&quot;``.</span>
+
+<span class="sd">    model : Model, opcional</span>
+<span class="sd">        Modelo principal de la aplicación que almacena la información</span>
+<span class="sd">        compartida del proceso.</span>
+
+<span class="sd">    parent : QObject, opcional</span>
+<span class="sd">        Objeto padre dentro de la máquina de estados.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ok</span>      <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>     <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;height1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+<div class="viewcode-block" id="Error.onEntry">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Error.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado de error.</span>
+
+<span class="sd">        Muestra en la interfaz gráfica el motivo del fallo detectado durante la</span>
+<span class="sd">        inspección. Dependiendo del tipo de error, informa las cavidades</span>
+<span class="sd">        pendientes de inspeccionar o aquellas cuya validación fue incorrecta.</span>
+
+<span class="sd">        Posteriormente limpia la información temporal de la inspección actual,</span>
+<span class="sd">        habilita la disponibilidad del indicador luminoso (*raffi*) y envía el</span>
+<span class="sd">        robot a la posición Home para preparar un posible reintento.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento de entrada al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Error HEIGHT ############################&quot;</span><span class="p">)</span>
+
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">raffi_disponible</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">missing_fuses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">missing_fuses</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">box</span><span class="si">}</span><span class="s2"> vision NOK, Faltan Fusibles por inspeccionar&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Llame al centro técnico&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+            <span class="p">}</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">},</span>
+                 <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">box</span><span class="si">}</span><span class="s2"> vision NOK&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span>
+                 <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Presiona el boton de reintento&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+                 <span class="p">}</span>
+
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">missing_fuses</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">home</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Error.onExit">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Error.onExit">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onExit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al salir del estado.</span>
+
+<span class="sd">        Deshabilita la disponibilidad del indicador luminoso (*raffi*) y</span>
+<span class="sd">        actualiza la interfaz gráfica para informar al operador que la</span>
+<span class="sd">        inspección de alturas será ejecutada nuevamente.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento de salida del estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">raffi_disponible</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Reintentando inspección de alturas&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Espera el resultado&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Pose">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Pose">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Pose</span><span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de posicionar el robot en la siguiente sección de</span>
+<span class="sd">    inspección de alturas.</span>
+
+<span class="sd">    Este estado obtiene la siguiente caja pendiente, determina el trigger</span>
+<span class="sd">    correspondiente y ordena al robot desplazarse a la posición adecuada.</span>
+<span class="sd">    Cuando una caja termina completamente su inspección, actualiza la GUI,</span>
+<span class="sd">    libera las tareas asociadas y notifica la finalización del proceso.</span>
+
+<span class="sd">    Señales:</span>
+<span class="sd">        finished: Emitida cuando todas las inspecciones de la caja actual</span>
+<span class="sd">            han concluido.</span>
+<span class="sd">        nok: Emitida cuando la caja requerida no se encuentra correctamente</span>
+<span class="sd">            clampeada.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">finished</span>    <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>         <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;height1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Pose.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            module (str, opcional):</span>
+<span class="sd">                Nombre del módulo de alturas asociado al estado.</span>
+<span class="sd">                Por defecto ``&quot;height1&quot;``.</span>
+
+<span class="sd">            model (Model):</span>
+<span class="sd">                Modelo principal de la aplicación.</span>
+
+<span class="sd">            parent (QObject, opcional):</span>
+<span class="sd">                Objeto padre del estado.</span>
+
+<span class="sd">        Atributos:</span>
+<span class="sd">            model: Referencia al modelo principal.</span>
+<span class="sd">            module: Nombre del módulo de alturas.</span>
+<span class="sd">            queue: Cola de cajas pendientes por inspeccionar.</span>
+<span class="sd">            pub_topic: Tema MQTT utilizado para enviar comandos al robot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;h_queue&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;robot&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Pose.onEntry">
+<a class="viewcode-back" href="../../../controller_height.html#manager.controller.height.Pose.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta la lógica al entrar al estado.</span>
+
+<span class="sd">        Flujo principal:</span>
+
+<span class="sd">        - Reinicia la bandera que permite recibir resultados del sensor</span>
+<span class="sd">          de alturas.</span>
+<span class="sd">        - Limpia los mensajes de error mostrados en la interfaz.</span>
+<span class="sd">        - Obtiene la siguiente caja pendiente de inspección.</span>
+<span class="sd">        - Verifica que la caja se encuentre correctamente clampeada.</span>
+<span class="sd">        - Determina el siguiente trigger que debe ejecutar el robot.</span>
+<span class="sd">        - Actualiza la interfaz mostrando la caja que será inspeccionada.</span>
+<span class="sd">        - Envía al robot la orden para desplazarse a la siguiente posición.</span>
+
+<span class="sd">        Si la caja ya no tiene más triggers pendientes:</span>
+
+<span class="sd">        - Oculta la caja correspondiente en la GUI.</span>
+<span class="sd">        - Actualiza las listas de cajas inspeccionadas.</span>
+<span class="sd">        - Marca las cajas listas para desclampeo.</span>
+<span class="sd">        - Actualiza los indicadores especiales</span>
+<span class="sd">          (PDC-D, PDC-Dbracket y F96).</span>
+<span class="sd">        - Limpia la cola de inspección.</span>
+<span class="sd">        - Emite la señal ``finished``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Pose HEIGHT ############################&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">revisando_resultado_height</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#para poder recibir resultados de trigger de altura</span>
+
+        <span class="c1">#se borran los errores en pantalla de alturas</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">}}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">box</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">box</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;plc&quot;</span><span class="p">][</span><span class="s2">&quot;clamps&quot;</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">box</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="n">box</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">current_trig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_trig</span>
+            <span class="k">if</span> <span class="n">box</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="s2">&quot;img&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">imgs_path</span> <span class="o">+</span> <span class="s2">&quot;boxes/&quot;</span> <span class="o">+</span> <span class="n">box</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">)</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Procesando alturas en &quot;</span> <span class="o">+</span><span class="n">box</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+                    <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Por favor espere&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+                    <span class="s2">&quot;img_center&quot;</span> <span class="p">:</span> <span class="s2">&quot;boxes/&quot;</span> <span class="o">+</span> <span class="n">box</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span>
+                    <span class="p">}</span>
+                <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="c1">#aquí guardas la caja a inspeccionar en height_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">box</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">h_triggers</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rh_triggers</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">current_trig</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1">#######################################################################################</span>
+            <span class="c1">################## INSPECCIÓN DE CAJAS SIEMPRE LLEGA AQUÍ AL TERMINAR ALTURAS #########</span>
+            <span class="c1">################## O SI LA CAJA NO TENÍA ALTURAS TAMBIÉN LLEGA AQUÍ ###################</span>
+            <span class="c1">###Se hace un pop de la tarea de -- self.model.input_data[&quot;database&quot;][&quot;modularity&quot;] ###</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CAJA TERMINADA, ELIMINANDO TAREA DE MODULARITY: &quot;</span><span class="p">,</span> <span class="n">box</span><span class="p">)</span>
+            
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;PDC-Dbracket&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box0&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+            <span class="s2">&quot;PDC-D&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                    
+            <span class="s2">&quot;PDC-P&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box2&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                    
+            <span class="s2">&quot;PDC-RMID&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box3&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;PDC-RS&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box3&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;PDC-R&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box3&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;PDC-S&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box4&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;TBLU&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box5&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;PDC-P2&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box6&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;F96&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box7&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;F96-1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box17&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;MFB-P2&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box8&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;MFB-P1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box9&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;MFB-S&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box10&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>                   
+            <span class="s2">&quot;MFB-E&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box11&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+            <span class="s2">&quot;PDC-S9&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box12&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+            <span class="s2">&quot;PDC-S19&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box13&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+            <span class="s2">&quot;PDC-S20&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box14&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+            <span class="s2">&quot;PDC-S17&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box15&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+            <span class="s2">&quot;PDC-S21&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lbl_box16&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgray&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+        <span class="p">}</span>
+<span class="w">            </span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                *** Remover el label de la pantalla cuando termine de inspeccionar la vision y alturas ***</span>
+<span class="sd">                </span>
+<span class="sd">                1) Hacemos un recorrido de cada caja[key] y su lbl[value].</span>
+<span class="sd">                </span>
+<span class="sd">                2) Si la caja actual se encuentra dentro del diccionario[key], se manda un hidden:True para que esta se oculte </span>
+<span class="sd">                y ademas se hace pop(remueve) de las tareas.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">labels</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">box</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>  <span class="c1"># Comparación exacta para evitar que por ejemplo &quot;PDC-P&quot; elimine a &quot;PDC-P2&quot;</span>
+                    <span class="n">command</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>       
+                
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Caja &quot;</span> <span class="o">+</span> <span class="n">box</span> <span class="o">+</span> <span class="s2">&quot; Terminada&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">}</span>
+                <span class="p">}</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">clamps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;plc&quot;</span><span class="p">][</span><span class="s2">&quot;clamps&quot;</span><span class="p">]</span>
+            <span class="c1">#se elimina de las cajas clampeadas actualmente</span>
+            <span class="n">clamps</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">clamps</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">box</span><span class="p">))</span>
+            
+            <span class="c1">#se guardan las cajas terminadas actuales en una variable para posteriormente desclampearlas cuando el robot esté en home</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cajas_a_desclampear</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+
+            <span class="c1">#se elimina de las tareas de modularity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">][</span><span class="s2">&quot;modularity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">height_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="c1">#se asegura que la condición clamps no afecte cuando len(clamps)&lt;1 al momento de desclampear la PDC-D</span>
+            <span class="c1">#se eliminan los boxextra detectados, en caso contrario a len(clamps)&gt;=1 significa que aún hay cajas clampeadas por inspeccionar</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">clamps</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;clamps, si hay más de 1&quot;</span><span class="p">,</span><span class="n">clamps</span><span class="p">)</span>
+                <span class="c1">#se eliminan todas las cajas agregadas a clamps que no estén en las cajas pendientes por inspeccionar (en modularity)</span>
+                <span class="c1">#por ejemplo si llegó un mensaje clamp_PDC-P2 y la PDC-P2 ya había terminado su inspección, o alguna diferente clamp_cajaexterna</span>
+                <span class="k">for</span> <span class="n">boxextra</span> <span class="ow">in</span> <span class="n">clamps</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">boxextra</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">][</span><span class="s2">&quot;modularity&quot;</span><span class="p">]:</span>
+                        <span class="n">clamps</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">clamps</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">boxextra</span><span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;había un boxextra&quot;</span><span class="p">,</span><span class="n">boxextra</span><span class="p">)</span>
+
+            <span class="c1">#(también se condiciona esto mismo desde comm.py para no permitir agregar cajas que no aparezcan ya en modularity -&gt; if box in modularity: self.model.input_data[&quot;plc&quot;][&quot;clamps&quot;].append(box))</span>
+            <span class="k">if</span> <span class="s2">&quot;PDC-D&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cajas_a_desclampear</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">clamps</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">PDCD_bracket_pendiente</span><span class="o">=</span><span class="kc">True</span>
+
+            <span class="k">if</span> <span class="s2">&quot;PDC-Dbracket&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cajas_a_desclampear</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">PDCD_bracket_terminado</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;lbl_box0&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+
+            <span class="c1">#si ya no le quedan cajas por inspeccionar de las que se clampearon</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">clamps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">desclampear_ready</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">F96_pendiente</span><span class="o">=</span><span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">][</span><span class="s2">&quot;modularity&quot;</span><span class="p">])</span><span class="o">&lt;=</span><span class="mi">1</span> <span class="ow">and</span> <span class="s2">&quot;F96&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">][</span><span class="s2">&quot;modularity&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">F96_pendiente</span><span class="o">=</span><span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">setPose</span><span class="p">(</span><span class="n">current_trig</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

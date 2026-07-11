@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controlador &mdash; documentación de EVA-MBI-3 - 1.0</title>
+  <title>Controlador Principal &mdash; documentación de EVA-MBI-3 - 1.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -20,6 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Índice" href="genindex.html" />
     <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Modelo de Datos del Manager" href="controller_model.html" />
     <link rel="prev" title="Comunicación MQTT de la GUI" href="gui_comm.html" /> 
 </head>
 
@@ -48,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Controlador</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Controlador Principal</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#manager.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#manager.controller.Controller.start"><code class="docutils literal notranslate"><span class="pre">Controller.start()</span></code></a></li>
 </ul>
@@ -141,6 +142,10 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="controller_model.html">Modelo de Datos del Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_height.html">Controlador De Alturas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_inspections.html">Controlador De Inspecciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_vision.html">Controlador De Vision</a></li>
 </ul>
 
         </div>
@@ -157,7 +162,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Controlador</li>
+      <li class="breadcrumb-item active">Controlador Principal</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/controller.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
       </li>
@@ -167,8 +172,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="controlador">
-<h1>Controlador<a class="headerlink" href="#controlador" title="Link to this heading"></a></h1>
+  <section id="controlador-principal">
+<h1>Controlador Principal<a class="headerlink" href="#controlador-principal" title="Link to this heading"></a></h1>
 <p id="module-manager.controller">Controlador principal del sistema EVA-MBI-3.</p>
 <p>Este módulo contiene la lógica principal de operación basada en
 máquina de estados mediante QState y QStateMachine.</p>
@@ -1227,6 +1232,7 @@ de reset para conservar la trazabilidad del arnés interrumpido.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
         <a href="gui_comm.html" class="btn btn-neutral float-left" title="Comunicación MQTT de la GUI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="controller_model.html" class="btn btn-neutral float-right" title="Modelo de Datos del Manager" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

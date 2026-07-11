@@ -1,3 +1,9 @@
+"""
+Procesamiento de vision del sistema EVA-MBI-3.
+
+Este módulo contiene la lógica principal de operación de vision basada en
+máquina de estados mediante QState y QStateMachine.
+"""
 from PyQt5.QtCore import QState, pyqtSignal
 from cv2 import imwrite, imread
 from paho.mqtt import publish
@@ -13,10 +19,60 @@ import os
 from os.path import exists
 
 class Vision (QState):
+    """
+    Estado principal encargado de ejecutar el proceso de inspección visual.
+
+    Este estado funciona como un contenedor de subestados que administran
+    el ciclo completo de una inspección de visión.
+
+    Durante su ejecución controla los siguientes estados internos:
+
+    - Process:
+        Ejecuta la inspección visual del módulo seleccionado.
+
+    - Error:
+        Administra las condiciones de error durante la inspección y permite
+        reintentar el proceso mediante la acción correspondiente.
+
+    - Standby:
+        Estado de espera utilizado después de una condición de error antes
+        de volver a ejecutar la inspección.
+
+    El estado Vision inicia siempre en Process y permanece activo hasta que
+    la inspección finaliza correctamente o requiere una acción de
+    recuperación.
+
+    Señales
+    --------
+
+    retry : pyqtSignal
+        Señal emitida cuando el estado interno Standby solicita volver a
+        ejecutar la inspección.
+
+    finished : pyqtSignal
+        Señal emitida cuando el proceso de inspección visual termina
+        correctamente.
+    """
     retry       = pyqtSignal()
     finished    = pyqtSignal()
 
     def __init__(self, module = "vision1", model = None, parent = None):
+        """
+        Inicializa el estado Vision.
+
+        Parameters
+        ----------
+        module : str, optional
+            Nombre del módulo de visión que será inspeccionado.
+
+        model : object, optional
+            Modelo principal de la aplicación. Contiene la configuración
+            del proceso, estados globales y referencias utilizadas por los
+            subestados.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -34,10 +90,66 @@ class Vision (QState):
         self.setInitialState(self.process)
 
 class Process (QState):
+    """
+    Estado encargado de ejecutar el flujo principal de inspección visual.
+
+    Este estado administra la secuencia completa de inspección de un módulo
+    de visión, coordinando el movimiento del robot, generación de triggers,
+    recepción de resultados y recuperación ante reintentos.
+
+    El flujo interno está compuesto por los siguientes estados:
+
+    - Pose:
+        Solicita al robot desplazarse a la posición requerida para la
+        inspección y espera la confirmación de movimiento.
+
+    - Triggers:
+        Prepara y administra los triggers necesarios para ejecutar las
+        inspecciones de visión.
+
+    - Receiver:
+        Recibe y procesa las respuestas generadas durante la inspección.
+
+    - Stop:
+        Estado preparado para gestionar una condición de paro durante el
+        proceso de inspección.
+
+    - Reintento:
+        Administra la repetición del ciclo cuando se solicita un nuevo
+        intento de inspección.
+
+    El estado inicia siempre en Pose y continúa el flujo dependiendo de
+    los eventos generados por el robot y los resultados de inspección.
+
+    Señales
+    --------
+
+    nok : pyqtSignal
+        Señal emitida cuando ocurre una condición no válida durante el
+        proceso de inspección.
+
+    finished : pyqtSignal
+        Señal emitida cuando el ciclo de inspección termina correctamente.
+    """
     nok         = pyqtSignal()
     finished    = pyqtSignal()
 
     def __init__(self, module = "vision1", model = None, parent = None):
+        """
+        Inicializa el estado Process.
+
+        Parameters
+        ----------
+        module : str, optional
+            Nombre del módulo de visión asociado al proceso.
+
+        model : object, optional
+            Modelo principal de la aplicación. Contiene estados globales,
+            transiciones y configuraciones utilizadas por los subestados.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -71,13 +183,57 @@ class Process (QState):
         self.setInitialState(self.pose)   
 
 class Stop(QState):
+    """
+    Estado de detención del proceso de visión.
+
+    Responsable de detener temporalmente el flujo de inspección visual del
+    módulo actual cuando el robot entra en condición STOP.
+
+    Mientras este estado permanece activo, la interfaz gráfica informa al
+    operador que el robot se encuentra detenido y que debe presionar START
+    para continuar con la operación.
+
+    Al abandonar este estado, se limpian los datos temporales asociados al
+    proceso de visión para evitar conservar información de una inspección
+    incompleta.
+
+    Señales
+    --------
+
+    Este estado no define señales propias.
+    """
     def __init__(self, module = "vision1", model = None, parent = None):
+        """
+        Inicializa el estado Stop de visión.
+
+        Parameters
+        ----------
+        module : str, optional
+            Nombre del módulo de visión asociado al estado.
+
+        model : object, optional
+            Modelo principal de la aplicación. Contiene los datos globales
+            del proceso de inspección y configuración MQTT.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Notifica a la interfaz gráfica que el módulo de visión se encuentra
+        detenido y solicita al operador presionar START para continuar.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: Stop VISION ############################")
 
         command = {
@@ -87,6 +243,25 @@ class Stop(QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def onExit(self, QEvent):
+        """
+        Ejecuta las acciones al salir del estado.
+
+        Limpia la información temporal almacenada del módulo de visión
+        actual para preparar una nueva ejecución del ciclo de inspección.
+
+        Se restablecen los siguientes datos:
+
+        - Caja actualmente inspeccionada.
+        - Cola de triggers pendientes.
+        - Trigger actual en ejecución.
+        - Resultados obtenidos.
+        - Solicitudes pendientes.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al abandonar el estado.
+        """
         self.model.vision_data[self.module]["box"] = ""
         self.model.vision_data[self.module]["queue"].clear()
         self.model.vision_data[self.module]["current_trig"] = None
@@ -94,10 +269,57 @@ class Stop(QState):
         self.model.vision_data[self.module]["rqst"] = None
 
 class Triggers (QState):
+    """
+    Estado encargado de ejecutar los triggers de inspección visual.
+
+    Responsable de administrar la secuencia de disparos de cámara durante
+    la inspección de una caja.
+
+    Este estado controla la activación de iluminación mediante PLC, envía
+    los comandos de captura al sistema de visión y procesa los resultados
+    obtenidos para determinar si los fusibles detectados corresponden con
+    la configuración esperada de la modularidad.
+
+    Durante su ejecución realiza las siguientes acciones:
+
+    - Activa la iluminación necesaria para la captura.
+    - Envía triggers individuales al sistema de visión.
+    - Administra la cola de inspecciones pendientes.
+    - Valida los fusibles detectados contra los fusibles esperados.
+    - Genera evidencia de inspección.
+    - Determina el resultado PASS o FAIL de la inspección.
+
+    Señales
+    --------
+
+    finished : pyqtSignal
+        Señal emitida cuando la inspección del trigger actual finaliza
+        correctamente.
+
+    nok : pyqtSignal
+        Señal emitida cuando la inspección detecta errores o diferencias
+        entre los resultados obtenidos y la configuración esperada.
+    """
     finished    = pyqtSignal()
     nok         = pyqtSignal()
 
     def __init__(self, module = "vision1", model = None, parent = None):
+        """
+        Inicializa el estado Triggers.
+
+        Parameters
+        ----------
+        module : str, optional
+            Nombre del módulo de visión asociado al proceso.
+
+        model : object, optional
+            Modelo principal de la aplicación. Contiene la información de
+            inspección, configuración de fusibles, comunicación MQTT y
+            datos utilizados durante el proceso.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -106,7 +328,27 @@ class Triggers (QState):
         self.BB = self.model.fuses_BB
 
     def onEntry(self, event):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Inicia el proceso de inspección visual revisando si existen
+        triggers pendientes en la cola del módulo actual.
+
+        Si existen inspecciones pendientes:
+
+        - Activa la iluminación mediante el PLC.
+        - Define el trigger actual que será enviado a la cámara.
+        - Programa el envío del comando después del tiempo de espera
+          establecido.
+
+        Si no existen triggers pendientes, desactiva la iluminación y
+        finaliza el proceso de inspección.
+
+        Parameters
+        ----------
+        event : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: Triggers VISION ############################")
 
         topic = self.model.pub_topics["plc"]
@@ -124,6 +366,15 @@ class Triggers (QState):
         Timer(1, self.delay).start()
         
     def delay(self):
+        """
+        Envía el trigger de inspección al sistema de visión.
+
+        Después del tiempo de espera requerido para estabilizar la
+        iluminación, envía la solicitud de captura al módulo de visión.
+
+        Actualiza la información asociada a la solicitud actual y prepara
+        los datos necesarios para el procesamiento posterior de resultados.
+        """
         print("trigger:+++++++++++++++",self.model.vision_data[self.module]["current_trig"])
         command = {
             "trigger": self.model.vision_data[self.module]["current_trig"],
@@ -135,6 +386,34 @@ class Triggers (QState):
         print("fuses parser+++++",self.model.fuses_parser["box"])
 
     def finish (self):
+        """
+        Procesa el resultado de una inspección visual.
+
+        Analiza los resultados obtenidos por la cámara y compara los
+        fusibles detectados contra la configuración esperada de la
+        modularidad.
+
+        Durante este proceso se realizan las siguientes validaciones:
+
+        - Comparación de color de fusibles.
+        - Detección de fusibles faltantes.
+        - Validación de cavidades inspeccionadas.
+        - Generación del resultado de inspección.
+        - Actualización de intentos de inspección.
+        - Creación de evidencia visual.
+
+        La evidencia generada se almacena localmente y en el servidor
+        de trazabilidad.
+
+        Dependiendo del resultado obtenido:
+
+        - PASS:
+            Limpia los datos temporales, elimina el trigger procesado y
+            emite la señal finished.
+
+        - FAIL:
+            Guarda la evidencia de fallo y emite la señal nok.
+        """
         #try
         current_trig = self.model.vision_data[self.module]["current_trig"]
         results = self.model.vision_data[self.module]["results"]
@@ -393,10 +672,57 @@ class Triggers (QState):
             self.nok.emit()
 
 class Receiver (QState):
+    """
+    Estado encargado de recibir y procesar los resultados de inspección
+    enviados por el sistema de visión.
+
+    Responsable de recopilar las respuestas generadas por la cámara para
+    cada trigger ejecutado y almacenar los resultados obtenidos dentro de
+    la estructura de datos del módulo de visión.
+
+    Durante su ejecución realiza las siguientes acciones:
+
+    - Verifica la existencia de una solicitud de inspección pendiente.
+    - Recibe la lectura obtenida por el sistema de visión.
+    - Almacena los resultados asociados a la caja inspeccionada.
+    - Compara los valores detectados contra la configuración esperada.
+    - Calcula el resultado parcial de la inspección.
+    - Controla la cantidad de intentos requeridos para validar un trigger.
+
+    Cuando se alcanza la cantidad de validaciones necesarias, elimina el
+    trigger procesado de la cola de inspección.
+
+    Señales
+    --------
+
+    ok : pyqtSignal
+        Señal emitida cuando el procesamiento del resultado de visión
+        termina correctamente.
+
+    nok : pyqtSignal
+        Señal emitida cuando ocurre una condición no válida durante el
+        procesamiento del resultado.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
 
     def __init__(self, module = "module1", model = None, parent = None):
+        """
+        Inicializa el estado Receiver.
+
+        Parameters
+        ----------
+        module : str, optional
+            Nombre del módulo de visión asociado al proceso.
+
+        model : object, optional
+            Modelo principal de la aplicación. Contiene los datos de
+            inspección, configuración de fusibles y resultados obtenidos
+            por el sistema de visión.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -409,7 +735,29 @@ class Receiver (QState):
         
 
     def onEntry(self, event):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Procesa la respuesta generada por el sistema de visión para el
+        trigger actual.
+
+        Primero valida si existe una solicitud pendiente de procesamiento.
+        Si no existe una solicitud activa, continúa el flujo sin realizar
+        cambios.
+
+        Cuando recibe información válida:
+
+        - Obtiene el trigger actual.
+        - Almacena los resultados obtenidos para la caja inspeccionada.
+        - Compara los valores detectados contra la configuración esperada.
+        - Actualiza el contador de validaciones.
+        - Determina si el trigger puede ser eliminado de la cola.
+
+        Parameters
+        ----------
+        event : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: Receiver VISION ############################")
 
         print("self.queue; ",self.queue)
@@ -463,16 +811,80 @@ class Receiver (QState):
             self.ok.emit()
 
 class Error (QState):
+    """
+    Estado encargado de gestionar errores durante la inspección visual.
+
+    Responsable de administrar las condiciones de fallo detectadas durante
+    el proceso de visión y proporcionar información al operador sobre el
+    resultado de la inspección.
+
+    Este estado se activa cuando una inspección visual no cumple con los
+    criterios esperados, mostrando la información correspondiente en la
+    interfaz gráfica y preparando el sistema para un posible reintento.
+
+    Durante su ejecución realiza las siguientes acciones:
+
+    - Habilita los controles de Raffi para permitir interacción manual.
+    - Muestra información de error al operador.
+    - Indica fusibles faltantes cuando existen errores de inspección.
+    - Limpia los datos temporales del proceso de visión.
+    - Restablece la información de inspección actual.
+    - Envía el robot a posición Home antes de un nuevo intento.
+
+    Señales
+    --------
+
+    ok : pyqtSignal
+        Señal emitida para indicar una finalización correcta del estado.
+
+    nok : pyqtSignal
+        Señal emitida cuando la condición de error permanece activa.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
 
     def __init__(self, module = "vision1", model = None, parent = None):
+        """
+        Inicializa el estado Error.
+
+        Parameters
+        ----------
+        module : str, optional
+            Nombre del módulo de visión asociado al proceso.
+
+        model : object, optional
+            Modelo principal de la aplicación. Contiene los datos del
+            proceso de inspección, comunicación MQTT y estados globales.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
 
     def onEntry(self, event):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Obtiene la información de la caja inspeccionada y notifica al
+        operador el resultado negativo de la inspección visual.
+
+        Dependiendo del tipo de error detectado:
+
+        - Muestra las cavidades faltantes cuando existen fusibles sin
+          inspeccionar.
+        - Muestra la comparación entre valores detectados y esperados
+          cuando existe una diferencia de inspección.
+
+        Posteriormente limpia la información temporal del módulo de visión
+        y envía el robot a posición Home para preparar un nuevo intento.
+
+        Parameters
+        ----------
+        event : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: Error VISION ############################")
 
         box = self.model.vision_data[self.module]["box"]
@@ -506,7 +918,17 @@ class Error (QState):
         self.model.robot.home()
         
     def onExit(self, QEvent):
+        """
+        Ejecuta las acciones al salir del estado.
 
+        Deshabilita los controles de Raffi y actualiza la interfaz gráfica
+        indicando que se realizará un nuevo intento de inspección visual.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al abandonar el estado.
+        """
         self.model.raffi_disponible = False
 
         command = {
@@ -517,10 +939,57 @@ class Error (QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
 class Pose(QState):
+    """
+    Estado encargado de posicionar el robot para ejecutar una inspección
+    visual.
+
+    Responsable de seleccionar la siguiente posición de inspección del
+    robot y preparar la información necesaria para ejecutar los triggers
+    de visión asociados a una caja.
+
+    Este estado administra la sincronización entre la trayectoria del robot
+    y el sistema de visión, determinando la caja y el punto de inspección
+    actual antes de enviar la posición correspondiente al robot.
+
+    Durante su ejecución realiza las siguientes acciones:
+
+    - Obtiene la siguiente caja pendiente de inspección.
+    - Valida que la caja se encuentre correctamente colocada en los clamps.
+    - Selecciona el trigger actual de inspección.
+    - Actualiza la información del módulo de visión.
+    - Carga la imagen de referencia de la caja en la interfaz gráfica.
+    - Prepara la cola de triggers para el sistema de visión.
+    - Envía la posición al robot cuando corresponde.
+
+    Señales
+    --------
+
+    finished : pyqtSignal
+        Señal emitida cuando no existen más inspecciones pendientes.
+
+    nok : pyqtSignal
+        Señal emitida cuando la caja requerida para inspección no se
+        encuentra disponible en los clamps.
+    """
     finished    = pyqtSignal()
     nok         = pyqtSignal()
 
     def __init__(self, module = "vision1", model = None, parent = None):
+        """
+        Inicializa el estado Pose.
+
+        Parameters
+        ----------
+        module : str, optional
+            Nombre del módulo de visión asociado al proceso.
+
+        model : object, optional
+            Modelo principal de la aplicación. Contiene los datos del robot,
+            configuración de inspección, triggers y comunicación MQTT.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -528,7 +997,32 @@ class Pose(QState):
         self.pub_topic = self.model.pub_topics["robot"]
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Prepara el sistema para iniciar una nueva posición de inspección.
+
+        Durante la ejecución:
+
+        - Habilita la recepción de nuevos resultados de visión.
+        - Limpia mensajes anteriores de error en la interfaz.
+        - Obtiene la siguiente caja pendiente de inspección.
+        - Verifica que la caja se encuentre dentro de los clamps activos.
+        - Selecciona el trigger actual asociado a la posición del robot.
+        - Actualiza la información utilizada por el módulo de visión.
+        - Envía la posición correspondiente al robot cuando es necesario.
+
+        Si la caja requerida no se encuentra disponible, emite la señal nok
+        para iniciar el flujo de recuperación.
+
+        Si no existen inspecciones pendientes, limpia la información del
+        proceso y emite la señal finished.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: Pose VISION ############################")
 
         self.model.revisando_resultado = False #para poder recibir resultados de trigger de visión
@@ -619,16 +1113,83 @@ class Pose(QState):
             self.model.robot.setPose(current_trig)
 
 class Reintento (QState):
+    """
+    Estado encargado de ejecutar un nuevo intento de inspección visual.
+
+    Responsable de gestionar la recuperación manual del proceso de visión
+    cuando el operador solicita repetir una inspección que previamente
+    terminó con error.
+
+    Este estado se activa mediante la acción del operador utilizando el
+    botón de reintento y prepara nuevamente el sistema para ejecutar el
+    ciclo de inspección desde una condición limpia.
+
+    Durante su ejecución realiza las siguientes acciones:
+
+    - Informa al operador que se realizará un nuevo intento.
+    - Limpia los datos temporales de inspección del módulo de visión.
+    - Elimina triggers pendientes del ciclo anterior.
+    - Restablece resultados y solicitudes activas.
+    - Envía el robot a posición Home antes de reiniciar la inspección.
+
+    Después de completar la recuperación, permite que el flujo continúe
+    nuevamente hacia la ejecución de una nueva inspección visual.
+
+    Señales
+    --------
+
+    ok : pyqtSignal
+        Señal emitida cuando el proceso de recuperación finaliza
+        correctamente.
+
+    nok : pyqtSignal
+        Señal emitida cuando ocurre una condición no válida durante el
+        proceso de reintento.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
 
     def __init__(self, module = "vision1", model = None, parent = None):
+        """
+        Inicializa el estado Reintento.
+
+        Parameters
+        ----------
+        module : str, optional
+            Nombre del módulo de visión asociado al proceso.
+
+        model : object, optional
+            Modelo principal de la aplicación. Contiene los datos del robot,
+            inspección visual y comunicación MQTT.
+
+        parent : QState, optional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
 
     def onEntry(self, event):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Inicia el proceso de recuperación para repetir una inspección
+        visual.
+
+        Durante la entrada al estado:
+
+        - Obtiene la caja asociada al intento anterior.
+        - Notifica al operador que el reintento fue solicitado.
+        - Limpia la información temporal del módulo de visión.
+        - Restablece la cola de triggers.
+        - Elimina resultados obtenidos previamente.
+        - Envía el robot a posición Home.
+
+        Parameters
+        ----------
+        event : QEvent
+            Evento generado al ingresar al estado.
+        """
         print("############################## ESTADO: reintento VISION ############################")
 
         box = self.model.vision_data[self.module]["box"]
@@ -647,7 +1208,17 @@ class Reintento (QState):
         self.model.robot.home()
         
     def onExit(self, QEvent):
+        """
+        Ejecuta las acciones al salir del estado.
 
+        Actualiza la interfaz gráfica indicando que el proceso de inspección
+        visual será ejecutado nuevamente y solicita esperar el resultado.
+
+        Parameters
+        ----------
+        QEvent : QEvent
+            Evento generado al abandonar el estado.
+        """
         command = {
             "lbl_info1" : {"text": "", "color": "black"},
             "lbl_result" : {"text": "Reintentando inspección por visión", "color": "green"},

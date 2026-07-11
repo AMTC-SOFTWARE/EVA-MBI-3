@@ -1,3 +1,9 @@
+"""
+Procesamiento de alturas del sistema EVA-MBI-3.
+
+Este módulo contiene la lógica principal de operación de inspeccion de alturas basada en
+máquina de estados mediante QState y QStateMachine.
+"""
 from PyQt5.QtCore import QState, pyqtSignal
 from cv2 import imwrite, imread
 from paho.mqtt import publish
@@ -10,11 +16,55 @@ import threading
 import json
 from time import sleep #para poder usar sleep()
 
-class Height (QState):
-    retry       = pyqtSignal()
-    finished    = pyqtSignal()
+class Height(QState):
+    """
+    Estado compuesto para la validación de altura.
+
+    Coordina el flujo completo de inspección de altura durante el ciclo
+    de producción. Este estado administra la ejecución de la inspección,
+    el manejo de errores y el reintento solicitado por el operador.
+
+    El flujo interno está compuesto por los siguientes subestados:
+
+    - ``Process``: Ejecuta la inspección de altura y procesa el resultado.
+    - ``Error``: Muestra la condición de error cuando la inspección falla.
+    - ``Standby``: Espera la solicitud de un nuevo intento de inspección.
+
+
+    Señales
+    -------
+
+    - ``retry``:
+      Solicita al controlador principal ejecutar nuevamente la inspección
+      de altura.
+
+    - ``finished``:
+      Indica que la validación de altura concluyó y el flujo puede
+      continuar con el siguiente estado de la máquina.
+    """
+    retry = pyqtSignal() 
+    finished = pyqtSignal()
 
     def __init__(self, module = "height1", model = None, parent = None):
+        """
+        Constructor de Height
+        ---------------------
+
+        Inicializa el estado compuesto encargado de la validación de altura,
+        creando los subestados internos y configurando las transiciones entre
+        ellos.
+
+        Args:
+            module (str):
+                Identificador del módulo o estación de altura que será
+                controlado.
+
+            model:
+                Modelo compartido utilizado por la máquina de estados.
+
+            parent:
+                Estado padre dentro de la jerarquía de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -32,10 +82,46 @@ class Height (QState):
 
 
 class Process (QState):
+    """
+    Estado compuesto encargado del proceso de validación de altura.
+
+    Coordina la ejecución completa de la inspección de altura,
+    administrando el posicionamiento del robot, la adquisición de
+    mediciones, el procesamiento de resultados, el manejo de errores,
+    los reintentos y la detención del proceso.
+
+    Este estado encapsula y coordina los siguientes subestados:
+
+    - Pose
+    - Triggers
+    - Receiver
+    - Reintento
+    - Stop
+
+    Señales:
+        finished:
+            Emitida cuando el proceso de validación concluye
+            correctamente.
+
+        nok:
+            Emitida cuando ocurre un error que impide continuar el
+            proceso de inspección.
+    """
     nok         = pyqtSignal()
     finished    = pyqtSignal()
 
     def __init__(self, module = "height1", model = None, parent = None):
+        """
+        Inicializa el proceso de validación de altura.
+
+        Crea los subestados internos y configura las transiciones de la
+        máquina de estados para ejecutar el flujo completo de inspección.
+
+        Args:
+            module (str): Identificador del módulo de altura.
+            model: Modelo compartido de la aplicación.
+            parent: Estado padre.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -74,13 +160,48 @@ class Process (QState):
 
 
 class Stop(QState):
+    """
+    Estado de detención del proceso de validación de altura.
+
+    Suspende temporalmente la inspección cuando el robot entra en modo
+    STOP. Durante este estado se notifica al operador que el proceso se
+    encuentra detenido y se espera una orden de inicio para reanudar la
+    validación.
+
+    Al abandonar este estado se restablece el contexto de trabajo del
+    módulo de altura, eliminando la información temporal utilizada
+    durante la inspección.
+
+    Notes:
+        La transición de salida es activada mediante la señal de inicio
+        del robot, permitiendo reiniciar el flujo de inspección.
+    """
     def __init__(self, module = "height1", model = None, parent = None):
+        """
+        Inicializa el estado de detención.
+
+        Args:
+            module (str):
+                Identificador del módulo de altura asociado.
+
+            model:
+                Modelo compartido de la aplicación.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Muestra en la interfaz gráfica que el robot se encuentra en modo
+        STOP y solicita al operador presionar el botón START para continuar
+        con el proceso.
+        """
         print("############################## ESTADO: Stop HEIGHT ############################")
 
         command = {
@@ -90,6 +211,13 @@ class Stop(QState):
         publish.single(self.model.pub_topics["gui"],json.dumps(command),hostname='127.0.0.1', qos = 2)
 
     def onExit(self, QEvent):
+        """
+        Ejecuta las acciones al salir del estado.
+
+        Limpia la información temporal utilizada durante la inspección,
+        incluyendo la caja procesada, la cola de inspecciones, el disparo
+        actual, los resultados obtenidos y la solicitud pendiente.
+        """
         self.model.height_data[self.module]["box"] = ""
         self.model.height_data[self.module]["queue"].clear()
         self.model.height_data[self.module]["current_trig"] = None
@@ -98,12 +226,52 @@ class Stop(QState):
 
 
 class Triggers (QState):
+    """
+    Administra la secuencia de disparos (triggers) enviados al sensor
+    para inspeccionar las distintas secciones de una caja.
+
+    Durante su ejecución obtiene cada sección pendiente de la cola,
+    envía el comando de medición correspondiente y espera la respuesta
+    del sensor. Además, implementa un mecanismo de reintento cuando no
+    se recibe respuesta dentro del tiempo establecido.
+
+    Notes:
+        La lista de secciones a inspeccionar es obtenida del modelo
+        compartido y se procesa de forma secuencial hasta completar
+        todas las mediciones.
+
+    Señales:
+        finished:
+            Emitida cuando todas las secciones fueron inspeccionadas.
+
+        nok:
+            Emitida cuando ocurre un error que impide continuar la
+            inspección.
+
+        retry:
+            Emitida cuando expira el tiempo de espera para recibir una
+            respuesta del sensor.
+    """
     finished    = pyqtSignal()
     nok         = pyqtSignal()
     retry       = pyqtSignal()
     
 
     def __init__(self, module = "height1", model = None, parent = None):
+        """
+        Inicializa el estado encargado de controlar los disparos del
+        sensor de altura.
+
+        Args:
+            module (str):
+                Identificador del módulo de altura.
+
+            model:
+                Modelo compartido de la aplicación.
+
+            parent:
+                Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -112,13 +280,28 @@ class Triggers (QState):
         self.BB = self.model.fuses_BB
 
     def onEntry(self, event):
+        """
+        Ejecuta las acciones al entrar al estado.
 
+        Inicia el proceso de inspección llamando al método encargado de
+        enviar el siguiente disparo al sensor de altura.
+        """
         print("############################## ESTADO: Triggers HEIGHT ############################")
         #se llama al método triggers de la clase Triggers
         self.triggers()
 
     def triggers(self):
+        """
+        Procesa la siguiente sección pendiente de inspección.
 
+        Obtiene el siguiente elemento de la cola de inspección y envía el
+        comando correspondiente al sensor de altura. Si no existen más
+        secciones pendientes, finaliza el proceso de inspección.
+
+        Después de enviar el disparo, inicia un temporizador que permitirá
+        detectar una falta de respuesta del sensor y solicitar un
+        reintento.
+        """
         # si hay cola de secciones a revisar (esta cola de "secciones de inspección de fusibles" se genera desde las modularidades)
         if len(self.queue) > 0:
             #se iguala la variable model.height_data["height1"]["current_trig"] a la sección de la cola
@@ -151,7 +334,13 @@ class Triggers (QState):
         self.model.tiempo.start()
             
     def second_attempt (self):
+        """
+        Reenvía el último disparo al sensor de altura.
 
+        Este método realiza un segundo intento de medición utilizando el
+        mismo trigger cuando la primera solicitud no produjo la respuesta
+        esperada.
+        """
         print("second attempt para: ",self.model.height_data[self.module]["current_trig"])
         command = {"trigger": self.model.height_data[self.module]["current_trig"]}
         publish.single(self.pub_topic, json.dumps(command), hostname='127.0.0.1', qos = 2)
@@ -160,7 +349,42 @@ class Triggers (QState):
     #A ESTE MÉTODO SOLO SE ACCEDE SI YA SE RECIBIÓ EL TRIGGER ACTUAL DE INSPECCIÓN DE ALTURAS
     #(EN Receiver SE HACE UN POP DEL TRIGGER ACTUAL QUE SE ESTÁ REVISANDO, si da NOK en trigger )
     def finish (self):
+        """
+        Finaliza la validación del trigger actual.
 
+        Compara los resultados obtenidos por el sensor de altura con la
+        configuración esperada para la caja inspeccionada.
+
+        Durante este proceso:
+
+        - Verifica que cada cavidad inspeccionada coincida con la
+        configuración definida en la modularidad.
+
+        - Actualiza los resultados de la inspección en el modelo.
+
+        - Resalta mediante *bounding boxes* los elementos correctos e
+        incorrectos sobre la imagen de inspección.
+
+        - Registra los intentos fallidos de cada cavidad cuando se detectan
+        discrepancias.
+
+        - Comprueba, al finalizar el último trigger de la caja, que todas
+        las cavidades esperadas hayan sido inspeccionadas.
+
+        Si la inspección finaliza sin errores, la imagen resultante se
+        publica en la interfaz gráfica y se emite la señal ``finished`` para
+        continuar con el siguiente trigger o finalizar el proceso.
+
+        Si se detectan errores, la interfaz muestra las cavidades con
+        inconsistencias y se emite la señal ``nok`` para iniciar el flujo de
+        manejo de errores.
+
+        Notes:
+        La validación utiliza la información de ``model.modularity_fuses``
+        como referencia para determinar la configuración esperada de cada
+        cavidad.
+
+        """
         print("########## FUNCION: Finish de Triggers de Height ##########")
 
         #se reinicia la variable que guarda expected_fuses
@@ -297,6 +521,20 @@ class Triggers (QState):
             self.nok.emit()
 
 class Reintento (QState):
+    """
+    Estado encargado de reiniciar la inspección de alturas tras una solicitud
+    de reintento.
+
+    Cuando el operador presiona el botón de reintento, este estado limpia
+    la información temporal de la inspección actual y ordena al robot regresar
+    a la posición HOME para iniciar nuevamente el proceso de medición.
+
+    Señales
+    --------
+
+    - ``ok``: Indica que el reintento concluyó correctamente.
+    - ``nok``: Indica que ocurrió un error durante el proceso de reintento.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
 
@@ -306,6 +544,20 @@ class Reintento (QState):
         self.module = module
 
     def onEntry(self, event):
+        """
+        Ejecuta el procedimiento de reinicio de la inspección.
+
+        Al entrar en este estado se notifica al operador que el sistema está
+        preparando el reintento, se eliminan los datos temporales de la inspección
+        actual (trigger, resultados, solicitudes y datos recibidos del sensor) y
+        finalmente se ordena al robot regresar a la posición HOME para iniciar
+        nuevamente la inspección.
+
+        Parametros
+        ----------
+        event : QEvent
+            Evento de entrada al estado.
+        """
 
         print("############################## ESTADO: reintento HEIGHT ############################")
 
@@ -325,6 +577,15 @@ class Reintento (QState):
         self.model.robot.home()
 
     def onExit(self, QEvent):
+        """
+        Actualiza la interfaz indicando que la inspección de alturas será
+        ejecutada nuevamente.
+
+        Parameters
+        ----------
+        event : QEvent
+            Evento de salida del estado.
+        """
         command = {
             "lbl_result" : {"text": "Reintentando inspección de alturas", "color": "green"},
             "lbl_steps" : {"text": "Espera el resultado", "color": "black"},
@@ -333,10 +594,63 @@ class Reintento (QState):
 
 
 class Receiver (QState):
+    """
+    Estado encargado de recibir y almacenar los resultados de las
+    mediciones del sensor de altura.
+
+    Al entrar en este estado se procesa la información recibida del
+    sensor, asociando cada resultado con la caja y la sección de
+    inspección correspondientes.
+
+    Una vez almacenadas las mediciones, el trigger procesado se elimina
+    de la cola de inspección y se notifica a la máquina de estados para
+    continuar con la siguiente etapa del proceso.
+
+    Hereda de
+        QState
+
+    Señales
+    --------
+    ok : pyqtSignal
+        Emitida cuando los resultados del sensor fueron procesados y
+        almacenados correctamente.
+
+    Parámetros
+    ----------
+    module : str, opcional
+        Identificador del módulo de inspección de alturas.
+        Por defecto es ``"module1"``.
+
+    model : Model, opcional
+        Modelo principal de la aplicación que contiene la información
+        compartida del proceso de inspección.
+
+    parent : QObject, opcional
+        Objeto padre dentro de la máquina de estados.
+    """
     ok      = pyqtSignal()
     #nok     = pyqtSignal()
 
     def __init__(self, module = "module1", model = None, parent = None):
+        """
+        Inicializa el estado encargado de recibir los resultados del sensor
+        de altura.
+
+        Obtiene las referencias a las estructuras de datos compartidas que
+        almacenarán las mediciones y configura los parámetros utilizados
+        durante la recepción de resultados.
+
+        Parámetros
+        ----------
+        module : str, opcional
+            Identificador del módulo de alturas.
+
+        model : Model, opcional
+            Modelo principal de la aplicación.
+
+        parent : QObject, opcional
+            Estado padre dentro de la máquina de estados.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -349,7 +663,22 @@ class Receiver (QState):
         
 
     def onEntry(self, event):
+        """
+        Procesa los resultados recibidos del sensor de altura.
 
+        Al entrar en este estado se cancela el temporizador de espera,
+        se almacenan las mediciones recibidas para la sección actual,
+        se actualiza la estructura de resultados del modelo y se elimina
+        el trigger procesado de la cola de inspección.
+
+        Finalmente se emite la señal ``ok`` para continuar con el flujo
+        de la máquina de estados.
+
+        Parámetros
+        ----------
+        event : QEvent
+            Evento de entrada al estado.
+        """
         print("############################## ESTADO: Receiver HEIGHT ############################")
 
         print("self.model.tiempo.cancel()")
@@ -405,6 +734,45 @@ class Receiver (QState):
 
 
 class Error (QState):
+    """
+    Estado que gestiona los errores detectados durante la inspección de
+    alturas.
+
+    Se activa cuando la validación de una o más cavidades falla o cuando
+    existen cavidades que no pudieron ser inspeccionadas.
+
+    Al entrar en este estado se informa al operador del motivo del error,
+    se habilita la interacción necesaria para realizar un reintento o
+    solicitar asistencia técnica y se restablece el contexto de la
+    inspección actual.
+
+    Al abandonar el estado se actualiza la interfaz para indicar que la
+    inspección será ejecutada nuevamente.
+
+    Hereda de
+        QState
+
+    Señales
+    --------
+    ok : pyqtSignal
+        Señal disponible para indicar que el error fue resuelto.
+
+    nok : pyqtSignal
+        Señal disponible para indicar que el error persiste.
+
+    Parámetros
+    ----------
+    module : str, opcional
+        Identificador del módulo de inspección de alturas.
+        Por defecto es ``"height1"``.
+
+    model : Model, opcional
+        Modelo principal de la aplicación que almacena la información
+        compartida del proceso.
+
+    parent : QObject, opcional
+        Objeto padre dentro de la máquina de estados.
+    """
     ok      = pyqtSignal()
     nok     = pyqtSignal()
 
@@ -414,7 +782,22 @@ class Error (QState):
         self.module = module
 
     def onEntry(self, event):
+        """
+        Ejecuta las acciones al entrar al estado de error.
 
+        Muestra en la interfaz gráfica el motivo del fallo detectado durante la
+        inspección. Dependiendo del tipo de error, informa las cavidades
+        pendientes de inspeccionar o aquellas cuya validación fue incorrecta.
+
+        Posteriormente limpia la información temporal de la inspección actual,
+        habilita la disponibilidad del indicador luminoso (*raffi*) y envía el
+        robot a la posición Home para preparar un posible reintento.
+
+        Parámetros
+        ----------
+        event : QEvent
+            Evento de entrada al estado.
+        """
         print("############################## ESTADO: Error HEIGHT ############################")
 
         box = self.model.height_data[self.module]["box"]
@@ -446,6 +829,18 @@ class Error (QState):
         self.model.robot.home()
 
     def onExit(self, QEvent):
+        """
+        Ejecuta las acciones al salir del estado.
+
+        Deshabilita la disponibilidad del indicador luminoso (*raffi*) y
+        actualiza la interfaz gráfica para informar al operador que la
+        inspección de alturas será ejecutada nuevamente.
+
+        Parámetros
+        ----------
+        event : QEvent
+            Evento de salida del estado.
+        """
 
         self.model.raffi_disponible = False
 
@@ -457,10 +852,45 @@ class Error (QState):
 
 
 class Pose(QState):
+    """
+    Estado encargado de posicionar el robot en la siguiente sección de
+    inspección de alturas.
+
+    Este estado obtiene la siguiente caja pendiente, determina el trigger
+    correspondiente y ordena al robot desplazarse a la posición adecuada.
+    Cuando una caja termina completamente su inspección, actualiza la GUI,
+    libera las tareas asociadas y notifica la finalización del proceso.
+
+    Señales:
+        finished: Emitida cuando todas las inspecciones de la caja actual
+            han concluido.
+        nok: Emitida cuando la caja requerida no se encuentra correctamente
+            clampeada.
+    """
     finished    = pyqtSignal()
     nok         = pyqtSignal()
 
     def __init__(self, module = "height1", model = None, parent = None):
+        """
+        Inicializa el estado Pose.
+
+        Args:
+            module (str, opcional):
+                Nombre del módulo de alturas asociado al estado.
+                Por defecto ``"height1"``.
+
+            model (Model):
+                Modelo principal de la aplicación.
+
+            parent (QObject, opcional):
+                Objeto padre del estado.
+
+        Atributos:
+            model: Referencia al modelo principal.
+            module: Nombre del módulo de alturas.
+            queue: Cola de cajas pendientes por inspeccionar.
+            pub_topic: Tema MQTT utilizado para enviar comandos al robot.
+        """
         super().__init__(parent)
         self.model = model
         self.module = module
@@ -468,7 +898,31 @@ class Pose(QState):
         self.pub_topic = self.model.pub_topics["robot"]
 
     def onEntry(self, QEvent):
+        """
+        Ejecuta la lógica al entrar al estado.
 
+        Flujo principal:
+
+        - Reinicia la bandera que permite recibir resultados del sensor
+          de alturas.
+        - Limpia los mensajes de error mostrados en la interfaz.
+        - Obtiene la siguiente caja pendiente de inspección.
+        - Verifica que la caja se encuentre correctamente clampeada.
+        - Determina el siguiente trigger que debe ejecutar el robot.
+        - Actualiza la interfaz mostrando la caja que será inspeccionada.
+        - Envía al robot la orden para desplazarse a la siguiente posición.
+
+        Si la caja ya no tiene más triggers pendientes:
+
+        - Oculta la caja correspondiente en la GUI.
+        - Actualiza las listas de cajas inspeccionadas.
+        - Marca las cajas listas para desclampeo.
+        - Actualiza los indicadores especiales
+          (PDC-D, PDC-Dbracket y F96).
+        - Limpia la cola de inspección.
+        - Emite la señal ``finished``.
+        """
+        ...
         print("############################## ESTADO: Pose HEIGHT ############################")
 
         self.model.revisando_resultado_height = False #para poder recibir resultados de trigger de altura

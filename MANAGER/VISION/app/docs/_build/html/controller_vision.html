@@ -1,0 +1,931 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controlador De Vision &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="prev" title="Controlador De Inspecciones" href="controller_inspections.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_model.html">Modelo de Datos del Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_height.html">Controlador De Alturas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_inspections.html">Controlador De Inspecciones</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Controlador De Vision</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.imwrite"><code class="docutils literal notranslate"><span class="pre">imwrite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.imread"><code class="docutils literal notranslate"><span class="pre">imread()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.Vision"><code class="docutils literal notranslate"><span class="pre">Vision</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.Process"><code class="docutils literal notranslate"><span class="pre">Process</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.Stop"><code class="docutils literal notranslate"><span class="pre">Stop</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Stop.onEntry"><code class="docutils literal notranslate"><span class="pre">Stop.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Stop.onExit"><code class="docutils literal notranslate"><span class="pre">Stop.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.Triggers"><code class="docutils literal notranslate"><span class="pre">Triggers</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Triggers.onEntry"><code class="docutils literal notranslate"><span class="pre">Triggers.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Triggers.delay"><code class="docutils literal notranslate"><span class="pre">Triggers.delay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Triggers.finish"><code class="docutils literal notranslate"><span class="pre">Triggers.finish()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.Receiver"><code class="docutils literal notranslate"><span class="pre">Receiver</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Receiver.onEntry"><code class="docutils literal notranslate"><span class="pre">Receiver.onEntry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.Error"><code class="docutils literal notranslate"><span class="pre">Error</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Error.onEntry"><code class="docutils literal notranslate"><span class="pre">Error.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Error.onExit"><code class="docutils literal notranslate"><span class="pre">Error.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Pose.onEntry"><code class="docutils literal notranslate"><span class="pre">Pose.onEntry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.vision.Reintento"><code class="docutils literal notranslate"><span class="pre">Reintento</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Reintento.onEntry"><code class="docutils literal notranslate"><span class="pre">Reintento.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.vision.Reintento.onExit"><code class="docutils literal notranslate"><span class="pre">Reintento.onExit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Controlador De Vision</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/controller_vision.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="controlador-de-vision">
+<h1>Controlador De Vision<a class="headerlink" href="#controlador-de-vision" title="Link to this heading"></a></h1>
+<p id="module-manager.controller.vision">Procesamiento de vision del sistema EVA-MBI-3.</p>
+<p>Este módulo contiene la lógica principal de operación de vision basada en
+máquina de estados mediante QState y QStateMachine.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="manager.controller.vision.imwrite">
+<span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">imwrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">retval</span></span></span><a class="headerlink" href="#manager.controller.vision.imwrite" title="Link to this definition"></a></dt>
+<dd><p>.   &#64;brief Saves an image to a specified file.
+.
+.   The function imwrite saves the image to the specified file. The image format is chosen based on the
+.   filename extension (see cv::imread for the list of extensions). In general, only 8-bit unsigned (CV_8U)
+.   single-channel or 3-channel (with “BGR” channel order) images
+.   can be saved using this function, with these exceptions:
+.
+.   - With OpenEXR encoder, only 32-bit float (CV_32F) images can be saved.
+.     - 8-bit unsigned (CV_8U) images are not supported.
+.   - With Radiance HDR encoder, non 64-bit float (CV_64F) images can be saved.
+.     - All images will be converted to 32-bit float (CV_32F).
+.   - With JPEG 2000 encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With PAM encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With PNG encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.     - PNG images with an alpha channel can be saved using this function. To do this, create
+.       8-bit (or 16-bit) 4-channel image BGRA, where the alpha channel goes last. Fully transparent pixels
+.       should have alpha set to 0, fully opaque pixels should have alpha set to 255/65535 (see the code sample below).
+.   - With PGM/PPM encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With TIFF encoder, 8-bit unsigned (CV_8U), 16-bit unsigned (CV_16U),
+.                        32-bit float (CV_32F) and 64-bit float (CV_64F) images can be saved.
+.     - Multiple images (vector of Mat) can be saved in TIFF format (see the code sample below).
+.     - 32-bit float 3-channel (CV_32FC3) TIFF images will be saved
+.       using the LogLuv high dynamic range encoding (4 bytes per pixel)
+.
+.   If the image format is not supported, the image will be converted to 8-bit unsigned (CV_8U) and saved that way.
+.
+.   If the format, depth or channel order is different, use
+.   Mat::convertTo and cv::cvtColor to convert it before saving. Or, use the universal FileStorage I/O
+.   functions to save the image to XML or YAML format.
+.
+.   The sample below shows how to create a BGRA image, how to set custom compression parameters and save it to a PNG file.
+.   It also demonstrates how to save multiple images in a TIFF file:
+.   &#64;include snippets/imgcodecs_imwrite.cpp
+.   &#64;param filename Name of the file.
+.   &#64;param img (Mat or vector of Mat) Image or Images to be saved.
+.   &#64;param params Format-specific parameters encoded as pairs (paramId_1, paramValue_1, paramId_2, paramValue_2, … .) see cv::ImwriteFlags</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="manager.controller.vision.imread">
+<span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">imread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">retval</span></span></span><a class="headerlink" href="#manager.controller.vision.imread" title="Link to this definition"></a></dt>
+<dd><p>.   &#64;brief Loads an image from a file.
+.
+.   &#64;anchor imread
+.
+.   The function imread loads an image from the specified file and returns it. If the image cannot be
+.   read (because of missing file, improper permissions, unsupported or invalid format), the function
+.   returns an empty matrix ( Mat::data==NULL ).
+.
+.   Currently, the following file formats are supported:
+.
+.   -   Windows bitmaps - *.bmp, *.dib (always supported)
+.   -   JPEG files - *.jpeg, *.jpg, *.jpe (see the <em>Note</em> section)
+.   -   JPEG 2000 files - *.jp2 (see the <em>Note</em> section)
+.   -   Portable Network Graphics - *.png (see the <em>Note</em> section)
+.   -   WebP - *.webp (see the <em>Note</em> section)
+.   -   AVIF - *.avif (see the <em>Note</em> section)
+.   -   Portable image format - *.pbm, *.pgm, *.ppm *.pxm, *.pnm (always supported)
+.   -   PFM files - *.pfm (see the <em>Note</em> section)
+.   -   Sun rasters - *.sr, *.ras (always supported)
+.   -   TIFF files - *.tiff, *.tif (see the <em>Note</em> section)
+.   -   OpenEXR Image files - *.exr (see the <em>Note</em> section)
+.   -   Radiance HDR - *.hdr, *.pic (always supported)
+.   -   Raster and Vector geospatial data supported by GDAL (see the <em>Note</em> section)
+.
+.   &#64;note
+.   -   The function determines the type of an image by the content, not by the file extension.
+.   -   In the case of color images, the decoded images will have the channels stored in <strong>B G R</strong> order.
+.   -   When using IMREAD_GRAYSCALE, the codec’s internal grayscale conversion will be used, if available.
+.       Results may differ to the output of cvtColor()
+.   -   On Microsoft Windows* OS and MacOSX*, the codecs shipped with an OpenCV image (libjpeg,
+.       libpng, libtiff, and libjasper) are used by default. So, OpenCV can always read JPEGs, PNGs,
+.       and TIFFs. On MacOSX, there is also an option to use native MacOSX image readers. But beware
+.       that currently these native image loaders give images with different pixel values because of
+.       the color management embedded into MacOSX.
+.   -   On Linux*, BSD flavors and other Unix-like open-source operating systems, OpenCV looks for
+.       codecs supplied with an OS image. Install the relevant packages (do not forget the development
+.       files, for example, «libjpeg-dev», in Debian* and Ubuntu*) to get the codec support or turn
+.       on the OPENCV_BUILD_3RDPARTY_LIBS flag in CMake.
+.   -   In the case you set <em>WITH_GDAL</em> flag to true in CMake and &#64;ref IMREAD_LOAD_GDAL to load the image,
+.       then the [GDAL](<a class="reference external" href="http://www.gdal.org">http://www.gdal.org</a>) driver will be used in order to decode the image, supporting
+.       the following formats: [Raster](<a class="reference external" href="http://www.gdal.org/formats_list.html">http://www.gdal.org/formats_list.html</a>),
+.       [Vector](<a class="reference external" href="http://www.gdal.org/ogr_formats.html">http://www.gdal.org/ogr_formats.html</a>).
+.   -   If EXIF information is embedded in the image file, the EXIF orientation will be taken into account
+.       and thus the image will be rotated accordingly except if the flags &#64;ref IMREAD_IGNORE_ORIENTATION
+.       or &#64;ref IMREAD_UNCHANGED are passed.
+.   -   Use the IMREAD_UNCHANGED flag to keep the floating point values from PFM image.
+.   -   By default number of pixels must be less than 2^30. Limit can be set using system
+.       variable OPENCV_IO_MAX_IMAGE_PIXELS
+.
+.   &#64;param filename Name of file to be loaded.
+.   &#64;param flags Flag that can take values of cv::ImreadModes</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.vision.Vision">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">Vision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vision1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Vision"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Vision" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado principal encargado de ejecutar el proceso de inspección visual.</p>
+<p>Este estado funciona como un contenedor de subestados que administran
+el ciclo completo de una inspección de visión.</p>
+<p>Durante su ejecución controla los siguientes estados internos:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Process:</dt><dd><p>Ejecuta la inspección visual del módulo seleccionado.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Error:</dt><dd><p>Administra las condiciones de error durante la inspección y permite
+reintentar el proceso mediante la acción correspondiente.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Standby:</dt><dd><p>Estado de espera utilizado después de una condición de error antes
+de volver a ejecutar la inspección.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>El estado Vision inicia siempre en Process y permanece activo hasta que
+la inspección finaliza correctamente o requiere una acción de
+recuperación.</p>
+<section id="senales">
+<h2>Señales<a class="headerlink" href="#senales" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>retry<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando el estado interno Standby solicita volver a
+ejecutar la inspección.</p>
+</dd>
+<dt>finished<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando el proceso de inspección visual termina
+correctamente.</p>
+</dd>
+</dl>
+<p>Inicializa el estado Vision.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del módulo de visión que será inspeccionado.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene la configuración
+del proceso, estados globales y referencias utilizadas por los
+subestados.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.vision.Process">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">Process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vision1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Process"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Process" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de ejecutar el flujo principal de inspección visual.</p>
+<p>Este estado administra la secuencia completa de inspección de un módulo
+de visión, coordinando el movimiento del robot, generación de triggers,
+recepción de resultados y recuperación ante reintentos.</p>
+<p>El flujo interno está compuesto por los siguientes estados:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Pose:</dt><dd><p>Solicita al robot desplazarse a la posición requerida para la
+inspección y espera la confirmación de movimiento.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Triggers:</dt><dd><p>Prepara y administra los triggers necesarios para ejecutar las
+inspecciones de visión.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Receiver:</dt><dd><p>Recibe y procesa las respuestas generadas durante la inspección.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Stop:</dt><dd><p>Estado preparado para gestionar una condición de paro durante el
+proceso de inspección.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Reintento:</dt><dd><p>Administra la repetición del ciclo cuando se solicita un nuevo
+intento de inspección.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>El estado inicia siempre en Pose y continúa el flujo dependiendo de
+los eventos generados por el robot y los resultados de inspección.</p>
+<section id="id1">
+<h2>Señales<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>nok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando ocurre una condición no válida durante el
+proceso de inspección.</p>
+</dd>
+<dt>finished<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando el ciclo de inspección termina correctamente.</p>
+</dd>
+</dl>
+<p>Inicializa el estado Process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del módulo de visión asociado al proceso.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene estados globales,
+transiciones y configuraciones utilizadas por los subestados.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.vision.Stop">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">Stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vision1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Stop"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Stop" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de detención del proceso de visión.</p>
+<p>Responsable de detener temporalmente el flujo de inspección visual del
+módulo actual cuando el robot entra en condición STOP.</p>
+<p>Mientras este estado permanece activo, la interfaz gráfica informa al
+operador que el robot se encuentra detenido y que debe presionar START
+para continuar con la operación.</p>
+<p>Al abandonar este estado, se limpian los datos temporales asociados al
+proceso de visión para evitar conservar información de una inspección
+incompleta.</p>
+<section id="id2">
+<h2>Señales<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>Este estado no define señales propias.</p>
+<p>Inicializa el estado Stop de visión.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del módulo de visión asociado al estado.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene los datos globales
+del proceso de inspección y configuración MQTT.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Stop.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Stop.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Stop.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Notifica a la interfaz gráfica que el módulo de visión se encuentra
+detenido y solicita al operador presionar START para continuar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Stop.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Stop.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Stop.onExit" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al salir del estado.</p>
+<p>Limpia la información temporal almacenada del módulo de visión
+actual para preparar una nueva ejecución del ciclo de inspección.</p>
+<p>Se restablecen los siguientes datos:</p>
+<ul class="simple">
+<li><p>Caja actualmente inspeccionada.</p></li>
+<li><p>Cola de triggers pendientes.</p></li>
+<li><p>Trigger actual en ejecución.</p></li>
+<li><p>Resultados obtenidos.</p></li>
+<li><p>Solicitudes pendientes.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al abandonar el estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.vision.Triggers">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">Triggers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vision1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Triggers"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Triggers" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de ejecutar los triggers de inspección visual.</p>
+<p>Responsable de administrar la secuencia de disparos de cámara durante
+la inspección de una caja.</p>
+<p>Este estado controla la activación de iluminación mediante PLC, envía
+los comandos de captura al sistema de visión y procesa los resultados
+obtenidos para determinar si los fusibles detectados corresponden con
+la configuración esperada de la modularidad.</p>
+<p>Durante su ejecución realiza las siguientes acciones:</p>
+<ul class="simple">
+<li><p>Activa la iluminación necesaria para la captura.</p></li>
+<li><p>Envía triggers individuales al sistema de visión.</p></li>
+<li><p>Administra la cola de inspecciones pendientes.</p></li>
+<li><p>Valida los fusibles detectados contra los fusibles esperados.</p></li>
+<li><p>Genera evidencia de inspección.</p></li>
+<li><p>Determina el resultado PASS o FAIL de la inspección.</p></li>
+</ul>
+<section id="id3">
+<h2>Señales<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>finished<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando la inspección del trigger actual finaliza
+correctamente.</p>
+</dd>
+<dt>nok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando la inspección detecta errores o diferencias
+entre los resultados obtenidos y la configuración esperada.</p>
+</dd>
+</dl>
+<p>Inicializa el estado Triggers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del módulo de visión asociado al proceso.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene la información de
+inspección, configuración de fusibles, comunicación MQTT y
+datos utilizados durante el proceso.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Triggers.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Triggers.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Triggers.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Inicia el proceso de inspección visual revisando si existen
+triggers pendientes en la cola del módulo actual.</p>
+<p>Si existen inspecciones pendientes:</p>
+<ul class="simple">
+<li><p>Activa la iluminación mediante el PLC.</p></li>
+<li><p>Define el trigger actual que será enviado a la cámara.</p></li>
+<li><p>Programa el envío del comando después del tiempo de espera
+establecido.</p></li>
+</ul>
+<p>Si no existen triggers pendientes, desactiva la iluminación y
+finaliza el proceso de inspección.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Triggers.delay">
+<span class="sig-name descname"><span class="pre">delay</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Triggers.delay"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Triggers.delay" title="Link to this definition"></a></dt>
+<dd><p>Envía el trigger de inspección al sistema de visión.</p>
+<p>Después del tiempo de espera requerido para estabilizar la
+iluminación, envía la solicitud de captura al módulo de visión.</p>
+<p>Actualiza la información asociada a la solicitud actual y prepara
+los datos necesarios para el procesamiento posterior de resultados.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Triggers.finish">
+<span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Triggers.finish"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Triggers.finish" title="Link to this definition"></a></dt>
+<dd><p>Procesa el resultado de una inspección visual.</p>
+<p>Analiza los resultados obtenidos por la cámara y compara los
+fusibles detectados contra la configuración esperada de la
+modularidad.</p>
+<p>Durante este proceso se realizan las siguientes validaciones:</p>
+<ul class="simple">
+<li><p>Comparación de color de fusibles.</p></li>
+<li><p>Detección de fusibles faltantes.</p></li>
+<li><p>Validación de cavidades inspeccionadas.</p></li>
+<li><p>Generación del resultado de inspección.</p></li>
+<li><p>Actualización de intentos de inspección.</p></li>
+<li><p>Creación de evidencia visual.</p></li>
+</ul>
+<p>La evidencia generada se almacena localmente y en el servidor
+de trazabilidad.</p>
+<p>Dependiendo del resultado obtenido:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>PASS:</dt><dd><p>Limpia los datos temporales, elimina el trigger procesado y
+emite la señal finished.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>FAIL:</dt><dd><p>Guarda la evidencia de fallo y emite la señal nok.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.vision.Receiver">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">Receiver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'module1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Receiver"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Receiver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de recibir y procesar los resultados de inspección
+enviados por el sistema de visión.</p>
+<p>Responsable de recopilar las respuestas generadas por la cámara para
+cada trigger ejecutado y almacenar los resultados obtenidos dentro de
+la estructura de datos del módulo de visión.</p>
+<p>Durante su ejecución realiza las siguientes acciones:</p>
+<ul class="simple">
+<li><p>Verifica la existencia de una solicitud de inspección pendiente.</p></li>
+<li><p>Recibe la lectura obtenida por el sistema de visión.</p></li>
+<li><p>Almacena los resultados asociados a la caja inspeccionada.</p></li>
+<li><p>Compara los valores detectados contra la configuración esperada.</p></li>
+<li><p>Calcula el resultado parcial de la inspección.</p></li>
+<li><p>Controla la cantidad de intentos requeridos para validar un trigger.</p></li>
+</ul>
+<p>Cuando se alcanza la cantidad de validaciones necesarias, elimina el
+trigger procesado de la cola de inspección.</p>
+<section id="id4">
+<h2>Señales<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>ok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando el procesamiento del resultado de visión
+termina correctamente.</p>
+</dd>
+<dt>nok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando ocurre una condición no válida durante el
+procesamiento del resultado.</p>
+</dd>
+</dl>
+<p>Inicializa el estado Receiver.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del módulo de visión asociado al proceso.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene los datos de
+inspección, configuración de fusibles y resultados obtenidos
+por el sistema de visión.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Receiver.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Receiver.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Receiver.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Procesa la respuesta generada por el sistema de visión para el
+trigger actual.</p>
+<p>Primero valida si existe una solicitud pendiente de procesamiento.
+Si no existe una solicitud activa, continúa el flujo sin realizar
+cambios.</p>
+<p>Cuando recibe información válida:</p>
+<ul class="simple">
+<li><p>Obtiene el trigger actual.</p></li>
+<li><p>Almacena los resultados obtenidos para la caja inspeccionada.</p></li>
+<li><p>Compara los valores detectados contra la configuración esperada.</p></li>
+<li><p>Actualiza el contador de validaciones.</p></li>
+<li><p>Determina si el trigger puede ser eliminado de la cola.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.vision.Error">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vision1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Error"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Error" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de gestionar errores durante la inspección visual.</p>
+<p>Responsable de administrar las condiciones de fallo detectadas durante
+el proceso de visión y proporcionar información al operador sobre el
+resultado de la inspección.</p>
+<p>Este estado se activa cuando una inspección visual no cumple con los
+criterios esperados, mostrando la información correspondiente en la
+interfaz gráfica y preparando el sistema para un posible reintento.</p>
+<p>Durante su ejecución realiza las siguientes acciones:</p>
+<ul class="simple">
+<li><p>Habilita los controles de Raffi para permitir interacción manual.</p></li>
+<li><p>Muestra información de error al operador.</p></li>
+<li><p>Indica fusibles faltantes cuando existen errores de inspección.</p></li>
+<li><p>Limpia los datos temporales del proceso de visión.</p></li>
+<li><p>Restablece la información de inspección actual.</p></li>
+<li><p>Envía el robot a posición Home antes de un nuevo intento.</p></li>
+</ul>
+<section id="id5">
+<h2>Señales<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>ok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida para indicar una finalización correcta del estado.</p>
+</dd>
+<dt>nok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando la condición de error permanece activa.</p>
+</dd>
+</dl>
+<p>Inicializa el estado Error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del módulo de visión asociado al proceso.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene los datos del
+proceso de inspección, comunicación MQTT y estados globales.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Error.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Error.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Error.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Obtiene la información de la caja inspeccionada y notifica al
+operador el resultado negativo de la inspección visual.</p>
+<p>Dependiendo del tipo de error detectado:</p>
+<ul class="simple">
+<li><p>Muestra las cavidades faltantes cuando existen fusibles sin
+inspeccionar.</p></li>
+<li><p>Muestra la comparación entre valores detectados y esperados
+cuando existe una diferencia de inspección.</p></li>
+</ul>
+<p>Posteriormente limpia la información temporal del módulo de visión
+y envía el robot a posición Home para preparar un nuevo intento.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Error.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Error.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Error.onExit" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al salir del estado.</p>
+<p>Deshabilita los controles de Raffi y actualiza la interfaz gráfica
+indicando que se realizará un nuevo intento de inspección visual.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al abandonar el estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.vision.Pose">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">Pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vision1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Pose"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Pose" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de posicionar el robot para ejecutar una inspección
+visual.</p>
+<p>Responsable de seleccionar la siguiente posición de inspección del
+robot y preparar la información necesaria para ejecutar los triggers
+de visión asociados a una caja.</p>
+<p>Este estado administra la sincronización entre la trayectoria del robot
+y el sistema de visión, determinando la caja y el punto de inspección
+actual antes de enviar la posición correspondiente al robot.</p>
+<p>Durante su ejecución realiza las siguientes acciones:</p>
+<ul class="simple">
+<li><p>Obtiene la siguiente caja pendiente de inspección.</p></li>
+<li><p>Valida que la caja se encuentre correctamente colocada en los clamps.</p></li>
+<li><p>Selecciona el trigger actual de inspección.</p></li>
+<li><p>Actualiza la información del módulo de visión.</p></li>
+<li><p>Carga la imagen de referencia de la caja en la interfaz gráfica.</p></li>
+<li><p>Prepara la cola de triggers para el sistema de visión.</p></li>
+<li><p>Envía la posición al robot cuando corresponde.</p></li>
+</ul>
+<section id="id6">
+<h2>Señales<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>finished<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando no existen más inspecciones pendientes.</p>
+</dd>
+<dt>nok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando la caja requerida para inspección no se
+encuentra disponible en los clamps.</p>
+</dd>
+</dl>
+<p>Inicializa el estado Pose.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del módulo de visión asociado al proceso.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene los datos del robot,
+configuración de inspección, triggers y comunicación MQTT.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Pose.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Pose.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Pose.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Prepara el sistema para iniciar una nueva posición de inspección.</p>
+<p>Durante la ejecución:</p>
+<ul class="simple">
+<li><p>Habilita la recepción de nuevos resultados de visión.</p></li>
+<li><p>Limpia mensajes anteriores de error en la interfaz.</p></li>
+<li><p>Obtiene la siguiente caja pendiente de inspección.</p></li>
+<li><p>Verifica que la caja se encuentre dentro de los clamps activos.</p></li>
+<li><p>Selecciona el trigger actual asociado a la posición del robot.</p></li>
+<li><p>Actualiza la información utilizada por el módulo de visión.</p></li>
+<li><p>Envía la posición correspondiente al robot cuando es necesario.</p></li>
+</ul>
+<p>Si la caja requerida no se encuentra disponible, emite la señal nok
+para iniciar el flujo de recuperación.</p>
+<p>Si no existen inspecciones pendientes, limpia la información del
+proceso y emite la señal finished.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.vision.Reintento">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.vision.</span></span><span class="sig-name descname"><span class="pre">Reintento</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vision1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Reintento"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Reintento" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de ejecutar un nuevo intento de inspección visual.</p>
+<p>Responsable de gestionar la recuperación manual del proceso de visión
+cuando el operador solicita repetir una inspección que previamente
+terminó con error.</p>
+<p>Este estado se activa mediante la acción del operador utilizando el
+botón de reintento y prepara nuevamente el sistema para ejecutar el
+ciclo de inspección desde una condición limpia.</p>
+<p>Durante su ejecución realiza las siguientes acciones:</p>
+<ul class="simple">
+<li><p>Informa al operador que se realizará un nuevo intento.</p></li>
+<li><p>Limpia los datos temporales de inspección del módulo de visión.</p></li>
+<li><p>Elimina triggers pendientes del ciclo anterior.</p></li>
+<li><p>Restablece resultados y solicitudes activas.</p></li>
+<li><p>Envía el robot a posición Home antes de reiniciar la inspección.</p></li>
+</ul>
+<p>Después de completar la recuperación, permite que el flujo continúe
+nuevamente hacia la ejecución de una nueva inspección visual.</p>
+<section id="id7">
+<h2>Señales<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>ok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando el proceso de recuperación finaliza
+correctamente.</p>
+</dd>
+<dt>nok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando ocurre una condición no válida durante el
+proceso de reintento.</p>
+</dd>
+</dl>
+<p>Inicializa el estado Reintento.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del módulo de visión asociado al proceso.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene los datos del robot,
+inspección visual y comunicación MQTT.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Reintento.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Reintento.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Reintento.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Inicia el proceso de recuperación para repetir una inspección
+visual.</p>
+<p>Durante la entrada al estado:</p>
+<ul class="simple">
+<li><p>Obtiene la caja asociada al intento anterior.</p></li>
+<li><p>Notifica al operador que el reintento fue solicitado.</p></li>
+<li><p>Limpia la información temporal del módulo de visión.</p></li>
+<li><p>Restablece la cola de triggers.</p></li>
+<li><p>Elimina resultados obtenidos previamente.</p></li>
+<li><p>Envía el robot a posición Home.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.vision.Reintento.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/vision.html#Reintento.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.vision.Reintento.onExit" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al salir del estado.</p>
+<p>Actualiza la interfaz gráfica indicando que el proceso de inspección
+visual será ejecutado nuevamente y solicita esperar el resultado.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al abandonar el estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="controller_inspections.html" class="btn btn-neutral float-left" title="Controlador De Inspecciones" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

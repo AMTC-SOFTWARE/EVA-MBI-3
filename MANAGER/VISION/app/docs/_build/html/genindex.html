@@ -46,7 +46,11 @@
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_model.html">Modelo de Datos del Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_height.html">Controlador De Alturas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_inspections.html">Controlador De Inspecciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_vision.html">Controlador De Vision</a></li>
 </ul>
 
         </div>
@@ -79,6 +83,7 @@
  <a href="#A"><strong>A</strong></a>
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
@@ -94,6 +99,9 @@
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -120,6 +128,8 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_inspections.html#manager.controller.inspections.UpdateTriggers.BRACKET_PDCD">BRACKET_PDCD (atributo de manager.controller.inspections.UpdateTriggers)</a>
+</li>
       <li><a href="controller.html#manager.controller.CheckQr.build_contenido_fusibles">build_contenido_fusibles() (método de manager.controller.CheckQr)</a>
 </li>
   </ul></td>
@@ -169,15 +179,35 @@
   </ul></td>
 </tr></table>
 
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_vision.html#manager.controller.vision.Triggers.delay">delay() (método de manager.controller.vision.Triggers)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_model.html#manager.model.Model.drawBB">drawBB() (método de manager.model.Model)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="controller.html#manager.controller.ScanPDCR.emptypdcr">emptypdcr (atributo de manager.controller.ScanPDCR)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_model.html#manager.model.Robot.enable">enable() (método de manager.model.Robot)</a>
+</li>
       <li><a href="controller.html#manager.controller.EnableClamps">EnableClamps (clase en manager.controller)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_height.html#manager.controller.height.Error">Error (clase en manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_vision.html#manager.controller.vision.Error">(clase en manager.controller.vision)</a>
+</li>
+      </ul></li>
       <li><a href="controller.html#manager.controller.CheckQr.ETIQUETA">ETIQUETA() (método de manager.controller.CheckQr)</a>
 </li>
   </ul></td>
@@ -188,10 +218,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="controller.html#manager.controller.Finish.finalMessage">finalMessage() (método de manager.controller.Finish)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="controller.html#manager.controller.Finish">Finish (clase en manager.controller)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_height.html#manager.controller.height.Triggers.finish">finish() (método de manager.controller.height.Triggers)</a>
+
+      <ul>
+        <li><a href="controller_vision.html#manager.controller.vision.Triggers.finish">(método de manager.controller.vision.Triggers)</a>
+</li>
+      </ul></li>
       <li><a href="controller.html#manager.controller.StartCycle.fuseBoxesClamps">fuseBoxesClamps() (método de manager.controller.StartCycle)</a>
 </li>
   </ul></td>
@@ -200,6 +236,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_model.html#manager.model.Model.get_currentTime">get_currentTime() (método de manager.model.Model)</a>
+</li>
       <li>
     gui.model
 
@@ -207,6 +245,8 @@
         <li><a href="gui_model.html#module-gui.model">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     gui.view
 
@@ -214,8 +254,6 @@
         <li><a href="gui.html#module-gui.view">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     gui.view.comm
 
@@ -229,10 +267,14 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="gui.html#gui.view.MainWindow.HOME_robot">HOME_robot() (método de gui.view.MainWindow)</a>
+      <li><a href="controller_height.html#manager.controller.height.Height">Height (clase en manager.controller.height)</a>
+</li>
+      <li><a href="controller_model.html#manager.model.Robot.home">home() (método de manager.model.Robot)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="gui.html#gui.view.MainWindow.HOME_robot">HOME_robot() (método de gui.view.MainWindow)</a>
+</li>
       <li><a href="gui.html#gui.view.MainWindow.horaxhora">horaxhora() (método de gui.view.MainWindow)</a>
 </li>
   </ul></td>
@@ -243,9 +285,31 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.Img_popout">Img_popout (clase en gui.view)</a>
 </li>
+      <li><a href="controller_height.html#manager.controller.height.imread">imread() (en el módulo manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_inspections.html#manager.controller.inspections.imread">(en el módulo manager.controller.inspections)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.imread">(en el módulo manager.controller.vision)</a>
+</li>
+        <li><a href="controller_model.html#manager.model.imread">(en el módulo manager.model)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_height.html#manager.controller.height.imwrite">imwrite() (en el módulo manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_inspections.html#manager.controller.inspections.imwrite">(en el módulo manager.controller.inspections)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.imwrite">(en el módulo manager.controller.vision)</a>
+</li>
+        <li><a href="controller_model.html#manager.model.imwrite">(en el módulo manager.model)</a>
+</li>
+      </ul></li>
       <li><a href="gui.html#gui.view.MainWindow.input">input() (método de gui.view.MainWindow)</a>
+</li>
+      <li><a href="controller_inspections.html#manager.controller.inspections.Inspections">Inspections (clase en manager.controller.inspections)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -281,14 +345,18 @@
 </li>
       <li><a href="gui.html#gui.view.MainWindow.launchWEB">launchWEB() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="controller_inspections.html#manager.controller.inspections.LiberarCajas">LiberarCajas (clase en manager.controller.inspections)</a>
+</li>
+      <li><a href="controller_model.html#manager.model.Model.log">log() (método de manager.model.Model)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.Login">Login (clase en gui.view)</a>
 
       <ul>
         <li><a href="controller.html#manager.controller.Login">(clase en manager.controller)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.MainWindow.login">login() (método de gui.view.MainWindow)</a>
 </li>
       <li><a href="controller.html#manager.controller.StartCycle.logout">logout() (método de manager.controller.StartCycle)</a>
@@ -312,12 +380,46 @@
         <li><a href="controller.html#module-manager.controller">module</a>
 </li>
       </ul></li>
+      <li>
+    manager.controller.height
+
+      <ul>
+        <li><a href="controller_height.html#module-manager.controller.height">module</a>
+</li>
+      </ul></li>
+      <li>
+    manager.controller.inspections
+
+      <ul>
+        <li><a href="controller_inspections.html#module-manager.controller.inspections">module</a>
+</li>
+      </ul></li>
+      <li>
+    manager.controller.vision
+
+      <ul>
+        <li><a href="controller_vision.html#module-manager.controller.vision">module</a>
+</li>
+      </ul></li>
+      <li>
+    manager.model
+
+      <ul>
+        <li><a href="controller_model.html#module-manager.model">module</a>
+</li>
+      </ul></li>
       <li><a href="gui.html#gui.view.MainWindow.menuProcess">menuProcess() (método de gui.view.MainWindow)</a>
 </li>
       <li><a href="gui.html#gui.view.Message_pop">Message_pop (clase en gui.view)</a>
 </li>
       <li><a href="gui_model.html#gui.model.Model">Model (clase en gui.model)</a>
+
+      <ul>
+        <li><a href="controller_model.html#manager.model.Model">(clase en manager.model)</a>
 </li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
@@ -332,10 +434,18 @@
 </li>
         <li><a href="controller.html#module-manager.controller">manager.controller</a>
 </li>
+        <li><a href="controller_height.html#module-manager.controller.height">manager.controller.height</a>
+</li>
+        <li><a href="controller_inspections.html#module-manager.controller.inspections">manager.controller.inspections</a>
+</li>
+        <li><a href="controller_vision.html#module-manager.controller.vision">manager.controller.vision</a>
+</li>
+        <li><a href="controller_model.html#module-manager.model">manager.model</a>
+</li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui_comm.html#gui.view.comm.MqttClient">MqttClient (clase en gui.view.comm)</a>
+</li>
+      <li><a href="controller_model.html#manager.model.MyClass">MyClass (clase en manager.model)</a>
 </li>
       <li><a href="controller.html#manager.controller.MyThread">MyThread (clase en manager.controller)</a>
 </li>
@@ -372,6 +482,32 @@
 </li>
         <li><a href="controller.html#manager.controller.Finish.onEntry">(método de manager.controller.Finish)</a>
 </li>
+        <li><a href="controller_height.html#manager.controller.height.Error.onEntry">(método de manager.controller.height.Error)</a>
+</li>
+        <li><a href="controller_height.html#manager.controller.height.Pose.onEntry">(método de manager.controller.height.Pose)</a>
+</li>
+        <li><a href="controller_height.html#manager.controller.height.Receiver.onEntry">(método de manager.controller.height.Receiver)</a>
+</li>
+        <li><a href="controller_height.html#manager.controller.height.Reintento.onEntry">(método de manager.controller.height.Reintento)</a>
+</li>
+        <li><a href="controller_height.html#manager.controller.height.Stop.onEntry">(método de manager.controller.height.Stop)</a>
+</li>
+        <li><a href="controller_height.html#manager.controller.height.Triggers.onEntry">(método de manager.controller.height.Triggers)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.LiberarCajas.onEntry">(método de manager.controller.inspections.LiberarCajas)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.SetRobot.onEntry">(método de manager.controller.inspections.SetRobot)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.Standby.onEntry">(método de manager.controller.inspections.Standby)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.Stop.onEntry">(método de manager.controller.inspections.Stop)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.UpdateTriggers.onEntry">(método de manager.controller.inspections.UpdateTriggers)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.WaitingHome.onEntry">(método de manager.controller.inspections.WaitingHome)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.WaitStart.onEntry">(método de manager.controller.inspections.WaitStart)</a>
+</li>
         <li><a href="controller.html#manager.controller.Login.onEntry">(método de manager.controller.Login)</a>
 </li>
         <li><a href="controller.html#manager.controller.QrRework.onEntry">(método de manager.controller.QrRework)</a>
@@ -388,6 +524,20 @@
 </li>
         <li><a href="controller.html#manager.controller.Startup.onEntry">(método de manager.controller.Startup)</a>
 </li>
+        <li><a href="controller_vision.html#manager.controller.vision.Error.onEntry">(método de manager.controller.vision.Error)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Pose.onEntry">(método de manager.controller.vision.Pose)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Receiver.onEntry">(método de manager.controller.vision.Receiver)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Reintento.onEntry">(método de manager.controller.vision.Reintento)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Stop.onEntry">(método de manager.controller.vision.Stop)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Triggers.onEntry">(método de manager.controller.vision.Triggers)</a>
+</li>
+        <li><a href="controller_model.html#manager.model.MyClass.onEntry">(método de manager.model.MyClass)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -398,6 +548,20 @@
 </li>
         <li><a href="controller.html#manager.controller.EnableClamps.onExit">(método de manager.controller.EnableClamps)</a>
 </li>
+        <li><a href="controller_height.html#manager.controller.height.Error.onExit">(método de manager.controller.height.Error)</a>
+</li>
+        <li><a href="controller_height.html#manager.controller.height.Reintento.onExit">(método de manager.controller.height.Reintento)</a>
+</li>
+        <li><a href="controller_height.html#manager.controller.height.Stop.onExit">(método de manager.controller.height.Stop)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.Standby.onExit">(método de manager.controller.inspections.Standby)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.UpdateTriggers.onExit">(método de manager.controller.inspections.UpdateTriggers)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.WaitingHome.onExit">(método de manager.controller.inspections.WaitingHome)</a>
+</li>
+        <li><a href="controller_inspections.html#manager.controller.inspections.WaitStart.onExit">(método de manager.controller.inspections.WaitStart)</a>
+</li>
         <li><a href="controller.html#manager.controller.QrRework.onExit">(método de manager.controller.QrRework)</a>
 </li>
         <li><a href="controller.html#manager.controller.QualityValidation.onExit">(método de manager.controller.QualityValidation)</a>
@@ -405,6 +569,12 @@
         <li><a href="controller.html#manager.controller.ScanPDCR.onExit">(método de manager.controller.ScanPDCR)</a>
 </li>
         <li><a href="controller.html#manager.controller.ScanQr.onExit">(método de manager.controller.ScanQr)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Error.onExit">(método de manager.controller.vision.Error)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Reintento.onExit">(método de manager.controller.vision.Reintento)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Stop.onExit">(método de manager.controller.vision.Stop)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -417,12 +587,24 @@
 </li>
       <li><a href="gui_comm.html#gui.view.comm.MqttClient.plc_publish">plc_publish() (método de gui.view.comm.MqttClient)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.PopOut">PopOut (clase en gui.view)</a>
 </li>
+      <li><a href="controller_height.html#manager.controller.height.Pose">Pose (clase en manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_vision.html#manager.controller.vision.Pose">(clase en manager.controller.vision)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="controller.html#manager.controller.CheckQr.procesado_anteriormente">procesado_anteriormente() (método de manager.controller.CheckQr)</a>
 </li>
+      <li><a href="controller_height.html#manager.controller.height.Process">Process (clase en manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_vision.html#manager.controller.vision.Process">(clase en manager.controller.vision)</a>
+</li>
+      </ul></li>
       <li><a href="gui_comm.html#gui.view.comm.MqttClient.publish">publish() (método de gui.view.comm.MqttClient)</a>
 </li>
   </ul></td>
@@ -453,11 +635,29 @@
 </li>
       <li><a href="gui_comm.html#gui.view.comm.MqttClient.rbt_publish">rbt_publish() (método de gui.view.comm.MqttClient)</a>
 </li>
-      <li><a href="controller.html#manager.controller.Reset">Reset (clase en manager.controller)</a>
+      <li><a href="controller_height.html#manager.controller.height.Receiver">Receiver (clase en manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_vision.html#manager.controller.vision.Receiver">(clase en manager.controller.vision)</a>
 </li>
+      </ul></li>
+      <li><a href="controller_model.html#manager.model.rectangle">rectangle() (en el módulo manager.model)</a>
+</li>
+      <li><a href="controller_height.html#manager.controller.height.Reintento">Reintento (clase en manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_vision.html#manager.controller.vision.Reintento">(clase en manager.controller.vision)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller.html#manager.controller.Reset">Reset (clase en manager.controller)</a>
+</li>
+      <li><a href="controller_model.html#manager.model.Model.reset">reset() (método de manager.model.Model)</a>
+</li>
       <li><a href="gui.html#gui.view.MainWindow.resizeEvent">resizeEvent() (método de gui.view.MainWindow)</a>
+</li>
+      <li><a href="controller_model.html#manager.model.Robot">Robot (clase en manager.model)</a>
 </li>
       <li><a href="controller.html#manager.controller.MyThread.run">run() (método de manager.controller.MyThread)</a>
 
@@ -479,9 +679,17 @@
 </li>
       <li><a href="controller.html#manager.controller.ScanQr">ScanQr (clase en manager.controller)</a>
 </li>
+      <li><a href="controller_height.html#manager.controller.height.Triggers.second_attempt">second_attempt() (método de manager.controller.height.Triggers)</a>
+</li>
       <li><a href="gui.html#gui.view.MainWindow.sendStatus">sendStatus() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="controller_model.html#manager.model.Robot.setPose">setPose() (método de manager.model.Robot)</a>
+</li>
+      <li><a href="controller_inspections.html#manager.controller.inspections.SetRobot">SetRobot (clase en manager.controller.inspections)</a>
+</li>
       <li><a href="gui_comm.html#gui.view.comm.MqttClient.setup">setup() (método de gui.view.comm.MqttClient)</a>
+</li>
+      <li><a href="controller_inspections.html#manager.controller.inspections.Standby">Standby (clase en manager.controller.inspections)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -497,6 +705,16 @@
 </li>
       <li><a href="gui.html#gui.view.MainWindow.status">status() (método de gui.view.MainWindow)</a>
 </li>
+      <li><a href="controller_height.html#manager.controller.height.Stop">Stop (clase en manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_inspections.html#manager.controller.inspections.Stop">(clase en manager.controller.inspections)</a>
+</li>
+        <li><a href="controller_vision.html#manager.controller.vision.Stop">(clase en manager.controller.vision)</a>
+</li>
+      </ul></li>
+      <li><a href="controller_model.html#manager.model.Robot.stop">stop() (método de manager.model.Robot)</a>
+</li>
       <li><a href="gui.html#gui.view.MainWindow.stop_raffi_animation">stop_raffi_animation() (método de gui.view.MainWindow)</a>
 </li>
   </ul></td>
@@ -506,6 +724,48 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="gui.html#gui.view.Tabla_hora_w">Tabla_hora_w (clase en gui.view)</a>
+</li>
+      <li><a href="controller_height.html#manager.controller.height.Triggers">Triggers (clase en manager.controller.height)</a>
+
+      <ul>
+        <li><a href="controller_vision.html#manager.controller.vision.Triggers">(clase en manager.controller.vision)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_height.html#manager.controller.height.Triggers.triggers">triggers() (método de manager.controller.height.Triggers)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_model.html#manager.model.Model.update_fecha_actual">update_fecha_actual() (método de manager.model.Model)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_inspections.html#manager.controller.inspections.UpdateTriggers">UpdateTriggers (clase en manager.controller.inspections)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_vision.html#manager.controller.vision.Vision">Vision (clase en manager.controller.vision)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_inspections.html#manager.controller.inspections.WaitingHome">WaitingHome (clase en manager.controller.inspections)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="controller_inspections.html#manager.controller.inspections.WaitStart">WaitStart (clase en manager.controller.inspections)</a>
 </li>
   </ul></td>
 </tr></table>

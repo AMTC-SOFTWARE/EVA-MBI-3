@@ -1,3 +1,9 @@
+"""
+Modelo de datos del controlador EVA-MBI-3.
+
+Este módulo contiene la estructura de datos utilizados por el MANAGER
+para almacenar configuraciones, estados de operación y topicos MQTT.
+"""
 from cv2 import imread, imwrite, rectangle
 from time import strftime
 from pickle import load
@@ -13,10 +19,45 @@ from threading import Timer
 
 
 class Model (QObject):
+    """
+    Modelo de datos principal del controlador EVA-MBI-3.
+
+    Su función principal es almacenar y administrar la información compartida
+    entre los diferentes componentes del sistema:
+
+    - Interfaz gráfica.
+    - Comunicación MQTT.
+    - PLC.
+    - Robot Epson.
+    - Sistema de visión.
+    - Sensor de altura.
+    - Configuración de cajas, fusibles, etc.
+    - Resultados de inspección.
+    - Trazabilidad del proceso.
+    """
 
     raffi_activated = pyqtSignal()
 
     def __init__(self, parent = None):
+        """
+        Inicializa el modelo principal de la aplicación.
+
+        Durante la inicialización se cargan:
+
+        - Variables globales del sistema.
+        - Topics MQTT.
+        - Estado inicial del ciclo.
+        - Configuración de inspecciones.
+        - Coordenadas de inspección.
+        - Datos de comunicación con dispositivos.
+        - Plantillas base de fusibles y tuercas.
+        - Parser de configuración de cavidades.
+
+        Parameters
+        ----------
+        parent : QObject, optional
+            Objeto padre de Qt para manejar la jerarquía de memoria.
+        """
         super().__init__(parent)
         self.name = "GUI"
         self.imgsPath = "data/imgs/"

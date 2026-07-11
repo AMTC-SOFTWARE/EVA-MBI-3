@@ -46,6 +46,10 @@ El sistema se encuentra dividido en diferentes componentes:
    gui_model
    gui_comm
    controller
+   controller_model
+   controller_height
+   controller_inspections
+   controller_vision
 
 Índices y tablas
 ================

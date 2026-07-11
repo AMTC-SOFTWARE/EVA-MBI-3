@@ -1,4 +1,10 @@
+"""
+Comunicación MQTT de la interfaz gráfica - manager EVA-MBI-3.
 
+Este módulo contiene la implementación del cliente MQTT utilizado
+por el MANAGER para intercambiar información con los diferentes
+componentes del sistema.
+"""
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 from paho.mqtt.client import Client
 from threading import Timer
@@ -6,7 +12,22 @@ from copy import copy
 import json
 
 class MqttClient (QObject):
-    
+    """
+    Cliente MQTT principal del MANAGER.
+
+    Responsable de establecer la conexión con el broker,
+    gestionar las suscripciones, distribuir y publicar mensajes.
+
+    Señales principales
+    -------------------
+
+    - ``subscribe``:
+      Emitida cuando se recibe un mensaje MQTT válido.
+
+    - ``connected``:
+      Emitida cuando el cliente establece correctamente
+      la conexión con el broker MQTT.
+    """
     conn_ok     =   pyqtSignal()
     conn_nok    =   pyqtSignal()
     clamp       =   pyqtSignal()
@@ -38,6 +59,29 @@ class MqttClient (QObject):
     #error_cortina   =   pyqtSignal()
 
     def __init__(self, model = None, parent = None):
+        """
+        Constructor de MqttClient
+        -------------------------
+
+        Inicializa el cliente MQTT utilizado por el MANAGER
+        y configura los mecanismos necesarios para la comunicación
+        con los diferentes componentes del sistema.
+
+        Configuraciones realizadas:
+
+        - Asociación con el modelo de datos.
+        - Creación de la instancia MQTT.
+        - Registro de callbacks de conexión y recepción.
+        - Programación del intento inicial de conexión al broker.
+
+        Args:
+            model:
+                Instancia del modelo de datos utilizada para obtener
+                parámetros de configuración y tópicos MQTT.
+
+            parent:
+                Objeto padre de Qt.
+        """
         super().__init__(parent)
         self.model = model
         self.client = Client()
@@ -83,6 +127,15 @@ class MqttClient (QObject):
         self.color_MFBE  = "blue"
 
     def setup(self):
+        """
+        Establece la conexión inicial con el broker MQTT.
+
+        Intenta conectar el cliente MQTT al broker
+        local y activa el ciclo de recepción de mensajes.
+
+        En caso de falla, notifica el error a la GUI mediante la señal
+        ``subscribe`` y programa el cierre automático del mensaje emergente.
+        """
         try:
             self.client.on_connect = self.on_connect
             self.client.on_message = self.on_message

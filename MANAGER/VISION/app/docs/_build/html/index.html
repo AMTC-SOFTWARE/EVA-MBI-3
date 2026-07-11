@@ -48,7 +48,11 @@
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_model.html">Modelo de Datos del Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_height.html">Controlador De Alturas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_inspections.html">Controlador De Inspecciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_vision.html">Controlador De Vision</a></li>
 </ul>
 
         </div>
@@ -136,7 +140,7 @@ proceso de producción.</p>
 <li class="toctree-l2"><a class="reference internal" href="gui_comm.html#gui.view.comm.MqttClient"><code class="docutils literal notranslate"><span class="pre">MqttClient</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador Principal</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Startup"><code class="docutils literal notranslate"><span class="pre">Startup</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Login"><code class="docutils literal notranslate"><span class="pre">Login</span></code></a></li>
@@ -154,6 +158,54 @@ proceso de producción.</p>
 <li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.Reset"><code class="docutils literal notranslate"><span class="pre">Reset</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.MyThreadReloj"><code class="docutils literal notranslate"><span class="pre">MyThreadReloj</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="controller.html#manager.controller.MyThread"><code class="docutils literal notranslate"><span class="pre">MyThread</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controller_model.html">Modelo de Datos del Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="controller_model.html#manager.model.imread"><code class="docutils literal notranslate"><span class="pre">imread()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_model.html#manager.model.imwrite"><code class="docutils literal notranslate"><span class="pre">imwrite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_model.html#manager.model.rectangle"><code class="docutils literal notranslate"><span class="pre">rectangle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_model.html#manager.model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_model.html#manager.model.Robot"><code class="docutils literal notranslate"><span class="pre">Robot</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_model.html#manager.model.MyClass"><code class="docutils literal notranslate"><span class="pre">MyClass</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controller_height.html">Controlador De Alturas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.imwrite"><code class="docutils literal notranslate"><span class="pre">imwrite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.imread"><code class="docutils literal notranslate"><span class="pre">imread()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.Height"><code class="docutils literal notranslate"><span class="pre">Height</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.Process"><code class="docutils literal notranslate"><span class="pre">Process</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.Stop"><code class="docutils literal notranslate"><span class="pre">Stop</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.Triggers"><code class="docutils literal notranslate"><span class="pre">Triggers</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.Reintento"><code class="docutils literal notranslate"><span class="pre">Reintento</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.Receiver"><code class="docutils literal notranslate"><span class="pre">Receiver</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.Error"><code class="docutils literal notranslate"><span class="pre">Error</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_height.html#manager.controller.height.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controller_inspections.html">Controlador De Inspecciones</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.imread"><code class="docutils literal notranslate"><span class="pre">imread()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.imwrite"><code class="docutils literal notranslate"><span class="pre">imwrite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.Inspections"><code class="docutils literal notranslate"><span class="pre">Inspections</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.Stop"><code class="docutils literal notranslate"><span class="pre">Stop</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.WaitStart"><code class="docutils literal notranslate"><span class="pre">WaitStart</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.SetRobot"><code class="docutils literal notranslate"><span class="pre">SetRobot</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.WaitingHome"><code class="docutils literal notranslate"><span class="pre">WaitingHome</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.LiberarCajas"><code class="docutils literal notranslate"><span class="pre">LiberarCajas</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.UpdateTriggers"><code class="docutils literal notranslate"><span class="pre">UpdateTriggers</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_inspections.html#manager.controller.inspections.Standby"><code class="docutils literal notranslate"><span class="pre">Standby</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controller_vision.html">Controlador De Vision</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.imwrite"><code class="docutils literal notranslate"><span class="pre">imwrite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.imread"><code class="docutils literal notranslate"><span class="pre">imread()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.Vision"><code class="docutils literal notranslate"><span class="pre">Vision</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.Process"><code class="docutils literal notranslate"><span class="pre">Process</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.Stop"><code class="docutils literal notranslate"><span class="pre">Stop</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.Triggers"><code class="docutils literal notranslate"><span class="pre">Triggers</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.Receiver"><code class="docutils literal notranslate"><span class="pre">Receiver</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.Error"><code class="docutils literal notranslate"><span class="pre">Error</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_vision.html#manager.controller.vision.Reintento"><code class="docutils literal notranslate"><span class="pre">Reintento</span></code></a></li>
 </ul>
 </li>
 </ul>

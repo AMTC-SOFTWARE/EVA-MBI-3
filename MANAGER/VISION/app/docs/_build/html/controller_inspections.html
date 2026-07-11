@@ -1,0 +1,752 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controlador De Inspecciones &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Controlador De Vision" href="controller_vision.html" />
+    <link rel="prev" title="Controlador De Alturas" href="controller_height.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_model.html">Modelo de Datos del Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_height.html">Controlador De Alturas</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Controlador De Inspecciones</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.imread"><code class="docutils literal notranslate"><span class="pre">imread()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.imwrite"><code class="docutils literal notranslate"><span class="pre">imwrite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.Inspections"><code class="docutils literal notranslate"><span class="pre">Inspections</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.Stop"><code class="docutils literal notranslate"><span class="pre">Stop</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.Stop.onEntry"><code class="docutils literal notranslate"><span class="pre">Stop.onEntry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.WaitStart"><code class="docutils literal notranslate"><span class="pre">WaitStart</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.WaitStart.onEntry"><code class="docutils literal notranslate"><span class="pre">WaitStart.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.WaitStart.onExit"><code class="docutils literal notranslate"><span class="pre">WaitStart.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.SetRobot"><code class="docutils literal notranslate"><span class="pre">SetRobot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.SetRobot.onEntry"><code class="docutils literal notranslate"><span class="pre">SetRobot.onEntry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.WaitingHome"><code class="docutils literal notranslate"><span class="pre">WaitingHome</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.WaitingHome.onEntry"><code class="docutils literal notranslate"><span class="pre">WaitingHome.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.WaitingHome.onExit"><code class="docutils literal notranslate"><span class="pre">WaitingHome.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.LiberarCajas"><code class="docutils literal notranslate"><span class="pre">LiberarCajas</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.LiberarCajas.onEntry"><code class="docutils literal notranslate"><span class="pre">LiberarCajas.onEntry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.UpdateTriggers"><code class="docutils literal notranslate"><span class="pre">UpdateTriggers</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.UpdateTriggers.BRACKET_PDCD"><code class="docutils literal notranslate"><span class="pre">UpdateTriggers.BRACKET_PDCD</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.UpdateTriggers.onEntry"><code class="docutils literal notranslate"><span class="pre">UpdateTriggers.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.UpdateTriggers.onExit"><code class="docutils literal notranslate"><span class="pre">UpdateTriggers.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.inspections.Standby"><code class="docutils literal notranslate"><span class="pre">Standby</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.Standby.onEntry"><code class="docutils literal notranslate"><span class="pre">Standby.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.inspections.Standby.onExit"><code class="docutils literal notranslate"><span class="pre">Standby.onExit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controller_vision.html">Controlador De Vision</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Controlador De Inspecciones</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/controller_inspections.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="controlador-de-inspecciones">
+<h1>Controlador De Inspecciones<a class="headerlink" href="#controlador-de-inspecciones" title="Link to this heading"></a></h1>
+<p id="module-manager.controller.inspections">Procesamiento de inspecciones del sistema EVA-MBI-3.</p>
+<p>Este módulo contiene la lógica principal de operación de inspeccion basada en
+máquina de estados mediante QState y QStateMachine.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="manager.controller.inspections.imread">
+<span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">imread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">retval</span></span></span><a class="headerlink" href="#manager.controller.inspections.imread" title="Link to this definition"></a></dt>
+<dd><p>.   &#64;brief Loads an image from a file.
+.
+.   &#64;anchor imread
+.
+.   The function imread loads an image from the specified file and returns it. If the image cannot be
+.   read (because of missing file, improper permissions, unsupported or invalid format), the function
+.   returns an empty matrix ( Mat::data==NULL ).
+.
+.   Currently, the following file formats are supported:
+.
+.   -   Windows bitmaps - *.bmp, *.dib (always supported)
+.   -   JPEG files - *.jpeg, *.jpg, *.jpe (see the <em>Note</em> section)
+.   -   JPEG 2000 files - *.jp2 (see the <em>Note</em> section)
+.   -   Portable Network Graphics - *.png (see the <em>Note</em> section)
+.   -   WebP - *.webp (see the <em>Note</em> section)
+.   -   AVIF - *.avif (see the <em>Note</em> section)
+.   -   Portable image format - *.pbm, *.pgm, *.ppm *.pxm, *.pnm (always supported)
+.   -   PFM files - *.pfm (see the <em>Note</em> section)
+.   -   Sun rasters - *.sr, *.ras (always supported)
+.   -   TIFF files - *.tiff, *.tif (see the <em>Note</em> section)
+.   -   OpenEXR Image files - *.exr (see the <em>Note</em> section)
+.   -   Radiance HDR - *.hdr, *.pic (always supported)
+.   -   Raster and Vector geospatial data supported by GDAL (see the <em>Note</em> section)
+.
+.   &#64;note
+.   -   The function determines the type of an image by the content, not by the file extension.
+.   -   In the case of color images, the decoded images will have the channels stored in <strong>B G R</strong> order.
+.   -   When using IMREAD_GRAYSCALE, the codec’s internal grayscale conversion will be used, if available.
+.       Results may differ to the output of cvtColor()
+.   -   On Microsoft Windows* OS and MacOSX*, the codecs shipped with an OpenCV image (libjpeg,
+.       libpng, libtiff, and libjasper) are used by default. So, OpenCV can always read JPEGs, PNGs,
+.       and TIFFs. On MacOSX, there is also an option to use native MacOSX image readers. But beware
+.       that currently these native image loaders give images with different pixel values because of
+.       the color management embedded into MacOSX.
+.   -   On Linux*, BSD flavors and other Unix-like open-source operating systems, OpenCV looks for
+.       codecs supplied with an OS image. Install the relevant packages (do not forget the development
+.       files, for example, «libjpeg-dev», in Debian* and Ubuntu*) to get the codec support or turn
+.       on the OPENCV_BUILD_3RDPARTY_LIBS flag in CMake.
+.   -   In the case you set <em>WITH_GDAL</em> flag to true in CMake and &#64;ref IMREAD_LOAD_GDAL to load the image,
+.       then the [GDAL](<a class="reference external" href="http://www.gdal.org">http://www.gdal.org</a>) driver will be used in order to decode the image, supporting
+.       the following formats: [Raster](<a class="reference external" href="http://www.gdal.org/formats_list.html">http://www.gdal.org/formats_list.html</a>),
+.       [Vector](<a class="reference external" href="http://www.gdal.org/ogr_formats.html">http://www.gdal.org/ogr_formats.html</a>).
+.   -   If EXIF information is embedded in the image file, the EXIF orientation will be taken into account
+.       and thus the image will be rotated accordingly except if the flags &#64;ref IMREAD_IGNORE_ORIENTATION
+.       or &#64;ref IMREAD_UNCHANGED are passed.
+.   -   Use the IMREAD_UNCHANGED flag to keep the floating point values from PFM image.
+.   -   By default number of pixels must be less than 2^30. Limit can be set using system
+.       variable OPENCV_IO_MAX_IMAGE_PIXELS
+.
+.   &#64;param filename Name of file to be loaded.
+.   &#64;param flags Flag that can take values of cv::ImreadModes</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="manager.controller.inspections.imwrite">
+<span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">imwrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">retval</span></span></span><a class="headerlink" href="#manager.controller.inspections.imwrite" title="Link to this definition"></a></dt>
+<dd><p>.   &#64;brief Saves an image to a specified file.
+.
+.   The function imwrite saves the image to the specified file. The image format is chosen based on the
+.   filename extension (see cv::imread for the list of extensions). In general, only 8-bit unsigned (CV_8U)
+.   single-channel or 3-channel (with “BGR” channel order) images
+.   can be saved using this function, with these exceptions:
+.
+.   - With OpenEXR encoder, only 32-bit float (CV_32F) images can be saved.
+.     - 8-bit unsigned (CV_8U) images are not supported.
+.   - With Radiance HDR encoder, non 64-bit float (CV_64F) images can be saved.
+.     - All images will be converted to 32-bit float (CV_32F).
+.   - With JPEG 2000 encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With PAM encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With PNG encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.     - PNG images with an alpha channel can be saved using this function. To do this, create
+.       8-bit (or 16-bit) 4-channel image BGRA, where the alpha channel goes last. Fully transparent pixels
+.       should have alpha set to 0, fully opaque pixels should have alpha set to 255/65535 (see the code sample below).
+.   - With PGM/PPM encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With TIFF encoder, 8-bit unsigned (CV_8U), 16-bit unsigned (CV_16U),
+.                        32-bit float (CV_32F) and 64-bit float (CV_64F) images can be saved.
+.     - Multiple images (vector of Mat) can be saved in TIFF format (see the code sample below).
+.     - 32-bit float 3-channel (CV_32FC3) TIFF images will be saved
+.       using the LogLuv high dynamic range encoding (4 bytes per pixel)
+.
+.   If the image format is not supported, the image will be converted to 8-bit unsigned (CV_8U) and saved that way.
+.
+.   If the format, depth or channel order is different, use
+.   Mat::convertTo and cv::cvtColor to convert it before saving. Or, use the universal FileStorage I/O
+.   functions to save the image to XML or YAML format.
+.
+.   The sample below shows how to create a BGRA image, how to set custom compression parameters and save it to a PNG file.
+.   It also demonstrates how to save multiple images in a TIFF file:
+.   &#64;include snippets/imgcodecs_imwrite.cpp
+.   &#64;param filename Name of the file.
+.   &#64;param img (Mat or vector of Mat) Image or Images to be saved.
+.   &#64;param params Format-specific parameters encoded as pairs (paramId_1, paramValue_1, paramId_2, paramValue_2, … .) see cv::ImwriteFlags</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.inspections.Inspections">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">Inspections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ID</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#Inspections"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.Inspections" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado compuesto encargado de coordinar el proceso completo de inspección
+de visión y alturas.</p>
+<p>Este estado administra el flujo principal de inspección, desde la
+configuración inicial del robot hasta la liberación de las cajas
+inspeccionadas. Además, coordina la ejecución de los módulos de visión
+y alturas, así como la actualización de disparadores (triggers) y la
+sincronización con el robot.</p>
+<p>El flujo de inspección incluye la preparación del robot, la espera de
+condiciones para iniciar el proceso, la ejecución de las inspecciones,
+la liberación de cajas y la notificación cuando todas las inspecciones
+han finalizado.</p>
+<section id="senales">
+<h2>Señales<a class="headerlink" href="#senales" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">finished</span></code>:</p></li>
+</ul>
+<p>Indica que todas las inspecciones de visión y alturas han finalizado
+correctamente y el flujo puede continuar con el siguiente estado de
+la máquina de estados.</p>
+<p>Inicializa el controlador de inspecciones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido que contiene la información del proceso,
+configuración de los módulos y comunicación entre estados.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model, optional</p>
+</dd>
+<dt class="field-odd">param ID<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Identificador del conjunto de inspección. Se utiliza para
+seleccionar los módulos de visión y alturas correspondientes
+(por ejemplo <code class="docutils literal notranslate"><span class="pre">vision1</span></code> y <code class="docutils literal notranslate"><span class="pre">height1</span></code>).</p>
+</dd>
+<dt class="field-even">type ID<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QObject, optional</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.inspections.Stop">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">Stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#Stop"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.Stop" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de detención del proceso de inspección.</p>
+<p>Responsable de detener temporalmente la secuencia de inspección
+cuando el robot entra en modo STOP.</p>
+<p>Mientras este estado permanezca activo, la interfaz informa al
+operador que el robot está detenido y que es necesario presionar
+el botón START para reanudar la operación.</p>
+<section id="id1">
+<h2>Señales<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>Este estado no define señales propias.</p>
+<p>Inicializa el estado STOP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene la configuración
+MQTT y referencias utilizadas durante la ejecución del estado.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.Stop.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#Stop.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.Stop.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Muestra en la interfaz un mensaje indicando que el robot se
+encuentra en modo STOP y que el operador debe presionar START
+para continuar con la inspección.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.inspections.WaitStart">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">WaitStart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#WaitStart"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.WaitStart" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de espera para iniciar el proceso de inspección.</p>
+<p>Responsable de mantener el sistema en espera hasta que el operador
+presione el botón START para comenzar el ciclo de inspección.</p>
+<p>Mientras este estado permanece activo, se habilitan los controles de
+Raffi y se informa a la interfaz gráfica que el sistema está preparado
+para iniciar la operación.</p>
+<p>Si existe un bracket PDC-D pendiente de colocar, este estado solicita
+al operador realizar la colocación antes de iniciar la inspección.</p>
+<section id="id2">
+<h2>Señales<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>Este estado no define señales propias.</p>
+<p>Inicializa el estado WaitStart.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene las variables
+de control del proceso, configuración MQTT y estados de
+operación utilizados durante la ejecución.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.WaitStart.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#WaitStart.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.WaitStart.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Habilita la disponibilidad de los controles de Raffi y activa
+la bandera que indica que el sistema se encuentra esperando la
+acción del botón START.</p>
+<p>Dependiendo de la condición del bracket PDC-D, muestra en la
+interfaz gráfica el mensaje correspondiente al operador.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.WaitStart.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#WaitStart.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.WaitStart.onExit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.inspections.SetRobot">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">SetRobot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#SetRobot"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.SetRobot" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de reiniciar la comunicación con el robot.</p>
+<p>Responsable de realizar la secuencia de reinicio del robot antes de
+continuar con el proceso de inspección.</p>
+<p>Al ingresar a este estado, se informa al operador que el robot está
+siendo reiniciado. Posteriormente se envía una orden de detención y
+después una orden de inicio mediante comunicación MQTT.</p>
+<section id="id3">
+<h2>Señales<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>ok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida para indicar que la configuración o reinicio del
+robot fue completado correctamente.</p>
+</dd>
+</dl>
+<p>Inicializa el estado SetRobot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene la configuración
+MQTT y referencias utilizadas durante la ejecución del estado.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.SetRobot.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#SetRobot.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.SetRobot.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Envía una notificación a la interfaz gráfica indicando que el robot
+está siendo reiniciado.</p>
+<p>Posteriormente ejecuta la secuencia de reinicio del robot mediante
+MQTT, enviando primero la orden de STOP y después la orden START.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.inspections.WaitingHome">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">WaitingHome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#WaitingHome"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.WaitingHome" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de espera del robot en posición Home.</p>
+<p>Responsable de mantener el sistema en espera mientras el robot se
+desplaza a la posición Home para liberar las cajas del proceso.</p>
+<p>Mientras este estado permanece activo, se informa al operador que el
+robot está realizando el movimiento hacia Home y que debe esperar o
+utilizar el botón amarillo para reintentar la operación.</p>
+<p>La variable de control waiting_home permite identificar que el sistema
+se encuentra esperando la confirmación de llegada del robot a la
+posición Home.</p>
+<section id="id4">
+<h2>Señales<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p>Este estado no define señales propias.</p>
+<p>Inicializa el estado WaitingHome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene las variables de
+control del proceso, configuración MQTT y estados utilizados
+durante la ejecución.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.WaitingHome.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#WaitingHome.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.WaitingHome.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Activa la bandera waiting_home para indicar que el sistema está
+esperando la confirmación de posición Home del robot.</p>
+<p>Envía una notificación a la interfaz gráfica indicando que el robot
+está siendo enviado a Home para liberar las cajas del proceso.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.WaitingHome.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#WaitingHome.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.WaitingHome.onExit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.inspections.LiberarCajas">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">LiberarCajas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#LiberarCajas"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.LiberarCajas" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de liberar las cajas sujetadas durante el proceso
+de inspección.</p>
+<p>Responsable de enviar las señales necesarias al PLC para desactivar
+los elementos de sujeción de las cajas cuando las condiciones del
+proceso permiten su liberación.</p>
+<p>Antes de realizar la liberación, valida que el proceso de colocación
+del bracket PDC-D haya finalizado o que no exista un bracket pendiente.
+Si la condición no se cumple, las cajas permanecen sujetas y el estado
+continúa el flujo sin ejecutar la liberación.</p>
+<section id="id5">
+<h2>Señales<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>ok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida al finalizar el proceso de liberación o cuando la
+operación no puede ejecutarse debido a condiciones del proceso.</p>
+</dd>
+</dl>
+<p>Inicializa el estado LiberarCajas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene las variables
+de control del proceso, configuración MQTT y comunicación
+con dispositivos externos.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.LiberarCajas.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#LiberarCajas.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.LiberarCajas.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Verifica si las condiciones del bracket PDC-D permiten liberar
+las cajas.</p>
+<p>Cuando la liberación está autorizada, envía comandos al PLC para
+desactivar los sujetadores correspondientes a las cajas almacenadas
+en la variable cajas_a_desclampear.</p>
+<p>Después de enviar las señales al PLC, limpia las variables de
+control asociadas al proceso de liberación y emite la señal de
+finalización del estado.</p>
+<p>Si el bracket PDC-D aún no ha sido terminado, no se realiza la
+liberación de cajas y se continúa el flujo del proceso.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.inspections.UpdateTriggers">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">UpdateTriggers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#UpdateTriggers"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.UpdateTriggers" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de actualizar los triggers de inspección del robot.</p>
+<p>Responsable de preparar la información necesaria para ejecutar las
+inspecciones de visión y altura durante el ciclo de producción.</p>
+<p>Este estado valida las condiciones actuales del proceso, administra
+las cajas disponibles en los clamps, genera las colas de inspección
+del robot y prepara los datos necesarios para las siguientes etapas
+del ciclo.</p>
+<p>También gestiona condiciones especiales del proceso como:</p>
+<ul class="simple">
+<li><p>Liberación de cajas pendientes.</p></li>
+<li><p>Colocación de bracket PDC-D.</p></li>
+<li><p>Colocación de fusible F96.</p></li>
+<li><p>Finalización del ciclo cuando no existen cajas pendientes.</p></li>
+</ul>
+<section id="id6">
+<h2>Señales<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>ok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando una caja queda preparada correctamente para
+iniciar su proceso de inspección.</p>
+</dd>
+<dt>finished<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando todas las inspecciones pendientes han sido
+completadas.</p>
+</dd>
+<dt>nok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando no existe una caja válida disponible para
+inspección y es necesario solicitar una nueva colocación.</p>
+</dd>
+<dt>esperar_robot_home<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando el robot debe regresar a posición Home antes
+de continuar el proceso.</p>
+</dd>
+<dt>F96_espera<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando el proceso requiere esperar la colocación y
+validación del fusible F96.</p>
+</dd>
+<dt>BRACKET_PDCD<span class="classifier">pyqtSignal</span></dt><dd><p>Señal emitida cuando el bracket PDC-D ha sido colocado y validado.</p>
+</dd>
+</dl>
+<p>Inicializa el estado UpdateTriggers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene la información
+del proceso, configuración de inspecciones, datos del robot,
+estados de clamps y comunicación MQTT.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="manager.controller.inspections.UpdateTriggers.BRACKET_PDCD">
+<span class="sig-name descname"><span class="pre">BRACKET_PDCD</span></span><a class="headerlink" href="#manager.controller.inspections.UpdateTriggers.BRACKET_PDCD" title="Link to this definition"></a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id7"><span class="problematic" id="id8">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.UpdateTriggers.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#UpdateTriggers.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.UpdateTriggers.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Actualiza la configuración de inspección de acuerdo con las cajas
+disponibles en los clamps y prepara las colas de ejecución del robot.</p>
+<p>Durante su ejecución realiza las siguientes validaciones:</p>
+<ul class="simple">
+<li><p>Verifica si existen cajas pendientes de liberar.</p></li>
+<li><p>Solicita al robot regresar a Home cuando es necesario.</p></li>
+<li><p>Gestiona la colocación del bracket PDC-D.</p></li>
+<li><p>Gestiona la colocación del fusible F96.</p></li>
+<li><p>Valida cajas disponibles contra la modularidad actual.</p></li>
+<li><p>Actualiza las colas de inspección de visión y altura.</p></li>
+<li><p>Notifica a la interfaz gráfica el estado actual del proceso.</p></li>
+</ul>
+<p>Las colas generadas son almacenadas en:</p>
+<ul class="simple">
+<li><p>robot_data[«v_queue»] para inspecciones de visión.</p></li>
+<li><p>robot_data[«h_queue»] para inspecciones de altura.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.UpdateTriggers.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#UpdateTriggers.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.UpdateTriggers.onExit" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al salir del estado.</p>
+<p>Finaliza la ejecución del estado UpdateTriggers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al abandonar el estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.inspections.Standby">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.inspections.</span></span><span class="sig-name descname"><span class="pre">Standby</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#Standby"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.Standby" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de espera del sistema de inspección.</p>
+<p>Responsable de mantener el sistema en estado de espera mientras no se
+ejecuta un ciclo activo de inspección.</p>
+<p>Mientras este estado permanece activo, se habilitan los controles de
+Raffi para permitir la interacción del operador con el sistema.</p>
+<p>Al abandonar este estado, los controles de Raffi son deshabilitados
+para evitar acciones manuales durante la ejecución de otros estados
+del proceso.</p>
+<section id="id9">
+<h2>Señales<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<p>Este estado no define señales propias.</p>
+<p>Inicializa el estado Standby.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo principal de la aplicación. Contiene las variables
+de control del proceso y estados utilizados durante la
+ejecución.</p>
+</dd>
+<dt class="field-even">type model<span class="colon">:</span></dt>
+<dd class="field-even"><p>object, optional</p>
+</dd>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+<dt class="field-even">type parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>QState, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.Standby.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#Standby.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.Standby.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Habilita la disponibilidad de los controles de Raffi indicando que
+el sistema se encuentra en un estado donde el operador puede
+interactuar manualmente.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>QEvent</strong> (<em>QEvent</em>) – Evento generado al ingresar al estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.inspections.Standby.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/inspections.html#Standby.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.inspections.Standby.onExit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="controller_height.html" class="btn btn-neutral float-left" title="Controlador De Alturas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="controller_vision.html" class="btn btn-neutral float-right" title="Controlador De Vision" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

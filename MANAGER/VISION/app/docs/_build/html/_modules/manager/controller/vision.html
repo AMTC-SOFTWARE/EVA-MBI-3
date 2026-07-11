@@ -1,0 +1,1395 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>manager.controller.vision &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../app.html">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller.html">Controlador Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller_model.html">Modelo de Datos del Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller_height.html">Controlador De Alturas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller_inspections.html">Controlador De Inspecciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controller_vision.html">Controlador De Vision</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código de módulo</a></li>
+          <li class="breadcrumb-item"><a href="../controller.html">manager.controller</a></li>
+      <li class="breadcrumb-item active">manager.controller.vision</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para manager.controller.vision</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Procesamiento de vision del sistema EVA-MBI-3.</span>
+
+<span class="sd">Este módulo contiene la lógica principal de operación de vision basada en</span>
+<span class="sd">máquina de estados mediante QState y QStateMachine.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">QState</span><span class="p">,</span> <span class="n">pyqtSignal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">imwrite</span><span class="p">,</span> <span class="n">imread</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">paho.mqtt</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">copyfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">strftime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">ceil</span>
+<span class="c1">#librería para ordenar diccionarios</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">exists</span>
+
+<div class="viewcode-block" id="Vision">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Vision">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Vision</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado principal encargado de ejecutar el proceso de inspección visual.</span>
+
+<span class="sd">    Este estado funciona como un contenedor de subestados que administran</span>
+<span class="sd">    el ciclo completo de una inspección de visión.</span>
+
+<span class="sd">    Durante su ejecución controla los siguientes estados internos:</span>
+
+<span class="sd">    - Process:</span>
+<span class="sd">        Ejecuta la inspección visual del módulo seleccionado.</span>
+
+<span class="sd">    - Error:</span>
+<span class="sd">        Administra las condiciones de error durante la inspección y permite</span>
+<span class="sd">        reintentar el proceso mediante la acción correspondiente.</span>
+
+<span class="sd">    - Standby:</span>
+<span class="sd">        Estado de espera utilizado después de una condición de error antes</span>
+<span class="sd">        de volver a ejecutar la inspección.</span>
+
+<span class="sd">    El estado Vision inicia siempre en Process y permanece activo hasta que</span>
+<span class="sd">    la inspección finaliza correctamente o requiere una acción de</span>
+<span class="sd">    recuperación.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    retry : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando el estado interno Standby solicita volver a</span>
+<span class="sd">        ejecutar la inspección.</span>
+
+<span class="sd">    finished : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando el proceso de inspección visual termina</span>
+<span class="sd">        correctamente.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">retry</span>       <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">finished</span>    <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;vision1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Vision.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, optional</span>
+<span class="sd">            Nombre del módulo de visión que será inspeccionado.</span>
+
+<span class="sd">        model : object, optional</span>
+<span class="sd">            Modelo principal de la aplicación. Contiene la configuración</span>
+<span class="sd">            del proceso, estados globales y referencias utilizadas por los</span>
+<span class="sd">            subestados.</span>
+
+<span class="sd">        parent : QState, optional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span>    <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span>      <span class="o">=</span> <span class="n">Error</span><span class="p">(</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standby</span>    <span class="o">=</span> <span class="n">QState</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">nok</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">retry_btn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">standby</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">standby</span><span class="o">.</span><span class="n">entered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="p">)</span>
+         <span class="c1">#Estado Inicial Process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setInitialState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Process">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Process">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Process</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de ejecutar el flujo principal de inspección visual.</span>
+
+<span class="sd">    Este estado administra la secuencia completa de inspección de un módulo</span>
+<span class="sd">    de visión, coordinando el movimiento del robot, generación de triggers,</span>
+<span class="sd">    recepción de resultados y recuperación ante reintentos.</span>
+
+<span class="sd">    El flujo interno está compuesto por los siguientes estados:</span>
+
+<span class="sd">    - Pose:</span>
+<span class="sd">        Solicita al robot desplazarse a la posición requerida para la</span>
+<span class="sd">        inspección y espera la confirmación de movimiento.</span>
+
+<span class="sd">    - Triggers:</span>
+<span class="sd">        Prepara y administra los triggers necesarios para ejecutar las</span>
+<span class="sd">        inspecciones de visión.</span>
+
+<span class="sd">    - Receiver:</span>
+<span class="sd">        Recibe y procesa las respuestas generadas durante la inspección.</span>
+
+<span class="sd">    - Stop:</span>
+<span class="sd">        Estado preparado para gestionar una condición de paro durante el</span>
+<span class="sd">        proceso de inspección.</span>
+
+<span class="sd">    - Reintento:</span>
+<span class="sd">        Administra la repetición del ciclo cuando se solicita un nuevo</span>
+<span class="sd">        intento de inspección.</span>
+
+<span class="sd">    El estado inicia siempre en Pose y continúa el flujo dependiendo de</span>
+<span class="sd">    los eventos generados por el robot y los resultados de inspección.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    nok : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando ocurre una condición no válida durante el</span>
+<span class="sd">        proceso de inspección.</span>
+
+<span class="sd">    finished : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando el ciclo de inspección termina correctamente.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nok</span>         <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">finished</span>    <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;vision1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Process.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, optional</span>
+<span class="sd">            Nombre del módulo de visión asociado al proceso.</span>
+
+<span class="sd">        model : object, optional</span>
+<span class="sd">            Modelo principal de la aplicación. Contiene estados globales,</span>
+<span class="sd">            transiciones y configuraciones utilizadas por los subestados.</span>
+
+<span class="sd">        parent : QState, optional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span>       <span class="o">=</span> <span class="n">Pose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span>   <span class="o">=</span> <span class="n">Triggers</span><span class="p">(</span> <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">receiver</span>   <span class="o">=</span> <span class="n">Receiver</span><span class="p">(</span> <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span>       <span class="o">=</span> <span class="n">Stop</span><span class="p">(</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span>  <span class="o">=</span> <span class="n">Reintento</span><span class="p">(</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+        
+        <span class="c1"># entra a triggers con el mensaje de posición alcanzada del robot, el estado pose manda el mensaje mqtt para que el robot vaya ahí</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">rbt_pose</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">rbt_home</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">retry_btn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">retry_btn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reintento</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">rbt_home</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">finished</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">vision</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">receiver</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">receiver</span><span class="o">.</span><span class="n">addTransition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">receiver</span><span class="o">.</span><span class="n">ok</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="p">)</span>
+        <span class="c1">#self.addTransition(self.model.transitions.rbt_stop, self.stop)</span>
+        <span class="c1">#self.stop.addTransition(self.model.transitions.start, self.pose)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggers</span><span class="o">.</span><span class="n">nok</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nok</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">nok</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nok</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setInitialState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>   </div>
+
+
+<div class="viewcode-block" id="Stop">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Stop">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Stop</span><span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado de detención del proceso de visión.</span>
+
+<span class="sd">    Responsable de detener temporalmente el flujo de inspección visual del</span>
+<span class="sd">    módulo actual cuando el robot entra en condición STOP.</span>
+
+<span class="sd">    Mientras este estado permanece activo, la interfaz gráfica informa al</span>
+<span class="sd">    operador que el robot se encuentra detenido y que debe presionar START</span>
+<span class="sd">    para continuar con la operación.</span>
+
+<span class="sd">    Al abandonar este estado, se limpian los datos temporales asociados al</span>
+<span class="sd">    proceso de visión para evitar conservar información de una inspección</span>
+<span class="sd">    incompleta.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    Este estado no define señales propias.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;vision1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Stop de visión.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, optional</span>
+<span class="sd">            Nombre del módulo de visión asociado al estado.</span>
+
+<span class="sd">        model : object, optional</span>
+<span class="sd">            Modelo principal de la aplicación. Contiene los datos globales</span>
+<span class="sd">            del proceso de inspección y configuración MQTT.</span>
+
+<span class="sd">        parent : QState, optional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+<div class="viewcode-block" id="Stop.onEntry">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Stop.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado.</span>
+
+<span class="sd">        Notifica a la interfaz gráfica que el módulo de visión se encuentra</span>
+<span class="sd">        detenido y solicita al operador presionar START para continuar.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        QEvent : QEvent</span>
+<span class="sd">            Evento generado al ingresar al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Stop VISION ############################&quot;</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Robot en modo STOP&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Presiona START para continuar&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stop.onExit">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Stop.onExit">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onExit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al salir del estado.</span>
+
+<span class="sd">        Limpia la información temporal almacenada del módulo de visión</span>
+<span class="sd">        actual para preparar una nueva ejecución del ciclo de inspección.</span>
+
+<span class="sd">        Se restablecen los siguientes datos:</span>
+
+<span class="sd">        - Caja actualmente inspeccionada.</span>
+<span class="sd">        - Cola de triggers pendientes.</span>
+<span class="sd">        - Trigger actual en ejecución.</span>
+<span class="sd">        - Resultados obtenidos.</span>
+<span class="sd">        - Solicitudes pendientes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        QEvent : QEvent</span>
+<span class="sd">            Evento generado al abandonar el estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Triggers">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Triggers">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Triggers</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de ejecutar los triggers de inspección visual.</span>
+
+<span class="sd">    Responsable de administrar la secuencia de disparos de cámara durante</span>
+<span class="sd">    la inspección de una caja.</span>
+
+<span class="sd">    Este estado controla la activación de iluminación mediante PLC, envía</span>
+<span class="sd">    los comandos de captura al sistema de visión y procesa los resultados</span>
+<span class="sd">    obtenidos para determinar si los fusibles detectados corresponden con</span>
+<span class="sd">    la configuración esperada de la modularidad.</span>
+
+<span class="sd">    Durante su ejecución realiza las siguientes acciones:</span>
+
+<span class="sd">    - Activa la iluminación necesaria para la captura.</span>
+<span class="sd">    - Envía triggers individuales al sistema de visión.</span>
+<span class="sd">    - Administra la cola de inspecciones pendientes.</span>
+<span class="sd">    - Valida los fusibles detectados contra los fusibles esperados.</span>
+<span class="sd">    - Genera evidencia de inspección.</span>
+<span class="sd">    - Determina el resultado PASS o FAIL de la inspección.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    finished : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando la inspección del trigger actual finaliza</span>
+<span class="sd">        correctamente.</span>
+
+<span class="sd">    nok : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando la inspección detecta errores o diferencias</span>
+<span class="sd">        entre los resultados obtenidos y la configuración esperada.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">finished</span>    <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>         <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;vision1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Triggers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, optional</span>
+<span class="sd">            Nombre del módulo de visión asociado al proceso.</span>
+
+<span class="sd">        model : object, optional</span>
+<span class="sd">            Modelo principal de la aplicación. Contiene la información de</span>
+<span class="sd">            inspección, configuración de fusibles, comunicación MQTT y</span>
+<span class="sd">            datos utilizados durante el proceso.</span>
+
+<span class="sd">        parent : QState, optional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;vision&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fuses_BB</span>
+
+<div class="viewcode-block" id="Triggers.onEntry">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Triggers.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado.</span>
+
+<span class="sd">        Inicia el proceso de inspección visual revisando si existen</span>
+<span class="sd">        triggers pendientes en la cola del módulo actual.</span>
+
+<span class="sd">        Si existen inspecciones pendientes:</span>
+
+<span class="sd">        - Activa la iluminación mediante el PLC.</span>
+<span class="sd">        - Define el trigger actual que será enviado a la cámara.</span>
+<span class="sd">        - Programa el envío del comando después del tiempo de espera</span>
+<span class="sd">          establecido.</span>
+
+<span class="sd">        Si no existen triggers pendientes, desactiva la iluminación y</span>
+<span class="sd">        finaliza el proceso de inspección.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento generado al ingresar al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Triggers VISION ############################&quot;</span><span class="p">)</span>
+
+        <span class="n">topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;plc&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;Flash&quot;</span><span class="p">:</span><span class="kc">True</span><span class="p">}),</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;Flash&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}),</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;se terminaron los triggers para esta caja&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;aquí debe estar prendida la luz 1 seg antes de mandar el trigger&quot;</span><span class="p">)</span>
+        <span class="n">Timer</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+        
+<div class="viewcode-block" id="Triggers.delay">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Triggers.delay">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Envía el trigger de inspección al sistema de visión.</span>
+
+<span class="sd">        Después del tiempo de espera requerido para estabilizar la</span>
+<span class="sd">        iluminación, envía la solicitud de captura al módulo de visión.</span>
+
+<span class="sd">        Actualiza la información asociada a la solicitud actual y prepara</span>
+<span class="sd">        los datos necesarios para el procesamiento posterior de resultados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;trigger:+++++++++++++++&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">])</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;trigger&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;C:/images/LASTINSPECTION.jpg&quot;</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fuses_parser</span><span class="p">[</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;fuses parser+++++&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fuses_parser</span><span class="p">[</span><span class="s2">&quot;box&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Triggers.finish">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Triggers.finish">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finish</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa el resultado de una inspección visual.</span>
+
+<span class="sd">        Analiza los resultados obtenidos por la cámara y compara los</span>
+<span class="sd">        fusibles detectados contra la configuración esperada de la</span>
+<span class="sd">        modularidad.</span>
+
+<span class="sd">        Durante este proceso se realizan las siguientes validaciones:</span>
+
+<span class="sd">        - Comparación de color de fusibles.</span>
+<span class="sd">        - Detección de fusibles faltantes.</span>
+<span class="sd">        - Validación de cavidades inspeccionadas.</span>
+<span class="sd">        - Generación del resultado de inspección.</span>
+<span class="sd">        - Actualización de intentos de inspección.</span>
+<span class="sd">        - Creación de evidencia visual.</span>
+
+<span class="sd">        La evidencia generada se almacena localmente y en el servidor</span>
+<span class="sd">        de trazabilidad.</span>
+
+<span class="sd">        Dependiendo del resultado obtenido:</span>
+
+<span class="sd">        - PASS:</span>
+<span class="sd">            Limpia los datos temporales, elimina el trigger procesado y</span>
+<span class="sd">            emite la señal finished.</span>
+
+<span class="sd">        - FAIL:</span>
+<span class="sd">            Guarda la evidencia de fallo y emite la señal nok.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#try</span>
+        <span class="n">current_trig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="s2">&quot;img&quot;</span><span class="p">]</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current_trig-------&quot;</span><span class="p">,</span><span class="n">current_trig</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;results-------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">results</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;box-------&quot;</span><span class="p">,</span><span class="n">box</span><span class="p">)</span>
+
+        <span class="n">epoches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;epoches&quot;</span><span class="p">]</span>
+        <span class="n">thresh</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="n">epoches</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1">#diccionario2 = self.model.modularity_fuses[box]</span>
+        <span class="c1">#diccionario3 = OrderedDict(sorted(diccionario2.items()))</span>
+        <span class="c1">#self.model.modularity_fuses[box] = diccionario3</span>
+        <span class="c1"># Aquí se ordenan las cavidades con sus respectivos fusibles.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+
+        <span class="c1">#variable para guardar la lectura de color del fusible actual vs la esperada para esa cavidad</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Lectura</span><span class="se">\t</span><span class="s2">         Esperado</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1">#print(&quot;Modelo Amperaje Arreglo:\n&quot;,self.model.amperaje)</span>
+        <span class="n">amp_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">amperaje</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="c1">#print(&quot;Modelo Amperaje Arreglo KEYS:\n&quot;,amp_keys)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current_trig: &quot;</span><span class="p">,</span><span class="n">current_trig</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.model.robot_data[v_queue][box]: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;v_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;len(self.model.robot_data[v_queue][box]): &quot;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;v_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]))</span>
+        <span class="c1">################################## SE REVISA QUE LOS FUSIBLES LEÍDOS CORRESPONDAN A LOS ESPERADOS #####################################</span>
+
+        <span class="k">for</span> <span class="n">fuse</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">]:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">fuse</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">history_fuses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fuse</span><span class="p">)</span> <span class="c1">#Variable que va guardando cada fusible que llega en &quot;results&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">fuse</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">],</span> <span class="s2">&quot; -- &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">])</span>
+                <span class="c1">#revisar color &quot;i&quot; en box, fuse de los resultados de visión</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]:</span>
+                    <span class="c1">#si el color leído es igual al esperado (de la modularidad del arnés)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;color leído: &quot;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;color esperado: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">])</span>
+
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]:</span>
+                        <span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">temp</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;||||||||||Cavidad en la que hubo error: &quot;</span><span class="p">,</span><span class="n">fuse</span><span class="p">,</span> <span class="s2">&quot; Caja: &quot;</span><span class="p">,</span><span class="n">box</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">fuse</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;VISION&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;VISION&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tries</span><span class="p">[</span><span class="s2">&quot;VISION&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="c1">#para guardar fusible actual vs esperado para mostrar en pantalla</span>
+                        <span class="c1">#self.model.expected_fuses.append(fuse+&quot;:\t[&quot;+i+&quot;]\t[&quot;+self.model.modularity_fuses[box][fuse]+&quot;]\n&quot;)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.model.modularity_fuses[box][fuse]&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="ow">in</span> <span class="n">amp_keys</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;rojo&quot;</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">fuse</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">amperaje</span><span class="p">[</span><span class="s2">&quot;rojo&quot;</span><span class="p">]:</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fusible MAXI Rojo de 50 A&quot;</span><span class="p">)</span>
+                                    <span class="n">amperaje</span> <span class="o">=</span> <span class="s1">&#39; 50 A&#39;</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fusible MINI Rojo de 10 A&quot;</span><span class="p">)</span>
+                                    <span class="n">amperaje</span> <span class="o">=</span> <span class="s1">&#39; 10 A&#39;</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">amperaje</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]]):</span>
+                                    <span class="n">amperaje</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">amperaje</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]]</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">amperaje</span> <span class="o">=</span><span class="s2">&quot;&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">amperaje</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+
+                            <span class="c1">#print(&quot;****DB-Este color se encuentra en el modelo de Amperaje****: &quot;,self.model.modularity_fuses[box][fuse],amperaje)</span>
+
+                        <span class="c1">#Este fragmento de código es para mostrar el amperaje del fusible detectado por la cámara del Robot,</span>
+                        <span class="c1">#pero está comentado pues al agregar el amperaje en el label, este se hace más grande y provoca que el label donde aparece la instrucción se mueva y no se vea estético...</span>
+                        <span class="c1">#No es nada Grave, pero en cualquier momento se puede descomentar y agregar &quot;+amperaje_VISY&quot; al lado de &quot;str(i)&quot; para mostrar en el resultado final el amperaje del lado izquierdo también.</span>
+                        <span class="c1">#if i in amp_keys:</span>
+                        <span class="c1">#    if i == &quot;rojo&quot;:</span>
+                        <span class="c1">#        if fuse in self.model.amperaje[&quot;rojo&quot;]:</span>
+                        <span class="c1">#            print(&quot;Fusible MAXI Rojo de 50 A&quot;)</span>
+                        <span class="c1">#            amperaje_VISY = &#39; 50 A&#39;</span>
+                        <span class="c1">#        else:</span>
+                        <span class="c1">#            print(&quot;Fusible MINI Rojo de 10 A&quot;)</span>
+                        <span class="c1">#            amperaje_VISY = &#39; 10 A&#39;</span>
+                        <span class="c1">#    else:</span>
+                        <span class="c1">#        amperaje_VISY = self.model.amperaje[i]</span>
+                        <span class="c1">#    print(&quot;****CAMARA-Este color se encuentra en el modelo de Amperaje****: &quot;,i,amperaje_VISY)</span>
+
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fuse</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">----    &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">])</span><span class="o">+</span><span class="n">amperaje</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+                <span class="c1">#Validaccion de inspeccion por zonas</span>
+                <span class="n">BB</span> <span class="o">=</span> <span class="p">[</span><span class="n">box</span><span class="p">,</span> <span class="n">fuse</span><span class="p">]</span>
+                 
+                <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;=</span> <span class="n">thresh</span><span class="p">:</span>
+                    <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">drawBB</span><span class="p">(</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">,</span> <span class="n">BB</span> <span class="o">=</span> <span class="n">BB</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">v_result</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">drawBB</span><span class="p">(</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">,</span> <span class="n">BB</span> <span class="o">=</span> <span class="n">BB</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">v_result</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">fuse</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+
+            <span class="c1">############################################## EN EL ÚLTIMO TRIGGER DE LA CAJA ########################################################</span>
+            <span class="c1">################################# SE REVISA QUE SE HAYAN INSPECCIONADO TODOS LOS FUSIBLES DE LA CAJA ##################################</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;v_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1">#cuando sea el último trigger solo queda este en robot_data</span>
+                <span class="c1">#Si la cavidad no está dentro de model.history_fuses, se emite un error = True y se muestra en pantalla las cavidades faltantes por inspeccionar</span>
+                <span class="k">if</span> <span class="n">fuse</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">history_fuses</span><span class="p">:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">BB</span> <span class="o">=</span> <span class="p">[</span><span class="n">box</span><span class="p">,</span> <span class="n">fuse</span><span class="p">]</span>
+                    <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">drawBB</span><span class="p">(</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">,</span> <span class="n">BB</span> <span class="o">=</span> <span class="n">BB</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;||||||||||Fusible faltante: &quot;</span><span class="p">,</span><span class="n">fuse</span><span class="p">,</span> <span class="s2">&quot; Caja: &quot;</span><span class="p">,</span><span class="n">box</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">missing_fuses</span> <span class="o">+=</span> <span class="s2">&quot;Inspecciones faltantes: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fuse</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finalizó inspección de trigger...&quot;</span><span class="p">)</span>
+        <span class="c1">###################################################################################</span>
+
+        <span class="n">current_day</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">current_month</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%m&quot;</span><span class="p">)</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y&quot;</span><span class="p">)</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_%H;%M;%S&quot;</span><span class="p">)</span>
+
+        <span class="k">while</span><span class="p">(</span><span class="n">current_day</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">current_month</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">year</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">current_time</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dentro de: while(current_day == None or current_month == None or year == None or current_time == None):&quot;</span><span class="p">)</span>
+            <span class="n">current_day</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">current_month</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%m&quot;</span><span class="p">)</span>
+            <span class="n">year</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y&quot;</span><span class="p">)</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_%H;%M;%S&quot;</span><span class="p">)</span>
+
+
+        <span class="n">meses</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;01&quot;</span><span class="p">:</span><span class="s2">&quot;Enero&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;02&quot;</span><span class="p">:</span><span class="s2">&quot;Febrero&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;03&quot;</span><span class="p">:</span><span class="s2">&quot;Marzo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;04&quot;</span><span class="p">:</span><span class="s2">&quot;Abril&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;05&quot;</span><span class="p">:</span><span class="s2">&quot;Mayo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;06&quot;</span><span class="p">:</span><span class="s2">&quot;Junio&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;07&quot;</span><span class="p">:</span><span class="s2">&quot;Julio&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;08&quot;</span><span class="p">:</span><span class="s2">&quot;Agosto&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;09&quot;</span><span class="p">:</span><span class="s2">&quot;Septiembre&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;10&quot;</span><span class="p">:</span><span class="s2">&quot;Octubre&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;11&quot;</span><span class="p">:</span><span class="s2">&quot;Noviembre&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;12&quot;</span><span class="p">:</span><span class="s2">&quot;Diciembre&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">elemento</span> <span class="ow">in</span> <span class="n">meses</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">elemento</span> <span class="o">==</span> <span class="n">current_month</span><span class="p">:</span>
+                <span class="n">current_month</span> <span class="o">=</span> <span class="n">meses</span><span class="p">[</span><span class="n">elemento</span><span class="p">]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mes actual: &quot;</span><span class="p">,</span><span class="n">current_month</span><span class="p">)</span>
+
+
+        <span class="n">imwrite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">imgs_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">qr_codes</span><span class="p">[</span><span class="s2">&quot;HM&quot;</span><span class="p">]</span><span class="c1">#self.model.input_data[&quot;database&quot;][&quot;pedido&quot;][&quot;PEDIDO&quot;]</span>
+        <span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">qr_codes</span><span class="p">[</span><span class="s2">&quot;REF&quot;</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">current_day</span> <span class="o">+</span> <span class="n">current_month</span> <span class="o">+</span> <span class="n">year</span> <span class="o">+</span> <span class="n">current_time</span>
+        <span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">box</span>
+        <span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">current_trig</span>
+
+        <span class="n">nombre_carpeta</span> <span class="o">=</span> <span class="n">year</span> <span class="o">+</span> <span class="n">current_month</span><span class="o">+</span> <span class="n">current_day</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nombre_carpeta: &quot;</span><span class="p">,</span><span class="n">nombre_carpeta</span><span class="p">)</span>
+
+        <span class="c1">#tratar de crear carpeta por si no existe aún</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">carpeta_nueva</span> <span class="o">=</span> <span class="s2">&quot;C:/images/DATABASE/&quot;</span> <span class="o">+</span> <span class="n">nombre_carpeta</span>
+
+            <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">carpeta_nueva</span><span class="p">)):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">carpeta_nueva</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ya existe carpeta LOCAL: &quot;</span><span class="p">,</span><span class="n">carpeta_nueva</span><span class="p">)</span>
+
+            <span class="c1">#command = {</span>
+            <span class="c1">#    &quot;lbl_result&quot; : {&quot;text&quot;: &quot;Creando Carpeta en RED...&quot;, &quot;color&quot;: &quot;navy&quot;},</span>
+            <span class="c1">#}</span>
+            <span class="c1">#publish.single(self.model.pub_topics[&quot;gui&quot;],json.dumps(command),hostname=&#39;127.0.0.1&#39;, qos = 2)</span>
+
+            <span class="n">carpeta_nueva</span> <span class="o">=</span> <span class="s2">&quot;//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-3/&quot;</span> <span class="o">+</span> <span class="n">nombre_carpeta</span>
+
+            <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">carpeta_nueva</span><span class="p">)):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">carpeta_nueva</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ya existe carpeta EN RED: &quot;</span><span class="p">,</span><span class="n">carpeta_nueva</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR AL CREAR CARPETA:::</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">exception</span><span class="p">)</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">nombre_carpeta</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">name</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">INSPECTION:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">v_result</span><span class="p">[</span><span class="n">box</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MASTER    :&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">],</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;expected fuses: &quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span><span class="p">)</span>
+
+        <span class="c1">#crear en C: una carpeta /images/ con una imagen&gt; LASTINSPECTION.jpg</span>
+        <span class="c1">#esta es la que irá actualizando VISYCAM</span>
+        <span class="c1">#además dentro de images/ otra carpeta llamada /DATABASE/</span>
+        <span class="c1">#esta carpeta para ir almacenando las inspecciones</span>
+
+        <span class="c1">#import cv2</span>
+        <span class="c1">#imgpath = &quot;C:/images/MUESTRA.jpg&quot;</span>
+        <span class="c1">#img = cv2.imread(imgpath)</span>
+        <span class="c1">#display the image</span>
+        <span class="c1">#cv2.imshow(&#39;IMAGEN DE PRUEBA&#39;, img)</span>
+        <span class="c1"># save the image in JPEG format with 15% quality</span>
+        <span class="c1">#outpath_jpeg = &quot;C:/images/COPIA_JPG.jpg&quot;</span>
+        <span class="c1">#cv2.imwrite(outpath_jpeg, img, [int(cv2.IMWRITE_JPEG_QUALITY), 15])</span>
+        <span class="c1">#img_jpg = cv2.imread(outpath_jpeg)</span>
+        <span class="c1">#cv2.imshow(&#39;JPG QUALITY&#39;, img_jpg)</span>
+        <span class="c1">##cv2.imwrite(outpath_webp, img, [int(cv2.IMWRITE_WEBP_QUALITY), 70])</span>
+        
+        <span class="c1">#cv2.IMWRITE_WEBP_QUALITY = 64</span>
+        <span class="n">IMWRITE_WEBP_QUALITY</span> <span class="o">=</span> <span class="mi">64</span>
+        <span class="n">quality_percent</span> <span class="o">=</span> <span class="mi">70</span>
+        <span class="n">imgpath_last</span> <span class="o">=</span> <span class="s2">&quot;C:/images/LASTINSPECTION.jpg&quot;</span>
+        <span class="n">img_last</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="n">imgpath_last</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">error</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">revisando_resultado</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1">#para no salir de Triggers si llega otro resultado de visión y aún no se manda el finished</span>
+
+            <span class="c1">#copyfile(&quot;C:/images/LASTINSPECTION.jpg&quot;, &quot;C:/images/DATABASE/&quot; + name  + &quot;-PASS.jpg&quot;)</span>
+
+            <span class="c1">#se tiene que guardar como .webp para que haga la conversión</span>
+            <span class="n">outpath_webp_LOCAL</span> <span class="o">=</span> <span class="s2">&quot;C:/images/DATABASE/&quot;</span> <span class="o">+</span> <span class="n">name</span>  <span class="o">+</span> <span class="s2">&quot;-PASS.webp&quot;</span> 
+            <span class="n">imwrite</span><span class="p">(</span><span class="n">outpath_webp_LOCAL</span><span class="p">,</span> <span class="n">img_last</span><span class="p">,</span> <span class="p">[</span><span class="n">IMWRITE_WEBP_QUALITY</span><span class="p">,</span> <span class="n">quality_percent</span><span class="p">])</span>
+            <span class="n">outpath_webp_SERVIDOR</span> <span class="o">=</span> <span class="s2">&quot;//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-3/&quot;</span> <span class="o">+</span> <span class="n">name</span>  <span class="o">+</span> <span class="s2">&quot;-PASS.webp&quot;</span> 
+            <span class="n">imwrite</span><span class="p">(</span><span class="n">outpath_webp_SERVIDOR</span><span class="p">,</span> <span class="n">img_last</span><span class="p">,</span> <span class="p">[</span><span class="n">IMWRITE_WEBP_QUALITY</span><span class="p">,</span> <span class="n">quality_percent</span><span class="p">])</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;img_center&quot;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span>
+                <span class="p">}</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;v_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;v_queue&quot;</span><span class="p">][</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.finished.emit de Trigger actual para vision.py&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+            <span class="c1">#Timer(1.5,self.finished.emit).start()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#copyfile(&quot;C:/images/LASTINSPECTION.jpg&quot;, &quot;C:/images/DATABASE/&quot; + name  + &quot;-FAIL.jpg&quot;)</span>
+
+            <span class="c1">#se tiene que guardar como .webp para que haga la conversión</span>
+            <span class="n">outpath_webp_LOCAL</span> <span class="o">=</span> <span class="s2">&quot;C:/images/DATABASE/&quot;</span> <span class="o">+</span> <span class="n">name</span>  <span class="o">+</span> <span class="s2">&quot;-FAIL.webp&quot;</span> 
+            <span class="n">imwrite</span><span class="p">(</span><span class="n">outpath_webp_LOCAL</span><span class="p">,</span> <span class="n">img_last</span><span class="p">,</span> <span class="p">[</span><span class="n">IMWRITE_WEBP_QUALITY</span><span class="p">,</span> <span class="n">quality_percent</span><span class="p">])</span>
+            <span class="n">outpath_webp_SERVIDOR</span> <span class="o">=</span> <span class="s2">&quot;//naapnx-tra04/AMTC_Trazabilidad/INTERIOR-3/&quot;</span> <span class="o">+</span> <span class="n">name</span>  <span class="o">+</span> <span class="s2">&quot;-FAIL.webp&quot;</span> 
+            <span class="n">imwrite</span><span class="p">(</span><span class="n">outpath_webp_SERVIDOR</span><span class="p">,</span> <span class="n">img_last</span><span class="p">,</span> <span class="p">[</span><span class="n">IMWRITE_WEBP_QUALITY</span><span class="p">,</span> <span class="n">quality_percent</span><span class="p">])</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;img_center&quot;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span>
+                <span class="p">}</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Receiver">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Receiver">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Receiver</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de recibir y procesar los resultados de inspección</span>
+<span class="sd">    enviados por el sistema de visión.</span>
+
+<span class="sd">    Responsable de recopilar las respuestas generadas por la cámara para</span>
+<span class="sd">    cada trigger ejecutado y almacenar los resultados obtenidos dentro de</span>
+<span class="sd">    la estructura de datos del módulo de visión.</span>
+
+<span class="sd">    Durante su ejecución realiza las siguientes acciones:</span>
+
+<span class="sd">    - Verifica la existencia de una solicitud de inspección pendiente.</span>
+<span class="sd">    - Recibe la lectura obtenida por el sistema de visión.</span>
+<span class="sd">    - Almacena los resultados asociados a la caja inspeccionada.</span>
+<span class="sd">    - Compara los valores detectados contra la configuración esperada.</span>
+<span class="sd">    - Calcula el resultado parcial de la inspección.</span>
+<span class="sd">    - Controla la cantidad de intentos requeridos para validar un trigger.</span>
+
+<span class="sd">    Cuando se alcanza la cantidad de validaciones necesarias, elimina el</span>
+<span class="sd">    trigger procesado de la cola de inspección.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    ok : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando el procesamiento del resultado de visión</span>
+<span class="sd">        termina correctamente.</span>
+
+<span class="sd">    nok : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando ocurre una condición no válida durante el</span>
+<span class="sd">        procesamiento del resultado.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ok</span>      <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>     <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;module1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Receiver.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, optional</span>
+<span class="sd">            Nombre del módulo de visión asociado al proceso.</span>
+
+<span class="sd">        model : object, optional</span>
+<span class="sd">            Modelo principal de la aplicación. Contiene los datos de</span>
+<span class="sd">            inspección, configuración de fusibles y resultados obtenidos</span>
+<span class="sd">            por el sistema de visión.</span>
+
+<span class="sd">        parent : QState, optional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;vision&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;epoches&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresh</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoches</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+        
+
+<div class="viewcode-block" id="Receiver.onEntry">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Receiver.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado.</span>
+
+<span class="sd">        Procesa la respuesta generada por el sistema de visión para el</span>
+<span class="sd">        trigger actual.</span>
+
+<span class="sd">        Primero valida si existe una solicitud pendiente de procesamiento.</span>
+<span class="sd">        Si no existe una solicitud activa, continúa el flujo sin realizar</span>
+<span class="sd">        cambios.</span>
+
+<span class="sd">        Cuando recibe información válida:</span>
+
+<span class="sd">        - Obtiene el trigger actual.</span>
+<span class="sd">        - Almacena los resultados obtenidos para la caja inspeccionada.</span>
+<span class="sd">        - Compara los valores detectados contra la configuración esperada.</span>
+<span class="sd">        - Actualiza el contador de validaciones.</span>
+<span class="sd">        - Determina si el trigger puede ser eliminado de la cola.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento generado al ingresar al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Receiver VISION ############################&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.queue; &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="s2">&quot;rqst&quot;</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+            <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;trigger de Receiver:&quot;</span><span class="p">,</span><span class="n">trigger</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;results de Receiver:&quot;</span><span class="p">,</span><span class="n">results</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;box de Receiver:&quot;</span><span class="p">,</span><span class="n">box</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">box</span> <span class="ow">in</span> <span class="n">results</span><span class="p">):</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;vision&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">]):</span>
+                    <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;vision&quot;</span><span class="p">][</span><span class="n">item</span><span class="p">])</span>
+
+                <span class="k">try</span><span class="p">:</span>
+
+                    <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;vision&quot;</span><span class="p">][</span><span class="n">item</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modularity_fuses</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">item</span><span class="p">]:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ok = False&quot;</span><span class="p">)</span>
+                            <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">epoch_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresh</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_cnt</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoches</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">epoch_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pop de queue - trigger: &quot;</span><span class="p">,</span><span class="n">trigger</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trigger</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Vision.Receiver exception: &quot;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Error">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Error">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Error</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de gestionar errores durante la inspección visual.</span>
+
+<span class="sd">    Responsable de administrar las condiciones de fallo detectadas durante</span>
+<span class="sd">    el proceso de visión y proporcionar información al operador sobre el</span>
+<span class="sd">    resultado de la inspección.</span>
+
+<span class="sd">    Este estado se activa cuando una inspección visual no cumple con los</span>
+<span class="sd">    criterios esperados, mostrando la información correspondiente en la</span>
+<span class="sd">    interfaz gráfica y preparando el sistema para un posible reintento.</span>
+
+<span class="sd">    Durante su ejecución realiza las siguientes acciones:</span>
+
+<span class="sd">    - Habilita los controles de Raffi para permitir interacción manual.</span>
+<span class="sd">    - Muestra información de error al operador.</span>
+<span class="sd">    - Indica fusibles faltantes cuando existen errores de inspección.</span>
+<span class="sd">    - Limpia los datos temporales del proceso de visión.</span>
+<span class="sd">    - Restablece la información de inspección actual.</span>
+<span class="sd">    - Envía el robot a posición Home antes de un nuevo intento.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    ok : pyqtSignal</span>
+<span class="sd">        Señal emitida para indicar una finalización correcta del estado.</span>
+
+<span class="sd">    nok : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando la condición de error permanece activa.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ok</span>      <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>     <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;vision1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Error.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, optional</span>
+<span class="sd">            Nombre del módulo de visión asociado al proceso.</span>
+
+<span class="sd">        model : object, optional</span>
+<span class="sd">            Modelo principal de la aplicación. Contiene los datos del</span>
+<span class="sd">            proceso de inspección, comunicación MQTT y estados globales.</span>
+
+<span class="sd">        parent : QState, optional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+<div class="viewcode-block" id="Error.onEntry">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Error.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado.</span>
+
+<span class="sd">        Obtiene la información de la caja inspeccionada y notifica al</span>
+<span class="sd">        operador el resultado negativo de la inspección visual.</span>
+
+<span class="sd">        Dependiendo del tipo de error detectado:</span>
+
+<span class="sd">        - Muestra las cavidades faltantes cuando existen fusibles sin</span>
+<span class="sd">          inspeccionar.</span>
+<span class="sd">        - Muestra la comparación entre valores detectados y esperados</span>
+<span class="sd">          cuando existe una diferencia de inspección.</span>
+
+<span class="sd">        Posteriormente limpia la información temporal del módulo de visión</span>
+<span class="sd">        y envía el robot a posición Home para preparar un nuevo intento.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento generado al ingresar al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Error VISION ############################&quot;</span><span class="p">)</span>
+
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+
+        <span class="c1">#solamente se pueden usar los botones de raffi cuando raffi_disponible sea True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">raffi_disponible</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">missing_fuses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">missing_fuses</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">box</span><span class="si">}</span><span class="s2"> vision NOK, Faltan Fusibles por inspeccionar&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Llame al centro técnico&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+            <span class="p">}</span>
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">expected_fuses</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">},</span>
+                 <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">box</span><span class="si">}</span><span class="s2"> vision NOK&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">},</span>
+                 <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Presiona el botón de Reintento&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+                 <span class="p">}</span>
+
+            <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">history_fuses</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">missing_fuses</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">home</span><span class="p">()</span></div>
+
+        
+<div class="viewcode-block" id="Error.onExit">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Error.onExit">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onExit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al salir del estado.</span>
+
+<span class="sd">        Deshabilita los controles de Raffi y actualiza la interfaz gráfica</span>
+<span class="sd">        indicando que se realizará un nuevo intento de inspección visual.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        QEvent : QEvent</span>
+<span class="sd">            Evento generado al abandonar el estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">raffi_disponible</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Reintentando inspección por visión&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Espera el resultado&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Pose">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Pose">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Pose</span><span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de posicionar el robot para ejecutar una inspección</span>
+<span class="sd">    visual.</span>
+
+<span class="sd">    Responsable de seleccionar la siguiente posición de inspección del</span>
+<span class="sd">    robot y preparar la información necesaria para ejecutar los triggers</span>
+<span class="sd">    de visión asociados a una caja.</span>
+
+<span class="sd">    Este estado administra la sincronización entre la trayectoria del robot</span>
+<span class="sd">    y el sistema de visión, determinando la caja y el punto de inspección</span>
+<span class="sd">    actual antes de enviar la posición correspondiente al robot.</span>
+
+<span class="sd">    Durante su ejecución realiza las siguientes acciones:</span>
+
+<span class="sd">    - Obtiene la siguiente caja pendiente de inspección.</span>
+<span class="sd">    - Valida que la caja se encuentre correctamente colocada en los clamps.</span>
+<span class="sd">    - Selecciona el trigger actual de inspección.</span>
+<span class="sd">    - Actualiza la información del módulo de visión.</span>
+<span class="sd">    - Carga la imagen de referencia de la caja en la interfaz gráfica.</span>
+<span class="sd">    - Prepara la cola de triggers para el sistema de visión.</span>
+<span class="sd">    - Envía la posición al robot cuando corresponde.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    finished : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando no existen más inspecciones pendientes.</span>
+
+<span class="sd">    nok : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando la caja requerida para inspección no se</span>
+<span class="sd">        encuentra disponible en los clamps.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">finished</span>    <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>         <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;vision1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Pose.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, optional</span>
+<span class="sd">            Nombre del módulo de visión asociado al proceso.</span>
+
+<span class="sd">        model : object, optional</span>
+<span class="sd">            Modelo principal de la aplicación. Contiene los datos del robot,</span>
+<span class="sd">            configuración de inspección, triggers y comunicación MQTT.</span>
+
+<span class="sd">        parent : QState, optional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;v_queue&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pub_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;robot&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Pose.onEntry">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Pose.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado.</span>
+
+<span class="sd">        Prepara el sistema para iniciar una nueva posición de inspección.</span>
+
+<span class="sd">        Durante la ejecución:</span>
+
+<span class="sd">        - Habilita la recepción de nuevos resultados de visión.</span>
+<span class="sd">        - Limpia mensajes anteriores de error en la interfaz.</span>
+<span class="sd">        - Obtiene la siguiente caja pendiente de inspección.</span>
+<span class="sd">        - Verifica que la caja se encuentre dentro de los clamps activos.</span>
+<span class="sd">        - Selecciona el trigger actual asociado a la posición del robot.</span>
+<span class="sd">        - Actualiza la información utilizada por el módulo de visión.</span>
+<span class="sd">        - Envía la posición correspondiente al robot cuando es necesario.</span>
+
+<span class="sd">        Si la caja requerida no se encuentra disponible, emite la señal nok</span>
+<span class="sd">        para iniciar el flujo de recuperación.</span>
+
+<span class="sd">        Si no existen inspecciones pendientes, limpia la información del</span>
+<span class="sd">        proceso y emite la señal finished.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        QEvent : QEvent</span>
+<span class="sd">            Evento generado al ingresar al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: Pose VISION ############################&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">revisando_resultado</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#para poder recibir resultados de trigger de visión</span>
+
+        <span class="c1">#se borran los errores de pantalla de visión</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">}}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.queue: &quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
+
+        <span class="c1">#caja igual a el primer elemento de la lista de la copia de rv_triggers (que viene de inspections.py - UpdateTriggers)</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#si la caja no está en las cajas clampeadas</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">box</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="s2">&quot;plc&quot;</span><span class="p">][</span><span class="s2">&quot;clamps&quot;</span><span class="p">]):</span>
+            <span class="c1">#se agrega la caja a la variable del modelo y se emite el ok negado</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">box</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nok</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+            <span class="k">return</span>
+        <span class="c1"># si hay al menos un elemento en la v_queue (copia de rv_triggers) para la caja actual...</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="n">box</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+             <span class="c1">#current trig es igual al primer elemento de la v_queue para la caja actual</span>
+            <span class="n">current_trig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1">#copia del punto actual en el modelo</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot_data</span><span class="p">[</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_trig</span>
+
+            <span class="c1">#si la caja actual es diferente a la del modelo...</span>
+            <span class="c1">#self.vision_data = {</span>
+            <span class="c1">#&quot;vision1&quot;: {</span>
+            <span class="c1">#    &quot;box&quot;: &quot;&quot;,</span>
+            <span class="c1">#    &quot;queue&quot;: [],</span>
+            <span class="c1">#    &quot;epoches&quot;: 1,</span>
+            <span class="c1">#    &quot;current_trig&quot;: None,</span>
+            <span class="c1">#    &quot;results&quot;: {},</span>
+            <span class="c1">#    &quot;rqst&quot;: False,</span>
+            <span class="c1">#    &quot;img&quot;: None</span>
+            <span class="c1">#         }</span>
+
+            <span class="c1">#revisa que la imagen proyectada sea la misma que la caja actual, en caso contrario se actualiza</span>
+            <span class="k">if</span> <span class="n">box</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]:</span>
+
+                <span class="c1">#ejemplo: &quot;data/imgs/boxes/PDC-RMID.jpg</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="s2">&quot;img&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">imgs_path</span> <span class="o">+</span> <span class="s2">&quot;boxes/&quot;</span> <span class="o">+</span> <span class="n">box</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">)</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Procesando vision en &quot;</span> <span class="o">+</span><span class="n">box</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+                    <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Por favor espere&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+                    <span class="s2">&quot;img_center&quot;</span> <span class="p">:</span> <span class="s2">&quot;boxes/&quot;</span> <span class="o">+</span> <span class="n">box</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span>
+                    <span class="p">}</span>
+                <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+
+            <span class="k">if</span> <span class="n">current_trig</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rv_F96_trigger</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="s2">&quot;img&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">imgs_path</span> <span class="o">+</span> <span class="s2">&quot;boxes/&quot;</span> <span class="o">+</span> <span class="s2">&quot;F96&quot;</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">)</span>
+                    <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Procesando vision en &quot;</span> <span class="o">+</span><span class="n">box</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Por favor espere&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;img_center&quot;</span> <span class="p">:</span> <span class="s2">&quot;boxes/&quot;</span> <span class="o">+</span> <span class="s2">&quot;F96&quot;</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span>
+                    <span class="p">}</span>
+                    <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+            
+                
+
+            <span class="c1">#actualiza en el modelo la caja actual</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">box</span>
+
+            <span class="c1">#print(&quot;self.model.vision_data*******&quot;,self.model.vision_data)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current_trig*******&quot;</span><span class="p">,</span><span class="n">current_trig</span><span class="p">)</span>
+
+            <span class="c1">#en modelo, en vision1,  en queue, se agrega; (de los triggers de esa caja para VISYCAM, de los puntos del robot para esa caja, el</span>
+            <span class="c1"># valor del indice del v_trigger que coincide con el indice del valor de current_trig en rv_trigger)</span>
+            <span class="c1">#model.v_triggers se llena desde _init_.py(manager.model) utilizando un for self.v_triggers[i].append(f&quot;R{j + 1}&quot;)</span>
+            <span class="c1">#después de crear esta variable</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">v_triggers</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rv_triggers</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">current_trig</span><span class="p">)])</span>
+
+            <span class="c1">#self.model.vision_data[self.module][&quot;queue&quot;] </span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; self.model.vision_data[self.module][queue]:   ****&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">])</span>
+        
+        <span class="c1">#si ya no hay más que revisar</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">history_fuses</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="c1"># self.model.vision_data Sale listo y recién horneado de aquí (AQUI ES DONDE VAMOS-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**)</span>
+        <span class="c1"># Ejemplo de current_trig : &quot;PDC_R_pv1&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">])</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">setPose</span><span class="p">(</span><span class="n">current_trig</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Reintento">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Reintento">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Reintento</span> <span class="p">(</span><span class="n">QState</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estado encargado de ejecutar un nuevo intento de inspección visual.</span>
+
+<span class="sd">    Responsable de gestionar la recuperación manual del proceso de visión</span>
+<span class="sd">    cuando el operador solicita repetir una inspección que previamente</span>
+<span class="sd">    terminó con error.</span>
+
+<span class="sd">    Este estado se activa mediante la acción del operador utilizando el</span>
+<span class="sd">    botón de reintento y prepara nuevamente el sistema para ejecutar el</span>
+<span class="sd">    ciclo de inspección desde una condición limpia.</span>
+
+<span class="sd">    Durante su ejecución realiza las siguientes acciones:</span>
+
+<span class="sd">    - Informa al operador que se realizará un nuevo intento.</span>
+<span class="sd">    - Limpia los datos temporales de inspección del módulo de visión.</span>
+<span class="sd">    - Elimina triggers pendientes del ciclo anterior.</span>
+<span class="sd">    - Restablece resultados y solicitudes activas.</span>
+<span class="sd">    - Envía el robot a posición Home antes de reiniciar la inspección.</span>
+
+<span class="sd">    Después de completar la recuperación, permite que el flujo continúe</span>
+<span class="sd">    nuevamente hacia la ejecución de una nueva inspección visual.</span>
+
+<span class="sd">    Señales</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    ok : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando el proceso de recuperación finaliza</span>
+<span class="sd">        correctamente.</span>
+
+<span class="sd">    nok : pyqtSignal</span>
+<span class="sd">        Señal emitida cuando ocurre una condición no válida durante el</span>
+<span class="sd">        proceso de reintento.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ok</span>      <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">nok</span>     <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span> <span class="o">=</span> <span class="s2">&quot;vision1&quot;</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el estado Reintento.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module : str, optional</span>
+<span class="sd">            Nombre del módulo de visión asociado al proceso.</span>
+
+<span class="sd">        model : object, optional</span>
+<span class="sd">            Modelo principal de la aplicación. Contiene los datos del robot,</span>
+<span class="sd">            inspección visual y comunicación MQTT.</span>
+
+<span class="sd">        parent : QState, optional</span>
+<span class="sd">            Estado padre dentro de la máquina de estados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+
+<div class="viewcode-block" id="Reintento.onEntry">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Reintento.onEntry">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al entrar al estado.</span>
+
+<span class="sd">        Inicia el proceso de recuperación para repetir una inspección</span>
+<span class="sd">        visual.</span>
+
+<span class="sd">        Durante la entrada al estado:</span>
+
+<span class="sd">        - Obtiene la caja asociada al intento anterior.</span>
+<span class="sd">        - Notifica al operador que el reintento fue solicitado.</span>
+<span class="sd">        - Limpia la información temporal del módulo de visión.</span>
+<span class="sd">        - Restablece la cola de triggers.</span>
+<span class="sd">        - Elimina resultados obtenidos previamente.</span>
+<span class="sd">        - Envía el robot a posición Home.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Evento generado al ingresar al estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;############################## ESTADO: reintento VISION ############################&quot;</span><span class="p">)</span>
+
+        <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;ESPERE&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Botón de reintento presionado&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">}</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;box&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;current_trig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vision_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">][</span><span class="s2">&quot;rqst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">home</span><span class="p">()</span></div>
+
+        
+<div class="viewcode-block" id="Reintento.onExit">
+<a class="viewcode-back" href="../../../controller_vision.html#manager.controller.vision.Reintento.onExit">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onExit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ejecuta las acciones al salir del estado.</span>
+
+<span class="sd">        Actualiza la interfaz gráfica indicando que el proceso de inspección</span>
+<span class="sd">        visual será ejecutado nuevamente y solicita esperar el resultado.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        QEvent : QEvent</span>
+<span class="sd">            Evento generado al abandonar el estado.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lbl_info1&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_result&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Reintentando inspección por visión&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;lbl_steps&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Espera el resultado&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="n">publish</span><span class="o">.</span><span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pub_topics</span><span class="p">[</span><span class="s2">&quot;gui&quot;</span><span class="p">],</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">command</span><span class="p">),</span><span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">qos</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

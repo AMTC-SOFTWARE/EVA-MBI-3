@@ -1,0 +1,759 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controlador De Alturas &mdash; documentación de EVA-MBI-3 - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Controlador De Inspecciones" href="controller_inspections.html" />
+    <link rel="prev" title="Modelo de Datos del Manager" href="controller_model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            EVA-MBI-3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Aplicación Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Interfaz Gráfica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_model.html">Modelo de Datos de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui_comm.html">Comunicación MQTT de la GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controlador Principal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_model.html">Modelo de Datos del Manager</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Controlador De Alturas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.imwrite"><code class="docutils literal notranslate"><span class="pre">imwrite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.imread"><code class="docutils literal notranslate"><span class="pre">imread()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.Height"><code class="docutils literal notranslate"><span class="pre">Height</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.Process"><code class="docutils literal notranslate"><span class="pre">Process</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.Stop"><code class="docutils literal notranslate"><span class="pre">Stop</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Stop.onEntry"><code class="docutils literal notranslate"><span class="pre">Stop.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Stop.onExit"><code class="docutils literal notranslate"><span class="pre">Stop.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.Triggers"><code class="docutils literal notranslate"><span class="pre">Triggers</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Triggers.onEntry"><code class="docutils literal notranslate"><span class="pre">Triggers.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Triggers.triggers"><code class="docutils literal notranslate"><span class="pre">Triggers.triggers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Triggers.second_attempt"><code class="docutils literal notranslate"><span class="pre">Triggers.second_attempt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Triggers.finish"><code class="docutils literal notranslate"><span class="pre">Triggers.finish()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.Reintento"><code class="docutils literal notranslate"><span class="pre">Reintento</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Reintento.onEntry"><code class="docutils literal notranslate"><span class="pre">Reintento.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Reintento.onExit"><code class="docutils literal notranslate"><span class="pre">Reintento.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.Receiver"><code class="docutils literal notranslate"><span class="pre">Receiver</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Receiver.onEntry"><code class="docutils literal notranslate"><span class="pre">Receiver.onEntry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.Error"><code class="docutils literal notranslate"><span class="pre">Error</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Error.onEntry"><code class="docutils literal notranslate"><span class="pre">Error.onEntry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Error.onExit"><code class="docutils literal notranslate"><span class="pre">Error.onExit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manager.controller.height.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manager.controller.height.Pose.onEntry"><code class="docutils literal notranslate"><span class="pre">Pose.onEntry()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controller_inspections.html">Controlador De Inspecciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller_vision.html">Controlador De Vision</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">EVA-MBI-3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Controlador De Alturas</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/controller_height.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="controlador-de-alturas">
+<h1>Controlador De Alturas<a class="headerlink" href="#controlador-de-alturas" title="Link to this heading"></a></h1>
+<p id="module-manager.controller.height">Procesamiento de alturas del sistema EVA-MBI-3.</p>
+<p>Este módulo contiene la lógica principal de operación de inspeccion de alturas basada en
+máquina de estados mediante QState y QStateMachine.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="manager.controller.height.imwrite">
+<span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">imwrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">retval</span></span></span><a class="headerlink" href="#manager.controller.height.imwrite" title="Link to this definition"></a></dt>
+<dd><p>.   &#64;brief Saves an image to a specified file.
+.
+.   The function imwrite saves the image to the specified file. The image format is chosen based on the
+.   filename extension (see cv::imread for the list of extensions). In general, only 8-bit unsigned (CV_8U)
+.   single-channel or 3-channel (with “BGR” channel order) images
+.   can be saved using this function, with these exceptions:
+.
+.   - With OpenEXR encoder, only 32-bit float (CV_32F) images can be saved.
+.     - 8-bit unsigned (CV_8U) images are not supported.
+.   - With Radiance HDR encoder, non 64-bit float (CV_64F) images can be saved.
+.     - All images will be converted to 32-bit float (CV_32F).
+.   - With JPEG 2000 encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With PAM encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With PNG encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.     - PNG images with an alpha channel can be saved using this function. To do this, create
+.       8-bit (or 16-bit) 4-channel image BGRA, where the alpha channel goes last. Fully transparent pixels
+.       should have alpha set to 0, fully opaque pixels should have alpha set to 255/65535 (see the code sample below).
+.   - With PGM/PPM encoder, 8-bit unsigned (CV_8U) and 16-bit unsigned (CV_16U) images can be saved.
+.   - With TIFF encoder, 8-bit unsigned (CV_8U), 16-bit unsigned (CV_16U),
+.                        32-bit float (CV_32F) and 64-bit float (CV_64F) images can be saved.
+.     - Multiple images (vector of Mat) can be saved in TIFF format (see the code sample below).
+.     - 32-bit float 3-channel (CV_32FC3) TIFF images will be saved
+.       using the LogLuv high dynamic range encoding (4 bytes per pixel)
+.
+.   If the image format is not supported, the image will be converted to 8-bit unsigned (CV_8U) and saved that way.
+.
+.   If the format, depth or channel order is different, use
+.   Mat::convertTo and cv::cvtColor to convert it before saving. Or, use the universal FileStorage I/O
+.   functions to save the image to XML or YAML format.
+.
+.   The sample below shows how to create a BGRA image, how to set custom compression parameters and save it to a PNG file.
+.   It also demonstrates how to save multiple images in a TIFF file:
+.   &#64;include snippets/imgcodecs_imwrite.cpp
+.   &#64;param filename Name of the file.
+.   &#64;param img (Mat or vector of Mat) Image or Images to be saved.
+.   &#64;param params Format-specific parameters encoded as pairs (paramId_1, paramValue_1, paramId_2, paramValue_2, … .) see cv::ImwriteFlags</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="manager.controller.height.imread">
+<span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">imread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">retval</span></span></span><a class="headerlink" href="#manager.controller.height.imread" title="Link to this definition"></a></dt>
+<dd><p>.   &#64;brief Loads an image from a file.
+.
+.   &#64;anchor imread
+.
+.   The function imread loads an image from the specified file and returns it. If the image cannot be
+.   read (because of missing file, improper permissions, unsupported or invalid format), the function
+.   returns an empty matrix ( Mat::data==NULL ).
+.
+.   Currently, the following file formats are supported:
+.
+.   -   Windows bitmaps - *.bmp, *.dib (always supported)
+.   -   JPEG files - *.jpeg, *.jpg, *.jpe (see the <em>Note</em> section)
+.   -   JPEG 2000 files - *.jp2 (see the <em>Note</em> section)
+.   -   Portable Network Graphics - *.png (see the <em>Note</em> section)
+.   -   WebP - *.webp (see the <em>Note</em> section)
+.   -   AVIF - *.avif (see the <em>Note</em> section)
+.   -   Portable image format - *.pbm, *.pgm, *.ppm *.pxm, *.pnm (always supported)
+.   -   PFM files - *.pfm (see the <em>Note</em> section)
+.   -   Sun rasters - *.sr, *.ras (always supported)
+.   -   TIFF files - *.tiff, *.tif (see the <em>Note</em> section)
+.   -   OpenEXR Image files - *.exr (see the <em>Note</em> section)
+.   -   Radiance HDR - *.hdr, *.pic (always supported)
+.   -   Raster and Vector geospatial data supported by GDAL (see the <em>Note</em> section)
+.
+.   &#64;note
+.   -   The function determines the type of an image by the content, not by the file extension.
+.   -   In the case of color images, the decoded images will have the channels stored in <strong>B G R</strong> order.
+.   -   When using IMREAD_GRAYSCALE, the codec’s internal grayscale conversion will be used, if available.
+.       Results may differ to the output of cvtColor()
+.   -   On Microsoft Windows* OS and MacOSX*, the codecs shipped with an OpenCV image (libjpeg,
+.       libpng, libtiff, and libjasper) are used by default. So, OpenCV can always read JPEGs, PNGs,
+.       and TIFFs. On MacOSX, there is also an option to use native MacOSX image readers. But beware
+.       that currently these native image loaders give images with different pixel values because of
+.       the color management embedded into MacOSX.
+.   -   On Linux*, BSD flavors and other Unix-like open-source operating systems, OpenCV looks for
+.       codecs supplied with an OS image. Install the relevant packages (do not forget the development
+.       files, for example, «libjpeg-dev», in Debian* and Ubuntu*) to get the codec support or turn
+.       on the OPENCV_BUILD_3RDPARTY_LIBS flag in CMake.
+.   -   In the case you set <em>WITH_GDAL</em> flag to true in CMake and &#64;ref IMREAD_LOAD_GDAL to load the image,
+.       then the [GDAL](<a class="reference external" href="http://www.gdal.org">http://www.gdal.org</a>) driver will be used in order to decode the image, supporting
+.       the following formats: [Raster](<a class="reference external" href="http://www.gdal.org/formats_list.html">http://www.gdal.org/formats_list.html</a>),
+.       [Vector](<a class="reference external" href="http://www.gdal.org/ogr_formats.html">http://www.gdal.org/ogr_formats.html</a>).
+.   -   If EXIF information is embedded in the image file, the EXIF orientation will be taken into account
+.       and thus the image will be rotated accordingly except if the flags &#64;ref IMREAD_IGNORE_ORIENTATION
+.       or &#64;ref IMREAD_UNCHANGED are passed.
+.   -   Use the IMREAD_UNCHANGED flag to keep the floating point values from PFM image.
+.   -   By default number of pixels must be less than 2^30. Limit can be set using system
+.       variable OPENCV_IO_MAX_IMAGE_PIXELS
+.
+.   &#64;param filename Name of file to be loaded.
+.   &#64;param flags Flag that can take values of cv::ImreadModes</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.height.Height">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">Height</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'height1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Height"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Height" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado compuesto para la validación de altura.</p>
+<p>Coordina el flujo completo de inspección de altura durante el ciclo
+de producción. Este estado administra la ejecución de la inspección,
+el manejo de errores y el reintento solicitado por el operador.</p>
+<p>El flujo interno está compuesto por los siguientes subestados:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Process</span></code>: Ejecuta la inspección de altura y procesa el resultado.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Error</span></code>: Muestra la condición de error cuando la inspección falla.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Standby</span></code>: Espera la solicitud de un nuevo intento de inspección.</p></li>
+</ul>
+<section id="senales">
+<h2>Señales<a class="headerlink" href="#senales" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">retry</span></code>:
+Solicita al controlador principal ejecutar nuevamente la inspección
+de altura.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">finished</span></code>:
+Indica que la validación de altura concluyó y el flujo puede
+continuar con el siguiente estado de la máquina.</p></li>
+</ul>
+</section>
+<section id="constructor-de-height">
+<h2>Constructor de Height<a class="headerlink" href="#constructor-de-height" title="Link to this heading"></a></h2>
+<p>Inicializa el estado compuesto encargado de la validación de altura,
+creando los subestados internos y configurando las transiciones entre
+ellos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param module<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Identificador del módulo o estación de altura que será
+controlado.</p>
+</dd>
+<dt class="field-even">type module<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Modelo compartido utilizado por la máquina de estados.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado padre dentro de la jerarquía de la máquina de estados.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.height.Process">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">Process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'height1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Process"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Process" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado compuesto encargado del proceso de validación de altura.</p>
+<p>Coordina la ejecución completa de la inspección de altura,
+administrando el posicionamiento del robot, la adquisición de
+mediciones, el procesamiento de resultados, el manejo de errores,
+los reintentos y la detención del proceso.</p>
+<p>Este estado encapsula y coordina los siguientes subestados:</p>
+<ul class="simple">
+<li><p>Pose</p></li>
+<li><p>Triggers</p></li>
+<li><p>Receiver</p></li>
+<li><p>Reintento</p></li>
+<li><p>Stop</p></li>
+</ul>
+<dl class="simple">
+<dt>Señales:</dt><dd><dl class="simple">
+<dt>finished:</dt><dd><p>Emitida cuando el proceso de validación concluye
+correctamente.</p>
+</dd>
+<dt>nok:</dt><dd><p>Emitida cuando ocurre un error que impide continuar el
+proceso de inspección.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Inicializa el proceso de validación de altura.</p>
+<p>Crea los subestados internos y configura las transiciones de la
+máquina de estados para ejecutar el flujo completo de inspección.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>module</strong> (<em>str</em>) – Identificador del módulo de altura.</p></li>
+<li><p><strong>model</strong> – Modelo compartido de la aplicación.</p></li>
+<li><p><strong>parent</strong> – Estado padre.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.height.Stop">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">Stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'height1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Stop"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Stop" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado de detención del proceso de validación de altura.</p>
+<p>Suspende temporalmente la inspección cuando el robot entra en modo
+STOP. Durante este estado se notifica al operador que el proceso se
+encuentra detenido y se espera una orden de inicio para reanudar la
+validación.</p>
+<p>Al abandonar este estado se restablece el contexto de trabajo del
+módulo de altura, eliminando la información temporal utilizada
+durante la inspección.</p>
+<p class="rubric">Notas</p>
+<p>La transición de salida es activada mediante la señal de inicio
+del robot, permitiendo reiniciar el flujo de inspección.</p>
+<p>Inicializa el estado de detención.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>module</strong> (<em>str</em>) – Identificador del módulo de altura asociado.</p></li>
+<li><p><strong>model</strong> – Modelo compartido de la aplicación.</p></li>
+<li><p><strong>parent</strong> – Estado padre dentro de la máquina de estados.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Stop.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Stop.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Stop.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Muestra en la interfaz gráfica que el robot se encuentra en modo
+STOP y solicita al operador presionar el botón START para continuar
+con el proceso.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Stop.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Stop.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Stop.onExit" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al salir del estado.</p>
+<p>Limpia la información temporal utilizada durante la inspección,
+incluyendo la caja procesada, la cola de inspecciones, el disparo
+actual, los resultados obtenidos y la solicitud pendiente.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.height.Triggers">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">Triggers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'height1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Triggers"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Triggers" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Administra la secuencia de disparos (triggers) enviados al sensor
+para inspeccionar las distintas secciones de una caja.</p>
+<p>Durante su ejecución obtiene cada sección pendiente de la cola,
+envía el comando de medición correspondiente y espera la respuesta
+del sensor. Además, implementa un mecanismo de reintento cuando no
+se recibe respuesta dentro del tiempo establecido.</p>
+<p class="rubric">Notas</p>
+<p>La lista de secciones a inspeccionar es obtenida del modelo
+compartido y se procesa de forma secuencial hasta completar
+todas las mediciones.</p>
+<dl class="simple">
+<dt>Señales:</dt><dd><dl class="simple">
+<dt>finished:</dt><dd><p>Emitida cuando todas las secciones fueron inspeccionadas.</p>
+</dd>
+<dt>nok:</dt><dd><p>Emitida cuando ocurre un error que impide continuar la
+inspección.</p>
+</dd>
+<dt>retry:</dt><dd><p>Emitida cuando expira el tiempo de espera para recibir una
+respuesta del sensor.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Inicializa el estado encargado de controlar los disparos del
+sensor de altura.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>module</strong> (<em>str</em>) – Identificador del módulo de altura.</p></li>
+<li><p><strong>model</strong> – Modelo compartido de la aplicación.</p></li>
+<li><p><strong>parent</strong> – Estado padre dentro de la máquina de estados.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Triggers.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Triggers.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Triggers.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado.</p>
+<p>Inicia el proceso de inspección llamando al método encargado de
+enviar el siguiente disparo al sensor de altura.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Triggers.triggers">
+<span class="sig-name descname"><span class="pre">triggers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Triggers.triggers"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Triggers.triggers" title="Link to this definition"></a></dt>
+<dd><p>Procesa la siguiente sección pendiente de inspección.</p>
+<p>Obtiene el siguiente elemento de la cola de inspección y envía el
+comando correspondiente al sensor de altura. Si no existen más
+secciones pendientes, finaliza el proceso de inspección.</p>
+<p>Después de enviar el disparo, inicia un temporizador que permitirá
+detectar una falta de respuesta del sensor y solicitar un
+reintento.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Triggers.second_attempt">
+<span class="sig-name descname"><span class="pre">second_attempt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Triggers.second_attempt"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Triggers.second_attempt" title="Link to this definition"></a></dt>
+<dd><p>Reenvía el último disparo al sensor de altura.</p>
+<p>Este método realiza un segundo intento de medición utilizando el
+mismo trigger cuando la primera solicitud no produjo la respuesta
+esperada.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Triggers.finish">
+<span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Triggers.finish"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Triggers.finish" title="Link to this definition"></a></dt>
+<dd><p>Finaliza la validación del trigger actual.</p>
+<p>Compara los resultados obtenidos por el sensor de altura con la
+configuración esperada para la caja inspeccionada.</p>
+<p>Durante este proceso:</p>
+<ul class="simple">
+<li><p>Verifica que cada cavidad inspeccionada coincida con la</p></li>
+</ul>
+<p>configuración definida en la modularidad.</p>
+<ul class="simple">
+<li><p>Actualiza los resultados de la inspección en el modelo.</p></li>
+<li><p>Resalta mediante <em>bounding boxes</em> los elementos correctos e</p></li>
+</ul>
+<p>incorrectos sobre la imagen de inspección.</p>
+<ul class="simple">
+<li><p>Registra los intentos fallidos de cada cavidad cuando se detectan</p></li>
+</ul>
+<p>discrepancias.</p>
+<ul class="simple">
+<li><p>Comprueba, al finalizar el último trigger de la caja, que todas</p></li>
+</ul>
+<p>las cavidades esperadas hayan sido inspeccionadas.</p>
+<p>Si la inspección finaliza sin errores, la imagen resultante se
+publica en la interfaz gráfica y se emite la señal <code class="docutils literal notranslate"><span class="pre">finished</span></code> para
+continuar con el siguiente trigger o finalizar el proceso.</p>
+<p>Si se detectan errores, la interfaz muestra las cavidades con
+inconsistencias y se emite la señal <code class="docutils literal notranslate"><span class="pre">nok</span></code> para iniciar el flujo de
+manejo de errores.</p>
+<p>Notes:
+La validación utiliza la información de <code class="docutils literal notranslate"><span class="pre">model.modularity_fuses</span></code>
+como referencia para determinar la configuración esperada de cada
+cavidad.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.height.Reintento">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">Reintento</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'height1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Reintento"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Reintento" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de reiniciar la inspección de alturas tras una solicitud
+de reintento.</p>
+<p>Cuando el operador presiona el botón de reintento, este estado limpia
+la información temporal de la inspección actual y ordena al robot regresar
+a la posición HOME para iniciar nuevamente el proceso de medición.</p>
+<section id="id1">
+<h2>Señales<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code>: Indica que el reintento concluyó correctamente.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nok</span></code>: Indica que ocurrió un error durante el proceso de reintento.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Reintento.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Reintento.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Reintento.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta el procedimiento de reinicio de la inspección.</p>
+<p>Al entrar en este estado se notifica al operador que el sistema está
+preparando el reintento, se eliminan los datos temporales de la inspección
+actual (trigger, resultados, solicitudes y datos recibidos del sensor) y
+finalmente se ordena al robot regresar a la posición HOME para iniciar
+nuevamente la inspección.</p>
+<section id="parametros">
+<h3>Parametros<a class="headerlink" href="#parametros" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>event<span class="classifier">QEvent</span></dt><dd><p>Evento de entrada al estado.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Reintento.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Reintento.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Reintento.onExit" title="Link to this definition"></a></dt>
+<dd><p>Actualiza la interfaz indicando que la inspección de alturas será
+ejecutada nuevamente.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>QEvent</em>) – Evento de salida del estado.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.height.Receiver">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">Receiver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'module1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Receiver"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Receiver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de recibir y almacenar los resultados de las
+mediciones del sensor de altura.</p>
+<p>Al entrar en este estado se procesa la información recibida del
+sensor, asociando cada resultado con la caja y la sección de
+inspección correspondientes.</p>
+<p>Una vez almacenadas las mediciones, el trigger procesado se elimina
+de la cola de inspección y se notifica a la máquina de estados para
+continuar con la siguiente etapa del proceso.</p>
+<dl class="simple">
+<dt>Hereda de</dt><dd><p>QState</p>
+</dd>
+</dl>
+<section id="id2">
+<h2>Señales<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>ok<span class="classifier">pyqtSignal</span></dt><dd><p>Emitida cuando los resultados del sensor fueron procesados y
+almacenados correctamente.</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h2>Parámetros<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>module<span class="classifier">str, opcional</span></dt><dd><p>Identificador del módulo de inspección de alturas.
+Por defecto es <code class="docutils literal notranslate"><span class="pre">&quot;module1&quot;</span></code>.</p>
+</dd>
+<dt>model<span class="classifier">Model, opcional</span></dt><dd><p>Modelo principal de la aplicación que contiene la información
+compartida del proceso de inspección.</p>
+</dd>
+<dt>parent<span class="classifier">QObject, opcional</span></dt><dd><p>Objeto padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<p>Inicializa el estado encargado de recibir los resultados del sensor
+de altura.</p>
+<p>Obtiene las referencias a las estructuras de datos compartidas que
+almacenarán las mediciones y configura los parámetros utilizados
+durante la recepción de resultados.</p>
+</section>
+<section id="id4">
+<h2>Parámetros<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>module<span class="classifier">str, opcional</span></dt><dd><p>Identificador del módulo de alturas.</p>
+</dd>
+<dt>model<span class="classifier">Model, opcional</span></dt><dd><p>Modelo principal de la aplicación.</p>
+</dd>
+<dt>parent<span class="classifier">QObject, opcional</span></dt><dd><p>Estado padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Receiver.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Receiver.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Receiver.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Procesa los resultados recibidos del sensor de altura.</p>
+<p>Al entrar en este estado se cancela el temporizador de espera,
+se almacenan las mediciones recibidas para la sección actual,
+se actualiza la estructura de resultados del modelo y se elimina
+el trigger procesado de la cola de inspección.</p>
+<p>Finalmente se emite la señal <code class="docutils literal notranslate"><span class="pre">ok</span></code> para continuar con el flujo
+de la máquina de estados.</p>
+<section id="id5">
+<h3>Parámetros<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>event<span class="classifier">QEvent</span></dt><dd><p>Evento de entrada al estado.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.height.Error">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'height1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Error"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Error" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado que gestiona los errores detectados durante la inspección de
+alturas.</p>
+<p>Se activa cuando la validación de una o más cavidades falla o cuando
+existen cavidades que no pudieron ser inspeccionadas.</p>
+<p>Al entrar en este estado se informa al operador del motivo del error,
+se habilita la interacción necesaria para realizar un reintento o
+solicitar asistencia técnica y se restablece el contexto de la
+inspección actual.</p>
+<p>Al abandonar el estado se actualiza la interfaz para indicar que la
+inspección será ejecutada nuevamente.</p>
+<dl class="simple">
+<dt>Hereda de</dt><dd><p>QState</p>
+</dd>
+</dl>
+<section id="id6">
+<h2>Señales<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>ok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal disponible para indicar que el error fue resuelto.</p>
+</dd>
+<dt>nok<span class="classifier">pyqtSignal</span></dt><dd><p>Señal disponible para indicar que el error persiste.</p>
+</dd>
+</dl>
+</section>
+<section id="id7">
+<h2>Parámetros<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>module<span class="classifier">str, opcional</span></dt><dd><p>Identificador del módulo de inspección de alturas.
+Por defecto es <code class="docutils literal notranslate"><span class="pre">&quot;height1&quot;</span></code>.</p>
+</dd>
+<dt>model<span class="classifier">Model, opcional</span></dt><dd><p>Modelo principal de la aplicación que almacena la información
+compartida del proceso.</p>
+</dd>
+<dt>parent<span class="classifier">QObject, opcional</span></dt><dd><p>Objeto padre dentro de la máquina de estados.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Error.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Error.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Error.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al entrar al estado de error.</p>
+<p>Muestra en la interfaz gráfica el motivo del fallo detectado durante la
+inspección. Dependiendo del tipo de error, informa las cavidades
+pendientes de inspeccionar o aquellas cuya validación fue incorrecta.</p>
+<p>Posteriormente limpia la información temporal de la inspección actual,
+habilita la disponibilidad del indicador luminoso (<em>raffi</em>) y envía el
+robot a la posición Home para preparar un posible reintento.</p>
+<section id="id8">
+<h3>Parámetros<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>event<span class="classifier">QEvent</span></dt><dd><p>Evento de entrada al estado.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Error.onExit">
+<span class="sig-name descname"><span class="pre">onExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Error.onExit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Error.onExit" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta las acciones al salir del estado.</p>
+<p>Deshabilita la disponibilidad del indicador luminoso (<em>raffi</em>) y
+actualiza la interfaz gráfica para informar al operador que la
+inspección de alturas será ejecutada nuevamente.</p>
+<section id="id9">
+<h3>Parámetros<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>event<span class="classifier">QEvent</span></dt><dd><p>Evento de salida del estado.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="manager.controller.height.Pose">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">manager.controller.height.</span></span><span class="sig-name descname"><span class="pre">Pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'height1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Pose"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Pose" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QState</span></code></p>
+<p>Estado encargado de posicionar el robot en la siguiente sección de
+inspección de alturas.</p>
+<p>Este estado obtiene la siguiente caja pendiente, determina el trigger
+correspondiente y ordena al robot desplazarse a la posición adecuada.
+Cuando una caja termina completamente su inspección, actualiza la GUI,
+libera las tareas asociadas y notifica la finalización del proceso.</p>
+<dl class="simple">
+<dt>Señales:</dt><dd><dl class="simple">
+<dt>finished: Emitida cuando todas las inspecciones de la caja actual</dt><dd><p>han concluido.</p>
+</dd>
+<dt>nok: Emitida cuando la caja requerida no se encuentra correctamente</dt><dd><p>clampeada.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Inicializa el estado Pose.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>module</strong> (<em>str</em><em>, </em><em>opcional</em>) – Nombre del módulo de alturas asociado al estado.
+Por defecto <code class="docutils literal notranslate"><span class="pre">&quot;height1&quot;</span></code>.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="controller_model.html#manager.model.Model" title="manager.model.Model"><em>Model</em></a>) – Modelo principal de la aplicación.</p></li>
+<li><p><strong>parent</strong> (<em>QObject</em><em>, </em><em>opcional</em>) – Objeto padre del estado.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Atributos:</dt><dd><p>model: Referencia al modelo principal.
+module: Nombre del módulo de alturas.
+queue: Cola de cajas pendientes por inspeccionar.
+pub_topic: Tema MQTT utilizado para enviar comandos al robot.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="manager.controller.height.Pose.onEntry">
+<span class="sig-name descname"><span class="pre">onEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">QEvent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/manager/controller/height.html#Pose.onEntry"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#manager.controller.height.Pose.onEntry" title="Link to this definition"></a></dt>
+<dd><p>Ejecuta la lógica al entrar al estado.</p>
+<p>Flujo principal:</p>
+<ul class="simple">
+<li><p>Reinicia la bandera que permite recibir resultados del sensor
+de alturas.</p></li>
+<li><p>Limpia los mensajes de error mostrados en la interfaz.</p></li>
+<li><p>Obtiene la siguiente caja pendiente de inspección.</p></li>
+<li><p>Verifica que la caja se encuentre correctamente clampeada.</p></li>
+<li><p>Determina el siguiente trigger que debe ejecutar el robot.</p></li>
+<li><p>Actualiza la interfaz mostrando la caja que será inspeccionada.</p></li>
+<li><p>Envía al robot la orden para desplazarse a la siguiente posición.</p></li>
+</ul>
+<p>Si la caja ya no tiene más triggers pendientes:</p>
+<ul class="simple">
+<li><p>Oculta la caja correspondiente en la GUI.</p></li>
+<li><p>Actualiza las listas de cajas inspeccionadas.</p></li>
+<li><p>Marca las cajas listas para desclampeo.</p></li>
+<li><p>Actualiza los indicadores especiales
+(PDC-D, PDC-Dbracket y F96).</p></li>
+<li><p>Limpia la cola de inspección.</p></li>
+<li><p>Emite la señal <code class="docutils literal notranslate"><span class="pre">finished</span></code>.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="controller_model.html" class="btn btn-neutral float-left" title="Modelo de Datos del Manager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="controller_inspections.html" class="btn btn-neutral float-right" title="Controlador De Inspecciones" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2026, AMTC.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
